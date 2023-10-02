@@ -1,0 +1,11 @@
+{
+  "ServerCount": 1,
+  "WebhookURL": null,
+  "LogDebug": true,
+  "EnableStat": false,
+  "EnableInput": true,
+
+  "BannedIPs": [
+
+  ]
+}
