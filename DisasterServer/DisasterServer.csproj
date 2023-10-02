@@ -8,7 +8,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ApplicationIcon>res\app.ico</ApplicationIcon>
         <PackageIcon>app.ico</PackageIcon>
-        <RepositoryUrl>https://github.com/MilesGlitch/DisasterServer</RepositoryUrl>
+        <RepositoryUrl>https://github.com/0xAX88M2/DisasterServer</RepositoryUrl>
         <RepositoryType>Private</RepositoryType>
     </PropertyGroup>
 
