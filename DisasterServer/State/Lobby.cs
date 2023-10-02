@@ -178,6 +178,7 @@ public class Lobby : State
 			}
 			server.TCPSend(session, new TcpPacket(PacketType.SERVER_LOBBY_CORRECT));
 			SendMessage(server, session, "|type .help for command list~");
+			SendMessage(server, session, "|Server Edit By:MilesGlitch~");
 			break;
 		case PacketType.CLIENT_CHAT_MESSAGE:
 		{
