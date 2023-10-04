@@ -178,174 +178,113 @@ public class Lobby : State
 			}
 			server.TCPSend(session, new TcpPacket(PacketType.SERVER_LOBBY_CORRECT));
 			SendMessage(server, session, "|type .help for command list~");
-			SendMessage(server, session, "|Server Edit By: MilesGlitch~");
+			SendMessage(server, session, "|server edit by: /miles&glitch~");
+			SendMessage(server, session, $"|server version `{Program.BUILD_VER}~");
+			SendMessage(server, session, $"|server count №{Options.Get<int>("server_count")}~");
 			break;
-		case PacketType.CLIENT_CHAT_MESSAGE:
-		{
-			ushort id2 = reader.ReadUInt16();
-			string msg = reader.ReadStringNull();
-			lock (server.Peers)
-			{
-				if (msg != null)
-				{
-					switch (msg.Length)
-					{
-					case 2:
-					{
-						char c = msg[1];
-						if ((uint)c <= 110u)
-						{
-							if (c != 'h')
-							{
-								if (c != 'n' || !(msg == ".n"))
-								{
-									break;
-								}
-								goto IL_0426;
-							}
-							if (!(msg == ".h"))
-							{
-								break;
-							}
-							goto IL_0518;
-						}
-						if (c != 'p')
-						{
-							if (c != 'y' || !(msg == ".y"))
-							{
-								break;
-							}
-							goto IL_032e;
-						}
-						if (!(msg == ".p"))
-						{
-							break;
-						}
-						goto IL_056b;
-					}
-					case 4:
-						if (!(msg == ".yes"))
-						{
-							break;
-						}
-						goto IL_032e;
-					case 3:
-						if (!(msg == ".no"))
-						{
-							break;
-						}
-						goto IL_0426;
-					case 5:
-						if (!(msg == ".help"))
-						{
-							break;
-						}
-						goto IL_0518;
-					case 9:
-						{
-							if (!(msg == ".practice"))
-							{
-								break;
-							}
-							goto IL_056b;
-						}
-						IL_032e:
-						lock (_voteKickVotes)
-						{
-							if (_voteKickTimer > 0 && !_voteKickVotes.Contains(session.ID))
-							{
-								_voteKickVotes.Add(session.ID);
-								lock (server.Peers)
-								{
-									SendMessage(server, server.Peers[session.ID].Nickname + " voted @yes~");
-									Terminal.LogDiscord(server.Peers[session.ID].Nickname + " voted yes");
-								}
-								if (_voteKickVotes.Count >= server.Peers.Count<KeyValuePair<ushort, Peer>>((KeyValuePair<ushort, Peer> e) => e.Key != _voteKickTarget))
-								{
-									CheckVoteKick(server, ignore: false);
-								}
-							}
-							return;
-						}
-						IL_0518:
-						SendMessage(server, session, "~----------------------");
-						SendMessage(server, session, "|list of commands:~");
-						SendMessage(server, session, "@.practice~ (.p) - practice mode vote");
-						SendMessage(server, session, "@.mute~ (.m) - toggle chat messages");
-						SendMessage(server, session, "@.votekick~ (.vk) - kick vote a player");
-						SendMessage(server, session, "~----------------------");
-						return;
-						IL_056b:
-						if (_practice)
-						{
-							lock (_practiceVotes)
-							{
-								if (_practiceVotes.Contains(session.ID))
-								{
-									return;
-								}
-								lock (server.Peers)
-								{
-									SendMessage(server, server.Peers[session.ID].Nickname + " wants to `practice~");
-									Terminal.LogDiscord(server.Peers[session.ID].Nickname + " wants to practice");
-									_practiceVotes.Add(session.ID);
-									if (_practiceVotes.Count >= server.Peers.Count)
-									{
-										server.SetState(new CharacterSelect(new FartZone()));
-									}
-									return;
-								}
-							}
-						}
-						lock (_practiceVotes)
-						{
-							lock (server.Peers)
-							{
-								SendMessage(server, server.Peers[session.ID].Nickname + " wants to `practice~");
-								Terminal.LogDiscord(server.Peers[session.ID].Nickname + " wants to practice");
-								_practiceVotes.Add(session.ID);
-							}
-						}
-						Terminal.LogDiscord(server.Peers[session.ID].Nickname + " started practice vote");
-						SendMessage(server, "~----------------------");
-						SendMessage(server, "\\`practice~ vote started by /" + server.Peers[id2].Nickname + "~");
-						SendMessage(server, "type `.p~ for practice room");
-						SendMessage(server, "~----------------------");
-						_practice = true;
-						return;
-						IL_0426:
-						lock (_voteKickVotes)
-						{
-							if (_voteKickTimer > 0)
-							{
-								if (_voteKickVotes.Contains(session.ID))
-								{
-									_voteKickVotes.Remove(session.ID);
-								}
-								lock (server.Peers)
-								{
-									SendMessage(server, server.Peers[session.ID].Nickname + " voted \\no~");
-									Terminal.LogDiscord(server.Peers[session.ID].Nickname + " voted no");
-								}
-								if (_voteKickVotes.Count >= server.Peers.Count<KeyValuePair<ushort, Peer>>((KeyValuePair<ushort, Peer> e) => e.Key != _voteKickTarget))
-								{
-									CheckVoteKick(server, ignore: false);
-								}
-							}
-							return;
-						}
-					}
-				}
-				foreach (Peer peer2 in server.Peers.Values)
-				{
-					if (!peer2.Waiting && peer2.ID == id2)
-					{
-						Terminal.LogDiscord("[" + peer2.Nickname + "]: " + msg);
-					}
-				}
-				break;
-			}
-		}
+			/* Chat message */
+            case PacketType.CLIENT_CHAT_MESSAGE:
+                {
+                    var id = reader.ReadUInt16();
+                    var msg = reader.ReadStringNull();
+                    lock (server.Peers)
+                    {
+                        switch (msg)
+                        {
+                            case ".y":
+                            case ".yes":
+                                lock (_voteKickVotes)
+                                {
+                                    if (_voteKickTimer <= 0)
+                                        break;
+                                    if (!_voteKickVotes.Contains(session.ID))
+                                        _voteKickVotes.Add(session.ID);
+                                    else
+                                        break;
+                                    lock (server.Peers)
+                                    {
+                                        SendMessage(server, $"{server.Peers[session.ID].Nickname} voted @yes~");
+                                        Terminal.LogDiscord($"{server.Peers[session.ID].Nickname} voted yes");
+                                    }
+                                    if (_voteKickVotes.Count >= server.Peers.Count(e => e.Key != _voteKickTarget))
+                                        CheckVoteKick(server, false);
+                                }
+                                break;
+                            case ".n":
+                            case ".no":
+                                lock (_voteKickVotes)
+                                {
+                                    if (_voteKickTimer <= 0)
+                                        break;
+                                    if (_voteKickVotes.Contains(session.ID))
+                                        _voteKickVotes.Remove(session.ID);
+                                    lock (server.Peers)
+                                    {
+                                        SendMessage(server, $"{server.Peers[session.ID].Nickname} voted \\no~");
+                                        Terminal.LogDiscord($"{server.Peers[session.ID].Nickname} voted no");
+                                    }
+                                    if (_voteKickVotes.Count >= server.Peers.Count(e => e.Key != _voteKickTarget))
+                                        CheckVoteKick(server, false);
+                                }
+                                break;
+                            case ".help":
+                            case ".h":
+                                SendMessage(server, session, $"~----------------------");
+                                SendMessage(server, session, "|list of commands:~");
+                                SendMessage(server, session, "@.practice~ (.p) - practice mode vote");
+                                SendMessage(server, session, "@.mute~ (.m) - toggle chat messages");
+                                SendMessage(server, session, "@.votekick~ (.vk) - kick vote a player");
+                                SendMessage(server, session, $"~----------------------");
+                                break;
+                            case ".practice":
+                            case ".p":
+                                if (_practice)
+                                {
+                                    lock (_practiceVotes)
+                                    {
+                                        if (_practiceVotes.Contains(session.ID))
+                                            break;
+                                        lock (server.Peers)
+                                        {
+                                            SendMessage(server, $"{server.Peers[session.ID].Nickname} wants to `practice~");
+                                            Terminal.LogDiscord($"{server.Peers[session.ID].Nickname} wants to practice");
+                                            _practiceVotes.Add(session.ID);
+                                            if (_practiceVotes.Count >= server.Peers.Count)
+                                                server.SetState(new CharacterSelect(new FartZone()));
+                                        }
+                                    }
+                                    break;
+                                }
+                                lock (_practiceVotes)
+                                {
+                                    lock (server.Peers)
+                                    {
+                                        SendMessage(server, $"{server.Peers[session.ID].Nickname} wants to `practice~");
+                                        Terminal.LogDiscord($"{server.Peers[session.ID].Nickname} wants to practice");
+                                        _practiceVotes.Add(session.ID);
+                                    }
+                                }
+                                Terminal.LogDiscord($"{server.Peers[session.ID].Nickname} started practice vote");
+                                SendMessage(server, $"~----------------------");
+                                SendMessage(server, $"\\`practice~ vote started by /{server.Peers[id].Nickname}~");
+                                SendMessage(server, $"type `.p~ for practice room");
+                                SendMessage(server, $"~----------------------");
+                                _practice = true;
+                                break;
+                            default:
+                                foreach (var peer in server.Peers.Values)
+                                {
+                                    if (peer.Waiting)
+                                        continue;
+                                    if (peer.ID != id)
+                                        continue;
+                                    Terminal.LogDiscord($"[{peer.Nickname}]: {msg}");
+                                }
+                                break;
+                        }
+                    }
+                    break; 
+                }
 		case PacketType.CLIENT_LOBBY_READY_STATE:
 		{
 			bool ready = reader.ReadBoolean();

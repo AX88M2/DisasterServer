@@ -61,9 +61,9 @@ public static class Ext
 		sbyte pet = reader.ReadSByte();
 		OSType os = (OSType)reader.ReadByte();
 		string udid = reader.ReadStringNull();
-		if (ver != 100)
+		if (ver != Program.BUILD_VER)
 		{
-			server.DisconnectWithReason(session, $"Wrong game version ({100} required, but got {ver})");
+			server.DisconnectWithReason(session, $"Wrong game version ({Program.BUILD_VER} required, but got {ver})");
 		}
 		else
 		{

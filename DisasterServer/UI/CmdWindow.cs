@@ -16,7 +16,7 @@ public class CmdWindow : Window
 		UIWrapper.AllocConsole();
 		Terminal.Log("===================");
 		Terminal.Log("TD2DR Server");
-		Terminal.Log($"BUILD v{100}");
+		Terminal.Log($"BUILD v{Program.BUILD_VER}");
 		Terminal.Log("(c) Team Exe Empire 2023");
 		Terminal.Log("===================");
 		Terminal.Log("Enter localhost or 127.0.0.1 on your PC to join the server.\n");

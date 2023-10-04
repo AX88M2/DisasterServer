@@ -40,7 +40,7 @@ public class SharedServerSession : TcpSession
 				_server.DisconnectWithReason(this, "You were banned from this server.");
 				return;
 			}
-			if (_server.Peers.Count >= 7)
+			if (_server.Peers.Count >= Program.MAX_PLAYERS)
 			{
 				_server.DisconnectWithReason(this, "Server is full. (7/7)");
 				return;
