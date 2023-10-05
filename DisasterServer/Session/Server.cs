@@ -31,8 +31,8 @@ public class Server
 
 	public Server(int uid)
 	{
-		MulticastServer = new MulticastServer(this, 8606 + uid);
-		SharedServer = new SharedServer(this, 7606 + uid);
+		MulticastServer = new(this, UDP_PORT + uid);
+		SharedServer = new(this, TCP_PORT + uid);
 		UID = uid + 1;
 	}
 
@@ -66,10 +66,7 @@ public class Server
 		State.Tick(this);
 	}
 
-	public SharedServerSession? GetSession(ushort id)
-	{
-		return (SharedServerSession)SharedServer.GetSession(id);
-	}
+	public SharedServerSession? GetSession(ushort id) => (SharedServerSession?)SharedServer.GetSession(id);
 
 	public void TCPSend(TcpSession? session, TcpPacket packet)
 	{
