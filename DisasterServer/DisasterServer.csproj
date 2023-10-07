@@ -19,54 +19,54 @@
     
     <ItemGroup>
       <Folder Include="ExeNet\" />
-      <Folder Include="res\" />
+      <Folder Include="Libs\" />
 
-        <None Update="res\D3Dcompiler_47.dll">
+        <None Update="Libs\D3Dcompiler_47.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="res\libEGL.dll">
+        <None Update="Libs\libEGL.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\libGLESv2.dll" >
+        <None Update="Libs\libGLESv2.dll" >
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\libServerGUI.dll">
+        <None Update="Libs\libServerGUI.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="res\opengl32sw.dll">
+        <None Update="Libs\opengl32sw.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="res\Qt5Core.dll">
+        <None Update="Libs\Qt5Core.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\Qt5Gui.dll">
+        <None Update="Libs\Qt5Gui.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\Qt5Svg.dll">
+        <None Update="Libs\Qt5Svg.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\Qt5Widgets.dll">
+        <None Update="Libs\Qt5Widgets.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\ServerConfig.json">
+        <None Update="Libs\ServerConfig.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\D3Dcompiler_47.dll">
+        <None Update="Libs\D3Dcompiler_47.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\libServerGUI.so">
+        <None Update="Libs\libServerGUI.so">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\opengl32sw.dll">
+        <None Update="Libs\opengl32sw.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\platforms\qwindows.dll">
+        <None Update="Libs\platforms\qwindows.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\styles\qwindowsvistastyle.dll">
+        <None Update="Libs\styles\qwindowsvistastyle.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="res\ServerGUI.dll">
+        <None Update="Libs\ServerGUI.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
