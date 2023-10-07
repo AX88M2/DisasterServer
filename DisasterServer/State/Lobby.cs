@@ -180,7 +180,6 @@ public class Lobby : State
 			SendMessage(server, session, "|type .help for command list~");
 			SendMessage(server, session, "|server edit by: /miles&glitch~");
 			SendMessage(server, session, $"|server version `{Program.BUILD_VER}~");
-			SendMessage(server, session, $"|server count №{Options.Get<int>("server_count")}~");
 			break;
 			/* Chat message */
             case PacketType.CLIENT_CHAT_MESSAGE:

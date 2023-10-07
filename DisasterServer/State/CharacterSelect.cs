@@ -42,9 +42,9 @@ internal class CharacterSelect : State
 				return;
 			}
 			int cnt = 0;
-			foreach (Peer pr in server.Peers.Values)
+			foreach (Peer peer1 in server.Peers.Values)
 			{
-				if (!pr.Waiting && pr.Player.Character != Character.None && (pr.Player.Character != 0 || pr.Player.ExeCharacter != ExeCharacter.None))
+				if (!peer1.Waiting && peer1.Player.Character != Character.None && (peer1.Player.Character != 0 || peer1.Player.ExeCharacter != ExeCharacter.None))
 				{
 					cnt++;
 				}
