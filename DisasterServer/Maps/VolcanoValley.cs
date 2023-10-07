@@ -8,7 +8,9 @@ public class VolcanoValley : Map
 {
 	public override void Init(Server server)
 	{
-		SetTime(server, 180);
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
+		SetTime(server, 180+addTimeRandom);
 		Spawn(server, new VVLava(0, 736f, 130f));
 		Spawn(server, new VVLava(1, 1388f, 130f));
 		Spawn(server, new VVLava(2, 1524f, 130f));

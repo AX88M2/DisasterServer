@@ -7,7 +7,9 @@ public class MajinForest : Map
 {
 	public override void Init(Server server)
 	{
-		SetTime(server, 155);
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
+		SetTime(server, 155+addTimeRandom);
 		base.Init(server);
 	}
 
