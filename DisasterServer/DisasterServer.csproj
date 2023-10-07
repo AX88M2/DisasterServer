@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <ApplicationIcon>res\app.ico</ApplicationIcon>
+        <ApplicationIcon>Libs\app.ico</ApplicationIcon>
         <PackageIcon>app.ico</PackageIcon>
         <RepositoryUrl>https://github.com/0xAX88M2/DisasterServer</RepositoryUrl>
         <RepositoryType>Private</RepositoryType>

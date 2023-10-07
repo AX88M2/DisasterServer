@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using DisasterServer;
 
 namespace ExeNet;
 
@@ -82,7 +83,10 @@ public class TcpSession : IDisposable
 
 	public void Disconnect()
 	{
-		Console.WriteLine($"[TcpSession.cs] CleanUp call from Disconnect ({IsRunning})");
+		if (Options.Get<bool>("debug_mode"))
+		{
+			Console.WriteLine($"[TcpSession.cs] CleanUp call from Disconnect ({IsRunning})");
+		}
 		CleanUp();
 	}
 
@@ -90,7 +94,11 @@ public class TcpSession : IDisposable
 	{
 		try
 		{
-			Console.WriteLine("[TcpSession.cs] CleanUp()");
+			if (Options.Get<bool>("debug_mode"))
+			{
+				Console.WriteLine("[TcpSession.cs] CleanUp()");
+			}
+			
 			if (!IsRunning)
 			{
 				return;
@@ -100,7 +108,13 @@ public class TcpSession : IDisposable
 			{
 				Client.Close();
 			}
-			Console.WriteLine("[TcpSession.cs] Client is closed");
+
+			if (Options.Get<bool>("debug_mode"))
+			{
+				Console.WriteLine("[TcpSession.cs] Client is closed");
+			}
+
+			
 			OnDisconnected();
 			lock (Server.Sessions)
 			{
@@ -109,7 +123,11 @@ public class TcpSession : IDisposable
 					Server.Sessions.Remove(this);
 				}
 			}
-			Console.WriteLine("[TcpSession.cs] Disconnect called and removed from the list.");
+
+			if (Options.Get<bool>("debug_mode"))
+			{
+				Console.WriteLine("[TcpSession.cs] Disconnect called and removed from the list.");
+			}
 		}
 		catch (ObjectDisposedException)
 		{
@@ -127,7 +145,10 @@ public class TcpSession : IDisposable
 			}
 			SocketError code;
 			int length = Client.Client.EndSend(result, out code);
-			Console.WriteLine($"[TcpSession.cs] DoSend() SocketError Code: {code}");
+			if (Options.Get<bool>("debug_mode"))
+			{
+				Console.WriteLine($"[TcpSession.cs] DoSend() SocketError Code: {code}");
+            }
 			switch (code)
 			{
 			case SocketError.NetworkReset:
@@ -173,7 +194,11 @@ public class TcpSession : IDisposable
 			}
 			SocketError code;
 			int length = Client.Client.EndReceive(result, out code);
-			Console.WriteLine($"[TcpSession.cs] DoReceive() SocketError Code: {code}");
+			if (Options.Get<bool>("debug_mode"))
+			{
+				Console.WriteLine($"[TcpSession.cs] DoReceive() SocketError Code: {code}");
+			}
+			
 			switch (code)
 			{
 			case SocketError.NetworkReset:
@@ -248,7 +273,10 @@ public class TcpSession : IDisposable
 
 	public void Dispose()
 	{
-		Console.WriteLine($"[TcpSession.cs] CleanUp call from Dispose ({IsRunning})");
+		if (Options.Get<bool>("debug_mode"))
+		{
+			Console.WriteLine($"[TcpSession.cs] CleanUp call from Dispose ({IsRunning})");
+		}
 		CleanUp();
 		Client.Dispose();
 	}
