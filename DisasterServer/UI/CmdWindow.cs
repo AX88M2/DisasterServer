@@ -13,7 +13,9 @@ public class CmdWindow : Window
 
 	public override bool Run()
 	{
-		UIWrapper.AllocConsole();
+#if _WINDOWS
+                UIWrapper.AllocConsole();
+#endif
 		Terminal.Log("===================");
 		Terminal.Log("TD2DR Server");
 		Terminal.Log($"BUILD v{Program.BUILD_VER}");
