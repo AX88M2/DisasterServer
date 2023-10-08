@@ -61,25 +61,47 @@ public class UIWrapper
 	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
 	public delegate void ReadyCallback();
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern bool gui_run([MarshalAs(UnmanagedType.FunctionPtr)] ReadyCallback cb);
+#if _WINDOWS
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool gui_run([MarshalAs(UnmanagedType.FunctionPtr)] ReadyCallback cb);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern bool gui_poll_events(out PollData data);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool gui_poll_events(out PollData data);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_log(string text);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_log(string text);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_add_ban(string name, string ip);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_add_ban(string name, string ip);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_set_status(string text);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_set_status(string text);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_player_state(PlayerData data);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_player_state(PlayerData data);
 
-	[DllImport("kernel32.dll", SetLastError = true)]
-	[return: MarshalAs(UnmanagedType.Bool)]
-	public static extern bool AllocConsole();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
+
+#else
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern bool gui_run(ReadyCallback cb);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern bool gui_poll_events(out PollData data);
+        
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern void gui_log(string text);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_add_ban(string name, string ip);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_set_status(string text);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_player_state(PlayerData data);
+#endif    
 }
