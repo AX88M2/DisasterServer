@@ -37,6 +37,8 @@ public class Options
 			string ser = JsonSerializer.Serialize(new
 			{
 				server_count = 1,
+				tcp_port = 7606,
+				udp_port = 8606,
 				webhook_url = "",
 				mapset_file = "",
 				enable_stat = false,
