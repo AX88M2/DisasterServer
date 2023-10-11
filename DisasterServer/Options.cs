@@ -43,7 +43,7 @@ public class Options
 				mapset_file = "",
 				enable_stat = false,
 				console_mode = true,
-				antiafk_system = true,
+				antiAfk_system = true,
 				debug_mode = false
 			});
 			_doc = JsonNode.Parse(ser);
