@@ -315,7 +315,7 @@ public class Game : State
 						{
 							_lastPackets[peer.ID] = 0;
 						}
-						else if (_lastPackets[peer.ID] >= 240)
+						else if (Options.Get<bool>("antiafk_system") && _lastPackets[peer.ID] >= 240)
 						{
 							server.DisconnectWithReason(server.GetSession(peer.ID), "AFK or Timeout");
 						}

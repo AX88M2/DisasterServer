@@ -59,10 +59,10 @@ namespace DisasterServer
             var os = (OSType)reader.ReadByte();
             var udid = reader.ReadStringNull();
 
-            if (ver != Program.BUILD_VER)
+            if (ver != Program.GAME_VER)
             {
                 server.DisconnectWithReason(session,
-                    $"Wrong game version ({Program.BUILD_VER} required, but got {ver})");
+                    $"Wrong game version ({Program.GAME_VER} required, but got {ver})");
                 return;
             }
 

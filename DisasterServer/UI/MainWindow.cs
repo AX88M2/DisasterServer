@@ -150,7 +150,7 @@ public class MainWindow : Window
 		{
 			Terminal.Log("===================");
 			Terminal.Log("TD2DR Server");
-			Terminal.Log($"BUILD v{Program.BUILD_VER}");
+			Terminal.Log($"BUILD v{Program.GAME_VER}");
 			Terminal.Log("Server edited by MilesGlitch");
 			Terminal.Log("(c) Team Exe Empire 2023");
 			Terminal.Log("===================");

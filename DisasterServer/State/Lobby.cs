@@ -178,8 +178,8 @@ public class Lobby : State
 			}
 			server.TCPSend(session, new TcpPacket(PacketType.SERVER_LOBBY_CORRECT));
 			SendMessage(server, session, "|type .help for command list~");
-			SendMessage(server, session, "|server edit by: /miles&glitch~");
-			SendMessage(server, session, $"|server version `{Program.BUILD_VER}~");
+			SendMessage(server, session, $"|version `{Program.BUILD_VER}~");
+			SendMessage(server, session, "|edit by /miles&glitch~");
 			break;
 			/* Chat message */
             case PacketType.CLIENT_CHAT_MESSAGE:
@@ -420,7 +420,7 @@ public class Lobby : State
 						{
 							_lastPackets[peer.ID] = 0;
 						}
-						else if (_lastPackets[peer.ID] >= 1500)
+						else if (Options.Get<bool>("antiafk_system") && _lastPackets[peer.ID] >= 1500)
 						{
 							server.DisconnectWithReason(server.GetSession(peer.ID), "AFK or Timeout");
 						}

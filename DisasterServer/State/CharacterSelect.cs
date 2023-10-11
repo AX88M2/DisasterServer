@@ -123,15 +123,20 @@ internal class CharacterSelect : State
 				foreach (Peer peer in server.Peers.Values)
 				{
 					if (peer.Waiting)
+					{
 						continue;
+					}
 
 					if (peer.Player.Character == (Character)id)
+					{
 						canUse = false;
+					}
 
 					if (peer.Player.Character != Character.None)
 					{
-						if (peer.Player.Character == Character.Exe && peer.Player.ExeCharacter == ExeCharacter.None)
+						if (peer.Player.Character == Character.Exe && peer.Player.ExeCharacter == ExeCharacter.None){
 							continue;
+						}
 
 						cnt++;
 					}
@@ -139,7 +144,9 @@ internal class CharacterSelect : State
 				if (canUse)
 				{
 					if (!server.Peers.ContainsKey(session.ID))
+					{
 						break;
+					}
 
 					var peer = server.Peers[session.ID];
 					peer.Player.Character = (Character)id;
@@ -155,7 +162,9 @@ internal class CharacterSelect : State
 					Terminal.LogDiscord($"{peer.Nickname} chooses {(Character)id}");
 
 					if (++cnt >= server.Peers.Count(e => !e.Value.Waiting))
+					{
 						server.SetState(new Game(_map, _exe.ID));
+					}
 				}
 				else
 				{
@@ -204,6 +213,7 @@ internal class CharacterSelect : State
 			{
 				if (!peer.Waiting)
 				{
+					//Вычесления кто будет exe
 					if (peer.Player.Character != 0)
 					{
 						peer.ExeChance += _rand.Next(4, 10);
@@ -281,7 +291,7 @@ internal class CharacterSelect : State
 						_lastPackets[peer.ID] = 0;
 						continue;
 					}
-					if (_lastPackets[peer.ID] >= 1800)
+					if (Options.Get<bool>("antiafk_system") && _lastPackets[peer.ID] >= 1800)
 					{
 						server.DisconnectWithReason(server.GetSession(peer.ID), "AFK or Timeout");
 						continue;
