@@ -420,7 +420,7 @@ public class Lobby : State
 						{
 							_lastPackets[peer.ID] = 0;
 						}
-						else if (Options.Get<bool>("antiafk_system") && _lastPackets[peer.ID] >= 1500)
+						else if (_lastPackets[peer.ID] >= 1500)
 						{
 							server.DisconnectWithReason(server.GetSession(peer.ID), "AFK or Timeout");
 						}
