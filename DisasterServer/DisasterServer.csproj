@@ -9,19 +9,13 @@
         <ApplicationIcon>Libs\app.ico</ApplicationIcon>
         <PackageIcon>app.ico</PackageIcon>
         <RepositoryUrl>https://github.com/0xAX88M2/DisasterServer</RepositoryUrl>
-        <Platforms>AnyCPU;x86;x64</Platforms>
+        <Platforms>AnyCPU</Platforms>
         <RepositoryType>Private</RepositoryType>
     </PropertyGroup>
     
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
         <DefineConstants>_WINDOWS</DefineConstants>
     </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <PlatformTarget>x64</PlatformTarget>
-      <DebugType>none</DebugType>
-    </PropertyGroup>
-    
     <ItemGroup>
       <Folder Include="ExeNet\" />
       <Folder Include="Libs\" />
