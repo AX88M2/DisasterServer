@@ -177,10 +177,9 @@ public class Lobby : State
 				}
 			}
 			server.TCPSend(session, new TcpPacket(PacketType.SERVER_LOBBY_CORRECT));
+			SendMessage(server, session, $"|- version `{Program.BUILD_VER}~");
+			SendMessage(server, session, "|- edit by /miles&glitch~");
 			SendMessage(server, session, "|type .help for command list~");
-			SendMessage(server, session, "|server edit by: /miles&glitch~");
-			SendMessage(server, session, $"|server version `{Program.BUILD_VER}~");
-			SendMessage(server, session, $"|server count №{Options.Get<int>("server_count")}~");
 			break;
 			/* Chat message */
             case PacketType.CLIENT_CHAT_MESSAGE:

@@ -7,9 +7,11 @@ public class YouCantRun : Map
 {
 	public override void Init(Server server)
 	{
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
 		Spawn<MovingSpikeController>(server);
 		Spawn<YCRSmokeController>(server);
-		SetTime(server, 180);
+		SetTime(server, 180+addTimeRandom);
 		base.Init(server);
 	}
 

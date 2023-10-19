@@ -3,83 +3,107 @@ using System.Runtime.InteropServices;
 namespace DisasterServer.UI;
 
 public class UIWrapper
-{
-	public enum PollType
-	{
-		POLL_NONE,
-		POLL_QUIT,
-		POLL_CLEAR_EXCLUDES,
-		POLL_ADD_EXCLUDE,
-		POLL_KICK,
-		POLL_BAN,
-		POLL_UNBAN,
-		POLL_BACKTOLOBBY,
-		POLL_EXEWIN,
-		POLL_SURVWIN,
-		POLL_PRACTICE
-	}
+    {
+        public enum PollType
+        {
+            POLL_NONE,
+            POLL_QUIT,
 
-	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-	public struct PollData
-	{
-		public ushort value1;
+            POLL_CLEAR_EXCLUDES,
+            POLL_ADD_EXCLUDE,
 
-		public PollType type;
+            POLL_KICK,
+            POLL_BAN,
+            POLL_UNBAN,
+            POLL_BACKTOLOBBY,
+            POLL_EXEWIN,
+            POLL_SURVWIN,
+            POLL_PRACTICE
+        }
 
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-		public string value2;
-	}
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct PollData
+        {
+            public ushort value1;
+            public PollType type;
 
-	public enum PlayerCharacter
-	{
-		CHARACTER_NONE,
-		CHRACTER_TAILS,
-		CHARACTER_KNUX,
-		CHARACTER_EGGMAN,
-		CHARACTER_AMY,
-		CHARACTER_CREAM,
-		CHARACTER_SALLY,
-		CHARACTER_EXE,
-		CHARACTER_CHAOS,
-		CHARACTER_EXETIOR,
-		CHARACTER_EXELLER
-	}
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string value2;
+        }
 
-	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-	public struct PlayerData
-	{
-		public int state;
+        public enum PlayerCharacter
+        {
+            CHARACTER_NONE,
 
-		public ushort pid;
+            CHRACTER_TAILS,
+            CHARACTER_KNUX,
+            CHARACTER_EGGMAN,
+            CHARACTER_AMY,
+            CHARACTER_CREAM,
+            CHARACTER_SALLY,
 
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-		public string name;
+            CHARACTER_EXE,
+            CHARACTER_CHAOS,
+            CHARACTER_EXETIOR,
+            CHARACTER_EXELLER
+        }
 
-		public PlayerCharacter character;
-	}
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct PlayerData
+        {
+            public int state;
+            public ushort pid;
 
-	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
-	public delegate void ReadyCallback();
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string name;
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern bool gui_run([MarshalAs(UnmanagedType.FunctionPtr)] ReadyCallback cb);
+            public PlayerCharacter character;
+        }
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern bool gui_poll_events(out PollData data);
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate void ReadyCallback();
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_log(string text);
+#if _WINDOWS
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool gui_run([MarshalAs(UnmanagedType.FunctionPtr)] ReadyCallback cb);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_add_ban(string name, string ip);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool gui_poll_events(out PollData data);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_set_status(string text);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_log(string text);
 
-	[DllImport("ServerGUI.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	public static extern void gui_player_state(PlayerData data);
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_add_ban(string name, string ip);
 
-	[DllImport("kernel32.dll", SetLastError = true)]
-	[return: MarshalAs(UnmanagedType.Bool)]
-	public static extern bool AllocConsole();
-}
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_set_status(string text);
+
+        [DllImport("ServerGUI.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern void gui_player_state(PlayerData data);
+
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
+
+#else
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern bool gui_run(ReadyCallback cb);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern bool gui_poll_events(out PollData data);
+        
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public static extern void gui_log(string text);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_add_ban(string name, string ip);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_set_status(string text);
+
+    [DllImport("libServerGUI.so", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern void gui_player_state(PlayerData data);
+#endif    
+    }

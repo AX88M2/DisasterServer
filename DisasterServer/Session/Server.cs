@@ -7,10 +7,6 @@ namespace DisasterServer.Session;
 
 public class Server
 {
-	private const int TCP_PORT = 7606;
-
-	private const int UDP_PORT = 8606;
-
 	public int UID = -1;
 
 	public bool IsRunning;
@@ -31,8 +27,8 @@ public class Server
 
 	public Server(int uid)
 	{
-		MulticastServer = new(this, UDP_PORT + uid);
-		SharedServer = new(this, TCP_PORT + uid);
+		MulticastServer = new(this, Options.Get<int>("udp_port") + uid);
+		SharedServer = new(this, Options.Get<int>("tcp_port") + uid);
 		UID = uid + 1;
 	}
 

@@ -5,7 +5,7 @@ namespace DisasterServer;
 
 public class Program
 {
-	public const int BUILD_VER = 100;
+	public const String BUILD_VER = "v1.0.5";
 
 	public const int MAX_PLAYERS = 7;
 
@@ -20,7 +20,9 @@ public class Program
 	{
 		if (Options.Get<int>("server_count") <= 0)
 		{
-			UIWrapper.AllocConsole();
+#if _WINDOWS
+                UIWrapper.AllocConsole();
+#endif
 			Console.ForegroundColor = ConsoleColor.DarkRed;
 			Console.WriteLine("ServerCount is set to 0 in config.");
 			return;

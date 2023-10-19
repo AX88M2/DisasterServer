@@ -8,10 +8,41 @@ public class Act9 : Map
 {
 	public override void Init(Server server)
 	{
-		SetTime(server, 130);
-		Spawn(server, new Act9Wall(0, 0, 1025));
-		Spawn(server, new Act9Wall(1, 1663, 0));
-		Spawn(server, new Act9Wall(2, 1663, 0));
+		Random random = new Random();
+		int wallRandom = random.Next(1, 7);
+		int addTimeRandom = random.Next(1,128);
+		SetTime(server, 130+addTimeRandom);
+		switch (wallRandom)
+		{
+			case 1:
+				Spawn(server, new Act9Wall(0, 0, 1025));
+				Spawn(server, new Act9Wall(1, 1663, 0));
+				Spawn(server, new Act9Wall(2, 1663, 0));
+				break;
+			case 2:
+				Spawn(server, new Act9Wall(0, 0, 1025));
+				Spawn(server, new Act9Wall(1, 1663, 0));
+				break;
+			case 3:
+				Spawn(server, new Act9Wall(1, 1663, 0));
+				Spawn(server, new Act9Wall(2, 1663, 0));
+				break;
+			case 4:
+				Spawn(server, new Act9Wall(0, 0, 1025));
+				Spawn(server, new Act9Wall(2, 1663, 0));
+				break;
+			case 5:
+				Spawn(server, new Act9Wall(0, 0, 1025));
+				break;
+			case 6:
+				Spawn(server, new Act9Wall(1, 1663, 0));
+				break;
+			case 7:
+				Spawn(server, new Act9Wall(2, 1663, 0));
+				break;
+		}
+		Terminal.Log($"WallRandom: {wallRandom.ToString()}"); 
+		Terminal.Log($"AddTimeRandom: {addTimeRandom.ToString()}");
 		base.Init(server);
 	}
 

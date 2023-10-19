@@ -7,8 +7,10 @@ public class NotPerfect : Map
 {
 	public override void Init(Server server)
 	{
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
 		Spawn<NotPerfectController>(server);
-		SetTime(server, 155);
+		SetTime(server, 155+addTimeRandom);
 		base.Init(server);
 	}
 

@@ -8,7 +8,9 @@ public class LimpCity : Map
 {
 	public override void Init(Server server)
 	{
-		SetTime(server, 155);
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
+		SetTime(server, 155+addTimeRandom);
 		Spawn(server, new LCEye
 		{
 			ID = 0

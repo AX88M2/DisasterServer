@@ -10,6 +10,8 @@ public class NastyParadise : Map
 
 	public override void Init(Server server)
 	{
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
 		for (byte m = 0; m < 10; m = (byte)(m + 1))
 		{
 			Spawn(server, new NAPIce(m));
@@ -39,7 +41,7 @@ public class NastyParadise : Map
 			ball.SetWaypointAnimSpeed((byte)(6 + i), 0.35f + 0.25f * ((float)(int)i / 2f));
 		}
 		Spawn(server, new NAPSnowball(4, 5, -1));
-		SetTime(server, 155);
+		SetTime(server, 155+addTimeRandom);
 		base.Init(server);
 	}
 

@@ -9,7 +9,9 @@ public class PricelessFreedom : Map
 {
 	public override void Init(Server server)
 	{
-		SetTime(server, 155);
+		Random random = new Random();
+		int addTimeRandom = random.Next(1, 128);
+		SetTime(server, 155+addTimeRandom);
 		Spawn(server, new PFLift(0, 1669f, 1016f));
 		Spawn(server, new PFLift(1, 1069f, 704f));
 		Spawn(server, new PFLift(2, 829f, 400f));
