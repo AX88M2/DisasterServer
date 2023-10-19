@@ -27,6 +27,7 @@ jobs:
           path: ${{ github.workspace }}\DisasterServer\bin\Release\net7.0\
   build-linux:
     runs-on: self-hosted
+    container: node:18
     steps:
       - uses: actions/checkout@v2
 
