@@ -25,6 +25,7 @@ jobs:
         with:
           name: DisasterServer-Windows
           path: ${{ github.workspace }}\DisasterServer\bin\Release\net7.0\
+          retention-days: 5
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -45,4 +46,5 @@ jobs:
         with:
           name: DisasterServer-Linux
           path: ${{ github.workspace }}/DisasterServer/bin/Release/net7.0/
+          retention-days: 5
 
