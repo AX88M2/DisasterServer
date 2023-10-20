@@ -10,6 +10,16 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      - name: create empty directory
+        run: |
+          mkdir empty.d
+
+      - name: empty dist archive
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: empty.d
+          
       - name: "Setup dotnet"
         uses: actions/setup-dotnet@v3
         with:
@@ -30,6 +40,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: create empty directory
+        run: |
+          mkdir empty.d
+
+      - name: empty dist archive
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: empty.d
 
       - name: "Setup dotnet"
         uses: actions/setup-dotnet@v3
