@@ -5,7 +5,7 @@ namespace DisasterServer;
 
 public class Program
 {
-	public const String BUILD_VER = "v1.0.5";
+	public const String BUILD_VER = "v1.0.6";
 
 	public const int MAX_PLAYERS = 7;
 
@@ -39,7 +39,7 @@ public class Program
 			Window.Run();
 		}
 	}
-
+	//Этот кусок кода почему-то не изпользуется.
 	public static Server? FindServer(string id)
 	{
 		if (!int.TryParse(id, out var srvId))
