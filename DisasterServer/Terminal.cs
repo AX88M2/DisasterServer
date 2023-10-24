@@ -123,7 +123,6 @@ public class Terminal
 				new
 				{
 					color = "2829617",
-					
 					title = title,
 					description = "``` " + message + " ```"
 				}
