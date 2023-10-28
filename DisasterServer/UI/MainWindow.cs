@@ -166,8 +166,9 @@ public class MainWindow : Window
 				UIWrapper.gui_add_ban(it.Value["name"], it.Key);
 			}
 		}
-		catch
+		catch (Exception e)
 		{
+			Console.WriteLine(e);
 		}
 	}
 }
