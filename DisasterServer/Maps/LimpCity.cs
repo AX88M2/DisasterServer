@@ -20,6 +20,7 @@ public class LimpCity : Map
 			ID = 1
 		});
 		Spawn<LCChainController>(server);
+		Terminal.Log($"[LimpCity] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

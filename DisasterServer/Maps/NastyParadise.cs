@@ -42,6 +42,7 @@ public class NastyParadise : Map
 		}
 		Spawn(server, new NAPSnowball(4, 5, -1));
 		SetTime(server, 155+addTimeRandom);
+		Terminal.Log($"[NastyParadise] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

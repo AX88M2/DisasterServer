@@ -27,6 +27,7 @@ public class DarkTower : Map
 		Spawn(server, new DTAss(3032, 64));
 		Spawn(server, new DTAss(3088, 64));
 		SetTime(server, 205+addTimeRandom);
+		Terminal.Log($"[DarkTower] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

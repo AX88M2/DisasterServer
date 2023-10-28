@@ -10,6 +10,7 @@ public class MajinForest : Map
 		Random random = new Random();
 		int addTimeRandom = random.Next(1, 128);
 		SetTime(server, 155+addTimeRandom);
+		Terminal.Log($"[MajinForest] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

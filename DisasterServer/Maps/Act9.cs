@@ -44,8 +44,8 @@ public class Act9 : Map
 				//Ничего
 				break;
 		}
-		Terminal.Log($"WallRandom: {wallRandom.ToString()}"); 
-		Terminal.Log($"AddTimeRandom: {addTimeRandom.ToString()}");
+		Terminal.Log($"[___ Act9] Wall Random: {wallRandom}"); 
+		Terminal.Log($"[___ Act9] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

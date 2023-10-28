@@ -11,6 +11,7 @@ public class NotPerfect : Map
 		int addTimeRandom = random.Next(1, 128);
 		Spawn<NotPerfectController>(server);
 		SetTime(server, 155+addTimeRandom);
+		Terminal.Log($"[NotPerfect] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

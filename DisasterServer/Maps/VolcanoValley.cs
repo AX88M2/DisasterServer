@@ -19,6 +19,7 @@ public class VolcanoValley : Map
 		{
 			Spawn(server, new VVVase(i));
 		}
+		Terminal.Log($"[VolcanoValley] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

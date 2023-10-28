@@ -8,7 +8,9 @@ public class KindAndFair : Map
 {
 	public override void Init(Server server)
 	{
-		for (int i = 0; i < 11; i++)
+		Random random = new Random();
+		int randomCountSpeedBooster = random.Next(1, 11);
+		for (int i = 0; i < randomCountSpeedBooster; i++)
 		{
 			Spawn(server, new KAFSpeedBooster
 			{
@@ -16,6 +18,7 @@ public class KindAndFair : Map
 			});
 		}
 		SetTime(server, 180);
+		Terminal.Log($"[KindAndFair] Count SpeedBooster: {randomCountSpeedBooster}");
 		base.Init(server);
 	}
 

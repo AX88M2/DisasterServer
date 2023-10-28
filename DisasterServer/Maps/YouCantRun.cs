@@ -12,6 +12,7 @@ public class YouCantRun : Map
 		Spawn<MovingSpikeController>(server);
 		Spawn<YCRSmokeController>(server);
 		SetTime(server, 180+addTimeRandom);
+		Terminal.Log($"[YouCantRun] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 
