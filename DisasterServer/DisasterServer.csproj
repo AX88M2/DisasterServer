@@ -47,9 +47,6 @@
         <None Update="Libs\Qt5Widgets.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="Libs\ServerConfig.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
         <None Update="Libs\D3Dcompiler_47.dll">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

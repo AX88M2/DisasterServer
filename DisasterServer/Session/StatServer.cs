@@ -6,7 +6,7 @@ namespace DisasterServer.Session;
 public class StatServer : TcpServer
 {
 	public StatServer()
-		: base(System.Net.IPAddress.Any, 12084)
+		: base(System.Net.IPAddress.Any, Options.Get<int>("stat_port"))
 	{
 	}
 

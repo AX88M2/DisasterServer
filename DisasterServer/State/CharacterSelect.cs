@@ -226,7 +226,7 @@ internal class CharacterSelect : State
 	private Peer? ChooseExe(Server server)
 	{
 		Dictionary<ushort, double> chances = new Dictionary<ushort, double>();
-		double accWeight = 0.0;
+		double accWeight = Options.Get<double>("random_weight");
 		lock (server.Peers)
 		{
 			foreach (Peer peer in server.Peers.Values)

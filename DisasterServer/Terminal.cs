@@ -117,7 +117,6 @@ public class Terminal
 		var @struct = new
 		{
 			username = "Thread (" + name + ")",
-			avatar_url = "https://cdn.discordapp.com/attachments/965716495294402580/1166300897836544060/DisasterLauncher.png?ex=6549fd5a&is=6537885a&hm=7bedc44df409d98c24908db3b59f6619c1b2cc4e2f392e45040f15493170b84e&",
 			embeds = new List<object>
 			{
 				new

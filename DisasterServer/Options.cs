@@ -34,17 +34,21 @@ public class Options
 	{
 		try
 		{
+			JsonSerializerOptions options = new JsonSerializerOptions();
+			options.WriteIndented = true;
 			string ser = JsonSerializer.Serialize(new
 			{
 				server_count = 1,
 				tcp_port = 7606,
 				udp_port = 8606,
+				stat_port = 12084,
+				random_weight = 0.1,
 				webhook_url = "",
 				mapset_file = "",
 				enable_stat = false,
 				console_mode = true,
 				debug_mode = false
-			});
+			},options);
 			_doc = JsonNode.Parse(ser);
 			if (!Directory.Exists("Config"))
 			{

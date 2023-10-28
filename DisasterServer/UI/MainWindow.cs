@@ -148,13 +148,13 @@ public class MainWindow : Window
 	{
 		try
 		{
-			Terminal.Log("===================");
+			Terminal.Log("=====================");
 			Terminal.Log("TD2DR Server");
 			Terminal.Log("BUILD v100");
-			Terminal.Log("Server edited by MilesGlitch");
+			Terminal.Log("Edited by MilesGlitch");
 			Terminal.Log("(c) Team Exe Empire 2023");
-			Terminal.Log("===================");
-			Terminal.Log("Enter localhost or 127.0.0.1 on your PC to join the server.\n");
+			Terminal.Log("=====================");
+			Console.WriteLine("");
 			for (int i = 0; i < Options.Get<int>("server_count"); i++)
 			{
 				Server server = new Server(i);
