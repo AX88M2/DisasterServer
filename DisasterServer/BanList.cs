@@ -49,6 +49,8 @@ public class BanList
 	{
 		unique = "";
 		nickname = "";
+		JsonSerializerOptions options = new JsonSerializerOptions();
+		options.WriteIndented = true;
 		foreach (Server server in Program.Servers)
 		{
 			lock (server.Peers)
@@ -66,7 +68,7 @@ public class BanList
 					{ "ip", ip }
 				};
 				_list.List[unique] = @struct;
-				string ball = JsonSerializer.Serialize(_list);
+				string ball = JsonSerializer.Serialize(_list,options);
 				File.WriteAllText("Config/Banlist.json", ball);
 				return true;
 			}

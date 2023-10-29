@@ -98,9 +98,9 @@ namespace DisasterServer
 
             Program.Stat?.MulticastInformation();
 
-            Terminal.LogDebug($"Indentity recived from {(IPEndPoint?)session.RemoteEndPoint}:");
-            Terminal.LogDebug($"  OS: {os}");
-            Terminal.LogDebug($"  UNIQUE: {udid}");
+            Terminal.Log($"Indentity recived from {(IPEndPoint?)session.RemoteEndPoint}:");
+            Terminal.Log($"  OS: {os}");
+            Terminal.Log($"  UNIQUE: {udid}");
 
             if (KickList.Check(udid))
             {
