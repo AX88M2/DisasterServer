@@ -35,6 +35,7 @@ public class SharedServerSession : TcpSession
 				_server.DisconnectWithReason(this, "Kicked by server.");
 				return;
 			}
+			
 			if (BanList.Check((base.RemoteEndPoint as IPEndPoint).Address.ToString()))
 			{
 				_server.DisconnectWithReason(this, "You were banned from this server.");
@@ -51,10 +52,11 @@ public class SharedServerSession : TcpSession
 			{
 				if (!Whitelist.Check((base.RemoteEndPoint as IPEndPoint).Address.ToString()))
 				{
-					_server.DisconnectWithReason(this, "Nope.");
+					_server.DisconnectWithReason(this, "Not on the whitelist.");
 					return;
 				}
 			}
+			
 			Peer peer = new Peer
 			{
 				EndPoint = base.RemoteEndPoint,
@@ -68,6 +70,7 @@ public class SharedServerSession : TcpSession
 			{
 				_server.State.PeerJoined(_server, this, peer);
 			}
+			
 			Terminal.Log($"{base.RemoteEndPoint} (ID {ID}) connected.");
 		}
 		base.OnConnected();

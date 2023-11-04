@@ -118,7 +118,7 @@ namespace DisasterServer
             {
                 if (!Whitelist.Check(udid))
                 {
-                    server.DisconnectWithReason(session, "Nope.");
+                    server.DisconnectWithReason(session, "Not on the whitelist.");
                     return;
                 }
             }
