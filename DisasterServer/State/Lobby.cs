@@ -180,7 +180,7 @@ public class Lobby : State
 			SendMessage(server, session, $"|- version `{Program.BUILD_VER}~");
 			SendMessage(server, session, "|- edit by /miles&glitch~");
 			SendMessage(server, session, "\\warning:~");
-			SendMessage(server, session, "`- this server is semi-private.~");
+			SendMessage(server, session, "`- this server is private.~");
 			SendMessage(server, session, "`- distribute server ip without~");
 			SendMessage(server, session, "`permission of the owner is strictly prohibited.~");
 			SendMessage(server, session, "|type .help for command list~");
