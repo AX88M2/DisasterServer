@@ -5,7 +5,7 @@ namespace DisasterServer;
 
 public class Program
 {
-	public const String BUILD_VER = "v1.0.7";
+	public const String BUILD_VER = "v1.0.8";
 
 	public const int MAX_PLAYERS = 7;
 
