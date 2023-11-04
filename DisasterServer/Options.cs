@@ -47,7 +47,8 @@ public class Options
 				mapset_file = "",
 				enable_stat = false,
 				console_mode = true,
-				debug_mode = false
+				debug_mode = false,
+				whitelist_enable = false
 			},options);
 			_doc = JsonNode.Parse(ser);
 			if (!Directory.Exists("Config"))

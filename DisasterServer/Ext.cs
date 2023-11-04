@@ -97,11 +97,11 @@ namespace DisasterServer
             }
 
             Program.Stat?.MulticastInformation();
-
+            
             Terminal.Log($"Indentity recived from {(IPEndPoint?)session.RemoteEndPoint}:");
             Terminal.Log($"  OS: {os}");
             Terminal.Log($"  UNIQUE: {udid}");
-
+            
             if (KickList.Check(udid))
             {
                 server.DisconnectWithReason(session, "Kick by host.");
@@ -114,6 +114,15 @@ namespace DisasterServer
                 return;
             }
 
+            if (Options.Get<bool>("whitelist_enable"))
+            {
+                if (!Whitelist.Check(udid))
+                {
+                    server.DisconnectWithReason(session, "Nope.");
+                    return;
+                }
+            }
+            
             var pak = new TcpPacket(PacketType.SERVER_IDENTITY_RESPONSE);
             pak.Write(server.State.AsState() == Session.State.LOBBY);
             pak.Write(session.ID);
