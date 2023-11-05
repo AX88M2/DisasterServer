@@ -87,11 +87,11 @@ public class Whitelist
     
     	public static bool Check(string unqie)
     	{
-    		if (!_list.List.ContainsKey(unqie))
+    		if (_list.List.ContainsKey(unqie))
     		{
-    			return false;
+    			return true;
     		}
-    		return true;
+    		return false;
     	}
     
     	public static Dictionary<string, Dictionary<string, string>> GetPlayers()

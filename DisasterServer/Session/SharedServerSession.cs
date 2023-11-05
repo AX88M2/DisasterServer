@@ -50,7 +50,7 @@ public class SharedServerSession : TcpSession
 
 			if (Options.Get<bool>("whitelist_enable"))
 			{
-				if (!Whitelist.Check((base.RemoteEndPoint as IPEndPoint).Address.ToString()))
+				if (Whitelist.Check((base.RemoteEndPoint as IPEndPoint).Address.ToString()))
 				{
 					_server.DisconnectWithReason(this, "Not on the whitelist.");
 					return;
