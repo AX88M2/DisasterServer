@@ -1,0 +1,16 @@
+﻿#ifndef COLORS_H
+#define COLORS_H
+
+#define CLRCODE_RED "\\"
+#define CLRCODE_GRN "@"
+#define CLRCODE_PUR "&"
+#define CLRCODE_BLU "/"
+#define CLRCODE_GRA "|"
+#define CLRCODE_YLW "`"
+#define CLRCODE_ORG "№"
+#define CLRCODE_RST "~"
+
+#define CLRLIST { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST }
+#define CLRLIST_LEN 8
+
+#endif

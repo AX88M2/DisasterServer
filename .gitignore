@@ -1,3 +1,4 @@
-.idea/*
-DisasterServer/bin/*
-DisasterServer/obj/*
+.vs/
+out/
+build/
+/.cache/clangd/index
