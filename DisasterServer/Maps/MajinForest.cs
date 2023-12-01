@@ -7,10 +7,17 @@ public class MajinForest : Map
 {
 	public override void Init(Server server)
 	{
-		Random random = new Random();
-		int addTimeRandom = random.Next(1, 128);
-		SetTime(server, 155+addTimeRandom);
-		Terminal.Log($"[MajinForest] Time added: {addTimeRandom}");
+		if (Options.Get<bool>("random_mode"))
+		{
+			Random random = new Random();
+			int addTimeRandom = random.Next(1, 128);
+			SetTime(server, 155+addTimeRandom);
+			Terminal.Log($"[MajinForest] Time added: {addTimeRandom}");
+		}
+		else
+		{
+			SetTime(server, 155);
+		}
 		base.Init(server);
 	}
 

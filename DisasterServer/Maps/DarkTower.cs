@@ -8,8 +8,6 @@ public class DarkTower : Map
 {
 	public override void Init(Server server)
 	{
-		Random random = new Random();
-		int addTimeRandom = random.Next(1, 128);
 		Spawn<DTTailsDoll>(server);
 		Spawn<DTBall>(server);
 		Spawn(server, new DTAss(1744, 224));
@@ -26,8 +24,18 @@ public class DarkTower : Map
 		Spawn(server, new DTAss(2592, 1384));
 		Spawn(server, new DTAss(3032, 64));
 		Spawn(server, new DTAss(3088, 64));
-		SetTime(server, 205+addTimeRandom);
-		Terminal.Log($"[DarkTower] Time added: {addTimeRandom}");
+		if (Options.Get<bool>("random_mode"))
+		{
+			Random random = new Random();
+			int addTimeRandom = random.Next(1, 128);
+			
+			SetTime(server, 205+addTimeRandom);
+			Terminal.Log($"[DarkTower] Time added: {addTimeRandom}");
+		}
+		else
+		{
+			SetTime(server, 205);
+		}
 		base.Init(server);
 	}
 

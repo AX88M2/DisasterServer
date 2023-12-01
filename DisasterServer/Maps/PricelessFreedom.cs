@@ -10,18 +10,35 @@ public class PricelessFreedom : Map
 	public override void Init(Server server)
 	{
 		Random random = new Random();
-		int addTimeRandom = random.Next(1, 128);
-		int countRandomSpawnBlackRing = random.Next(1, 29);
-		SetTime(server, 155+addTimeRandom);
+		if (Options.Get<bool>("random_mode"))
+		{
+			int addTimeRandom = random.Next(1, 128);
+			SetTime(server, 155+addTimeRandom);
+		}
+		else
+		{
+			SetTime(server, 155);
+		}
 		Spawn(server, new PFLift(0, 1669f, 1016f));
 		Spawn(server, new PFLift(1, 1069f, 704f));
 		Spawn(server, new PFLift(2, 829f, 400f));
 		Spawn(server, new PFLift(3, 1070f, 544f));
-		for (int i = 0; i < countRandomSpawnBlackRing; i++)
+		if (Options.Get<bool>("random_mode"))
 		{
-			Spawn<BlackRing>(server);
+			int countRandomSpawnBlackRing = random.Next(1, 29);
+			for (int i = 0; i < countRandomSpawnBlackRing; i++)
+			{
+				Spawn<BlackRing>(server);
+			}
+			Terminal.Log($"[PricelessFreedom] Count Black Rings: {countRandomSpawnBlackRing}");
 		}
-		Terminal.Log($"[PricelessFreedom] Count Black Rings: {countRandomSpawnBlackRing}");
+		else
+		{
+			for (int i = 0; i < 29; i++)
+			{
+				Spawn<BlackRing>(server);
+			}
+		}
 		base.Init(server);
 	}
 

@@ -8,44 +8,56 @@ public class Act9 : Map
 {
 	public override void Init(Server server)
 	{
-		Random random = new Random();
-		int wallRandom = random.Next(1, 8);
-		int addTimeRandom = random.Next(1,128);
-		SetTime(server, 130+addTimeRandom);
-		switch (wallRandom)
+		if (Options.Get<bool>("random_mode"))
 		{
-			case 1:
-				Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
-				Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
-				Spawn(server, new Act9Wall(2, 1663, 0)); // Право
-				break;
-			case 2:
-				Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
-				Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
-				break;
-			case 3:
-				Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
-				Spawn(server, new Act9Wall(2, 1663, 0)); // Право
-				break;
-			case 4:
-				Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
-				Spawn(server, new Act9Wall(2, 1663, 0)); // Право
-				break;
-			case 5:
-				Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
-				break;
-			case 6:
-				Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
-				break;
-			case 7:
-				Spawn(server, new Act9Wall(2, 1663, 0)); // Право
-				break;
-			case 8:
-				//Ничего
-				break;
+			Random random = new Random();
+			int wallRandom = random.Next(1, 8);
+			int addTimeRandom = random.Next(1,128);
+			SetTime(server, 130+addTimeRandom);
+			switch (wallRandom)
+			{
+				case 1:
+					Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
+					Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
+					Spawn(server, new Act9Wall(2, 1663, 0)); // Право
+					break;
+				case 2:
+					Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
+					Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
+					break;
+				case 3:
+					Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
+					Spawn(server, new Act9Wall(2, 1663, 0)); // Право
+					break;
+				case 4:
+					Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
+					Spawn(server, new Act9Wall(2, 1663, 0)); // Право
+					break;
+				case 5:
+					Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
+					break;
+				case 6:
+					Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
+					break;
+				case 7:
+					Spawn(server, new Act9Wall(2, 1663, 0)); // Право
+					break;
+				case 8:
+					//Ничего
+					break;
+			}
+			Terminal.Log($"[___ Act9] Wall Random: {wallRandom}"); 
+			Terminal.Log($"[___ Act9] Time added: {addTimeRandom}");
 		}
-		Terminal.Log($"[___ Act9] Wall Random: {wallRandom}"); 
-		Terminal.Log($"[___ Act9] Time added: {addTimeRandom}");
+		else
+		{
+			Spawn(server, new Act9Wall(0, 0, 1025)); // Поталог
+			Spawn(server, new Act9Wall(1, 1663, 0)); // Лево
+			Spawn(server, new Act9Wall(2, 1663, 0)); // Право
+			SetTime(server, 130);
+		}
+
+		
 		base.Init(server);
 	}
 

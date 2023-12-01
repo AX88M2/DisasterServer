@@ -8,9 +8,17 @@ public class VolcanoValley : Map
 {
 	public override void Init(Server server)
 	{
-		Random random = new Random();
-		int addTimeRandom = random.Next(1, 128);
-		SetTime(server, 180+addTimeRandom);
+		if (Options.Get<bool>("random_mode"))
+		{
+			Random random = new Random();
+			int addTimeRandom = random.Next(1, 128);
+			SetTime(server, 180+addTimeRandom);
+			Terminal.Log($"[VolcanoValley] Time added: {addTimeRandom}");
+		}
+		else
+		{
+			SetTime(server, 180);
+		}
 		Spawn(server, new VVLava(0, 736f, 130f));
 		Spawn(server, new VVLava(1, 1388f, 130f));
 		Spawn(server, new VVLava(2, 1524f, 130f));
@@ -19,7 +27,6 @@ public class VolcanoValley : Map
 		{
 			Spawn(server, new VVVase(i));
 		}
-		Terminal.Log($"[VolcanoValley] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 

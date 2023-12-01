@@ -47,6 +47,7 @@ public class Options
 				mapset_file = "",
 				enable_stat = false,
 				console_mode = true,
+				random_mode = false,
 				debug_mode = false,
 				whitelist_enable = false
 			},options);

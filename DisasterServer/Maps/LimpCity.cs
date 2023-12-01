@@ -8,9 +8,18 @@ public class LimpCity : Map
 {
 	public override void Init(Server server)
 	{
-		Random random = new Random();
-		int addTimeRandom = random.Next(1, 128);
-		SetTime(server, 155+addTimeRandom);
+		if (Options.Get<bool>("random_mode"))
+		{
+			Random random = new Random();
+			int addTimeRandom = random.Next(1, 128);
+			SetTime(server, 155+addTimeRandom);
+			Terminal.Log($"[LimpCity] Time added: {addTimeRandom}");
+		}
+		else
+		{
+			SetTime(server, 155);
+		}
+		
 		Spawn(server, new LCEye
 		{
 			ID = 0
@@ -20,7 +29,6 @@ public class LimpCity : Map
 			ID = 1
 		});
 		Spawn<LCChainController>(server);
-		Terminal.Log($"[LimpCity] Time added: {addTimeRandom}");
 		base.Init(server);
 	}
 
