@@ -1,7 +1,5 @@
 #include <Player.h>
 #include <Server.h>
-#include <arpa/inet.h>
-#include <stdio.h>
 
 bool player_add_error(Server* server, Player* player, uint16_t by)
 {

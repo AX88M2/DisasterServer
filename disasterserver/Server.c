@@ -6,7 +6,6 @@
 #include <io/Time.h>
 #include <CMath.h>
 #include <Colors.h>
-#include <stdio.h>
 #include <time.h>
 #include <string.h>
 
@@ -401,11 +400,11 @@ bool server_timeout(Server* server, uint16_t id, double timeout)
 			continue;
 
 		if (peer->id == id)
-			res = timeout_set(peer->nickname.value, inet_ntoa(peer->addr.sin_addr), peer->udid.value, time(NULL) + (uint64_t)(round(timeout)));
+			res = timeout_set(peer->nickname.value, inet_ntoa(peer->addr.sin_addr), peer->udid.value, time(NULL) + (uint64_t)(60 * timeout));
 	}
 
 	if (res)
-		server_disconnect(server, id, DR_KICKEDBYHOST, NULL);
+		res = server_disconnect(server, id, DR_KICKEDBYHOST, NULL);
 
 	MutexUnlock(server->state_lock);
 	return res;
@@ -427,7 +426,7 @@ bool server_ban(Server* server, uint16_t id)
 	}
 
 	if (res)
-		server_disconnect(server, id, DR_BANNEDBYHOST, NULL);
+		res = server_disconnect(server, id, DR_BANNEDBYHOST, NULL);
 
 	MutexUnlock(server->state_lock);
 	return res;
@@ -453,7 +452,7 @@ bool server_op(Server* server, uint16_t id)
 		}
 
 		if (res)
-			server_send_msg(server, id, CLRCODE_GRN "you're an operator now");
+			res = server_send_msg(server, id, CLRCODE_GRN "you're an operator now");
 	}
 	MutexUnlock(server->state_lock);
 	return res;

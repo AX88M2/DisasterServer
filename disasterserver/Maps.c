@@ -74,7 +74,6 @@ bool map_tcpmsg(PeerData* v, Packet* packet)
 {
 	return true;
 }
-
 bool map_left(PeerData* v)
 {
 	return true;

@@ -200,9 +200,6 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 
 bool rmz_left(PeerData* v)
 {
-	if(!v->server->game.started)
-		return true;
-
 	Player* plr = game_findplr(v->server, v->id);
 	if (!plr)
 		return true;
