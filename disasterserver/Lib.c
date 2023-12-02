@@ -1,13 +1,10 @@
-#include "io/Threads.h"
 #include <Lib.h>
+#include <io/Threads.h>
 #include <Log.h>
 #include <Server.h>
 #include <States.h>
 #include <DyList.h>
 #include <Config.h>
-#if defined(__unix) || defined(__unix__)
-#include <sys/socket.h>
-#endif
 
 TcpListener		tcp;
 DyList			servers;

@@ -400,11 +400,11 @@ bool server_timeout(Server* server, uint16_t id, double timeout)
 			continue;
 
 		if (peer->id == id)
-			res = timeout_set(peer->nickname.value, inet_ntoa(peer->addr.sin_addr), peer->udid.value, time(NULL) + (uint64_t)(60 * timeout));
+			res = timeout_set(peer->nickname.value, inet_ntoa(peer->addr.sin_addr), peer->udid.value, time(NULL) + (uint64_t)(round(timeout)));
 	}
 
 	if (res)
-		res = server_disconnect(server, id, DR_KICKEDBYHOST, NULL);
+		server_disconnect(server, id, DR_KICKEDBYHOST, NULL);
 
 	MutexUnlock(server->state_lock);
 	return res;
@@ -426,7 +426,7 @@ bool server_ban(Server* server, uint16_t id)
 	}
 
 	if (res)
-		res = server_disconnect(server, id, DR_BANNEDBYHOST, NULL);
+		server_disconnect(server, id, DR_BANNEDBYHOST, NULL);
 
 	MutexUnlock(server->state_lock);
 	return res;
@@ -452,7 +452,7 @@ bool server_op(Server* server, uint16_t id)
 		}
 
 		if (res)
-			res = server_send_msg(server, id, CLRCODE_GRN "you're an operator now");
+			server_send_msg(server, id, CLRCODE_GRN "you're an operator now");
 	}
 	MutexUnlock(server->state_lock);
 	return res;

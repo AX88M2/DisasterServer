@@ -1,6 +1,5 @@
 .vs/
 .idea/
 out/
-bin/
 build/
 /.cache/clangd/index
