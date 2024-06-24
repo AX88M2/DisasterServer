@@ -1,4 +1,5 @@
 .vs/
+bin/*
 .idea/
 out/
 build/
