@@ -1234,7 +1234,7 @@ bool game_player_tick(Server* server)
 		Player* player = (Player*)server->game.players.ptr[i];
 		if (!player)
 			continue;
-		
+
 		// subpussy revival time
 		if(player->flags & PLAYER_DEAD && !(player->flags & PLAYER_CANTREVIVE))
 		{
