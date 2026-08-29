@@ -12,18 +12,12 @@ bool exclone_init(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write16, (uint16_t)clone->pos.x);
 	PacketWrite(&pack, packet_write16, (uint16_t)clone->pos.y);
 	PacketWrite(&pack, packet_write8,  clone->dir);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
 
 bool exclone_uninit(Server* server, Entity* entity)
 {
-	Packet pack;
-	PacketCreate(&pack, SERVER_EXELLERCLONE_STATE);
-	PacketWrite(&pack, packet_write8, 1);
-	PacketWrite(&pack, packet_write16, entity->id);
-	server_broadcast(server, &pack);
-
 	return true;
 }

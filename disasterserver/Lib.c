@@ -1,14 +1,16 @@
-#include <Lib.h>
+#include <enet/enet.h>
+#include <io/Dir.h>
 #include <io/Threads.h>
+#include <Lib.h>
 #include <Log.h>
 #include <Server.h>
 #include <States.h>
 #include <DyList.h>
 #include <Config.h>
 
-TcpListener		tcp;
+ThreadVar		g_threadName;
 DyList			servers;
-uint8_t 		running;
+bool 			running = 0;
 
 bool allocate_server(uint16_t base_port, uint16_t n)
 {
@@ -16,7 +18,7 @@ bool allocate_server(uint16_t base_port, uint16_t n)
 		.state = ST_LOBBY,
 		.last_map = -1,
 		.id = n,
-		.tcp = &tcp,
+		.running = true,
 		.delta = 1,
 		.game = {
 			.exe = -1
@@ -33,143 +35,92 @@ bool allocate_server(uint16_t base_port, uint16_t n)
 	RAssert(server);
 	memcpy(server, &templ, sizeof(Server));
 
+	for (int i = 0; i < MAP_COUNT; i++)
+		server->map_pickrates[i] = 255;
+
 	// Init lobby
 	MutexCreate(server->state_lock);
 	RAssert(dylist_create(&server->peers, 7));
-	RAssert(udp_open(&server->udp, base_port + n));
+	
+	ENetAddress addr;
+	addr.host = ENET_HOST_ANY;
+	addr.port = base_port + n;
+	server->host = enet_host_create(&addr, 50, 2, 0, 0);
+
+	Info("Listening on port %d.", base_port + n);
+	RAssert(server->host != NULL);
 	RAssert(lobby_init(server));
-
-	Thread th;
-	ThreadSpawn(th, server_tick, server);
-
-	Thread th2;
-	ThreadSpawn(th2, server_udpworker, server);
-	ThreadPrioritse(th2);
-
 	RAssert(dylist_push(&servers, server));
+
 	return true;
-}
-
-Server* find_free(void)
-{
-	Server* server = NULL;
-	for (size_t i = 0; i < servers.capacity; i++)
-	{
-		Server* srv = (Server*)servers.ptr[i];
-		if (!srv)
-			continue;
-
-		if (srv->peers.noitems < 7)
-		{
-			server = srv;
-			break;
-		}
-	}
-	return server;
 }
 
 bool disaster_init(void)
 {
-	// We first initialize and then get rid of fd 0
-	// id 0 is taken by server so we cant allow using it
-	#ifdef WIN32
-		// Init WinSock2
-		WSADATA wsaData;
-		RAssert(WSAStartup(MAKEWORD(2, 2), &wsaData) == 0);
+	if (running)
+		return true;
 
-		FILE* fp = fopen("NUL", "r");
-		int _idontcare = _dup2(_fileno(fp), _fileno(stdin));
-		fclose(fp);
-	#elif defined(__unix) || defined(__unix__)
-		int fd = open("/dev/null", O_RDONLY);
-		dup2(fd, STDIN_FILENO);
-		close(fd);
-	#endif
+	RAssert(enet_initialize() == 0);
+
+	// Init global variables
+	ThreadVarCreate(g_threadName);
+	ThreadVarSet(g_threadName, "Main Thr");
+
+#ifdef SYS_ANDROID
+	log_hook(log_android);
+#endif
 
 	Info("--------------------------------");
-	Info("DisasterServer v" STRINGIFY(BUILD_VERSION));
-	Info("Build from " __DATE__ " " __TIME__);
-	Info("(c) 2023 Team Exe Empire");
+	Info(LOG_RED "Better" LOG_BLU "Server " LOG_RST "v" STRINGIFY(BUILD_VERSION));
+	Info("Build from " LOG_PUR __DATE__ " " LOG_GRN __TIME__);
+	Info("(c) 2024 Team Exe Empire");
 	Info("--------------------------------");
 	Info("");
 
 	RAssert(config_init());
-
-	if (!log_init())
-		Warn("Logging to file is disabled.");
+	RAssert(log_init());
 
 	RAssert(dylist_create(&servers, g_config.server_count));
-
 	for (int32_t i = 0; i < g_config.server_count; i++)
-		RAssert(allocate_server((uint16_t)g_config.udp_port, i));
-
-	RAssert(tcp_open(&tcp, (uint16_t)g_config.tcp_port));
-	RAssert(tcp_listen(&tcp));
+		RAssert(allocate_server((uint16_t)g_config.port, i));
+	
 	return true;
 }
 
 int disaster_run(void)
 {
-	running = 1;
-	Info("Entering main loop...");
+	if (running)
+		return 1;
 
-	Mutex servers_lock;
-	MutexCreate(servers_lock);
+	running = true;
+	Debug("Entering main loop...");
 
-	while (running)
+	for(int32_t i = 0; i < g_config.server_count; i++)
 	{
-		PeerData* data = (PeerData*)malloc(sizeof(PeerData));
-		RAssert(data);
-		memset(data, 0, sizeof(PeerData));
-
-		bool res = tcp_next(&tcp, &data->id, &data->addr);
-		Server* server = find_free();
-
-		if (!res)
-		{
-			Debug("!res probably shutdown?");
-			free(data);
+		Server* server = servers.ptr[i];
+		if(!server)
 			continue;
-		}
-
-		if (!server)
-		{
-			Warn("No free servers found.");
-			server_disconnect(server, data->id, DR_LOBBYFULL, NULL);
-			close(data->id);
-			free(data);
-			continue;
-		}
-
-		data->server = server;
 
 		Thread th;
-		ThreadSpawn(th, server_peerworker, data);
+		ThreadSpawn(th, server_worker, server);
+	}
+
+	// dont ask too many questions
+	while (running)
+	{
+		ThreadSleep(100);
 	}
 	
 	return 0;
 }
-
 
 void disaster_shutdown(void)
 {
 	if(!running)
 		return;
 
-	running = 0;
-
-	#ifdef WIN32
-		int how = SD_BOTH;
-	#else
-		int how = SHUT_RDWR;
-	#endif
-
-	shutdown(tcp.fd, how);
-}
-
-int disaster_servers(void)
-{
-	return servers.capacity;
+	running = false;
+	exit(0);
 }
 
 Server* disaster_get(int i)
@@ -178,4 +129,144 @@ Server* disaster_get(int i)
 		return NULL;
 
 	return (Server*)servers.ptr[i];
+}
+
+int disaster_count(void)
+{
+	return (int)servers.capacity;
+}
+
+bool disaster_server_lock(Server* server)
+{
+	RAssert(server);
+	MutexLock(server->state_lock);
+	return true;
+}
+
+bool disaster_server_unlock(Server* server)
+{
+	RAssert(server);
+	MutexUnlock(server->state_lock);
+	return true;
+}
+
+uint8_t disaster_server_state(Server* server)
+{
+	RAssert(server);
+	return (uint8_t)server->state;
+}
+
+bool disaster_server_ban(Server* server, uint16_t id)
+{
+	for (size_t i = 0; i < server->peers.capacity; i++)
+	{
+		PeerData* v = (PeerData*)server->peers.ptr[i];
+		if (!v)
+			continue;
+
+		if (v->id == id)
+		{
+			server_disconnect(server, v->peer, DR_BANNEDBYHOST, NULL);
+			return ban_add(v->nickname.value, v->udid.value, v->ip.value);
+		}
+	}
+
+	return false;
+}
+
+bool disaster_server_op(Server* server, uint16_t id)
+{
+	for (size_t i = 0; i < server->peers.capacity; i++)
+	{
+		PeerData* v = (PeerData*)server->peers.ptr[i];
+		if (!v)
+			continue;
+
+		if (v->id == id)
+		{
+			v->op = true;
+
+			server_send_msg(server, v->peer, CLRCODE_GRN "you're an operator now");
+			return op_add(v->nickname.value, v->ip.value);
+		}
+	}
+
+	return false;
+}
+
+bool disaster_server_timeout(Server* server, uint16_t id, double timeout)
+{
+	for (size_t i = 0; i < server->peers.capacity; i++)
+	{
+		PeerData* v = (PeerData*)server->peers.ptr[i];
+		if (!v)
+			continue;
+
+		if (v->id == id)
+		{
+			server_disconnect(server, v->peer, DR_KICKEDBYHOST, NULL);
+			return timeout_set(v->nickname.value, v->udid.value, v->ip.value, time(NULL) + (uint64_t)(round(timeout)));
+		}
+	}
+
+	return false;
+}
+
+bool disaster_server_peer(Server* server, int index, PeerInfo* info)
+{
+	info->character = -1;
+	if (index < 0 || index >= server->peers.capacity)
+		return false;
+	else
+	{
+		PeerData* v = (PeerData*)server->peers.ptr[index];
+		if (!v)
+			return false;
+		else
+		{
+			info->peer = v;
+			info->is_exe = (server->game.exe == v->id);
+			info->ip_addr = v->ip;
+
+			if (v->in_game && server->state >= ST_GAME)
+			{
+				if (info->is_exe)
+					info->character = v->exe_char;
+				else
+					info->character = v->surv_char;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool disaster_server_peer_disconnect(Server* server, uint16_t id, DisconnectReason reason, const char* text)
+{
+	return server_disconnect_id(server, (int)id, reason, text);
+}
+
+int disaster_server_peer_count(Server* server)
+{
+	return server_total(server);
+}
+
+int disaster_server_peer_ingame(Server* server)
+{
+	return server_ingame(server);
+}
+
+int8_t disaster_game_map(Server* server)
+{
+	return server->game.map;
+}
+
+double disaster_game_time(Server* server)
+{
+	return server->game.time;
+}
+
+uint16_t disaster_game_time_sec(Server* server)
+{
+	return server->game.time_sec;
 }

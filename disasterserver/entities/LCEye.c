@@ -45,7 +45,7 @@ bool lceye_update(Server* server, LCEye* eye)
 	PacketWrite(&pack, packet_write16, eye->use_id);
 	PacketWrite(&pack, packet_write8,  (uint8_t)eye->target);
 	PacketWrite(&pack, packet_write8,  eye->charge);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

@@ -9,7 +9,7 @@ typedef struct
 	ENTITY_BODY
 
 	uint8_t frame;
-	int32_t timer;
+	double timer;
 } SpikeController;
 #define MakeSpike() ((SpikeController) { MakeEntity("spikectrl", 0, 0) NULL, spike_tick, NULL, 0, 2 * TICKSPERSEC })
 

@@ -1,3 +1,4 @@
+#include "Server.h"
 #include <entities/DTStalactits.h>
 
 bool dtst_init(Server* server, Entity* entity)
@@ -10,7 +11,7 @@ bool dtst_init(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, titi->sid);
 	PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.x);
 	PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.y);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -18,50 +19,60 @@ bool dtst_init(Server* server, Entity* entity)
 bool dtst_tick(Server* server, Entity* entity)
 {
 	DTStalactits* titi = (DTStalactits*)entity;
-
 	if (titi->state)
 	{
-		titi->vel += 0.164f * server->delta;
-		titi->pos.y += titi->vel * server->delta;
+		titi->vel += 0.164f * (float)server->delta;
+		titi->pos.y += titi->vel * (float)server->delta;
 
 		Packet pack;
 		PacketCreate(&pack, SERVER_DTASS_STATE);
 		PacketWrite(&pack, packet_write8, titi->sid);
 		PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.x);
 		PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.y);
-		game_broadcast(server, &pack);
+		server_broadcast(server, &pack, false);
 	}
 	else
 	{
-		if (titi->timer > 0)
-			titi->timer -= server->delta;
-
-		if (titi->timer <= TICKSPERSEC && !titi->show)
+		if (!titi->show)
 		{
-			Packet pack;
-			PacketCreate(&pack, SERVER_DTASS_STATE);
-			PacketWrite(&pack, packet_write8, 0);
-			PacketWrite(&pack, packet_write8, titi->sid);
-			PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.x);
-			PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.y);
-			server_broadcast(server, &pack);
+			if (titi->timer > TICKSPERSEC)
+				titi->timer -= server->delta;
 
-			titi->show = 1;
+			if (titi->timer <= TICKSPERSEC)
+			{
+				Packet pack;
+				PacketCreate(&pack, SERVER_DTASS_STATE);
+				PacketWrite(&pack, packet_write8, 0);
+				PacketWrite(&pack, packet_write8, titi->sid);
+				PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.x);
+				PacketWrite(&pack, packet_write16, (uint16_t)titi->pos.y);
+				server_broadcast(server, &pack, true);
+
+				titi->show = true;
+			}
+		}
+		else
+		{
+			if (titi->timer > 0)
+				titi->timer -= server->delta;
 		}
 
 		if (titi->timer <= 0)
 		{
-			for (size_t i = 0; i < server->game.players.capacity; i++)
+			for (size_t i = 0; i < server->peers.capacity; i++)
 			{
-				Player* plr = (Player*)server->game.players.ptr[i];
-				if (!plr)
+				PeerData* data = (PeerData*)server->peers.ptr[i];
+				if (!data)
 					continue;
 
-				if (plr->flags & PLAYER_DEAD)
+				if(!data->in_game)
 					continue;
 
-				float dist = plr->pos.y - titi->pos.y;
-				if (dist > 0 && dist <= 336 && plr->pos.x >= titi->pos.x && plr->pos.x <= titi->pos.x + 80)
+				if (data->plr.flags & PLAYER_DEAD)
+					continue;
+
+				float dist = data->plr.pos.y - titi->pos.y;
+				if (dist > 0 && dist <= 336 && data->plr.pos.x >= titi->pos.x && data->plr.pos.x <= titi->pos.x + 80)
 				{
 					titi->vel = 0;
 
@@ -69,9 +80,9 @@ bool dtst_tick(Server* server, Entity* entity)
 					PacketCreate(&pack, SERVER_DTASS_STATE);
 					PacketWrite(&pack, packet_write8, 2);
 					PacketWrite(&pack, packet_write8, titi->sid);
-					server_broadcast(server, &pack);
+					server_broadcast(server, &pack, true);
 
-					titi->state = 1;
+					titi->state = true;
 					break;
 				}
 			}
@@ -83,9 +94,12 @@ bool dtst_tick(Server* server, Entity* entity)
 
 bool dtst_activate(Server* server, DTStalactits* tits)
 {
-	tits->show = 0;
-	tits->state = 0;
-	tits->timer = (rand() % 5 + 25.0) * TICKSPERSEC;
+	if(!tits->state)
+		return true;
+		
+	tits->show = false;
+	tits->state = false;
+	tits->timer = (25.0 + rand() % 5 ) * TICKSPERSEC;
 	tits->pos.y = tits->sy;
 	tits->vel = 0;
 
@@ -93,7 +107,7 @@ bool dtst_activate(Server* server, DTStalactits* tits)
 	PacketCreate(&pack, SERVER_DTASS_STATE);
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write8, tits->sid);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

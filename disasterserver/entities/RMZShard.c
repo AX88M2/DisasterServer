@@ -8,9 +8,9 @@ bool shard_init(Server* server, Entity* entity)
 	PacketCreate(&pack, SERVER_RMZSHARD_STATE);
 	PacketWrite(&pack, packet_write8, shard->spawned);
 	PacketWrite(&pack, packet_write16, shard->id);
-	PacketWrite(&pack, packet_write16, shard->pos.x);
-	PacketWrite(&pack, packet_write16, shard->pos.y);
-	server_broadcast(server, &pack);
+	PacketWrite(&pack, packet_write16, (uint16_t)shard->pos.x);
+	PacketWrite(&pack, packet_write16, (uint16_t)shard->pos.y);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

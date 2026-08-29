@@ -14,7 +14,7 @@ bool ycrctrl_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_YCRSMOKE_READY);
 				PacketWrite(&pack, packet_write8, ctrl->smoke_id);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				ctrl->state = YCC_SOME;
 			}
@@ -38,7 +38,7 @@ bool ycrctrl_tick(Server* server, Entity* entity)
 				PacketCreate(&pack, SERVER_YCRSMOKE_STATE);
 				PacketWrite(&pack, packet_write8, ctrl->activated);
 				PacketWrite(&pack, packet_write8, ctrl->smoke_id);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 			}
 			break;
 		}

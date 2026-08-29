@@ -6,7 +6,6 @@ typedef struct
 {
 	ENTITY_BODY
 
-
 	uint8_t vid;
 	uint8_t type;
 } Vase;

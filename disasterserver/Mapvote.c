@@ -42,48 +42,47 @@ bool mapvote_state_handle(PeerData* v, Packet* packet)
 	bool res = true;
 
 	switch (type)
-	{
-		default:
-			RAssert(server_msg_handle(v->server, type, v, packet));
-			break;
-			
+	{			
 		case CLIENT_VOTE_REQUEST:
 		{
+			if(!v->in_game)
+				break;
+
 			PacketRead(map, packet, packet_read8, uint8_t);
 			AssertOrDisconnect(v->server, !v->voted);
 			AssertOrDisconnect(v->server, map >= 0);
 			AssertOrDisconnect(v->server, map < 3);
 
 			v->server->lobby.votes[map]++;
-			v->voted = 1;
+			v->voted = true;
 
 			PacketCreate(&pack, SERVER_VOTE_SET);
 			for (int i = 0; i < 3; i++)
 				PacketWrite(&pack, packet_write8, v->server->lobby.votes[i]);
 
-			Debug("%s (id %d) voted for [%s]!", v->nickname.value, v->id, g_mapList[v->server->lobby.maps[map]].name);
-			server_broadcast(v->server, &pack);
+			Info("%s " LOG_RST "(id %d) voted for [" LOG_BLU "%s" LOG_RST "]!", v->nickname.value, v->id, g_mapList[v->server->lobby.maps[map]].name);
+			server_broadcast(v->server, &pack, true);
 			mapvote_check_state(v->server);
 			break;
 		}
 
 		case CLIENT_CHAT_MESSAGE:
 		{
-			if (v->in_game)
-				break;
-
 			PacketRead(pid, packet, packet_read16, uint16_t);
 			PacketRead(msg, packet, packet_readstr, String);
 			AssertOrDisconnect(v->server, string_length(&msg) <= 40);
 
 			v->timeout = 0;
-
-			Info("[%s] (id %d): %s", v->nickname.value, v->id, msg.value);
+			Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
 			if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg))
-				server_broadcast_ex(v->server, packet, v->id);
+				server_broadcast_ex(v->server, packet, true, v->id);
 
 			break;
 		}
+
+		default:
+			RAssert(server_msg_handle(v->server, type, v, packet));
+			break;
 	}
 
 	return res;
@@ -123,16 +122,40 @@ bool mapvote_state_tick(Server* server)
 			// Find winner
 			int8_t won = indeces[rand() % count];
 			server->last_map = won;
-			Info("Map is [%s]", g_mapList[won].name);
+			
+			// Decrease pickrate
+			if ((server->map_pickrates[won] -= 255) < 0)
+				server->map_pickrates[won] = 0;
 
-			if (!charselect_init(won, server))
-				return lobby_init(server);
+			// Decrease pickrate for other maps
+			for (int8_t i = 0; i < 3; i++)
+			{
+				if ((server->map_pickrates[server->lobby.maps[i]] -= 25) < 0)
+					server->map_pickrates[server->lobby.maps[i]] = 0;
+			}
+
+			Debug("Pickrates:");
+			// Increase other map's pickrate
+			for (int8_t i = 0; i < MAP_COUNT; i++)
+			{
+				Debug("		%d: %d", i, server->map_pickrates[i]);
+				if (i == won)
+					continue;
+
+				server->map_pickrates[i] += 25;
+				if (server->map_pickrates[i] >= 255)
+					server->map_pickrates[i] = 255;
+			}
+
+			Info(LOG_YLW "Map is [" LOG_BLU "%s" LOG_RST "]", g_mapList[won].name);
+
+			return charselect_init(won, server) || lobby_init(server);
 		}
 
 		Packet pack;
 		PacketCreate(&pack, SERVER_VOTE_TIME_SYNC);
 		PacketWrite(&pack, packet_write8, server->lobby.countdown_sec);
-		server_broadcast(server, &pack);
+		server_broadcast(server, &pack, true);
 	}
 
 	server->lobby.countdown -= server->delta;
@@ -148,44 +171,78 @@ bool mapvote_init(Server* server)
 	// randomize
 	time_t seed = time(NULL);
 	Debug("Mapvote seed: %d", seed);
-	srand((uint32_t)seed);
+	srand((unsigned int)seed);
 
 	RAssert(server);
 	server->state = ST_MAPVOTE;
 	server->lobby.countdown_sec = 30;
 	server->lobby.countdown = TICKSPERSEC;
-	
-	int map;
-	for (int i = 0; i < 3; i++)
+	memset(server->lobby.votes, 0, sizeof(server->lobby.votes));
+
+	MutexLock(g_config.map_list_lock);
 	{
-	gen:
-		map = rand() % MAP_COUNT;
+		// first we check if map count is less than 3
+		int8_t allowed[MAP_COUNT] = { 0 };
+		int8_t allowed_count = 0;
 
-		if (map == server->last_map)
-			goto gen;
-
-		for (int j = 0; j < i; j++)
+		for (int8_t i = 0; i < MAP_COUNT; i++)
 		{
-			if (server->lobby.maps[j] == map)
-				goto gen;
+			if (g_config.map_list[i])
+				allowed[allowed_count++] = i;
 		}
 
-		server->lobby.maps[i] = map;
+		// skip right away if we only have 3 maps
+		if (allowed_count <= 3)
+		{
+			for (int8_t i = 0; i < allowed_count; i++)
+			{
+				for(int j = i; j < 3; j++)
+					server->lobby.maps[j] = allowed[i];
+			}
+			goto skip_rand;
+		}
+
+		int8_t map;
+		for (int i = 0; i < 3; i++)
+		{
+		gen:
+			map = allowed[rand() % allowed_count];
+
+			if (map == server->last_map)
+				goto gen;
+
+			int num = rand() % 255;
+			if (num >= server->map_pickrates[map])
+			{
+				Debug("%d vs %d lost", num, server->map_pickrates[map]);
+				goto gen;
+			}
+
+			for (int j = 0; j < i; j++)
+			{
+				if (server->lobby.maps[j] == map)
+					goto gen;
+			}
+
+			server->lobby.maps[i] = map;
+		}
+
 	}
-	memset(server->lobby.votes, 0, 3 * sizeof(uint8_t));
+skip_rand:
+	MutexUnlock(g_config.map_list_lock);
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_VOTE_MAPS);
 	for (int i = 0; i < 3; i++)
 		PacketWrite(&pack, packet_write8, server->lobby.maps[i]);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	PacketCreate(&pack, SERVER_VOTE_TIME_SYNC);
 	PacketWrite(&pack, packet_write8, server->lobby.countdown_sec);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
-	Info("Server is now in ST_MAPVOTE");
-	Info("Vote maps are [%s] [%s] [%s]", g_mapList[server->lobby.maps[0]].name, g_mapList[server->lobby.maps[1]].name, g_mapList[server->lobby.maps[2]].name);
+	Info(LOG_YLW "Server is now in " LOG_PUR "Map Vote");
+	Info("Maps: " LOG_RED "[%s] " LOG_BLU "[%s] " LOG_YLW "[%s]", g_mapList[server->lobby.maps[0]].name, g_mapList[server->lobby.maps[1]].name, g_mapList[server->lobby.maps[2]].name);
 	return true;
 }
 
@@ -196,11 +253,7 @@ bool mapvote_state_join(PeerData* v)
 
 bool mapvote_state_left(PeerData* v)
 {
-	uint8_t should = 0;
 	if(server_ingame(v->server) <= 1)
-		should = 1;
-	
-	if (should)
 		return lobby_init(v->server);
 
 	RAssert(mapvote_check_state(v->server));

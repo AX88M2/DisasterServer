@@ -8,7 +8,7 @@ bool npctrl_tick(Server* server, Entity* entity)
 	{
 		ctrl->timer = 5 * TICKSPERSEC;
 		ctrl->state = NPC_PREPARE;
-		ctrl->balls = 1;
+		ctrl->balls = true;
 	}
 
 	switch (ctrl->state)
@@ -24,7 +24,7 @@ bool npctrl_tick(Server* server, Entity* entity)
 				PacketWrite(&pack, packet_write8, 0);
 				PacketWrite(&pack, packet_write8, 0);
 				PacketWrite(&pack, packet_write8, 0);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				ctrl->state = NPC_PREPARE;
 				ctrl->timer = 0;
@@ -44,7 +44,7 @@ bool npctrl_tick(Server* server, Entity* entity)
 				PacketWrite(&pack, packet_write8, 1);
 				PacketWrite(&pack, packet_write8, ctrl->stage % 4);
 				PacketWrite(&pack, packet_write8, (uint8_t)fmax(ctrl->stage - 1, 0) % 4);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				ctrl->state = NPC_NONE;
 				ctrl->timer = 0;

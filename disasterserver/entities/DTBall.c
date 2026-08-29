@@ -1,3 +1,4 @@
+#include "Server.h"
 #include <entities/DTBall.h>
 
 bool dtball_tick(Server* server, Entity* entity)
@@ -22,7 +23,7 @@ bool dtball_tick(Server* server, Entity* entity)
 	Packet pack;
 	PacketCreate(&pack, SERVER_DTBALL_STATE);
 	PacketWrite(&pack, packet_writefloat, (float)ball->state);
-	game_broadcast(server, &pack);
+	server_broadcast(server, &pack, false);
 
 	return true;
 }

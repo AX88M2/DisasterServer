@@ -10,18 +10,18 @@ bool thunder_tick(Server* server, Entity* entity)
 		Packet pack;
 		PacketCreate(&pack, SERVER_GHZTHUNDER_STATE);
 		PacketWrite(&pack, packet_write8, 0);
-		server_broadcast(server, &pack);
-		th->flag = 1;
+		server_broadcast(server, &pack, true);
+		th->flag = true;
 	}
 	else if (th->timer <= 0)
 	{
 		Packet pack;
 		PacketCreate(&pack, SERVER_GHZTHUNDER_STATE);
 		PacketWrite(&pack, packet_write8, 1);
-		server_broadcast(server, &pack);
+		server_broadcast(server, &pack, true);
 
 		th->timer = (15 + (rand() % 5)) * TICKSPERSEC;
-		th->flag = 0;
+		th->flag = false;
 		return true;
 	}
 

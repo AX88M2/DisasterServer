@@ -1,11 +1,11 @@
 #ifndef LOBBY_H
 #define LOBBY_H
-#include "Server.h"
-#include "Log.h"
-#include "Maps.h"
-#include "Player.h"
+#include <Server.h>
+#include <Log.h>
+#include <Maps.h>
+#include <Player.h>
 
-#define AssertOrDisconnect(server, x) if(!(x)) { server_disconnect(server, v->id, DR_OTHER, "AssertOrDisconnect(" #x ") failed!"); RAssert(x); }
+#define AssertOrDisconnect(server, x) if(!(x)) { server_disconnect(server, v->peer, DR_OTHER, "AssertOrDisconnect(" #x ") failed!"); return false; }
 #define ENTITY_BODY \
 char tag[16];\
 uint16_t id;\
@@ -34,6 +34,7 @@ typedef struct Entity
 #define CMD_NO 47727
 #define CMD_N 1536
 #define CMD_INFO 45719004
+#define CMD_LOBBY 1420085352
 
 bool lobby_init				(Server* server);
 bool lobby_state_join		(PeerData* v);
@@ -54,28 +55,21 @@ bool charselect_state_left		(PeerData* v);
 bool charselect_state_handle	(PeerData* v, Packet * packet);
 bool charselect_state_tick		(Server* server);
 
+bool 	game_end				(Server* server, Ending ending, bool achiv);
 bool	game_init				(int exe, int8_t map, Server* server);
-bool	game_uninit				(Server* server);
+bool	game_uninit				(Server* server, bool show_results);
 bool	game_spawn				(Server* server, Entity* entity, size_t size, Entity** out);
 bool	game_despawn			(Server* server, Entity** out, uint16_t id);
 int		game_find				(Server* server, Entity** out, char* tag, size_t count);
-
-Player* game_findplr			(Server* server, uint16_t id);
 
 bool	game_bigring			(Server* server, BigRingState state);
 bool	game_state_join			(PeerData* v);
 bool	game_state_left			(PeerData* v);
 bool	game_state_handletcp	(PeerData* v, Packet* packet);
-bool	game_state_handleudp	(Server* server, IpAddr* addr, Packet* packet);
 bool	game_state_tick			(Server* server);
 
-/* UDP broadcast */
-void	game_broadcast			(Server* server, Packet* packet);
-void	game_broadcast_ex		(Server* server, Packet* packet, IpAddr* addr);
-
-/* Should be used outside the server */
-SERVER_API int8_t	game_map(Server* server);
-SERVER_API double	game_time(Server* server);
-SERVER_API uint16_t game_timesec(Server* server);
+bool	results_init			(Server* server);
+bool	results_state_tick		(Server* server);
+bool	results_state_handle	(PeerData* v, Packet* packet);
 
 #endif

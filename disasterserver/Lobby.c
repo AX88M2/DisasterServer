@@ -1,11 +1,11 @@
-#include "Log.h"
-#include "Server.h"
+#include <Log.h>
+#include <Server.h>
 #include <States.h>
 #include <Config.h>
 #include <Colors.h>
 #include <CMath.h>
+#include <stdbool.h>
 #include <time.h>
-#include <ctype.h>
 
 #define NO_COUNTDOWN (5 + 1)
 #define COUNTDOWN (5)
@@ -18,7 +18,7 @@ bool lobby_send_countdown(Server* server)
 	PacketWrite(&pack, packet_write8, server->lobby.countdown_sec < NO_COUNTDOWN);
 	PacketWrite(&pack, packet_write8, server->lobby.countdown_sec);
 	
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 	return true;
 }
 
@@ -34,8 +34,8 @@ void lobby_check_vote(Server* server)
 				snprintf(buffer, 256, "vote kick " CLRCODE_GRN "succeeded~ (" CLRCODE_GRN "%d" " ~from " CLRCODE_RED "%d~)", server->lobby.vote.votecnt, server->lobby.vote.votetotal);
 				server_broadcast_msg(server, buffer);
 				
-				timeout_set(server->lobby.kick_target.nickname.value, inet_ntoa(server->lobby.kick_target.addr.sin_addr), server->lobby.kick_target.udid.value, time(NULL) + 60);
-				server_disconnect(server, server->lobby.kick_target.id, DR_KICKEDBYHOST, NULL);
+				timeout_set(server->lobby.kick_target.nickname.value, server->lobby.kick_target.udid.value, server->lobby.kick_target.ip.value, time(NULL) + 60);
+				server_disconnect_id(server, server->lobby.kick_target.id, DR_KICKEDBYHOST, NULL);
 				break;
 			}
 
@@ -81,7 +81,6 @@ bool lobby_check_countdown(Server* server)
 		return false;
 
 	uint8_t count = 0;
-	uint8_t should = 0;
 	for (size_t i = 0; i < server->peers.capacity; i++)
 	{
 		PeerData* peer = (PeerData*)server->peers.ptr[i];
@@ -96,31 +95,26 @@ bool lobby_check_countdown(Server* server)
 	{
 		server->lobby.countdown = TICKSPERSEC;
 		server->lobby.countdown_sec = COUNTDOWN;
-		should = 1;
+		RAssert(lobby_send_countdown(server));
 	}
 	else if (server->lobby.countdown_sec != NO_COUNTDOWN)
 	{
 		server->lobby.countdown = TICKSPERSEC;
 		server->lobby.countdown_sec = NO_COUNTDOWN;
-		should = 1;
-	}
-
-	if(should)
 		RAssert(lobby_send_countdown(server));
+	}
 
 	return true;
 }
 
 bool lobby_state_handle(PeerData* v, Packet* packet)
 {
-	if (!v->in_game)
-		return true;
-
 	// sub-state machine
 	switch (v->server->state)
 	{
 	case ST_LOBBY:
 	case ST_GAME:
+	case ST_RESULTS:
 		break;
 	case ST_MAPVOTE:
 		return mapvote_state_handle(v, packet);
@@ -158,7 +152,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 				packet_write8(&pack, peer->lobby_icon);
 				packet_write8(&pack, peer->pet);
 
-				if (!packet_sendtcp(v->server, v->id, &pack))
+				if (!packet_send(v->peer, &pack, true))
 				{
 					res = false;
 					break;
@@ -166,23 +160,23 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			}
 
 			PacketCreate(&pack, SERVER_LOBBY_CORRECT);
-			RAssert(packet_sendtcp(v->server, v->id, &pack));
+			RAssert(packet_send(v->peer, &pack, true));
 
 			char msg[100];
 			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server_count);
 
-			server_send_msg(v->server, v->id, "-----------------------");
-			server_send_msg(v->server, v->id, CLRCODE_RED "better/server~ v" STRINGIFY(BUILD_VERSION));
-			server_send_msg(v->server, v->id, "build from " CLRCODE_PUR  __DATE__ " " CLRCODE_GRN  __TIME__ CLRCODE_RST);
-			server_send_msg(v->server, v->id, msg);
-			server_send_msg(v->server, v->id, "-----------------------");
-			server_send_msg(v->server, v->id, CLRCODE_GRA "type .help for command list~");
+			server_send_msg(v->server, v->peer, "-----------------------");
+			server_send_msg(v->server, v->peer, CLRCODE_RED "better/server~ v" STRINGIFY(BUILD_VERSION));
+			server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR  __DATE__ " " CLRCODE_GRN  __TIME__ CLRCODE_RST);
+			server_send_msg(v->server, v->peer, msg);
+			server_send_msg(v->server, v->peer, "-----------------------");
+			server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list~");
+			server_send_msg(v->server, v->peer, g_config.motd);
 
-			server_send_msg(v->server, v->id, "hi its dev, just a reminder");
-			server_send_msg(v->server, v->id, "this version of the server is still \\unstable~");
-
+			if (v->mod_tool)
+				server_send_msg(v->server, v->peer, CLRCODE_RED "your mod is disallowed on this server" CLRCODE_RST);
 			if (v->op)
-				server_send_msg(v->server, v->id, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
+				server_send_msg(v->server, v->peer, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
 			break;
 		}
 
@@ -190,8 +184,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 		{
 			PacketRead(pid, packet, packet_read16, uint16_t);
 			PacketRead(msg, packet, packet_readstr, String);
-			AssertOrDisconnect(v->server, string_length(&msg) <= 40);
-
+			AssertOrDisconnect(v->server, string_length(&msg) <= 80);
 			v->timeout = 0;
 
 			// cheats
@@ -204,21 +197,22 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					Packet pack;
 					PacketCreate(&pack, SERVER_LOBBY_EXE_CHANCE);
 					PacketWrite(&pack, packet_write8, v->exe_chance);
-					RAssert(packet_sendtcp(v->server, v->id, &pack));
+					RAssert(packet_send(v->peer, &pack, true));
 				}
 
-				RAssert(server_send_msg(v->server, v->id, CLRCODE_GRA "you were sent to " CLRCODE_RED "brazil" CLRCODE_RST));
+				RAssert(server_send_msg(v->server, v->peer, CLRCODE_GRA "you were sent to " CLRCODE_RED "brazil" CLRCODE_RST));
 				return true;
 			}
 
-			uint8_t ignore = 1;
+			bool ignore = true;
 			unsigned long hash = server_cmd_parse(&msg);
+
 			switch (hash)
 			{
 				default:
 				{
 					if(!server_cmd_handle(v->server, hash, v, &msg))
-						ignore = 0;
+						ignore = false;
 					break;
 				}
 
@@ -227,25 +221,27 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 				{
 					if (!v->op)
 					{
-						RAssert(server_send_msg(v->server, v->id, CLRCODE_RED "you aren't an operator"));
+						RAssert(server_send_msg(v->server, v->peer, CLRCODE_RED "you aren't an operator"));
 						break;
 					}
 
 					int ind;
 					if (sscanf(msg.value, ".map %d", &ind) <= 0)
 					{
-						RAssert(server_send_msg(v->server, v->id, CLRCODE_RED "example:~ .map 0"));
+						RAssert(server_send_msg(v->server, v->peer, CLRCODE_RED "example:~ .map 1"));
 						break;
 					}
 					
-					if (ind < 0 || ind >= 19)
+					ind--;
+					if (ind < 0 || ind >= MAP_COUNT+1)
 					{
-						RAssert(server_send_msg(v->server, v->id, CLRCODE_RED "map should be between 0 and 18"));
+						char msg[128];
+						snprintf(msg, 128, CLRCODE_RED "map should be between 1 and %d", MAP_COUNT + 1);
+						RAssert(server_send_msg(v->server, v->peer, msg));
 						break;
 					}
 
-					RAssert(charselect_init(ind, v->server));
-					break;
+					return charselect_init(ind, v->server) || lobby_init(v->server);
 				}
 
 				/* YES on votes */
@@ -257,13 +253,13 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 
 					if (!v->can_vote)
 					{
-						server_send_msg(v->server, v->id, CLRCODE_RED "you can't participate in this vote.");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "you can't participate in this vote.");
 						break;
 					}
 
 					if (v->server->lobby.vote.type == VOTE_KICK && v->server->lobby.kick_target.id == v->id)
 					{
-						server_send_msg(v->server, v->id, CLRCODE_RED "why are you kicking yourself ???");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "why are you kicking yourself ???");
 						break;
 					}
 
@@ -271,15 +267,15 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						case 1:
 						{
-							char buffer[256];
-							snprintf(buffer, 256, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
+							char buffer[512];
+							snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
 							server_broadcast_msg(v->server, buffer);
 							break;
 						}
 
 						case 0:
 						{
-							server_send_msg(v->server, v->id, CLRCODE_RED "you have already voted.");
+							server_send_msg(v->server, v->peer, CLRCODE_RED "you have already voted.");
 							break;
 						}
 
@@ -299,7 +295,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						if (!v->can_vote)
 						{
-							server_send_msg(v->server, v->id, CLRCODE_RED "you can't participate in this vote.");
+							server_send_msg(v->server, v->peer, CLRCODE_RED "you can't participate in this vote.");
 							break;
 						}
 
@@ -309,15 +305,15 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 							{
 								case VOTE_SUCCESS:
 								{
-									char buffer[256];
-									snprintf(buffer, 256, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
+									char buffer[512];
+									snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
 									server_broadcast_msg(v->server, buffer);
 									break;
 								}
 
 								case VOTE_ALREADYVOTED:
 								{
-									server_send_msg(v->server, v->id, CLRCODE_RED "you have already voted.");
+									server_send_msg(v->server, v->peer, CLRCODE_RED "you have already voted.");
 									break;
 								}
 
@@ -329,7 +325,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 							}
 						}
 						else
-							server_send_msg(v->server, v->id, CLRCODE_RED "another vote is already in progress.");
+							server_send_msg(v->server, v->peer, CLRCODE_RED "another vote is already in progress.");
 
 						break;
 					}
@@ -338,13 +334,13 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						char buffer[128];
 						snprintf(buffer, 128, CLRCODE_RED "you cannot start another vote for %d s", (int)(v->vote_cooldown / TICKSPERSEC));
-						server_send_msg(v->server, v->id, buffer);
+						server_send_msg(v->server, v->peer, buffer);
 						break;
 					}
 
 					if (!vote_init(v->server, &v->server->lobby.vote, VOTE_PRACTICE, 0))
 					{
-						server_send_msg(v->server, v->id, CLRCODE_RED "not enough participants.");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "not enough participants.");
 						break;
 					}
 
@@ -358,7 +354,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					server_broadcast_msg(v->server, "-----------------------");
 
 					vote_add(&v->server->lobby.vote, v->id);
-					v->vote_cooldown = 10 * TICKSPERSEC;
+					v->vote_cooldown = 30 * TICKSPERSEC;
 					break;
 				}
 
@@ -366,7 +362,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 				{
 					if (v->server->lobby.vote.ongoing)
 					{
-						server_send_msg(v->server, v->id, CLRCODE_RED "another vote is already in progress.");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "another vote is already in progress.");
 						break;
 					}
 
@@ -374,7 +370,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						char buffer[128];
 						snprintf(buffer, 128, CLRCODE_RED "you cannot start another vote for %ds", (int)(v->vote_cooldown / TICKSPERSEC));
-						server_send_msg(v->server, v->id, buffer);
+						server_send_msg(v->server, v->peer, buffer);
 						break;
 					}
 
@@ -383,18 +379,17 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					if (ingame > 2)
 					{
 						PacketCreate(&pack, SERVER_LOBBY_CHOOSEVOTEKICK);
-						RAssert(packet_sendtcp(v->server, v->id, &pack));
+						RAssert(packet_send(v->peer, &pack, true));
 					}
 					else
-						server_send_msg(v->server, v->id, CLRCODE_RED "not enough participants.");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "not enough participants.");
 					break;
 				}
 			}
-			
-			Info("[%s] (id %d): %s", v->nickname.value, v->id, msg.value);
-			
+
+			Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
 			if(!ignore)
-				server_broadcast_ex(v->server, packet, v->id);
+				server_broadcast_ex(v->server, packet, true, v->id);
 			
 			break;
 		}
@@ -407,7 +402,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			PacketCreate(&pack, SERVER_LOBBY_READY_STATE);
 			PacketWrite(&pack, packet_write16, v->id);
 			PacketWrite(&pack, packet_write8, state);
-			server_broadcast(v->server, &pack);
+			server_broadcast(v->server, &pack, true);
 
 			RAssert(lobby_check_countdown(v->server));
 			break;
@@ -421,7 +416,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			{
 				if (!v->can_vote)
 				{
-					server_send_msg(v->server, v->id, CLRCODE_RED "you can't participate in this vote.");
+					server_send_msg(v->server, v->peer, CLRCODE_RED "you can't participate in this vote.");
 					break;
 				}
 
@@ -431,15 +426,15 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						case VOTE_SUCCESS:
 						{
-							char buffer[256];
-							snprintf(buffer, 256, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
+							char buffer[512];
+							snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
 							server_broadcast_msg(v->server, buffer);
 							break;
 						}
 
 						case VOTE_ALREADYVOTED:
 						{
-							server_send_msg(v->server, v->id, CLRCODE_RED "you have already voted.");
+							server_send_msg(v->server, v->peer, CLRCODE_RED "you have already voted.");
 							break;
 						}
 
@@ -451,14 +446,13 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					}
 				}
 				else
-					server_send_msg(v->server, v->id, CLRCODE_RED "another vote is already in progress.");
+					server_send_msg(v->server, v->peer, CLRCODE_RED "another vote is already in progress.");
 
 				break;
 			}
 			else
 			{
-				uint8_t found = 0;
-
+				bool found = false;
 				for (size_t i = 0; i < v->server->peers.capacity; i++)
 				{
 					PeerData* peer = (PeerData*)v->server->peers.ptr[i];
@@ -467,8 +461,16 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 
 					if (peer->id == pid)
 					{
+						if (peer->op)
+						{
+							char buffer[128];
+							snprintf(buffer, 128, CLRCODE_RED "you're permissionless");
+							server_send_msg(v->server, v->peer, buffer);
+							return true;
+						}
+
 						memcpy(&v->server->lobby.kick_target, peer, sizeof(PeerData));
-						found = 1;
+						found = true;
 						break;
 					}
 				}
@@ -479,18 +481,18 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					{
 						char buffer[128];
 						snprintf(buffer, 128, CLRCODE_RED "you cannot start another vote for %ds", (int)(v->vote_cooldown / TICKSPERSEC));
-						server_send_msg(v->server, v->id, buffer);
+						server_send_msg(v->server, v->peer, buffer);
 						break;
 					}
 
 					if(!vote_init(v->server, &v->server->lobby.vote, VOTE_KICK, pid))
 					{
-						server_send_msg(v->server, v->id, CLRCODE_RED "not enough participants.");
+						server_send_msg(v->server, v->peer, CLRCODE_RED "not enough participants.");
 						break;
 					}
 
-					char buffer[356];
-					snprintf(buffer, 356, "%s~ " CLRCODE_RED "started kick vote for " CLRCODE_RST "%s" CLRCODE_RST, v->nickname.value, v->server->lobby.kick_target.nickname.value);
+					char buffer[555];
+					snprintf(buffer, 555, "%s~ " CLRCODE_RED "started kick vote for " CLRCODE_RST "%s" CLRCODE_RST, v->nickname.value, v->server->lobby.kick_target.nickname.value);
 
 					server_broadcast_msg(v->server, "-----------------------");
 					server_broadcast_msg(v->server, buffer);
@@ -499,7 +501,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					server_broadcast_msg(v->server, "-----------------------");
 
 					vote_add(&v->server->lobby.vote, v->id);
-					v->vote_cooldown = 10 * TICKSPERSEC;
+					v->vote_cooldown = 30 * TICKSPERSEC;
 				}
 				else
 					server_broadcast_msg(v->server, CLRCODE_RED "specified player not found.");
@@ -539,7 +541,7 @@ bool lobby_state_tick(Server* server)
 						Debug("tick for %s: %f", peer->nickname.value, peer->timeout/60.0f);
 
 					if (peer->timeout >= 25 * TICKSPERSEC)
-						server_disconnect(server, peer->id, DR_AFKTIMEOUT, NULL);
+						server_disconnect(server, peer->peer, DR_AFKTIMEOUT, NULL);
 				}
 				else
 					peer->timeout = 0;
@@ -553,6 +555,7 @@ bool lobby_state_tick(Server* server)
 			return charselect_state_tick(server);
 
 		case ST_GAME:
+		case ST_RESULTS:
 			break;
 	}
 
@@ -561,10 +564,7 @@ bool lobby_state_tick(Server* server)
 	{
 		server->lobby.prac_countdown -= server->delta;
 		if (server->lobby.prac_countdown <= 0)
-		{
-			if (!charselect_init(18, server))
-				RAssert(lobby_init(server));
-		}
+			return charselect_init(20, server) || lobby_init(server);
 	}
 
 	// If vote is going on, call tick function
@@ -579,8 +579,8 @@ bool lobby_state_tick(Server* server)
 			server->lobby.countdown += TICKSPERSEC;
 
 			if (--server->lobby.countdown_sec == 0)
-				return mapvote_init(server);
-
+				return mapvote_init(server) || lobby_init(server);
+			
 			RAssert(lobby_send_countdown(server));
 		}
 
@@ -592,48 +592,45 @@ bool lobby_state_tick(Server* server)
 
 bool lobby_init(Server* server)
 {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 
 	Debug("Attepting to enter ST_LOBBY...");
 	RAssert(server);
 
 	for (size_t i = 0; i < server->peers.capacity; i++)
 	{
-		PeerData* peer = (PeerData*)server->peers.ptr[i];
-		if (!peer)
+		PeerData* v = (PeerData*)server->peers.ptr[i];
+		if (!v)
 			continue;
 		
-		peer->ready = 0;
-		peer->voted = 0;
-		peer->timeout = 0;
+		v->ready = false;
+		v->voted = false;
+		v->timeout = false;
 
-		if (!peer->in_game)
+		if (!v->in_game)
 		{
-			peer->in_game = 1;
+			v->in_game = true;
 
 			Packet pack;
 			PacketCreate(&pack, SERVER_IDENTITY_RESPONSE);
 			PacketWrite(&pack, packet_write8, 1);
-			PacketWrite(&pack, packet_write16, ntohs(server->udp.addr.sin_port));
-			PacketWrite(&pack, packet_write16, peer->id);
+			PacketWrite(&pack, packet_write16, v->id);
 			
-			if (!packet_sendtcp(server, peer->id, &pack))
+			if (!packet_send(v->peer, &pack, true))
 			{
-				server_disconnect(server, peer->id, DR_TCPTIMEOUT, NULL);
+				server_disconnect_id(server, v->id, DR_SERVERTIMEOUT, NULL);
 				continue;
 			}
 		}
 		else
 		{
-			if (peer->id != server->game.exe)
-				peer->exe_chance += 2 + rand() % 5;
-			else
-				peer->exe_chance = 1 + rand() % 1;
+			if (v->id != server->game.exe)
+				v->exe_chance += 2 + rand() % 5;
 
 			Packet pack;
 			PacketCreate(&pack, SERVER_LOBBY_EXE_CHANCE);
-			PacketWrite(&pack, packet_write8, peer->exe_chance);
-			packet_sendtcp(server, peer->id, &pack);
+			PacketWrite(&pack, packet_write8, v->exe_chance);
+			packet_send(v->peer, &pack, true);
 		}
 	}
 
@@ -645,9 +642,9 @@ bool lobby_init(Server* server)
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_GAME_BACK_TO_LOBBY);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
-	Info("Server is now in ST_LOBBY");
+	Info(LOG_YLW "Server is now in " LOG_PUR "Lobby");
 	return true;
 }
 
@@ -659,6 +656,11 @@ bool lobby_state_join(PeerData* v)
 	v->timeout = 0;
 	switch (v->server->state)
 	{
+	case ST_LOBBY:
+		break;
+	case ST_GAME:
+	case ST_RESULTS:
+		break;
 	case ST_MAPVOTE:
 		return mapvote_state_join(v);
 	case ST_CHARSELECT:
@@ -676,6 +678,10 @@ bool lobby_state_left(PeerData* v)
 
 	switch (v->server->state)
 	{
+	case ST_LOBBY:
+	case ST_GAME:
+	case ST_RESULTS:
+		break;
 	case ST_MAPVOTE:
 		return mapvote_state_left(v);
 	case ST_CHARSELECT:

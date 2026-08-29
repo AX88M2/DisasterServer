@@ -1,5 +1,5 @@
+#include "Server.h"
 #include <entities/TailsDoll.h>
-#include <CMath.h>
 #include <CMath.h>
 
 Vector2 spots[11] =
@@ -24,17 +24,19 @@ void tdoll_find_spot(Server* server, TailsDoll* doll)
 
 	for (int i = 0; i < 11; i++)
 	{
-		uint8_t can_use = 1;
-
-		for (size_t i = 0; i < server->game.players.capacity; i++)
+		bool can_use = true; 
+		for (size_t j = 0; j < server->peers.capacity; j++)
 		{
-			Player* plr = (Player*)server->game.players.ptr[i];
-			if (!plr)
+			PeerData* data = (PeerData*)server->peers.ptr[j];
+			if (!data)
 				continue;
 
-			if (vector2_dist(&spots[i], &plr->pos) < 480)
+			if(!data->in_game)
+				continue;
+
+			if (vector2_dist(&spots[i], &data->plr.pos) < 480.f)
 			{
-				can_use = 0;
+				can_use = false;
 				break;
 			}
 		}
@@ -50,7 +52,7 @@ void tdoll_find_spot(Server* server, TailsDoll* doll)
 		doll->pos.x = spot.x;
 		doll->pos.y = spot.y;
 
-		Info("Tails doll found spot %d at %f %f", ball, doll->pos.x, doll->pos.y);
+		Debug("Tails doll found spot %d at %f %f", ball, doll->pos.x, doll->pos.y);
 	}
 	else
 	{
@@ -58,7 +60,7 @@ void tdoll_find_spot(Server* server, TailsDoll* doll)
 		doll->pos.x = spot.x;
 		doll->pos.y = spot.y;
 
-		Info("Tails doll didn't find a spot, using %f %f", doll->pos.x, doll->pos.y);
+		Debug("Tails doll didn't find a spot, using %f %f", doll->pos.x, doll->pos.y);
 	}
 }
 
@@ -67,25 +69,28 @@ bool tdoll_is_vaild_target(Server* server, TailsDoll* doll)
 	if (doll->target == -1)
 		return false;
 
-	for (size_t i = 0; i < server->game.players.capacity; i++)
+	for (size_t i = 0; i < server->peers.capacity; i++)
 	{
-		Player* plr = (Player*)server->game.players.ptr[i];
-		if (!plr)
+		PeerData* data = (PeerData*)server->peers.ptr[i];
+		if (!data)
 			continue;
 
-		if (plr->id == server->game.exe)
+		if(!data->in_game)
 			continue;
 
-		if (plr->flags & PLAYER_DEAD)
+		if (data->id == server->game.exe)
 			continue;
 
-		if (plr->flags & PLAYER_DEMONIZED)
+		if (data->plr.flags & PLAYER_DEAD)
 			continue;
 
-		if (plr->flags & PLAYER_ESCAPED)
+		if (data->plr.flags & PLAYER_DEMONIZED)
 			continue;
 
-		if (plr->id == doll->target)
+		if (data->plr.flags & PLAYER_ESCAPED)
+			continue;
+
+		if (data->id == doll->target)
 			return true;
 	}
 
@@ -97,27 +102,30 @@ bool tdoll_find_target(Server* server, TailsDoll* doll)
 	Vector2 pos = { doll->pos.x, doll->pos.y };
 
 	// scan for people
-	for (size_t i = 0; i < server->game.players.capacity; i++)
+	for (size_t i = 0; i < server->peers.capacity; i++)
 	{
-		Player* plr = (Player*)server->game.players.ptr[i];
-		if (!plr)
+		PeerData* data = (PeerData*)server->peers.ptr[i];
+		if (!data)
 			continue;
 
-		if (plr->id == server->game.exe)
+		if(!data->in_game)
 			continue;
 
-		if (plr->flags & PLAYER_DEAD)
+		if (data->id == server->game.exe)
 			continue;
 
-		if (plr->flags & PLAYER_DEMONIZED)
+		if (data->plr.flags & PLAYER_DEAD)
 			continue;
 
-		if (plr->flags & PLAYER_ESCAPED)
+		if (data->plr.flags & PLAYER_DEMONIZED)
 			continue;
 
-		if (vector2_dist(&plr->pos, &pos) < 130)
+		if (data->plr.flags & PLAYER_ESCAPED)
+			continue;
+
+		if (vector2_dist(&data->plr.pos, &pos) < 130)
 		{
-			doll->target = plr->id;
+			doll->target = data->id;
 			return true;
 		}
 	}
@@ -133,10 +141,10 @@ bool tdoll_init(Server* server, Entity* entity)
 	Packet pack;
 	PacketCreate(&pack, SERVER_DTTAILSDOLL_STATE);
 	PacketWrite(&pack, packet_write8, 0);
-	PacketWrite(&pack, packet_write16, doll->pos.x);
-	PacketWrite(&pack, packet_write16, doll->pos.y);
-	PacketWrite(&pack, packet_write8, doll->state);
-	server_broadcast(server, &pack);
+	PacketWrite(&pack, packet_write16, (uint16_t)doll->pos.x);
+	PacketWrite(&pack, packet_write16, (uint16_t)doll->pos.y);
+	PacketWrite(&pack, packet_write8, (uint8_t)doll->state);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -144,7 +152,6 @@ bool tdoll_init(Server* server, Entity* entity)
 bool tdoll_tick(Server* server, Entity* entity)
 {
 	TailsDoll* doll = (TailsDoll*)entity;
-	
 	switch (doll->state)
 	{
 		case TDST_NONE:
@@ -157,7 +164,7 @@ bool tdoll_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_DTTAILSDOLL_STATE);
 				PacketWrite(&pack, packet_write8, 2);
-				packet_sendtcp(server, doll->target, &pack);
+				packet_send_id(server, doll->target, &pack, true);
 			}
 			break;
 		}
@@ -171,7 +178,7 @@ bool tdoll_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_DTTAILSDOLL_STATE);
 				PacketWrite(&pack, packet_write8, 3);
-				packet_sendtcp(server, doll->target, &pack);
+				packet_send_id(server, doll->target, &pack, true);
 
 				doll->state = TDST_FOLLOW;
 			}
@@ -189,34 +196,34 @@ bool tdoll_tick(Server* server, Entity* entity)
 				break;
 			}
 
-			Player* plr = game_findplr(server, doll->target);
-			if (!plr)
+			PeerData* data = server_find_peer(server, doll->target);
+			if (!data || !data->in_game)
 			{
 				doll->state = TDST_RELOC;
 				break;
 			}
 
-			if (abs((int)(plr->pos.x - doll->pos.x)) >= 4)
+			if (abs((int)(data->plr.pos.x - doll->pos.x)) >= 4)
 			{
-				doll->velx += sign((int)plr->pos.x - doll->pos.x) * 0.512 * server->delta;
+				doll->velx += sign((int)data->plr.pos.x - doll->pos.x) * 0.512 * server->delta;
 				doll->velx = fmin(fmax(doll->velx, -5), 5);
 			}
 
-			if (abs((int)(plr->pos.y - doll->pos.y)) >= 5)
+			if (abs((int)(data->plr.pos.y - doll->pos.y)) >= 5)
 			{
-				doll->vely += sign((int)plr->pos.y - doll->pos.y) * 0.480 * server->delta;
+				doll->vely += sign((int)data->plr.pos.y - doll->pos.y) * 0.480 * server->delta;
 				doll->vely = fmin(fmax(doll->vely, -5), 5);
 			}
 
-			doll->pos.x += doll->velx * server->delta;
-			doll->pos.y += doll->vely * server->delta;
+			doll->pos.x += doll->velx * (float)server->delta;
+			doll->pos.y += doll->vely * (float)server->delta;
 
-			if (vector2_dist(&doll->pos, &plr->pos) < 12)
+			if (vector2_dist(&doll->pos, &data->plr.pos) < 12)
 			{
 				Packet pack;
 				PacketCreate(&pack, SERVER_DTTAILSDOLL_STATE);
 				PacketWrite(&pack, packet_write8, 1);
-				packet_sendtcp(server, doll->target, &pack);
+				packet_send_id(server, doll->target, &pack, true);
 
 				doll->state = TDST_RELOC;
 				break;
@@ -235,10 +242,10 @@ bool tdoll_tick(Server* server, Entity* entity)
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_DTTAILSDOLL_STATE);
-	PacketWrite(&pack, packet_write16, doll->pos.x);
-	PacketWrite(&pack, packet_write16, doll->pos.y);
+	PacketWrite(&pack, packet_write16, (uint16_t)doll->pos.x);
+	PacketWrite(&pack, packet_write16, (uint16_t)doll->pos.y);
 	PacketWrite(&pack, packet_write8, doll->state);
-	game_broadcast(server, &pack);
+	server_broadcast(server, &pack, false);
 
 	return true;
 }

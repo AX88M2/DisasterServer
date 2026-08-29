@@ -22,6 +22,7 @@ bool kaf_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_KAFMONITOR_ACTIVATE:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			PacketRead(nid, packet, packet_read8, uint8_t);
 			PacketRead(proj, packet, packet_read8, uint8_t);
 

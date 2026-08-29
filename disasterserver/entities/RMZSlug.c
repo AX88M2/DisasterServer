@@ -61,10 +61,10 @@ bool slug_init(Server* server, Entity* entity)
 	PacketCreate(&pack, SERVER_RMZSLIME_STATE);
 	PacketWrite(&pack, packet_write8,	0);
 	PacketWrite(&pack, packet_write16,	slug->id);
-	PacketWrite(&pack, packet_write16,	slug->pos.x);
-	PacketWrite(&pack, packet_write16,	slug->pos.y);
-	PacketWrite(&pack, packet_write8,	slug->state);
-	server_broadcast(server, &pack);
+	PacketWrite(&pack, packet_write16,	(uint16_t)slug->pos.x);
+	PacketWrite(&pack, packet_write16,	(uint16_t)slug->pos.y);
+	PacketWrite(&pack, packet_write8,	(uint8_t)slug->state);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -78,7 +78,7 @@ bool slug_tick(Server* server, Entity* entity)
 		case SLUG_NONELEFT:
 		case SLUG_RINGLEFT:
 		case SLUG_REDRINGLEFT:
-			slug->pos.x -= server->delta;
+			slug->pos.x -= (float)server->delta;
 			if (slug->pos.x <= slug->sX - 100)
 				slug_face(slug, 1);
 			break;
@@ -86,7 +86,7 @@ bool slug_tick(Server* server, Entity* entity)
 		case SLUG_NONERIGHT:
 		case SLUG_RINGRIGHT:
 		case SLUG_REDRINGRIGHT:
-			slug->pos.x += server->delta;
+			slug->pos.x += (float)server->delta;
 			if (slug->pos.x >= slug->sX + 100)
 				slug_face(slug, 0);
 			break;
@@ -96,10 +96,10 @@ bool slug_tick(Server* server, Entity* entity)
 	PacketCreate(&pack, SERVER_RMZSLIME_STATE);
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write16, slug->id);
-	PacketWrite(&pack, packet_write16, slug->pos.x);
-	PacketWrite(&pack, packet_write16, slug->pos.y);
-	PacketWrite(&pack, packet_write8, slug->state);
-	game_broadcast(server, &pack);
+	PacketWrite(&pack, packet_write16, (uint16_t)slug->pos.x);
+	PacketWrite(&pack, packet_write16, (uint16_t)slug->pos.y);
+	PacketWrite(&pack, packet_write8, (uint8_t)slug->state);
+	server_broadcast(server, &pack, false);
 
 	return true;
 }
@@ -110,7 +110,7 @@ bool slug_uninit(Server* server, Entity* entity)
 	PacketCreate(&pack, SERVER_RMZSLIME_STATE);
 	PacketWrite(&pack, packet_write8, 2);
 	PacketWrite(&pack, packet_write16, entity->id);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	// find slug spawner and free it
 	SlugSpawner* spawners[11];

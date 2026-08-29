@@ -14,7 +14,7 @@ bool tproj_init(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, tproj->damage);
 	PacketWrite(&pack, packet_write8, tproj->exe);
 	PacketWrite(&pack, packet_write8, tproj->charge);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -44,9 +44,9 @@ bool tproj_tick(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write16, (uint16_t)tproj->pos.x);
 	PacketWrite(&pack, packet_write16, (uint16_t)tproj->pos.y);
-	game_broadcast(server, &pack);
+	server_broadcast(server, &pack, false);
 
-	tproj->pos.x += tproj->dir * 14 * server->delta;
+	tproj->pos.x += (float)(tproj->dir * 14 * server->delta);
 	tproj->timer -= server->delta;
 
 	return true;
@@ -59,7 +59,7 @@ bool tproj_uninit(Server* server, Entity* entity)
 	Packet pack;
 	PacketCreate(&pack, SERVER_TPROJECTILE_STATE);
 	PacketWrite(&pack, packet_write8, 2);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

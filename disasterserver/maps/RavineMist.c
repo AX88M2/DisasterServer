@@ -26,7 +26,7 @@ bool rmz_checkstate(Server* server)
 	PacketCreate(&pack, SERVER_RMZSHARD_STATE);
 	PacketWrite(&pack, packet_write8, 3);
 	PacketWrite(&pack, packet_write8, total);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	if (server->game.time_sec <= TICKSPERSEC - 10)
 	{
@@ -95,10 +95,10 @@ bool rmz_tick(Server* server)
 {
 	if (server->game.time >= TICKSPERSEC)
 	{
-		if (server->game.time_sec == TICKSPERSEC)
+		if (server->game.time_sec <= TICKSPERSEC && server->game.bring_state < BS_DEACTIVATED)
 			game_bigring(server, BS_DEACTIVATED);
 
-		if (server->game.time_sec == TICKSPERSEC - 10)
+		if (server->game.time_sec <= TICKSPERSEC - 10 && server->game.bring_state < BS_ACTIVATED)
 		{
 			if((7 - game_find(server, NULL, "shard", 7) >= 6))
 				game_bigring(server, BS_ACTIVATED);
@@ -117,6 +117,7 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_RMZSLIME_HIT:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			if (v->server->game.end > 0)
 				break;
 
@@ -135,10 +136,18 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 
 			if (ent->ring != SLUG_NORING)
 			{
+				if (ent->ring == SLUG_RING)
+				{
+					time_start(&v->plr.last_rings);
+					v->plr.rings++;
+					v->plr.stats.rings++;
+				}
+
 				Packet pack;
 				PacketCreate(&pack, SERVER_RMZSLIME_RINGBONUS);
 				PacketWrite(&pack, packet_write8, (ent->ring - 1));
-				RAssert(packet_sendtcp(v->server, v->id, &pack));
+				PacketWrite(&pack, packet_write8, v->plr.rings > 0);
+				RAssert(packet_send(v->peer, &pack, true));
 			}
 
 			free(ent);
@@ -147,6 +156,7 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 
 		case CLIENT_RMZSHARD_COLLECT:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			if (v->server->game.end > 0)
 				break;
 
@@ -156,19 +166,15 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 			if (!game_despawn(v->server, (Entity**)&ent, eid))
 				break;
 
-			Player* plr = game_findplr(v->server, v->id);
-			if (!plr)
-				break;
-
 			// incr shard count
-			plr->data[0]++;
+			v->plr.data[0]++;
 
 			Packet pack;
 			PacketCreate(&pack, SERVER_RMZSHARD_STATE);
 			PacketWrite(&pack, packet_write8, 2);
 			PacketWrite(&pack, packet_write16, ent->id);
 			PacketWrite(&pack, packet_write16, v->id);
-			server_broadcast(v->server, &pack);
+			server_broadcast(v->server, &pack, true);
 			free(ent);
 
 			RAssert(rmz_checkstate(v->server));
@@ -181,15 +187,13 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 				break;
 
 			AssertOrDisconnect(v->server, v->id != v->server->game.exe);
-
-			Player* player = game_findplr(v->server, v->id);
-			AssertOrDisconnect(v->server, player);
+			AssertOrDisconnect(v->server, v->in_game);
 
 			PacketRead(dead, packet, packet_read8, uint8_t);
 			PacketRead(rtimes, packet, packet_read8, uint8_t);
 
 			if (dead)
-				RAssert(rmz_spawnshards(v->server, player));
+				RAssert(rmz_spawnshards(v->server, &v->plr));
 
 			RAssert(rmz_checkstate(v->server));
 			break;
@@ -200,11 +204,10 @@ bool rmz_tcpmsg(PeerData* v, Packet* packet)
 
 bool rmz_left(PeerData* v)
 {
-	Player* plr = game_findplr(v->server, v->id);
-	if (!plr)
+	if(!v->server->game.started)
 		return true;
 
-	RAssert(rmz_spawnshards(v->server, plr));
+	RAssert(rmz_spawnshards(v->server, &v->plr));
 	RAssert(rmz_checkstate(v->server));
 	return true;
 }

@@ -23,7 +23,7 @@ gen:
 	if (server->game.rings[rnd])
 		goto gen;
 
-	server->game.rings[rnd] = 1;
+	server->game.rings[rnd] = true;
 	ring->rid = (uint8_t)rnd;
 	ring->red = g_mapList[server->game.map].spawn_red_rings && (rand() % 100 <= 10);
 
@@ -33,7 +33,7 @@ gen:
 	PacketWrite(&pack, packet_write8, ring->rid);
 	PacketWrite(&pack, packet_write16, ring->id);
 	PacketWrite(&pack, packet_write8, ring->red);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -48,7 +48,7 @@ bool ring_uninit(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write8, ring->rid);
 	PacketWrite(&pack, packet_write16, ring->id);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

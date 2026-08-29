@@ -11,7 +11,7 @@ typedef struct
 
 	uint8_t	 nid;
 	double	 timer;
-	uint8_t	 activated;
+	bool	 activated;
 } KafBox;
 #define MakeKafBox(nid) ((KafBox) { MakeEntity("kafbox", 0, 0) kafbox_init, kafbox_tick, NULL, nid, 0, 0, })
 

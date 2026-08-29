@@ -12,7 +12,7 @@ bool lcchain_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_LCCHAIN_STATE);
 				PacketWrite(&pack, packet_write8, 0);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				chain->timer = 0;
 				chain->state = LCC_PREPARE;
@@ -26,7 +26,7 @@ bool lcchain_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_LCCHAIN_STATE);
 				PacketWrite(&pack, packet_write8, 1);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				chain->timer = 0;
 				chain->state = LCC_ACTIVATE;
@@ -41,7 +41,7 @@ bool lcchain_tick(Server* server, Entity* entity)
 				Packet pack;
 				PacketCreate(&pack, SERVER_LCCHAIN_STATE);
 				PacketWrite(&pack, packet_write8, 2);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				chain->timer = 0;
 				chain->state = LCC_NONE;

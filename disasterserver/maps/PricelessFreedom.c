@@ -27,6 +27,7 @@ bool pf_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_PFLIT_ACTIVATE:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			PacketRead(lid, packet, packet_read8, uint8_t);
 
 			PFLift* ents[4];

@@ -2,12 +2,12 @@
 
 float lerp(float a, float b, float f)
 {
-	return a * (1.0 - f) + (b * f);
+	return a * (1.0f - f) + (b * f);
 }
 
 float sign(float x)
 {
-	return ((x) > 0) ? 1 : (((x) < 0) ? -1 : 0);
+	return ((x) > 0) ? 1.f : (((x) < 0) ? -1.f : 0.f);
 }
 
 float vector2_dist(Vector2* a, Vector2* b)

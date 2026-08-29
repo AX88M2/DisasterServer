@@ -8,7 +8,7 @@ bool bring_init(Server* server, Entity* entity)
 		PacketCreate(&pack, SERVER_BRING_STATE)
 		PacketWrite(&pack, packet_write8, 0);
 		PacketWrite(&pack, packet_write16, entity->id);
-		server_broadcast(server, &pack);
+		server_broadcast(server, &pack, true);
 
 		return true;
 	}
@@ -18,7 +18,7 @@ bool bring_init(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write16, entity->id);
 	PacketWrite(&pack, packet_write16, (uint16_t)entity->pos.x);
 	PacketWrite(&pack, packet_write16, (uint16_t)entity->pos.y);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -29,7 +29,7 @@ bool bring_uninit(Server* server, Entity* entity)
 	PacketCreate(&pack, SERVER_BRING_STATE)
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write16, entity->id);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

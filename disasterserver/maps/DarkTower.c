@@ -42,6 +42,7 @@ bool dt_tcpmsg(PeerData* v, Packet* packet)
 		case CLIENT_DTASS_ACTIVATE:
 		{
 			PacketRead(sid, packet, packet_read8, uint8_t);
+			AssertOrDisconnect(v->server, v->in_game);
 			AssertOrDisconnect(v->server, sid < 14);
 
 			DTStalactits* ents[14];

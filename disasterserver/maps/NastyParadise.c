@@ -55,6 +55,7 @@ bool nap_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_NAPICE_ACTIVATE:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			PacketRead(iid, packet, packet_read8, uint8_t);
 			AssertOrDisconnect(v->server, iid < 10);
 

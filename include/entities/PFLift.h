@@ -7,12 +7,12 @@ typedef struct
 	ENTITY_BODY
 
 	uint8_t		lid;
-	uint16_t	timer;
+	double		timer;
 	float		start;
 	float		end;
 	float		speed;
 	uint16_t	activator;
-	uint8_t		activated;
+	bool		activated;
 
 } PFLift;
 #define MakePFLift(id, start, end) ((PFLift) { MakeEntity("pflift", 0, 0) pflift_init, pflift_tick, NULL, id, 0, start, end, 0, 0, 0 })

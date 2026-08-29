@@ -1,6 +1,6 @@
 #ifndef MAPS_H
 #define MAPS_H
-#include "Server.h"
+#include <Server.h>
 
 typedef struct
 {
@@ -12,18 +12,16 @@ typedef struct
 		bool (*tick)(Server*);
 		bool (*tcp_msg)(PeerData*, Packet*);
 		bool (*left)(PeerData*);
-		bool (*uninit)(Server*);
 	} cb;
 
 	uint8_t  spawn_red_rings;
 	uint8_t  ring_count;
 } Map;
 
-extern Map g_mapList[19];
-#define MAP_COUNT 18
+#define MAP_COUNT 20
+extern Map g_mapList[MAP_COUNT+1];
 
 bool map_init 	(Server* server);
-bool map_uninit (Server* server);
 bool map_tick 	(Server* server);
 bool map_tcpmsg (PeerData* v, Packet* packet);
 bool map_left 	(PeerData* v);

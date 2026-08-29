@@ -1,10 +1,8 @@
-﻿cmake_minimum_required(VERSION 3.8)
-
-option(DYLIB "Builds dynamic library" OFF)
-option(BUILD_UI "Builds UI using SDL" ON)
+﻿option(DYLIB "Builds dynamic library" OFF)
+option(BUILD_UI "Builds UI using SDL" OFF)
 
 # Needed for packet stuff
-include (TestBigEndian)
+include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 
 if(IS_BIG_ENDIAN)
@@ -19,6 +17,10 @@ if(BUILD_UI)
 	add_compile_definitions(SYS_USE_SDL2)
 endif()
 
+if(ANDROID)
+	add_compile_definitions(SYS_ANDROID)
+endif()
+
 if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
 	set(CMAKE_C_FLAGS_DEBUG "-g")
 	set(CMAKE_C_FLAGS_RELEASE "-O3")
@@ -26,25 +28,28 @@ if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
 endif()
 
 set(SOURCES
+	"Auth.c"
+	"Config.c"
+	"cJSON.c"
+	"UTF8.c"
+	"CMath.c"
+	"DyList.c"
 	"Log.c"
 	"Lib.c"
-	"Config.c"
-	"DyList.c"
-	"cJSON.c"
-	"CMath.c"
 	"Server.c"
 	"Vote.c"
-	"Lobby.c"
 	"Maps.c"
+	"Packet.c"
+	"Player.c"
+	"Palette.c"
+	"Zone.c"
+
+	"Lobby.c"
 	"Mapvote.c"
 	"CharSelect.c"
-	"Player.c"
 	"Game.c"
-
-	"io/TcpListener.c"
-	"io/Packet.c"
+	"Results.c"
 	"io/Time.c"
-	"io/UdpListener.c"  
 
 	"entities/Ring.c"
 	"entities/CreamRing.c"
@@ -54,80 +59,134 @@ set(SOURCES
 	"entities/ExellerClone.c"
 	"entities/RMZSlug.c"
 	"entities/RMZShard.c"
-	"entities/Act9Wall.c" 
+	"entities/Act9Wall.c"
 	"entities/NotPerfect.c"
-	"entities/PFLift.c" 
-	"entities/HDDoor.c" 
+	"entities/PFLift.c"
+	"entities/HDDoor.c"
 	"entities/SpkieController.c"
 	"entities/LCEye.c"
 	"entities/LCChain.c"
 	"entities/NAPSnowball.c"
 	"entities/NAPIce.c"
 	"entities/HillThunder.c"
-	"entities/VVLava.c" 
+	"entities/VVLava.c"
 	"entities/YouCantRun.c"
 	"entities/TCAcid.c"
 	"entities/KAFSpeedBox.c"
 	"entities/TailsDoll.c"
-	"entities/DTBall.c" 
-	"entities/DTStalactits.c" 
+	"entities/DTBall.c"
+	"entities/DTStalactits.c"
 	"entities/Dummy.c"
+	"entities/WDLatern.c"
+	"entities/MJLava.c"
+	"entities/MJAss.c"
+	"entities/MJJudger.c"
 
 	"maps/RavineMist.c"
 	"maps/Act9.c"
-	"maps/NotPerfect.c" 
+	"maps/NotPerfect.c"
 	"maps/PricelessFreedom.c"
 	"maps/HauntingDream.c"
     "maps/DotDotDot.c"
 	"maps/LimpCity.c"
 	"maps/NastyParadise.c"
-	"maps/Hill.c" 
+	"maps/Hill.c"
 	"maps/VolcanoValley.c"
 	"maps/YouCantRun.c"
-	"maps/TortureCave.c" 
+	"maps/TortureCave.c"
 	"maps/KindAndFair.c"
 	"maps/DarkTower.c"
-	"maps/FartZone.c" 
-	"maps/MajinForest.c" 
+	"maps/FartZone.c"
+	"maps/MajinForest.c"
 	"maps/HideAndSeek.c"
+	"maps/WoodDream.c"
+	"maps/Marijuna.c"
 )
 
-if(DYLIB) # Build .dll or .so
-	add_library(DisasterServer SHARED ${SOURCES})
-	
-	if (WIN32)
-		target_link_libraries(DisasterServer PRIVATE ws2_32)
-	else() # UNIX
-		set(THREADS_PREFER_PTHREAD_FLAG ON)
-		find_package(Threads REQUIRED)
-		target_link_libraries(DisasterServer PRIVATE m Threads::Threads)
-	endif()
+if(ANDROID)
+	add_library(DisasterServer SHARED "Android.c" ${SOURCES})
 
-else() # Build executable
-	add_executable(DisasterServer Main.c ${SOURCES})
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+	find_package(Threads REQUIRED)
+	target_link_libraries(DisasterServer PRIVATE log enet m Threads::Threads)
+else()
+	if(DYLIB) # Build .dll or .so
+		add_library(DisasterServer SHARED ${SOURCES})
 
-	if(BUILD_UI)
 		if (WIN32)
-			target_link_libraries(DisasterServer PRIVATE ws2_32 ${SDL2_INCLUDE_DIRS})
+			target_link_libraries(DisasterServer PRIVATE enet ws2_32 winmm dbghelp)
 		else() # UNIX
 			set(THREADS_PREFER_PTHREAD_FLAG ON)
 			find_package(Threads REQUIRED)
-			target_link_libraries(DisasterServer PRIVATE m Threads::Threads ${SDL2_INCLUDE_DIRS})
+			target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads)
 		endif()
+	else() # Build executable
+		if(BUILD_UI)
+			set(UI_SOURCES
+				"ui/Resources.c"
+				"ui/Main.c"
+				"ui/Image.c"
+				"ui/Label.c"
+				"ui/Button.c"
+				"ui/TButton.c"
+				"ui/MapList.c"
+			  	"ui/Presets.c"
+				"ui/MapListPreset.c"
+				"ui/PingPreset.c"
+				"ui/PlayerList.c"
+			)
 
-	else()
-		if (WIN32)
-			target_link_libraries(DisasterServer PRIVATE ws2_32)
-		else() # UNIX
-			set(THREADS_PREFER_PTHREAD_FLAG ON)
-			find_package(Threads REQUIRED)
-			target_link_libraries(DisasterServer PRIVATE m Threads::Threads)
+			if (WIN32)
+				find_package(SDL2 CONFIG REQUIRED)
+				find_package(SDL2_image CONFIG REQUIRED)
+				include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
+
+				add_executable(DisasterServer
+					WIN32
+					"icon.rc"
+					${SOURCES}
+					${UI_SOURCES}
+				)
+
+				target_link_libraries(DisasterServer PRIVATE ws2_32 enet winmm dbghelp $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+					$<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+					$<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
+
+			else() # UNIX
+				include(FindPkgConfig)
+				PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+				PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
+				include_directories(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS})
+
+				add_executable(DisasterServer
+					${SOURCES}
+					${UI_SOURCES}
+				)
+
+				set(THREADS_PREFER_PTHREAD_FLAG ON)
+				find_package(Threads REQUIRED)
+				target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
+			endif()
+
+		else()
+			add_executable(DisasterServer
+				${SOURCES}
+				Main.c
+			)
+
+			if (WIN32)
+				target_link_libraries(DisasterServer PRIVATE enet ws2_32 winmm dbghelp)
+			else() # UNIX
+				set(THREADS_PREFER_PTHREAD_FLAG ON)
+				find_package(Threads REQUIRED)
+				target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads)
+			endif()
+
 		endif()
-
 	endif()
 endif()
 
-if(MSVC) # Turn off retarded microsofts shit
+if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 

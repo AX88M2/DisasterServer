@@ -4,10 +4,10 @@
 #include <CMath.h>
 #include <float.h>
 
-uint8_t init = 0;
+bool init = false;
 double freq = 0;
 
-void time_start(Timer* timer)
+void time_start(TimeStamp* timer)
 {
 #ifdef _WIN32
 	LARGE_INTEGER li;
@@ -21,7 +21,7 @@ void time_start(Timer* timer)
 		}
 
 		freq = (double)(li.QuadPart) / 1000.0;
-		init = 1;
+		init = true;
 	}
 
 	QueryPerformanceCounter(&li);
@@ -33,7 +33,7 @@ void time_start(Timer* timer)
 #endif
 }
 
-double time_end(Timer* timer)
+double time_end(TimeStamp* timer)
 {
 #ifdef _WIN32
 	LARGE_INTEGER li;

@@ -1,6 +1,6 @@
 #ifndef VOTE_H
 #define VOTE_H
-#include "Log.h"
+#include <Log.h>
 #include <stdint.h>
 
 typedef enum
@@ -19,7 +19,7 @@ typedef enum
 typedef struct
 {
 	VoteType	type;
-	uint8_t		ongoing;
+	bool		ongoing;
 	uint16_t	votes[7];
 	uint8_t		votecnt;
 	uint8_t		votetotal;

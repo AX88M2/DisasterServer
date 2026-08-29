@@ -13,7 +13,7 @@ bool vote_init(Server* server, Vote* vote, VoteType type, uint16_t id)
 		if (!peer)
 			continue;
 		
-		peer->can_vote = peer->id != id;
+		peer->can_vote = (peer->id != id);
 		
 		if(peer->can_vote)
 			vote->votetotal++;
@@ -22,7 +22,7 @@ bool vote_init(Server* server, Vote* vote, VoteType type, uint16_t id)
 	if (vote->votetotal <= 1)
 		return false;
 
-	vote->ongoing = 1;
+	vote->ongoing = true;
 	vote->countdown = 20 * TICKSPERSEC;
 	memset(vote->votes, 0, 6 * sizeof(uint8_t));
 	return true;

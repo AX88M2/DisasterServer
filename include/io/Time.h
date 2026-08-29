@@ -4,11 +4,12 @@
 #include <time.h>
 
 #if defined(_WIN32)
+	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 #endif
 
-typedef double Timer;
-void	time_start	(Timer* timer);
-double	time_end	(Timer* timer);
+typedef double TimeStamp;
+void	time_start	(TimeStamp* timer);
+double	time_end	(TimeStamp* timer);
 
 #endif

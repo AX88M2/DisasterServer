@@ -27,6 +27,7 @@ bool lc_tcpmsg(PeerData* v, Packet* packet)
 			PacketRead(nid, packet, packet_read8, uint8_t);
 			PacketRead(target, packet, packet_read8, uint8_t);
 			AssertOrDisconnect(v->server, nid < 2);
+			AssertOrDisconnect(v->server, v->in_game);
 
 			LCEye* eyes[2];
 			if (!game_find(v->server, (Entity**)eyes, "lceye", 2))
@@ -43,14 +44,14 @@ bool lc_tcpmsg(PeerData* v, Packet* packet)
 
 				eye->use_id = v->id;
 				eye->target = target;
-				eye->used = 1;
+				eye->used = true;
 				eye->timer = 0;
 
 				RAssert(lceye_update(v->server, eye));
 			}
 			else
 			{
-				eye->used = 0;
+				eye->used = false;
 				eye->timer = 0;
 
 				RAssert(lceye_update(v->server, eye));

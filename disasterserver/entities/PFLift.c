@@ -12,8 +12,8 @@ bool pflift_init(Server* server, Entity* entity)
 
 bool pflift_tick(Server* server, Entity* entity)
 {
-	PFLift* lift = (PFLift*)entity;
 	Packet pack;
+	PFLift* lift = (PFLift*)entity;
 
 	if (!lift->activated)
 	{
@@ -27,7 +27,7 @@ bool pflift_tick(Server* server, Entity* entity)
 				PacketWrite(&pack, packet_write8, 3);
 				PacketWrite(&pack, packet_write8, lift->lid);
 				PacketWrite(&pack, packet_write16, (uint16_t)lift->start);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 			}
 		}
 		return true;
@@ -36,9 +36,9 @@ bool pflift_tick(Server* server, Entity* entity)
 	if (lift->pos.y > lift->end)
 	{
 		if (lift->speed < 7.f)
-			lift->speed += 0.052f * server->delta;
+			lift->speed += 0.052f * (float)server->delta;
 
-		lift->pos.y -= lift->speed * server->delta;
+		lift->pos.y -= lift->speed * (float)server->delta;
 	}
 	else
 	{
@@ -47,10 +47,10 @@ bool pflift_tick(Server* server, Entity* entity)
 		PacketWrite(&pack, packet_write8, lift->lid);
 		PacketWrite(&pack, packet_write16, lift->activator);
 		PacketWrite(&pack, packet_write16, (uint16_t)lift->pos.y);
-		server_broadcast(server, &pack);
+		server_broadcast(server, &pack, true);
 		
 		lift->timer = (uint16_t)(1.5f * TICKSPERSEC);
-		lift->activated = 0;
+		lift->activated = false;
 		lift->activator = 0;
 	}
 
@@ -59,7 +59,7 @@ bool pflift_tick(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, lift->lid);
 	PacketWrite(&pack, packet_write16, lift->activator);
 	PacketWrite(&pack, packet_write16, (uint16_t)lift->pos.y);
-	game_broadcast(server, &pack);
+	server_broadcast(server, &pack, false);
 
 	return true;
 }
@@ -76,14 +76,14 @@ bool pflift_activate(Server* server, PFLift* lift, uint16_t id)
 	lift->timer = 0;
 	lift->speed = 0;
 	lift->pos.y = lift->start;
-	lift->activated = 1;
+	lift->activated = true;
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_PFLIFT_STATE);
 	PacketWrite(&pack, packet_write8, 0);
 	PacketWrite(&pack, packet_write8, lift->lid);
 	PacketWrite(&pack, packet_write16, lift->activator);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

@@ -27,15 +27,14 @@ bool dylist_push(DyList* list, void* item)
 	if (!item)
 		return false;
 
-	uint8_t found = 0;
-	
+	bool found = false;
 	for (size_t i = 0; i < list->capacity; i++)
 	{
 		if (!list->ptr[i])
 		{
 			Debug("%p DyList added item %p (index %d)", list->ptr, item, i);
 			list->ptr[i] = item;
-			found = 1;
+			found = true;
 			break;
 		}
 	}
@@ -69,14 +68,12 @@ bool dylist_remove(DyList* list, void* item)
 	return false;
 }
 
-bool dylist_free(DyList* list)
+void dylist_free(DyList* list)
 {
 	if (!list)
-		return false;
+		return;
 
 	Debug("%p DyList freed.", list->ptr);
 	free(list->ptr);
 	memset(list, 0, sizeof(DyList));
-
-	return true;
 }

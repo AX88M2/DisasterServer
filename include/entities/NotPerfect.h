@@ -15,7 +15,7 @@ typedef struct
 	}		state;
 	uint8_t stage;
 	double	timer;
-	uint8_t balls;
+	bool	balls;
 } NPController;
 #define MakeNPCtrl() ((NPController) { MakeEntity("npctrl", 0, 0) NULL, npctrl_tick, NULL, NPC_NONE, 0, 0, 0 })
 

@@ -1,42 +1,45 @@
 #include <Config.h>
 #include <Log.h>
-#include <io/Threads.h>
 #include <cJSON.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+#include <io/Dir.h>
 
-#define LiteCheck(x) { if(!(x)) { Err(liteconf_lasterr()); } }
+#ifdef SYS_ANDROID
+	#include <Android.h>
+#endif
+
+#ifdef SYS_USE_SDL2
+#include <ui/Main.h>
+#endif
 
 SERVER_API Config g_config =
 {
-	.tcp_port = 7606,
-	.udp_port = 8606,
+	.port = 8606,
 	.server_count = 1,
-	.log_debug = 1,
-	.log_file = 0,
+
+#ifdef SYS_ANDROID
+	.ping_limit = UINT16_MAX,
+#else
+	.ping_limit = 250,
+#endif
+
+	.log_debug = false,
+	.log_file = false,
+	.map_list = { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true },
+	.motd = "",
+	.anticheat = true,
+	.pride = true
 };
 
-const char* config_default =
-"{\n"
-"	\"tcp_port\": 7606,\n"
-"	\"udp_port\": 8606,\n"
-"	\"server_count\": 1,\n"
-"	\"log_debug\": true,\n"
-"	\"log_file\": false\n"
-"}";
-
-cJSON*	bans;
-cJSON*	timeouts;
-cJSON*	ops;
-Mutex	ban_mut;
-Mutex	timeout_mut;
-Mutex	op_mut;
-
-#define CONFIG_FILE "Config.json"
-#define BANS_FILE "Bans.json"
-#define OPERATORS_FILE "Operators.json"
-#define TIMEOUTS_FILE "Timeouts.json"
+cJSON*	g_bans = NULL;
+cJSON*	g_timeouts = NULL;
+cJSON*	g_ops = NULL;
+Mutex	g_banMut;
+Mutex	g_timeoutMut;
+Mutex	g_opMut;
 
 bool write_default(const char* filename, const char* default_str)
 {
@@ -47,7 +50,7 @@ bool write_default(const char* filename, const char* default_str)
 
 		if (!file)
 		{
-			Warn("Failed to open \"%s\" for writing.", filename);
+			Warn("Failed to open %s for writing.", filename);
 			return false;
 		}
 
@@ -82,7 +85,7 @@ bool collection_init(cJSON** output, const char* file, const char* default_value
 	FILE* f = fopen(file, "r");
 	if (!f)
 	{
-		Warn("What a fuck");
+		Warn("what de fuck");
 		return false;
 	}
 
@@ -101,9 +104,13 @@ bool collection_init(cJSON** output, const char* file, const char* default_value
 
 	*output = cJSON_ParseWithLength(buffer, len);
 	if (!(*output))
+	{
 		Err("Failed to parse %s: %s", file, cJSON_GetErrorPtr());
+		*output = cJSON_CreateObject();
+		return false;
+	}
 	else
-		Info("%s loaded.", file);
+		Debug("%s loaded.", file);
 
 	free(buffer);
 	return true;
@@ -111,116 +118,151 @@ bool collection_init(cJSON** output, const char* file, const char* default_value
 
 bool config_init(void)
 {
-	RAssert(write_default(CONFIG_FILE, config_default));
-
+	MutexCreate(g_config.map_list_lock);
+	
+	// Try to open config
 	FILE* file = fopen(CONFIG_FILE, "r");
 	if (!file)
 	{
-		Warn("What a fuck");
-		goto init_balls;
+		RAssert(config_save());
+
+		// Reopen
+		file = fopen(CONFIG_FILE, "r");
+		if (!file)
+		{
+			Warn("Failed to save default config file properly!");
+			goto init_balls;
+		}
 	}
 
-	char buffer[1024];
+	char buffer[1024] = { 0 };
 	size_t len = fread(buffer, 1, 1024, file);
 	fclose(file);
 
 	cJSON* json = cJSON_ParseWithLength(buffer, len);
 	if (!json)
 	{
-		Err("Failed to parse " CONFIG_FILE ": %s", cJSON_GetErrorPtr());
+		Err("Failed to parse %s: %s", CONFIG_FILE, cJSON_GetErrorPtr());
 		return false;
 	}
 	else
-		Info(CONFIG_FILE " loaded.");
+		Debug("%s loaded.", CONFIG_FILE);
 
-	g_config.tcp_port =		(uint16_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "tcp_port"));
-	g_config.udp_port =		(uint16_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "udp_port"));
-	g_config.server_count = (uint16_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "server_count"));
+	g_config.port =			(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "port"));
+	g_config.server_count = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "server_count"));
+	g_config.ping_limit =	(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "ping_limit"));
 	g_config.log_file =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_file"));
 	g_config.log_debug =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_debug"));
+	g_config.anticheat =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "anticheat"));
+	g_config.pride =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "pride"));
+
+	snprintf(g_config.motd, 256, "%s", cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(json, "motd")));
 	cJSON_Delete(json);
 
 init_balls:
-	MutexCreate(timeout_mut);
-	MutexCreate(ban_mut);
-	MutexCreate(op_mut);
+	MutexCreate(g_timeoutMut);
+	MutexCreate(g_banMut);
+	MutexCreate(g_opMut);
 
-	RAssert(collection_init(&timeouts,	TIMEOUTS_FILE,	"{}"));
-	RAssert(collection_init(&bans,		BANS_FILE,		"{}"));
-	RAssert(collection_init(&ops,		OPERATORS_FILE, "{ \"127.0.0.1\": \"Host (127.0.0.1)\" }"));
+	RAssert(collection_init(&g_timeouts,	TIMEOUTS_FILE,	"{}"));
+	RAssert(collection_init(&g_bans,		BANS_FILE,		"{}"));
+	RAssert(collection_init(&g_ops,		OPERATORS_FILE, "{ \"127.0.0.1\": \"Host (127.0.0.1)\" }"));
+
+	if (!g_config.anticheat)
+	{
+		Info(LOG_YLW "Anticheat is disabled, client modifications are allowed.");
+	}
 
 	return true;
 }
 
+SERVER_API bool config_save(void)
+{
+	cJSON* json = cJSON_CreateObject();
+	RAssert(json);
 
-bool ban_add(const char* nickname, const char* ip, const char* udid)
+	cJSON_AddItemToObject(json, "port", cJSON_CreateNumber(g_config.port));
+	cJSON_AddItemToObject(json, "server_count", cJSON_CreateNumber(g_config.server_count));
+	cJSON_AddItemToObject(json, "ping_limit", cJSON_CreateNumber(g_config.ping_limit));
+	cJSON_AddItemToObject(json, "log_file", cJSON_CreateBool(g_config.log_file));
+	cJSON_AddItemToObject(json, "log_debug", cJSON_CreateBool(g_config.log_debug));
+	cJSON_AddItemToObject(json, "anticheat", cJSON_CreateBool(g_config.anticheat));
+	cJSON_AddItemToObject(json, "pride", cJSON_CreateBool(g_config.pride));
+	cJSON_AddItemToObject(json, "motd", cJSON_CreateString(g_config.motd));
+
+	RAssert(collection_save(CONFIG_FILE, json));
+	cJSON_Delete(json);
+	return true;
+}
+
+bool ban_add(const char* nickname, const char* udid, const char* ip)
 {
 	bool res = true;
 
-	MutexLock(ban_mut);
+	MutexLock(g_banMut);
 	{
-		uint8_t changed = 0;
-
-		if (!cJSON_HasObjectItem(bans, ip))
+		bool changed = false;
+		if (!cJSON_HasObjectItem(g_bans, ip))
 		{
 			cJSON* js = cJSON_CreateString(nickname);
-			cJSON_AddItemToObject(bans, ip, js);
-			changed = 1;
+			cJSON_AddItemToObject(g_bans, ip, js);
+			changed = true;
 		}
 
-		if (!cJSON_HasObjectItem(bans, udid))
+		if (!cJSON_HasObjectItem(g_bans, udid))
 		{
-			cJSON* js = js = cJSON_CreateString(nickname);
-			cJSON_AddItemToObject(bans, udid, js);
-			changed = 1;
+			cJSON* js = cJSON_CreateString(nickname);
+			cJSON_AddItemToObject(g_bans, udid, js);
+			changed = true;
 		}
 
 		if (changed)
-			res = collection_save(BANS_FILE, bans);
+			res = collection_save(BANS_FILE, g_bans);
+		
 	}
-	MutexUnlock(ban_mut);
+	MutexUnlock(g_banMut);
 
 	return res;
 }
 
 bool ban_revoke(const char* udid, const char* ip)
 {
-	bool res = true;
+	bool res = false;
 
-	MutexLock(ban_mut);
+	MutexLock(g_banMut);
 	{
-		uint8_t changed = 0;
+		bool changed = false;
 
-		if (cJSON_HasObjectItem(bans, ip))
+		if (cJSON_HasObjectItem(g_bans, ip))
 		{
-			cJSON_DeleteItemFromObject(bans, ip);
-			changed = 1;
+			cJSON_DeleteItemFromObject(g_bans, ip);
+			changed = true;
 		}
 
-		if (cJSON_HasObjectItem(bans, udid))
+		if (cJSON_HasObjectItem(g_bans, udid))
 		{
-			cJSON_DeleteItemFromObject(bans, udid);
-			changed = 1;
+			cJSON_DeleteItemFromObject(g_bans, udid);
+			changed = true;
 		}
 
 		if(changed)
-			res = collection_save(BANS_FILE, bans);
+			res = collection_save(BANS_FILE, g_bans);
 	}
-	MutexUnlock(ban_mut);
+	MutexUnlock(g_banMut);
 
 	return res;
 }
 
-bool ban_check(const char* udid, const char* ip, uint8_t* result)
+bool ban_check(const char* udid, const char* ip, bool* result)
 {
-	*result = 0;
+	*result = false;
 
-	MutexLock(ban_mut);
+	MutexLock(g_banMut);
 	{
-		if (cJSON_HasObjectItem(bans, udid) || cJSON_HasObjectItem(bans, ip))
-			*result = 1;
+		if (cJSON_HasObjectItem(g_bans, udid) || cJSON_HasObjectItem(g_bans, ip))
+			*result = true;
 	}
-	MutexUnlock(ban_mut);
+	MutexUnlock(g_banMut);
 
 	return true;
 }
@@ -229,11 +271,11 @@ bool timeout_set(const char* nickname, const char* ip, const char* udid, uint64_
 {
 	bool res = true;
 
-	MutexLock(timeout_mut);
+	MutexLock(g_timeoutMut);
 	{
-		uint8_t changed = 0;
+		bool changed = false;
 
-		cJSON* obj = cJSON_GetObjectItem(timeouts, ip);
+		cJSON* obj = cJSON_GetObjectItem(g_timeouts, ip);
 		if (!obj)
 		{
 			cJSON* root = cJSON_CreateArray();
@@ -246,8 +288,8 @@ bool timeout_set(const char* nickname, const char* ip, const char* udid, uint64_
 			js = cJSON_CreateNumber((double)timestamp);
 			cJSON_AddItemToArray(root, js);
 
-			cJSON_AddItemToObject(timeouts, ip, root);
-			changed = 1;
+			cJSON_AddItemToObject(g_timeouts, ip, root);
+			changed = true;
 		}
 		else
 		{
@@ -255,13 +297,13 @@ bool timeout_set(const char* nickname, const char* ip, const char* udid, uint64_
 			if (item)
 			{
 				cJSON_SetNumberValue(item, timestamp);
-				changed = 1;
+				changed = true;
 			}
 			else
 				Warn("Missing timestamp in array");
 		}
 
-		obj = cJSON_GetObjectItem(timeouts, udid);
+		obj = cJSON_GetObjectItem(g_timeouts, udid);
 		if (!obj)
 		{
 			cJSON* root = cJSON_CreateArray();
@@ -274,8 +316,8 @@ bool timeout_set(const char* nickname, const char* ip, const char* udid, uint64_
 			js = cJSON_CreateNumber((double)timestamp);
 			cJSON_AddItemToArray(root, js);
 
-			cJSON_AddItemToObject(timeouts, udid, root);
-			changed = 1;
+			cJSON_AddItemToObject(g_timeouts, udid, root);
+			changed = true;
 		}
 		else
 		{
@@ -283,44 +325,44 @@ bool timeout_set(const char* nickname, const char* ip, const char* udid, uint64_
 			if (item)
 			{
 				cJSON_SetNumberValue(item, timestamp);
-				changed = 1;
+				changed = true;
 			}
 			else
 				Warn("Missing timestamp in array");
 		}
 
 		if (changed)
-			res = collection_save(TIMEOUTS_FILE, timeouts);
+			res = collection_save(TIMEOUTS_FILE, g_timeouts);
 	}
-	MutexUnlock(timeout_mut);
+	MutexUnlock(g_timeoutMut);
 
 	return res;
 }
 
 bool timeout_revoke(const char* udid, const char* ip)
 {
-	bool res = true;
+	bool res = false;
 
-	MutexLock(timeout_mut);
+	MutexLock(g_timeoutMut);
 	{
-		uint8_t changed = 0;
+		bool changed = false;
 
-		if (cJSON_HasObjectItem(timeouts, ip))
+		if (cJSON_HasObjectItem(g_timeouts, ip))
 		{
-			cJSON_DeleteItemFromObject(timeouts, ip);
-			changed = 1;
+			cJSON_DeleteItemFromObject(g_timeouts, ip);
+			changed = true;
 		}
 
-		if (cJSON_HasObjectItem(timeouts, udid))
+		if (cJSON_HasObjectItem(g_timeouts, udid))
 		{
-			cJSON_DeleteItemFromObject(timeouts, udid);
-			changed = 1;
+			cJSON_DeleteItemFromObject(g_timeouts, udid);
+			changed = true;
 		}
 
 		if (changed)
-			res = collection_save(TIMEOUTS_FILE, timeouts);
+			res = collection_save(TIMEOUTS_FILE, g_timeouts);
 	}
-	MutexUnlock(timeout_mut);
+	MutexUnlock(g_timeoutMut);
 
 	return res;
 }
@@ -329,24 +371,24 @@ bool timeout_check(const char* udid, const char* ip, uint64_t* result)
 {
 	*result = 0;
 
-	MutexLock(op_mut);
+	MutexLock(g_opMut);
 	{
-		cJSON* obj = cJSON_GetObjectItem(timeouts, ip);
+		cJSON* obj = cJSON_GetObjectItem(g_timeouts, ip);
 
 		if(!obj)
-			obj = cJSON_GetObjectItem(timeouts, udid);
+			obj = cJSON_GetObjectItem(g_timeouts, udid);
 
 		if (obj)
 		{
 			cJSON* timeout = cJSON_GetArrayItem(obj, 1);
 			
 			if (timeout)
-				*result = cJSON_GetNumberValue(timeout);
+				*result = (uint64_t)cJSON_GetNumberValue(timeout);
 			else
 				Warn("Missing timestamp in array");
 		}
 	}
-	MutexUnlock(op_mut);
+	MutexUnlock(g_opMut);
 
 	return true;
 }
@@ -355,48 +397,49 @@ bool op_add(const char* nickname, const char* ip)
 {
 	bool res = true;
 
-	MutexLock(op_mut);
+	MutexLock(g_opMut);
 	{
-		if (!cJSON_HasObjectItem(ops, ip))
+		if (!cJSON_HasObjectItem(g_ops, ip))
 		{
 			cJSON* js = cJSON_CreateString(nickname);
-			cJSON_AddItemToObject(ops, ip, js);
+			cJSON_AddItemToObject(g_ops, ip, js);
 
-			res = collection_save(OPERATORS_FILE, ops);
+			res = collection_save(OPERATORS_FILE, g_ops);
 		}
 	}
-	MutexUnlock(op_mut);
+	MutexUnlock(g_opMut);
 
 	return res;
 }
 
 bool op_revoke(const char* ip)
 {
-	bool res = true;
+	bool res = false;
 
-	MutexLock(op_mut);
+	MutexLock(g_opMut);
 	{
-		if (cJSON_HasObjectItem(ops, ip))
+		if (cJSON_HasObjectItem(g_ops, ip))
 		{
-			cJSON_DeleteItemFromObject(ops, ip);
-			res = collection_save(OPERATORS_FILE, ops);
+			cJSON_DeleteItemFromObject(g_ops, ip);
+
+			res = collection_save(OPERATORS_FILE, g_ops);
 		}
 	}
-	MutexUnlock(op_mut);
+	MutexUnlock(g_opMut);
 
 	return res;
 }
 
-bool op_check(const char* ip, uint8_t* result)
+bool op_check(const char* ip, bool* result)
 {
-	*result = 0;
+	*result = false;
 
-	MutexLock(op_mut);
+	MutexLock(g_opMut);
 	{
-		if (cJSON_HasObjectItem(ops, ip))
-			*result = 1;
+		if (cJSON_HasObjectItem(g_ops, ip))
+			*result = true;
 	}
-	MutexUnlock(op_mut);
+	MutexUnlock(g_opMut);
 
 	return true;
 }

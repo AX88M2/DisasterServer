@@ -10,7 +10,7 @@ typedef struct
 	ENTITY_BODY
 
 	uint8_t		sid;
-	uint8_t		active;
+	bool		active;
 	uint8_t		state;
 	double		stage_prog;
 	int8_t		dir;

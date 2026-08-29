@@ -10,7 +10,7 @@ typedef struct
 
 	uint8_t		eye_id;
 	uint16_t	use_id;
-	uint8_t		used;
+	bool		used;
 	uint8_t		charge;
 	uint16_t	target;
 

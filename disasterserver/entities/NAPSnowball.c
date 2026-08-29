@@ -56,14 +56,14 @@ bool snowball_tick(Server* server, Entity* entity)
 			{
 				sb->state = 0;
 				sb->stage_prog = 0;
-				sb->active = 0;
+				sb->active = false;
 				sb->frame = 0;
 
 				Packet pack;
 				PacketCreate(&pack, SERVER_NAPBALL_STATE);
 				PacketWrite(&pack, packet_write8, 2);
 				PacketWrite(&pack, packet_write8, sb->sid);
-				server_broadcast(server, &pack);
+				server_broadcast(server, &pack, true);
 
 				return true;
 			}
@@ -74,9 +74,9 @@ bool snowball_tick(Server* server, Entity* entity)
 		PacketWrite(&pack, packet_write8, 1);
 		PacketWrite(&pack, packet_write8, sb->sid);
 		PacketWrite(&pack, packet_write8, sb->state);
-		PacketWrite(&pack, packet_write8, sb->frame);
+		PacketWrite(&pack, packet_write8, (uint8_t)sb->frame);
 		PacketWrite(&pack, packet_writedouble, sb->stage_prog);
-		game_broadcast(server, &pack);
+		server_broadcast(server, &pack, false);
 	}
 
 	return true;
@@ -91,16 +91,14 @@ bool snowball_activate(Server* server, Snowball* sb)
 	sb->state = 0;
 	sb->stage_prog = 0;
 	sb->frame = 0;
-	sb->active = 1;
+	sb->active = true;
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_NAPBALL_STATE);
 	PacketWrite(&pack, packet_write8, 0);
 	PacketWrite(&pack, packet_write8, sb->sid);
 	PacketWrite(&pack, packet_write8, sb->dir);
-	server_broadcast(server, &pack);
-
-	Debug("snowball activated");
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

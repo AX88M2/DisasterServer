@@ -8,8 +8,8 @@ typedef struct
 {
 	ENTITY_BODY
 
-	double timer;
-	uint8_t flag;
+	double	timer;
+	bool	flag;
 } Thunder;
 #define MakeThunder() ((Thunder) { MakeEntity("thunder", 0, 0) NULL, thunder_tick, NULL, (15 + (rand() % 5)) * TICKSPERSEC, 0 })
 

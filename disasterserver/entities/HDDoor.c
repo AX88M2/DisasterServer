@@ -12,7 +12,7 @@ bool hddoor_tick(Server* server, Entity* entity)
 			PacketCreate(&pack, SERVER_HDDOOR_STATE);
 			PacketWrite(&pack, packet_write8, 1);
 			PacketWrite(&pack, packet_write8, 1);
-			server_broadcast(server, &pack);
+			server_broadcast(server, &pack, true);
 		}
 	}
 
@@ -31,12 +31,12 @@ bool hddoor_toggle(Server* server, HDDoor* door)
 	PacketCreate(&pack, SERVER_HDDOOR_STATE);
 	PacketWrite(&pack, packet_write8, 0);
 	PacketWrite(&pack, packet_write8, door->state);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	PacketCreate(&pack, SERVER_HDDOOR_STATE);
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write8, 0);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

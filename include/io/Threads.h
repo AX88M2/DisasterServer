@@ -8,8 +8,14 @@
 	#include <sched.h>
 
 	typedef pthread_t Thread;
+	typedef pthread_key_t ThreadVar;
 	typedef void* (*pthread_cbfunc_t) (void*);
-	#define ThreadPrioritse(thr) { struct sched_param param; param.sched_priority = 20; pthread_setschedparam(thr, SCHED_FIFO, &param); }
+
+	#define ThreadVarCreate(var) pthread_key_create(&var, NULL)
+	#define ThreadVarSet(var, value) pthread_setspecific(var, value)
+	#define ThreadVarGet(var) pthread_getspecific(var)
+	#define ThreadVarFree(var) pthread_key_delete(var)
+
 	#define ThreadSpawn(thr, cb, arg) { pthread_create(&thr, NULL, (pthread_cbfunc_t)(cb), (arg)); pthread_detach(thr); }
 	#define ThreadJoin(thr) pthread_join(thr, NULL)
 	#define ThreadSleep(ms) { struct timespec ts;\
@@ -25,8 +31,14 @@
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 
-	typedef HANDLE Thread;
-	#define ThreadPrioritse(thr) SetThreadPriority(thr, THREAD_PRIORITY_HIGHEST)
+	typedef HANDLE	Thread;
+	typedef DWORD	ThreadVar;
+
+	#define ThreadVarCreate(var) RAssert((var = TlsAlloc()) != TLS_OUT_OF_INDEXES)
+	#define ThreadVarGet(var) TlsGetValue(var)
+	#define ThreadVarSet(var, value) TlsSetValue(var, value)
+	#define ThreadVarFree(var) TlsFree(var)
+
 	#define ThreadSpawn(thr, cb, arg) (thr = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)(cb), (arg), 0, NULL))
 	#define ThreadJoin(thr) WaitForSingleObject(thr, INFINITE)
 	#define ThreadSleep(ms) Sleep(ms)
@@ -37,4 +49,6 @@
 	#define MutexUnlock(mut) RAssert(ReleaseMutex(mut))
 #endif
 
-	#endif
+extern ThreadVar g_threadName;
+
+#endif

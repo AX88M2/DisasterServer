@@ -14,7 +14,7 @@ bool cring_init(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, ring->rid);
 	PacketWrite(&pack, packet_write16, ring->id);
 	PacketWrite(&pack, packet_write8, ring->red);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }
@@ -28,7 +28,7 @@ bool cring_uninit(Server* server, Entity* entity)
 	PacketWrite(&pack, packet_write8, 1);
 	PacketWrite(&pack, packet_write8, ring->rid);
 	PacketWrite(&pack, packet_write16, ring->id);
-	server_broadcast(server, &pack);
+	server_broadcast(server, &pack, true);
 
 	return true;
 }

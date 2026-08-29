@@ -29,6 +29,7 @@ bool ft_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_FART_PUSH:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			PacketRead(spd, packet, packet_read8, int8_t);
 
 			Dummy* dum;

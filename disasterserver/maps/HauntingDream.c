@@ -20,6 +20,7 @@ bool hd_tcpmsg(PeerData* v, Packet* packet)
 	{
 		case CLIENT_HDDOOR_TOGGLE:
 		{
+			AssertOrDisconnect(v->server, v->in_game);
 			HDDoor* door;
 			if (!game_find(v->server, (Entity**)&door, "hddoor", 1))
 				break;

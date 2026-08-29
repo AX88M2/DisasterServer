@@ -9,7 +9,7 @@ typedef struct
 	ENTITY_BODY
 
 	uint8_t		iid;
-	uint8_t		activated;
+	bool		activated;
 	double		timer;
 
 } Ice;

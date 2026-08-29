@@ -17,7 +17,7 @@ bool acid_tick(Server* server, Entity* entity)
 		PacketCreate(&pack, SERVER_TCGOM_STATE);
 		PacketWrite(&pack, packet_write8, ac->acid_id);
 		PacketWrite(&pack, packet_write8, ac->activated);
-		server_broadcast(server, &pack);
+		server_broadcast(server, &pack, true);
 	}
 
 	ac->timer += server->delta;

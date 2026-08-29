@@ -16,7 +16,7 @@ typedef struct
 		TDST_FOLLOW,
 		TDST_RELOC
 	}			state;
-	int			target;
+	uint32_t	target;
 	double		timer;
 	double		velx, vely;
 } TailsDoll;

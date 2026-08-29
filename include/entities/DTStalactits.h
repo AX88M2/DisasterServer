@@ -10,8 +10,8 @@ typedef struct
 	ENTITY_BODY
 
 	uint8_t		sid;
-	uint8_t		state;
-	uint8_t		show;
+	bool		state;
+	bool		show;
 	uint16_t	sx, sy;
 	double		timer;
 	float		vel;
