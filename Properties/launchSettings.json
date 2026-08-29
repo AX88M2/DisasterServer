@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DisasterServer": {
+      "commandName": "Project",
+      "commandLineArgs": "--disableAntiAfkSystem"
+    }
+  }
+}
