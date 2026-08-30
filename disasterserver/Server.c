@@ -131,8 +131,9 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR __DATE__ " " CLRCODE_GRN __TIME__ CLRCODE_RST);
 		server_send_msg(v->server, v->peer, msg);
 		server_send_msg(v->server, v->peer, "-----------------------");
-		server_send_msg(v->server, v->peer, g_config.motd);
 
+		if(g_config.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.motd);
 		if (v->op)
 			server_send_msg(v->server, v->peer, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
 
@@ -833,7 +834,8 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		server_send_msg(v->server, v->peer, msg);
 		server_send_msg(v->server, v->peer, "-----------------------");
 		server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list" CLRCODE_RST);
-		server_send_msg(v->server, v->peer, g_config.motd);
+		if(g_config.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.motd);
 		break;
 	}
 

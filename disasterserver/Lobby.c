@@ -171,8 +171,9 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			server_send_msg(v->server, v->peer, msg);
 			server_send_msg(v->server, v->peer, "-----------------------");
 			server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list~");
-			server_send_msg(v->server, v->peer, g_config.motd);
 
+            if(g_config.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.motd);
 			if (v->mod_tool)
 				server_send_msg(v->server, v->peer, CLRCODE_RED "your mod is disallowed on this server" CLRCODE_RST);
 			if (v->op)
