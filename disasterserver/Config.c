@@ -31,7 +31,8 @@ SERVER_API Config g_config =
 	.map_list = { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true },
 	.motd = "",
 	.anticheat = true,
-	.pride = true
+	.pride = true,
+	.chatfix = true,
 };
 
 cJSON*	g_bans = NULL;

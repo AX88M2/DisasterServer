@@ -33,7 +33,6 @@ set(SOURCES
 	"DyList.c"
 	"Log.c"
 	"Lib.c"
-	"Server.c"
 	"Vote.c"
 	"Maps.c"
 	"Packet.c"
@@ -41,6 +40,7 @@ set(SOURCES
 	"Palette.c"
 	"Zone.c"
 
+	"states/Server.c"
 	"states/Lobby.c"
 	"states/Mapvote.c"
 	"states/CharSelect.c"

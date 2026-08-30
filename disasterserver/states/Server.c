@@ -852,7 +852,7 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		char format[100];
 		snprintf(format, 100, "\\%s~, you /sti@nk~", buff);
 
-		RAssert(server_broadcast_msg(v->server, format));
+		RAssert(server_broadcast_msg(v->server, 0, format));
 		break;
 	}
 	}
@@ -953,11 +953,11 @@ bool server_send_msg(Server *server, ENetPeer *peer, const char *message)
 	return true;
 }
 
-bool server_broadcast_msg(Server *server, const char *message)
+bool server_broadcast_msg(Server* server, uint16_t sender, const char* message)
 {
 	Packet pack;
 	PacketCreate(&pack, CLIENT_CHAT_MESSAGE);
-	PacketWrite(&pack, packet_write16, 0);
+	PacketWrite(&pack, packet_write16, sender);
 	PacketWrite(&pack, packet_writestr, string_lower(__Str(message)));
 
 	server_broadcast(server, &pack, true);

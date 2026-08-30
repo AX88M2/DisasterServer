@@ -188,18 +188,24 @@ typedef struct Server
 	ENetHost *host;
 } Server;
 
-bool server_state_joined(PeerData *v);
-bool server_state_left(PeerData *v);
-bool server_state_handle(PeerData *v, Packet *packet);
-bool server_msg_handle(Server *server, PacketType type, PeerData *v, Packet *packet);
-bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *msg);
-unsigned long server_cmd_parse(String *string);
+bool				server_state_joined (PeerData* v);
+bool				server_state_left 	(PeerData* v);
+bool				server_state_handle	(PeerData* v, Packet* packet);
+bool 				server_msg_handle	(Server* server, PacketType type, PeerData* v, Packet* packet);
+bool 				server_cmd_handle	(Server* server, unsigned long hash, PeerData* v, String* msg);
+unsigned long 		server_cmd_parse	(String* string);
 
-bool server_worker(Server *server);
-bool server_broadcast(Server *server, Packet *packet, bool reliable);
-bool server_broadcast_ex(Server *server, Packet *packet, bool reliable, uint16_t ignore);
-bool server_send_msg(Server *server, ENetPeer *peer, const char *message);
-bool server_broadcast_msg(Server *server, const char *message);
+bool				server_worker 		(Server* server);
+bool				server_broadcast 	(Server* server, Packet* packet, bool reliable);
+bool				server_broadcast_ex (Server* server, Packet* packet, bool reliable, uint16_t ignore);
+bool 				server_send_msg		(Server* server, ENetPeer* peer, const char* message);
+bool 				server_broadcast_msg(Server* server, uint16_t sender, const char* message);
+
+int					server_total 		(Server* server);
+int					server_ingame 		(Server* server);
+PeerData* 			server_find_peer	(Server* server, uint16_t id);
+bool				server_disconnect	(Server* server, ENetPeer* peer, DisconnectReason reason, const char* text);
+bool				server_disconnect_id(Server* server, uint16_t id, DisconnectReason reason, const char* text);
 
 int server_total(Server *server);
 int server_ingame(Server *server);

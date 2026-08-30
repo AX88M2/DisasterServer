@@ -32,7 +32,7 @@ void lobby_check_vote(Server* server)
 			{
 				char buffer[256];
 				snprintf(buffer, 256, "vote kick " CLRCODE_GRN "succeeded~ (" CLRCODE_GRN "%d" " ~from " CLRCODE_RED "%d~)", server->lobby.vote.votecnt, server->lobby.vote.votetotal);
-				server_broadcast_msg(server, buffer);
+				server_broadcast_msg(server, 0, buffer);
 				
 				timeout_set(server->lobby.kick_target.nickname.value, server->lobby.kick_target.udid.value, server->lobby.kick_target.ip.value, time(NULL) + 60);
 				server_disconnect_id(server, server->lobby.kick_target.id, DR_KICKEDBYHOST, NULL);
@@ -43,7 +43,7 @@ void lobby_check_vote(Server* server)
 			{
 				char buffer[256];
 				snprintf(buffer, 256, "vote practice " CLRCODE_GRN "succeeded~ (" CLRCODE_GRN "%d" " ~from " CLRCODE_RED "%d~)", server->lobby.vote.votecnt, server->lobby.vote.votetotal);
-				server_broadcast_msg(server, buffer);
+				server_broadcast_msg(server, 0, buffer);
 
 				server->lobby.prac_countdown = 2 * TICKSPERSEC;
 				break;
@@ -58,7 +58,7 @@ void lobby_check_vote(Server* server)
 			{
 				char buffer[256];
 				snprintf(buffer, 256, "vote kick " CLRCODE_RED "failed~ (" CLRCODE_GRN "%d" " ~from " CLRCODE_RED "%d~)", server->lobby.vote.votecnt, server->lobby.vote.votetotal);
-				server_broadcast_msg(server, buffer);
+				server_broadcast_msg(server, 0, buffer);
 				break;
 			}
 
@@ -66,7 +66,7 @@ void lobby_check_vote(Server* server)
 			{
 				char buffer[256];
 				snprintf(buffer, 256, "vote practice " CLRCODE_RED "failed~ (" CLRCODE_GRN "%d" " ~from " CLRCODE_RED "%d~)", server->lobby.vote.votecnt, server->lobby.vote.votetotal);
-				server_broadcast_msg(server, buffer);
+				server_broadcast_msg(server, 0, buffer);
 				break;
 			}
 		}
@@ -270,7 +270,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 						{
 							char buffer[512];
 							snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
-							server_broadcast_msg(v->server, buffer);
+							server_broadcast_msg(v->server, 0, buffer);
 							break;
 						}
 
@@ -308,7 +308,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 								{
 									char buffer[512];
 									snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
-									server_broadcast_msg(v->server, buffer);
+									server_broadcast_msg(v->server, 0, buffer);
 									break;
 								}
 
@@ -348,11 +348,11 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					char buffer[356];
 					snprintf(buffer, 356, "%s~ " CLRCODE_YLW "started practice vote." CLRCODE_RST, v->nickname.value);
 
-					server_broadcast_msg(v->server, "-----------------------");
-					server_broadcast_msg(v->server, buffer);
-					server_broadcast_msg(v->server, "type " CLRCODE_GRN ".yes~ or ignore");
-					server_broadcast_msg(v->server, "results will be summarized in " CLRCODE_GRA "20~ sec");
-					server_broadcast_msg(v->server, "-----------------------");
+					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, buffer);
+					server_broadcast_msg(v->server, 0, "type " CLRCODE_GRN ".yes~ or ignore");
+					server_broadcast_msg(v->server, 0, "results will be summarized in " CLRCODE_GRA "20~ sec");
+					server_broadcast_msg(v->server, 0, "-----------------------");
 
 					vote_add(&v->server->lobby.vote, v->id);
 					v->vote_cooldown = 30 * TICKSPERSEC;
@@ -388,9 +388,9 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 				}
 			}
 
-			Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
-			if(!ignore)
-				server_broadcast_ex(v->server, packet, true, v->id);
+            Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
+            if (!ignore && g_config.chatfix)
+                server_broadcast_msg(v->server, v->id, msg.value);
 			
 			break;
 		}
@@ -429,7 +429,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 						{
 							char buffer[512];
 							snprintf(buffer, 512, "%s~ " CLRCODE_GRN "voted~.", v->nickname.value);
-							server_broadcast_msg(v->server, buffer);
+							server_broadcast_msg(v->server, 0, buffer);
 							break;
 						}
 
@@ -495,17 +495,17 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					char buffer[555];
 					snprintf(buffer, 555, "%s~ " CLRCODE_RED "started kick vote for " CLRCODE_RST "%s" CLRCODE_RST, v->nickname.value, v->server->lobby.kick_target.nickname.value);
 
-					server_broadcast_msg(v->server, "-----------------------");
-					server_broadcast_msg(v->server, buffer);
-					server_broadcast_msg(v->server, "type " CLRCODE_GRN ".yes~ or ignore");
-					server_broadcast_msg(v->server, "results will be summarized in " CLRCODE_GRA "20~ sec");
-					server_broadcast_msg(v->server, "-----------------------");
+					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, buffer);
+					server_broadcast_msg(v->server, 0, "type " CLRCODE_GRN ".yes~ or ignore");
+					server_broadcast_msg(v->server, 0,"results will be summarized in " CLRCODE_GRA "20~ sec");
+					server_broadcast_msg(v->server, 0, "-----------------------");
 
 					vote_add(&v->server->lobby.vote, v->id);
 					v->vote_cooldown = 30 * TICKSPERSEC;
 				}
 				else
-					server_broadcast_msg(v->server, CLRCODE_RED "specified player not found.");
+					server_broadcast_msg(v->server, 0, CLRCODE_RED "specified player not found.");
 			}
 
 			break;
