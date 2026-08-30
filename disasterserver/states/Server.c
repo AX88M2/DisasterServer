@@ -126,14 +126,15 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		char msg[100];
 		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server_count);
 
-		server_send_msg(v->server, v->peer, "-----------------------");
-		server_send_msg(v->server, v->peer, CLRCODE_RED "better/server~ v" STRINGIFY(BUILD_VERSION));
-		server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR __DATE__ " " CLRCODE_GRN __TIME__ CLRCODE_RST);
-		server_send_msg(v->server, v->peer, msg);
-		server_send_msg(v->server, v->peer, "-----------------------");
+		server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
+		server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
+		server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
+		server_send_msg(v->server, v->peer, "|type .help for command list~");
 
 		if(g_config.motd[0] != '\0')
 			server_send_msg(v->server, v->peer, g_config.motd);
+		if (v->mod_tool)
+			server_send_msg(v->server, v->peer, CLRCODE_RED "your mod is disallowed on this server" CLRCODE_RST);
 		if (v->op)
 			server_send_msg(v->server, v->peer, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
 
@@ -827,12 +828,12 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		char msg[100];
 		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server_count);
 
-		server_send_msg(v->server, v->peer, "-----------------------");
-		server_send_msg(v->server, v->peer, CLRCODE_RED "better" CLRCODE_BLU "server" CLRCODE_RST " v" STRINGIFY(BUILD_VERSION));
-		server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR __DATE__ " " CLRCODE_GRN __TIME__ CLRCODE_RST);
-		server_send_msg(v->server, v->peer, msg);
-		server_send_msg(v->server, v->peer, "-----------------------");
-		server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list" CLRCODE_RST);
+		server_send_msg(v->server, v->peer, BRACKET);
+		server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
+		server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
+		server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~ (aka &mini \\exe~)");
+		server_send_msg(v->server, v->peer, "|- original binary by " CLRCODE_YLW "hander");
+		server_send_msg(v->server, v->peer, BRACKET);
 		if(g_config.motd[0] != '\0')
                 server_send_msg(v->server, v->peer, g_config.motd);
 		break;

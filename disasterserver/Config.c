@@ -33,6 +33,8 @@ SERVER_API Config g_config =
 	.anticheat = true,
 	.pride = true,
 	.chatfix = true,
+	.random_mode = false,
+	.antiafk_system = false,
 };
 
 cJSON*	g_bans = NULL;
@@ -156,6 +158,8 @@ bool config_init(void)
 	g_config.log_debug =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_debug"));
 	g_config.anticheat =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "anticheat"));
 	g_config.pride =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "pride"));
+	g_config.random_mode =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "random_mode"));
+	g_config.antiafk_system = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "antiafk_system"));
 
 	snprintf(g_config.motd, 256, "%s", cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(json, "motd")));
 	cJSON_Delete(json);
@@ -189,6 +193,8 @@ SERVER_API bool config_save(void)
 	cJSON_AddItemToObject(json, "log_debug", cJSON_CreateBool(g_config.log_debug));
 	cJSON_AddItemToObject(json, "anticheat", cJSON_CreateBool(g_config.anticheat));
 	cJSON_AddItemToObject(json, "pride", cJSON_CreateBool(g_config.pride));
+	cJSON_AddItemToObject(json, "random_mode", cJSON_CreateBool(g_config.random_mode));
+	cJSON_AddItemToObject(json, "antiafk_system", cJSON_CreateBool(g_config.antiafk_system));
 	cJSON_AddItemToObject(json, "motd", cJSON_CreateString(g_config.motd));
 
 	RAssert(collection_save(CONFIG_FILE, json));

@@ -33,6 +33,8 @@ typedef struct
 	bool 	map_list[20];
 	Mutex	map_list_lock;
 	bool	chatfix;
+	bool	random_mode;
+	bool	antiafk_system;
 
 	char 	motd[256];
 } Config;
