@@ -11,16 +11,16 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
     MapList* list = (MapList*)component;
 	SDL_Rect bounds = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
 
-    int mouse_x, mouse_y;
+    float mouse_x, mouse_y;
     float scale_x, scale_y;
     Uint32 flags = SDL_GetMouseState(&mouse_x, &mouse_y);
-    SDL_RenderGetScale(renderer, &scale_x, &scale_y);
+    SDL_GetRenderScale(renderer, &scale_x, &scale_y);
 
     mouse_x /= scale_x;
     mouse_y /= scale_y;
 
     bool mouse_down = false;
-    if(flags & SDL_BUTTON(1))
+    if(flags & SDL_BUTTON_MASK(1))
     {
         if(!list->clicked)
         {
@@ -47,8 +47,8 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
     MutexLock(g_config.map_list_lock);
     for(int i = 0; i < MAP_COUNT; i++)
     {
-        SDL_Rect src = { 0, 272, 123, 104 };
-        SDL_Rect dst = { 8 + i % 4 * 143, 90 + i / 4 * 124 + list->scroll, 123, 104 };
+        SDL_FRect src = { 0, 272, 123, 104 };
+        SDL_FRect dst = { 8 + i % 4 * 143, 90 + i / 4 * 124 + list->scroll, 123, 104 };
 
         src.x = 480 + i * src.w;
 
@@ -62,13 +62,13 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
                 list->cb(component);
             }
 
-            if(flags & SDL_BUTTON(1))
+            if(flags & SDL_BUTTON_MASK(1))
                 dst.y += 2;
         }
 
         const Uint8 color = g_config.map_list[i] ? 255 : 96;
         SDL_SetTextureColorMod(g_textureSheet, color, color, color);
-        SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+        SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
     }
     MutexUnlock(g_config.map_list_lock);
 

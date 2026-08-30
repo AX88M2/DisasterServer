@@ -1,6 +1,6 @@
 #include <ui/Resources.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 // Resources
 #include <ui/Spritesheet.h>
@@ -8,13 +8,13 @@
 SDL_Texture* g_textureSheet = NULL;
 SDL_Texture* texture_load(SDL_Renderer* renderer, const void* data, unsigned int length)
 {
-	SDL_RWops* rw = SDL_RWFromConstMem(data, (int)length);
-	SDL_Surface* img = IMG_Load_RW(rw, 0);
+	SDL_IOStream* rw = SDL_IOFromConstMem(data, (int)length);
+	SDL_Surface* img = IMG_Load_IO(rw, 0);
 	if (!img)
 		return NULL;
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, img);
-	SDL_FreeSurface(img);
+	SDL_DestroySurface(img);
 
 	return texture;
 }

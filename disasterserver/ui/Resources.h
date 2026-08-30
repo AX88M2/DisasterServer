@@ -1,7 +1,7 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 #include <Server.h>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 
 #define INFO_TEXT CLRCODE_PUR "disasterserverui " CLRCODE_BLU __DATE__  " " CLRCODE_GRN __TIME__ CLRCODE_RST "\n"\

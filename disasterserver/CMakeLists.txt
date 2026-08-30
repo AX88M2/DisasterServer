@@ -1,7 +1,4 @@
-﻿option(DYLIB "Builds dynamic library" OFF)
-option(BUILD_UI "Builds UI using SDL" OFF)
-
-# Needed for packet stuff
+﻿# Needed for packet stuff
 include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 
@@ -108,6 +105,7 @@ if(ANDROID)
 
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 	find_package(Threads REQUIRED)
+	target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 	target_link_libraries(DisasterServer PRIVATE log enet m Threads::Threads)
 else()
 	if(DYLIB) # Build .dll or .so
@@ -120,6 +118,9 @@ else()
 			find_package(Threads REQUIRED)
 			target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads)
 		endif()
+
+		target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 	else() # Build executable
 		if(BUILD_UI)
 			set(UI_SOURCES
@@ -137,27 +138,25 @@ else()
 			)
 
 			if (WIN32)
-				find_package(SDL2 CONFIG REQUIRED)
-				find_package(SDL2_image CONFIG REQUIRED)
-				include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
-
 				add_executable(DisasterServer
-					WIN32
-					"icon.rc"
 					${SOURCES}
 					${UI_SOURCES}
 				)
 
-				target_link_libraries(DisasterServer PRIVATE ws2_32 enet winmm dbghelp $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-					$<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-					$<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
+				target_link_libraries(DisasterServer PRIVATE
+						ws2_32
+						enet
+						winmm
+						dbghelp
+						SDL3-static
+						SDL3_image::SDL3_image
+				)
+
+				target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+				target_sources(DisasterServer PRIVATE "${CMAKE_SOURCE_DIR}/resources/icon.rc")
 
 			else() # UNIX
-				include(FindPkgConfig)
-				PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
-				PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
-				include_directories(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS})
-
 				add_executable(DisasterServer
 					${SOURCES}
 					${UI_SOURCES}
@@ -165,8 +164,13 @@ else()
 
 				set(THREADS_PREFER_PTHREAD_FLAG ON)
 				find_package(Threads REQUIRED)
-				target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
+				target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads
+						SDL3::SDL3-static
+						SDL3_image::SDL3_image
+				)
 			endif()
+
+			target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 		else()
 			add_executable(DisasterServer
@@ -181,6 +185,8 @@ else()
 				find_package(Threads REQUIRED)
 				target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads)
 			endif()
+
+			target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 		endif()
 	endif()

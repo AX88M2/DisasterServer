@@ -10,25 +10,31 @@
 bool playerlist_update(SDL_Renderer* renderer, struct _Component* component)
 {
     PlayerList* list = (PlayerList*)component;
-    SDL_Rect src = { 4528, 0, 144, 176 };
-    SDL_Rect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
+    SDL_FRect src = { 4528, 0, 144, 176 };
+    SDL_FRect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
 
     SDL_Point mouse;
     float scale_x, scale_y;
-    Uint32 flags = SDL_GetMouseState(&mouse.x, &mouse.y);
-    SDL_RenderGetScale(renderer, &scale_x, &scale_y);
+    float mo_x = 0;
+    float mo_y = 0;
+
+    Uint32 flags = SDL_GetMouseState(&mo_x, &mo_y);
+    mouse.x = mo_x;
+    mouse.y = mo_y;
+
+    SDL_GetRenderScale(renderer, &scale_x, &scale_y);
 
     mouse.x /= scale_x;
     mouse.y /= scale_y;
 
-    if (!(flags & SDL_BUTTON(1)))
+    if (!(flags & SDL_BUTTON_MASK(1)))
         list->clicked = false;
 
-    SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+    SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 
-    SDL_Rect title_src = (SDL_Rect){ 4672, 0, 80, 8 };
-    SDL_Rect title_dst = (SDL_Rect){ (list->x + 32) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 80 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
-    SDL_RenderCopy(renderer, g_textureSheet, &title_src, &title_dst);
+    SDL_FRect title_src = { 4672, 0, 80, 8 };
+    SDL_FRect title_dst = { (list->x + 32) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 80 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
+    SDL_RenderTexture(renderer, g_textureSheet, &title_src, &title_dst);
 
     Label label = LabelCreate(list->x + 8, list->y + 8, "", INTERFACE_SCALE);
     PlayerButton op = (PlayerButton){ 4672, 16, 15, 8, button_update, list->x + 20 * 2, list->y - 2 + 8, 15, 8, ui_button_op, 0, { 0 } };
@@ -51,7 +57,8 @@ bool playerlist_update(SDL_Renderer* renderer, struct _Component* component)
         if(!list->clicked && SDL_PointInRect(&mouse, &check))
         {
             SDL_SetRenderDrawColor(renderer, 73, 0, 0, 255);
-            SDL_RenderFillRect(renderer, &check);
+            SDL_FRect fcheck = { check.x, check.y, check.w, check.h };
+            SDL_RenderFillRect(renderer, &fcheck);
 
             snprintf(text, 128, "%s", "...");
             op.peer = list->peers[i];
@@ -78,32 +85,37 @@ bool playerlist_update(SDL_Renderer* renderer, struct _Component* component)
 bool playerlist_bans_update(SDL_Renderer* renderer, struct _Component* component)
 {
     PlayerListConfig* list = (PlayerListConfig*)component;
-    SDL_Rect src = { 4528, 0, 144, 176 };
-    SDL_Rect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
+    SDL_FRect src = { 4528, 0, 144, 176 };
+    SDL_FRect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
 
-    SDL_Point mouse;
+    SDL_FPoint mouse;
     float scale_x, scale_y;
-    Uint32 flags = SDL_GetMouseState(&mouse.x, &mouse.y);
-    SDL_RenderGetScale(renderer, &scale_x, &scale_y);
+
+    float mo_x = 0;
+    float mo_y = 0;
+    Uint32 flags = SDL_GetMouseState(&mo_x, &mo_y);
+    mouse.x = mo_x;
+    mouse.y = mo_y;
+    SDL_GetRenderScale(renderer, &scale_x, &scale_y);
 
     mouse.x /= scale_x;
     mouse.y /= scale_y;
 
-    if (!(flags & SDL_BUTTON(1)))
+    if (!(flags & SDL_BUTTON_MASK(1)))
         list->clicked = false;
 
-    SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+    SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 
-    SDL_Rect title_src = (SDL_Rect){ 4763, 0, 58, 8 };
-    SDL_Rect title_dst = (SDL_Rect){ (list->x + 42) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 58 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
-    SDL_RenderCopy(renderer, g_textureSheet, &title_src, &title_dst);
+    SDL_FRect title_src = { 4763, 0, 58, 8 };
+    SDL_FRect title_dst = { (list->x + 42) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 58 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
+    SDL_RenderTexture(renderer, g_textureSheet, &title_src, &title_dst);
 
     Label label = LabelCreate(list->x + 8, list->y + 8, "", INTERFACE_SCALE);
     DeleteButton delete = (DeleteButton){ 4672, 40, 43, 8, button_update, list->x + 20 * 2, list->y - 2 + 8, 43, 8, ui_update_delete, false, BANS_FILE, g_bans, NULL };
 
     MutexLock(g_banMut);
     {
-        if (SDL_PointInRect(&mouse, &dst))
+        if (SDL_PointInRectFloat(&mouse, &dst))
         {
             list->page -= g_mouseWheel;
             list->page = SDL_clamp(list->page, 0, SDL_max((int)ceil(cJSON_GetArraySize(g_bans) / 9.0) - 1, 0));
@@ -126,9 +138,9 @@ bool playerlist_bans_update(SDL_Renderer* renderer, struct _Component* component
             label.y += 8 * INTERFACE_SCALE;
             delete.d_y += 8 * INTERFACE_SCALE;
 
-            SDL_Rect check = (SDL_Rect){ (label.x - 2) * INTERFACE_SCALE, (label.y - 4) * INTERFACE_SCALE, 132 * INTERFACE_SCALE, 12 * INTERFACE_SCALE };
+            SDL_FRect check = (SDL_FRect){ (label.x - 2) * INTERFACE_SCALE, (label.y - 4) * INTERFACE_SCALE, 132 * INTERFACE_SCALE, 12 * INTERFACE_SCALE };
             
-            if(!list->clicked && SDL_PointInRect(&mouse, &check))
+            if(!list->clicked && SDL_PointInRectFloat(&mouse, &check))
             {                
                 SDL_SetRenderDrawColor(renderer, 73, 0, 0, 255);
                 SDL_RenderFillRect(renderer, &check);
@@ -165,32 +177,33 @@ bool playerlist_bans_update(SDL_Renderer* renderer, struct _Component* component
 bool playerlist_op_update(SDL_Renderer* renderer, struct _Component* component)
 {
     PlayerListConfig* list = (PlayerListConfig*)component;
-    SDL_Rect src = { 4528, 0, 144, 176 };
-    SDL_Rect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
+    SDL_FRect src = { 4528, 0, 144, 176 };
+    SDL_FRect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
 
-    SDL_Point mouse;
+    SDL_FPoint mouse;
     float scale_x, scale_y;
     Uint32 flags = SDL_GetMouseState(&mouse.x, &mouse.y);
-    SDL_RenderGetScale(renderer, &scale_x, &scale_y);
+
+    SDL_GetRenderScale(renderer, &scale_x, &scale_y);
 
     mouse.x /= scale_x;
     mouse.y /= scale_y;
 
-    if (!(flags & SDL_BUTTON(1)))
+    if (!(flags & SDL_BUTTON_MASK(1)))
         list->clicked = false;
 
-    SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+    SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 
-    SDL_Rect title_src = (SDL_Rect){ 4672, 8, 96, 8 };
-    SDL_Rect title_dst = (SDL_Rect){ (list->x + 24) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 96 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
-    SDL_RenderCopy(renderer, g_textureSheet, &title_src, &title_dst);
+    SDL_FRect title_src = { 4672, 8, 96, 8 }; // Operator list
+    SDL_FRect title_dst = { (list->x + 24) * INTERFACE_SCALE, (list->y + 6) * INTERFACE_SCALE, 96 * INTERFACE_SCALE, 8 * INTERFACE_SCALE };
+    SDL_RenderTexture(renderer, g_textureSheet, &title_src, &title_dst);
 
     Label label = LabelCreate(list->x + 8, list->y + 8, "", INTERFACE_SCALE);
     DeleteButton delete = (DeleteButton){ 4672, 40, 43, 8, button_update, list->x + 20 * 2, list->y - 2 + 8, 43, 8, ui_update_delete, false, OPERATORS_FILE, g_ops, NULL };
 
     MutexLock(g_opMut);
-    {        
-        if (SDL_PointInRect(&mouse, &dst))
+    {
+        if (SDL_PointInRectFloat(&mouse, &dst))
         {
             list->page -= g_mouseWheel;
             list->page = SDL_clamp(list->page, 0, SDL_max((int)ceil(cJSON_GetArraySize(g_ops) / 9.0) - 1, 0));
@@ -213,10 +226,10 @@ bool playerlist_op_update(SDL_Renderer* renderer, struct _Component* component)
             label.y += 8 * INTERFACE_SCALE;
             delete.d_y += 8 * INTERFACE_SCALE;
 
-            SDL_Rect check = (SDL_Rect){ (label.x - 2) * INTERFACE_SCALE, (label.y - 4) * INTERFACE_SCALE, 132 * INTERFACE_SCALE, 12 * INTERFACE_SCALE };
+            SDL_FRect check = { (label.x - 2) * INTERFACE_SCALE, (label.y - 4) * INTERFACE_SCALE, 132 * INTERFACE_SCALE, 12 * INTERFACE_SCALE };
             char text[128];
 
-            if(!list->clicked && SDL_PointInRect(&mouse, &check))
+            if(!list->clicked && SDL_PointInRectFloat(&mouse, &check))
             {                
                 SDL_SetRenderDrawColor(renderer, 73, 0, 0, 255);
                 SDL_RenderFillRect(renderer, &check);

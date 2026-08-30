@@ -5,16 +5,16 @@
 bool ping_update(SDL_Renderer* renderer, struct _Component* component)
 {
     PingLimit* list = (PingLimit*)component;
-    SDL_Rect src = { 4272, 0, 128, 40 };
-    SDL_Rect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
+    SDL_FRect src = { 4272, 0, 128, 40 };
+    SDL_FRect dst = { list->x * INTERFACE_SCALE, list->y * INTERFACE_SCALE, list->w * INTERFACE_SCALE, list->h * INTERFACE_SCALE };
 
-    int mouse_x, mouse_y;
+    float mouse_x, mouse_y;
     float scale_x, scale_y;
     Uint32 flags = SDL_GetMouseState(&mouse_x, &mouse_y);
-    SDL_RenderGetScale(renderer, &scale_x, &scale_y);
+    SDL_GetRenderScale(renderer, &scale_x, &scale_y);
 
     bool mouse_down = false;
-    if (flags & SDL_BUTTON(1))
+    if (flags & SDL_BUTTON_MASK(1))
     {
         if (!list->clicked)
         {
@@ -32,8 +32,8 @@ bool ping_update(SDL_Renderer* renderer, struct _Component* component)
     {
         src.x += src.w;
 
-        SDL_Rect arrow_src = { 1680, 0, 116, 32 };
-        SDL_Rect arrow_dst = { dst.x, dst.y, 116 * INTERFACE_SCALE, 32 * INTERFACE_SCALE };
+        SDL_FRect arrow_src = { 1680, 0, 116, 32 };
+        SDL_FRect arrow_dst = { dst.x, dst.y, 116 * INTERFACE_SCALE, 32 * INTERFACE_SCALE };
 
         const char* text;
 
@@ -56,11 +56,11 @@ bool ping_update(SDL_Renderer* renderer, struct _Component* component)
             config_save();
         }
 
-        SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
-        SDL_RenderCopy(renderer, g_textureSheet, &arrow_src, &arrow_dst);
+        SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
+        SDL_RenderTexture(renderer, g_textureSheet, &arrow_src, &arrow_dst);
     }
     else
-        SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+        SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 
     char* name;
     switch (g_config.ping_limit)

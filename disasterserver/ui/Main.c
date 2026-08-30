@@ -4,8 +4,8 @@
 #include <ui/Components.h>
 #include <ui/Presets.h>
 #include <io/Threads.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <Lib.h>
 #include <Maps.h>
 #include <Server.h>
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
 		char msg[1024];
 		snprintf(msg, 1024, "%s\n\nPress OK to fallback to console mode.", SDL_GetError());
@@ -172,9 +172,8 @@ int main(int argc, char** argv)
 		return console_loop();
 	}
 
-	SDL_Window* window;
-	SDL_Renderer* renderer;
-	if (!(window = SDL_CreateWindow("DisasterServer v" STRINGIFY(BUILD_VERSION) " (Modified)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480 * INTERFACE_SCALE, 270 * INTERFACE_SCALE, SDL_WINDOW_SHOWN)))
+	SDL_Window* window = SDL_CreateWindow("DisasterServer v" STRINGIFY(BUILD_VERSION) " (Modified)", 480 * INTERFACE_SCALE, 270 * INTERFACE_SCALE, 0);
+	if (window == NULL)
 	{
 		char msg[1024];
 		snprintf(msg, 1024, "%s\n\nPress OK to fallback to console mode.", SDL_GetError());
@@ -183,7 +182,9 @@ int main(int argc, char** argv)
 		return console_loop();
 	}
 
-	if (!(renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)))
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
+
+	if (renderer == NULL)
 	{
 		char msg[1024];
 		snprintf(msg, 1024, "%s\n\nPress OK to fallback to console mode.", SDL_GetError());
@@ -191,14 +192,16 @@ int main(int argc, char** argv)
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error (Report to dev)", msg, NULL);
 		return console_loop();
 	}
+
+	SDL_SetDefaultTextureScaleMode(renderer, SDL_SCALEMODE_NEAREST);
 
 	if (!resources_load(renderer))
 		return console_loop();
 
 	init_info();
 	log_hook(log_msg);
-	SDL_RenderSetLogicalSize(renderer, 480 * INTERFACE_SCALE, 270 * INTERFACE_SCALE);
-	SDL_RenderSetVSync(renderer, true);
+	SDL_SetRenderLogicalPresentation(renderer, 480 * INTERFACE_SCALE, 270 * INTERFACE_SCALE, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+	SDL_SetRenderVSync(renderer, true);
 
 	Label label;
 	Thread thr;
@@ -214,11 +217,11 @@ int main(int argc, char** argv)
 		{
 			switch (ev.type)
 			{
-			case SDL_QUIT:
+			case SDL_EVENT_QUIT:
 				running = false;
 				break;
 
-			case SDL_MOUSEWHEEL:
+			case SDL_EVENT_MOUSE_WHEEL:
 				g_mouseWheel = ev.wheel.y;
 				break;
 			}
@@ -226,13 +229,13 @@ int main(int argc, char** argv)
 		
 		SDL_RenderClear(renderer);
 		{
-			SDL_Rect src = (SDL_Rect){ 480 + ((int)bg / 3 % 28) * 96, 446, 96, 96 };
+			SDL_FRect src = { 480 + ((int)bg / 3 % 28) * 96, 446, 96, 96 };
 			for(int i = 0; i < 6 * INTERFACE_SCALE; i++)
 			{
 				for(int j = 0; j < 3 * INTERFACE_SCALE; j++)
 				{
-					SDL_Rect dst = (SDL_Rect){ -((int)bg / 2 % 96) + i * 96, j * 96, 96, 96 };
-					SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+					SDL_FRect dst = { -((int)bg / 2 % 96) + i * 96, j * 96, 96, 96 };
+					SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 				}
 			}
 
@@ -301,11 +304,8 @@ void init_info()
         snprintf(compiler, 128, "unknown");
     #endif
 
-	SDL_version sdl_ver;
-	SDL_GetVersion(&sdl_ver);
-	const SDL_version* img_ver = IMG_Linked_Version();
 
-	snprintf(info_text, 1024, INFO_TEXT, compiler, sdl_ver.major, sdl_ver.minor, sdl_ver.patch, img_ver->major, img_ver->minor, img_ver->patch);
+	snprintf(info_text, 1024, INFO_TEXT, compiler, SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_MICRO_VERSION);
 }
 
 bool main_menu(Component* component)

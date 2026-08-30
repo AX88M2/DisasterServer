@@ -4,8 +4,8 @@
 bool label_update(SDL_Renderer* renderer, struct _Component* component)
 {
 	Label* label = (Label*)component;
-	int x = label->x;
-	int y = label->y;
+	float x = label->x;
+	float y = label->y;
 	SDL_Color clr = COLOR_WHITE;
 
 	for (int i = 0; i < utf8_strlen(label->text); i++)
@@ -153,9 +153,9 @@ bool label_update(SDL_Renderer* renderer, struct _Component* component)
 		}
 
 		SDL_SetTextureColorMod(g_textureSheet, clr.r, clr.g, clr.b);
-		SDL_Rect src = (SDL_Rect){ 480 + ind * 8, 432, 8, 6 };
-		SDL_Rect dst = (SDL_Rect){ x * label->scale, y * label->scale, 8 * label->scale, 6 * label->scale };
-		SDL_RenderCopy(renderer, g_textureSheet, &src, &dst);
+		SDL_FRect src = { 480 + ind * 8, 432, 8, 6 };
+		SDL_FRect dst = { x * label->scale, y * label->scale, 8 * label->scale, 6 * label->scale };
+		SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 		x += 6;
 
 		switch (c)

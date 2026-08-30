@@ -1,11 +1,11 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 #include <Maps.h>
 #include <ui/Resources.h>
 
-#define COMPONENT_BODY int x, y, w, h; UpdateCallback update
+#define COMPONENT_BODY float x, y, w, h; UpdateCallback update
 #define COLOR_WHITE (SDL_Color)	{ 255, 255, 255, 255 }
 #define COLOR_RED	(SDL_Color) { 194, 0, 55, 255 }
 #define COLOR_GRN	(SDL_Color) { 15, 255, 57, 255 }
@@ -37,7 +37,7 @@ bool label_update(SDL_Renderer* renderer, struct _Component* component);
 typedef struct
 {
 	COMPONENT_BODY;
-	int d_x, d_y, d_w, d_h;
+	float d_x, d_y, d_w, d_h;
 } Image;
 #define ImageCreate(x, y, w, h, s_x, s_y, s_w, s_h) (Image) { s_x, s_y, s_w, s_h, image_update, x, y, w, h }
 bool image_update(SDL_Renderer* renderer, struct _Component* component);
@@ -46,7 +46,7 @@ typedef bool (*ButtonCallback)(struct _Component* component);
 typedef struct
 {
 	COMPONENT_BODY;
-	int d_x, d_y, d_w, d_h;
+	float d_x, d_y, d_w, d_h;
 	ButtonCallback cb;
 	bool clicked;
 } Button;
@@ -56,7 +56,7 @@ bool button_update(SDL_Renderer* renderer, struct _Component* component);
 typedef struct
 {
 	COMPONENT_BODY;
-	int d_x, d_y, d_w, d_h;
+	float d_x, d_y, d_w, d_h;
 	ButtonCallback cb;
 	bool clicked, reverse;
 	bool* value;
@@ -67,7 +67,7 @@ bool tbutton_update(SDL_Renderer* renderer, struct _Component* component);
 typedef struct
 {
 	COMPONENT_BODY;
-	int d_x, d_y, d_w, d_h;
+	float d_x, d_y, d_w, d_h;
 	ButtonCallback cb;
 	bool clicked;
 	PeerData peer;
@@ -116,7 +116,7 @@ bool playerlist_update(SDL_Renderer* renderer, struct _Component* component);
 typedef struct
 {
 	COMPONENT_BODY;
-	int d_x, d_y, d_w, d_h;
+	float d_x, d_y, d_w, d_h;
 	ButtonCallback cb;
 	bool clicked;
 
