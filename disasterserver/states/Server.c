@@ -448,29 +448,28 @@ bool server_worker(Server *server)
 	return true;
 }
 
-bool server_disconnect(Server *server, ENetPeer *peer, DisconnectReason reason, const char *text)
+bool server_disconnect(Server* server, ENetPeer* peer, DisconnectReason reason, const char* text)
 {
 	if (server)
 	{
-		PeerData *data = (PeerData *)peer->data;
-		if (data->disconnecting)
+		PeerData* data = (PeerData*)peer->data;
+		if(data->disconnecting)
 			return true;
 
-		// FIXME: crashes v110 too lazy to fix
-		// if(reason == DR_OTHER && text != NULL)
-		// {
-		// 	Packet pack;
-		// 	PacketCreate(&pack, SERVER_PLAYER_FORCE_DISCONNECT);
-		// 	PacketWrite(&pack, packet_write8, reason);
-		// 	PacketWrite(&pack, packet_writestr, __Str(text));
-		// 	packet_send(peer, &pack, true);
-		// 	enet_peer_disconnect_later(peer, reason);
-		// }
-		// else
-		enet_peer_disconnect(peer, reason);
-
-		if (!text)
+		if(reason == DR_OTHER && text != NULL)
 		{
+			Packet pack;
+			PacketCreate(&pack, SERVER_PLAYER_FORCE_DISCONNECT);
+			PacketWrite(&pack, packet_write8, reason);
+			PacketWrite(&pack, packet_writestr, __Str(text));
+			packet_send(peer, &pack, true);
+			enet_peer_disconnect_later(peer, reason);
+		}
+		else
+			enet_peer_disconnect(peer, reason);
+
+		if(!text)
+		{	
 			Info("Disconnected id %d %d: No text.", data->id, reason);
 		}
 		else
