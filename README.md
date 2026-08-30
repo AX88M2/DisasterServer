@@ -2,7 +2,7 @@
 This is a custom server for Sonic.exe The Disaster 2D Remake.
 
 Servers for version `100` of the game.
-V100 You can download [here](https://github.com/teamexeempire/disaster-launcher/releases/tag/100)
+V100 You can download [here](https://github.com/teamexeempire/disaster-launcher/releases/tag/100).
 
 # Compiling on the Command line
 
