@@ -131,8 +131,9 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR __DATE__ " " CLRCODE_GRN __TIME__ CLRCODE_RST);
 		server_send_msg(v->server, v->peer, msg);
 		server_send_msg(v->server, v->peer, "-----------------------");
-		server_send_msg(v->server, v->peer, g_config.motd);
 
+		if(g_config.motd[0] != '\0')
+			server_send_msg(v->server, v->peer, g_config.motd);
 		if (v->op)
 			server_send_msg(v->server, v->peer, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
 
@@ -447,29 +448,28 @@ bool server_worker(Server *server)
 	return true;
 }
 
-bool server_disconnect(Server *server, ENetPeer *peer, DisconnectReason reason, const char *text)
+bool server_disconnect(Server* server, ENetPeer* peer, DisconnectReason reason, const char* text)
 {
 	if (server)
 	{
-		PeerData *data = (PeerData *)peer->data;
-		if (data->disconnecting)
+		PeerData* data = (PeerData*)peer->data;
+		if(data->disconnecting)
 			return true;
 
-		// FIXME: crashes v110 too lazy to fix
-		// if(reason == DR_OTHER && text != NULL)
-		// {
-		// 	Packet pack;
-		// 	PacketCreate(&pack, SERVER_PLAYER_FORCE_DISCONNECT);
-		// 	PacketWrite(&pack, packet_write8, reason);
-		// 	PacketWrite(&pack, packet_writestr, __Str(text));
-		// 	packet_send(peer, &pack, true);
-		// 	enet_peer_disconnect_later(peer, reason);
-		// }
-		// else
-		enet_peer_disconnect(peer, reason);
-
-		if (!text)
+		if(reason == DR_OTHER && text != NULL)
 		{
+			Packet pack;
+			PacketCreate(&pack, SERVER_PLAYER_FORCE_DISCONNECT);
+			PacketWrite(&pack, packet_write8, reason);
+			PacketWrite(&pack, packet_writestr, __Str(text));
+			packet_send(peer, &pack, true);
+			enet_peer_disconnect_later(peer, reason);
+		}
+		else
+			enet_peer_disconnect(peer, reason);
+
+		if(!text)
+		{	
 			Info("Disconnected id %d %d: No text.", data->id, reason);
 		}
 		else
@@ -833,7 +833,8 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		server_send_msg(v->server, v->peer, msg);
 		server_send_msg(v->server, v->peer, "-----------------------");
 		server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list" CLRCODE_RST);
-		server_send_msg(v->server, v->peer, g_config.motd);
+		if(g_config.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.motd);
 		break;
 	}
 
@@ -850,7 +851,7 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		char format[100];
 		snprintf(format, 100, "\\%s~, you /sti@nk~", buff);
 
-		RAssert(server_broadcast_msg(v->server, format));
+		RAssert(server_broadcast_msg(v->server, 0, format));
 		break;
 	}
 	}
@@ -951,11 +952,11 @@ bool server_send_msg(Server *server, ENetPeer *peer, const char *message)
 	return true;
 }
 
-bool server_broadcast_msg(Server *server, const char *message)
+bool server_broadcast_msg(Server* server, uint16_t sender, const char* message)
 {
 	Packet pack;
 	PacketCreate(&pack, CLIENT_CHAT_MESSAGE);
-	PacketWrite(&pack, packet_write16, 0);
+	PacketWrite(&pack, packet_write16, sender);
 	PacketWrite(&pack, packet_writestr, string_lower(__Str(message)));
 
 	server_broadcast(server, &pack, true);

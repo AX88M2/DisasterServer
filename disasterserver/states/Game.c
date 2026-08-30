@@ -1209,9 +1209,9 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			PacketRead(msg, packet, packet_readstr, String);
 			AssertOrDisconnect(v->server, string_length(&msg) <= 40);
 
-			Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
-			if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg))
-				server_broadcast_ex(v->server, packet, true, v->id);
+            Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
+            if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg) && g_config.chatfix)
+                server_broadcast_msg(v->server, v->id, msg.value);
 
 			break;
 		}
