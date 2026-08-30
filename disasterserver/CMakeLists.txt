@@ -41,11 +41,11 @@ set(SOURCES
 	"Palette.c"
 	"Zone.c"
 
-	"Lobby.c"
-	"Mapvote.c"
-	"CharSelect.c"
-	"Game.c"
-	"Results.c"
+	"states/Lobby.c"
+	"states/Mapvote.c"
+	"states/CharSelect.c"
+	"states/Game.c"
+	"states/Results.c"
 	"io/Time.c"
 
 	"entities/Ring.c"
