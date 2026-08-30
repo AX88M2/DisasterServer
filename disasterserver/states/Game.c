@@ -1503,10 +1503,14 @@ bool game_player_tick(Server* server)
 
     bool exe_camp = false;
     int survivors = 0, demonized = 0;
-    static int afk_tick_counter = 0;
-    afk_tick_counter++;
+
+	static int afk_tick_counter = 0;
+
+	afk_tick_counter++;
+
     bool check_afk = (afk_tick_counter >= 60);
-    if (check_afk)
+
+	if (check_afk)
         afk_tick_counter = 0;
 
     for(size_t i = 0; i < server->peers.capacity; i++)

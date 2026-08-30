@@ -126,12 +126,10 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		char msg[100];
 		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server_count);
 
-		server_send_msg(v->server, v->peer, BRACKET);
 		server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
 		server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
 		server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
 		server_send_msg(v->server, v->peer, "|type .help for command list~");
-		server_send_msg(v->server, v->peer, BRACKET);
 
 		if(g_config.motd[0] != '\0')
 			server_send_msg(v->server, v->peer, g_config.motd);

@@ -165,12 +165,10 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			char msg[100];
 			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server_count);
 
-			server_send_msg(v->server, v->peer, BRACKET);
 			server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
 			server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
 			server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
 			server_send_msg(v->server, v->peer, "|type .help for command list~");
-			server_send_msg(v->server, v->peer, BRACKET);
 
             if(g_config.motd[0] != '\0')
                 server_send_msg(v->server, v->peer, g_config.motd);
@@ -189,7 +187,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			v->timeout = 0;
 
 			// cheats
-			if(strstr(msg.value, "i want big burgr"))
+			if(strstr(msg.value, ".exe"))
 			{
 				if(v->op)
 				{
@@ -199,9 +197,9 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					PacketCreate(&pack, SERVER_LOBBY_EXE_CHANCE);
 					PacketWrite(&pack, packet_write8, v->exe_chance);
 					RAssert(packet_send(v->peer, &pack, true));
+					RAssert(server_send_msg(v->server, v->peer, "you were deported straight to " CLRCODE_RED "hell" CLRCODE_RST));
 				}
 
-				RAssert(server_send_msg(v->server, v->peer, CLRCODE_GRA "you were sent to " CLRCODE_RED "brazil" CLRCODE_RST));
 				return true;
 			}
 
