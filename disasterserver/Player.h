@@ -52,6 +52,8 @@ typedef struct
 	uintptr_t	data[4]; /* Can be used as pointer/data field */
 	Vector2		start_pos;
 	Vector2		pos;
+	Vector2		last_pos;
+	int			afk_counter;
 
 	struct
 	{

@@ -107,7 +107,7 @@ bool game_state_check(Server* server)
 bool game_init(int exe, int8_t map, Server* server)
 {
 	Debug("Attepting to enter ST_GAME...");
-	RAssert(server_ingame(server) > 1);
+	RAssert(server_ingame(server) > 0);
 
 	server->state = ST_GAME;
 	server->game = (Game)
@@ -122,7 +122,7 @@ bool game_init(int exe, int8_t map, Server* server)
 		.entid = 0,
 		.time = TICKSPERSEC,
 		.elapsed = 0.0,
-		.start_timeout = 15.0 * TICKSPERSEC
+		.start_timeout = 15.0 * TICKSPERSEC,
 	};
 
 	// Setup cooldowns
@@ -154,6 +154,8 @@ bool game_init(int exe, int8_t map, Server* server)
 
 		v->plr.ready = false;
 		v->plr.mod_tool = v->mod_tool;
+		v->plr.afk_counter = 0;
+		v->plr.last_pos = (Vector2){0, 0};
 
 		for (int i = 0; i < 5; i++)
 			v->plr.revival_init[i] = -1;
@@ -1249,24 +1251,32 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			PacketRead(y, packet, packet_read16, uint16_t);
 			PacketRead(_xspd, packet, packet_read16, uint16_t);
 			PacketRead(_yspd, packet, packet_read16, uint16_t);
-			
 			PacketRead(state, packet, packet_read8, uint8_t);
 			PacketRead(_angle, packet, packet_read16, int16_t);
 			PacketRead(_index, packet, packet_read8, uint8_t);
 			PacketRead(_xscale, packet, packet_read8, int8_t);
 
 			Vector2 new_pos = { x, y };
+
+			if (g_config.antiafk_system) {
+				float dist_moved = vector2_dist(&v->plr.last_pos, &new_pos);
+				if (dist_moved > 0.5f) {
+					v->plr.afk_counter = 0;
+					v->plr.last_pos = new_pos;
+				}
+			}
+
 			#define PLAYER_ATTACKING 1 << 4
-			
+
 			int duration = 2000;
-			if(v->server->game.exe != v->id)
+			if (v->server->game.exe != v->id)
 			{
 				PacketRead(hp, packet, packet_read8, int8_t);
 				PacketRead(revival, packet, packet_read8, uint8_t);
 				PacketRead(rings, packet, packet_read16, int16_t);
 				PacketRead(flags, packet, packet_read8, uint8_t);
 
-				if(!(v->plr.flags & PLAYER_DEAD) && !(v->plr.flags & PLAYER_DEMONIZED))
+				if (!(v->plr.flags & PLAYER_DEAD) && !(v->plr.flags & PLAYER_DEMONIZED))
 				{
 					if (v->server->game.exe != v->id)
 					{
@@ -1289,13 +1299,11 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				}
 
 				v->plr.is_attacking = flags & PLAYER_ATTACKING;
-				switch(v->surv_char)
+				switch (v->surv_char)
 				{
 					case CH_EGGMAN:
-					{
 						duration = 3000;
 						break;
-					}
 				}
 			}
 			else
@@ -1304,9 +1312,9 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				v->plr.is_attacking = flags & PLAYER_ATTACKING;
 			}
 
-			if(v->server->game.end <= 0 && v->plr.is_attacking)
+			if (v->server->game.end <= 0 && v->plr.is_attacking)
 			{
-				if(v->plr.attack_timer <= 0)
+				if (v->plr.attack_timer <= 0)
 				{
 					time_start(&v->plr.last_attack);
 					v->plr.attack_timer = 1;
@@ -1315,7 +1323,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				{
 					double elapsed = time_end(&v->plr.last_attack);
 					v->plr.attack_timer += elapsed;
-					if(v->plr.attack_timer >= duration)
+					if (v->plr.attack_timer >= duration)
 					{
 						server_disconnect(v->server, v->peer, DR_KICKEDBYHOST, "nuh-uh!");
 						return true;
@@ -1325,11 +1333,9 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			}
 			else
 				v->plr.attack_timer = 0;
-			
-			// ping limit disabled
-			if(g_config.ping_limit == UINT16_MAX)
+
+			if (g_config.ping_limit == UINT16_MAX)
 			{
-				// Calc distance before setting new posx
 				float dist = vector2_dist(&v->plr.pos, &new_pos);
 				if (v->server->game.started && !v->plr.mod_tool && v->plr.pos.x != 0 && v->plr.pos.y != 0)
 				{
@@ -1344,13 +1350,12 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 								case 8:
 								case 6:
 									break;
-				
 								default:
 									server_disconnect(v->server, v->peer, DR_OTHER, "blud used a portal gun lmfao");
 									return true;
 							}
 						}
-				
+
 						if (dist > 60)
 						{
 							if (!player_add_error(v->server, v, 500))
@@ -1361,7 +1366,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 						v->plr.ex_teleport--;
 				}
 			}
-			
+
 			v->plr.pos = new_pos;
 			v->plr.timeout = 0;
 
@@ -1382,7 +1387,6 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 					}
 					else if (dist >= 300)
 					{
-						// purpl men
 						server_disconnect(v->server, v->peer, DR_OTHER,
 							"@@@@@@@......@@@\n"
 							"@@@@@@@......@@@\n"
@@ -1404,7 +1408,6 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				if (v->plr.mod_tool_timer == 60)
 				{
 					v->plr.start_pos = v->plr.pos;
-
 					Packet pack;
 					PacketCreate(&pack, SERVER_FELLA);
 					PacketWrite(&pack, packet_write16, v->id);
@@ -1415,7 +1418,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				}
 			}
 
-			if(v->plr.state != state || time_end(&v->plr.last_packet) >= 15 * 2.9)
+			if (v->plr.state != state || time_end(&v->plr.last_packet) >= 15 * 2.9)
 			{
 				v->plr.state = state;
 				time_start(&v->plr.last_packet);
@@ -1485,259 +1488,283 @@ bool game_entity_tick(Server* server)
 
 bool game_player_tick(Server* server)
 {
-	// Update player cooldown
-	for (int i = 0; i < PLAYER_COOLCOUNT; i++)
-	{
-		if (server->game.cooldowns[i] > 0)
-			server->game.cooldowns[i] -= server->delta;
-		else
-			server->game.cooldowns[i] = 0;
-	}
-	
-	PeerData* exe = server_find_peer(server, server->game.exe);
-	if(!exe)
-		return true;
+    // Update player cooldown
+    for (int i = 0; i < PLAYER_COOLCOUNT; i++)
+    {
+        if (server->game.cooldowns[i] > 0)
+            server->game.cooldowns[i] -= server->delta;
+        else
+            server->game.cooldowns[i] = 0;
+    }
+    
+    PeerData* exe = server_find_peer(server, server->game.exe);
+    if(!exe)
+        return true;
 
-	bool exe_camp = false;
-	int survivors = 0, demonized = 0;
+    bool exe_camp = false;
+    int survivors = 0, demonized = 0;
+    static int afk_tick_counter = 0;
+    afk_tick_counter++;
+    bool check_afk = (afk_tick_counter >= 60);
+    if (check_afk)
+        afk_tick_counter = 0;
 
-	for(size_t i = 0; i < server->peers.capacity; i++)
-	{
-		PeerData* data = (PeerData*)server->peers.ptr[i];
-		if (!data)
-			continue;
+    for(size_t i = 0; i < server->peers.capacity; i++)
+    {
+        PeerData* data = (PeerData*)server->peers.ptr[i];
+        if (!data)
+            continue;
 
-		if(!data->in_game)
-			continue;
+        if(!data->in_game)
+            continue;
 
-		player_check_zone(server, data);
+        player_check_zone(server, data);
 
-		// ping check
-		if (server->delta < 2.5)
-		{
-			data->plr.ping_timer += server->delta;
-			data->plr.ping_total += data->plr.ping_last * server->delta;
+        if (g_config.antiafk_system && check_afk && server->game.started)
+        {
+            if (!(data->plr.flags & PLAYER_ESCAPED) && !(data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_DEMONIZED))
+            {
+                data->plr.afk_counter += 60;
 
-			if (data->plr.ping_timer >= 20 * TICKSPERSEC)
-			{
-				double avg_ping = data->plr.ping_total / data->plr.ping_timer;
-				if (avg_ping >= g_config.ping_limit)
-				{
-					char msg[130];
-					snprintf(msg, 130, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: %dms", (int)avg_ping);
-					server_disconnect(server, data->peer, DR_OTHER, msg);
-					continue;
-				}
+                if (data->plr.afk_counter >= 1800)
+                {
+                    Info("%s (id %d) kicked for AFK or Timeout!", data->nickname.value, data->id);
+                    server_disconnect(server, data->peer, DR_AFKTIMEOUT, "AFK or Timeout");
+                    continue;
+                }
+            }
+            else
+            {
+                data->plr.afk_counter = 0;
+            }
+        }
 
-				data->plr.ping_total = 0;
-				data->plr.ping_timer = 0;
-			}
-		}
+        // ping check
+        if (server->delta < 2.5)
+        {
+            data->plr.ping_timer += server->delta;
+            data->plr.ping_total += data->plr.ping_last * server->delta;
 
-		if((data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_CANTREVIVE) && vector2_dist(&exe->plr.pos, &data->plr.pos) < 300)
-			exe_camp = true;
+            if (data->plr.ping_timer >= 20 * TICKSPERSEC)
+            {
+                double avg_ping = data->plr.ping_total / data->plr.ping_timer;
+                if (avg_ping >= g_config.ping_limit)
+                {
+                    char msg[130];
+                    snprintf(msg, 130, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: %dms", (int)avg_ping);
+                    server_disconnect(server, data->peer, DR_OTHER, msg);
+                    continue;
+                }
 
-		if (exe->id != data->id && !(data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_DEMONIZED))
-		{
-			// calc danger time
-			if (!(data->plr.flags & PLAYER_ESCAPED))
-			{
-				bool in_danger = exe && vector2_dist(&data->plr.pos, &exe->plr.pos) < 300;
-				if (in_danger)
-					data->plr.stats.danger_time += server->delta;
-				
-				if(server->game.map != 8 && server->game.map != 6)
-				{
-					// calc balls
-					uint32_t chunk = ((uint32_t)data->plr.pos.x / 480) + ((uint32_t)data->plr.pos.y / 270);
-					if (data->plr.chunk != chunk)
-					{
-						data->plr.stats.braindead_time = 0;
-						data->plr.chunk = chunk;
-					}
-					else
-					{
-						data->plr.stats.braindead_time += server->delta * (in_danger ? 0.5 : 1);
-						if (data->plr.stats.braindead_time >= 25 * TICKSPERSEC)
-							data->plr.stats.brain_damage = true;
-					}
-				}
-			}
+                data->plr.ping_total = 0;
+                data->plr.ping_timer = 0;
+            }
+        }
 
-			data->plr.stats.survive_time += server->delta;
-		}
-		
-		// subpussy revival time
-		if(data->plr.flags & PLAYER_DEAD && !(data->plr.flags & PLAYER_CANTREVIVE))
-		{
-			if(data->plr.revival > 0)
-			{
-				data->plr.revival -= 0.0025 * server->delta;
-				
-				Packet pack;
-				if(data->plr.revival <= 0)
-				{
-					for(int i = 0; i < 5; i++)
-						data->plr.revival_init[i] = -1;
+        if((data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_CANTREVIVE) && vector2_dist(&exe->plr.pos, &data->plr.pos) < 300)
+            exe_camp = true;
 
-					PacketCreate(&pack, SERVER_REVIVAL_STATUS);
-					PacketWrite(&pack, packet_write8, 0);
-					PacketWrite(&pack, packet_write16, data->id);
-					server_broadcast(server, &pack, true);
-				}
-				else
-				{
-					PacketCreate(&pack, SERVER_REVIVAL_PROGRESS);
-					PacketWrite(&pack, packet_write16, data->id);
-					PacketWrite(&pack, packet_writedouble, data->plr.revival);
-					server_broadcast(server, &pack, false);
-				}
-			}
-		}
+        if (exe->id != data->id && !(data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_DEMONIZED))
+        {
+            // calc danger time
+            if (!(data->plr.flags & PLAYER_ESCAPED))
+            {
+                bool in_danger = exe && vector2_dist(&data->plr.pos, &exe->plr.pos) < 300;
+                if (in_danger)
+                    data->plr.stats.danger_time += server->delta;
+                
+                if(server->game.map != 8 && server->game.map != 6)
+                {
+                    // calc balls
+                    uint32_t chunk = ((uint32_t)data->plr.pos.x / 480) + ((uint32_t)data->plr.pos.y / 270);
+                    if (data->plr.chunk != chunk)
+                    {
+                        data->plr.stats.braindead_time = 0;
+                        data->plr.chunk = chunk;
+                    }
+                    else
+                    {
+                        data->plr.stats.braindead_time += server->delta * (in_danger ? 0.5 : 1);
+                        if (data->plr.stats.braindead_time >= 25 * TICKSPERSEC)
+                            data->plr.stats.brain_damage = true;
+                    }
+                }
+            }
 
-		if (!(data->plr.flags & PLAYER_ESCAPED))
-		{
-			data->plr.timeout += server->delta;
-			if (data->plr.timeout >= 4.f * TICKSPERSEC)
-				server_disconnect(server, data->peer, DR_AFKTIMEOUT, NULL);
-			continue;
-		}
+            data->plr.stats.survive_time += server->delta;
+        }
+        
+        // subpussy revival time
+        if(data->plr.flags & PLAYER_DEAD && !(data->plr.flags & PLAYER_CANTREVIVE))
+        {
+            if(data->plr.revival > 0)
+            {
+                data->plr.revival -= 0.0025 * server->delta;
+                
+                Packet pack;
+                if(data->plr.revival <= 0)
+                {
+                    for(int i = 0; i < 5; i++)
+                        data->plr.revival_init[i] = -1;
 
-		if (data->id == server->game.exe)
-			continue;
+                    PacketCreate(&pack, SERVER_REVIVAL_STATUS);
+                    PacketWrite(&pack, packet_write8, 0);
+                    PacketWrite(&pack, packet_write16, data->id);
+                    server_broadcast(server, &pack, true);
+                }
+                else
+                {
+                    PacketCreate(&pack, SERVER_REVIVAL_PROGRESS);
+                    PacketWrite(&pack, packet_write16, data->id);
+                    PacketWrite(&pack, packet_writedouble, data->plr.revival);
+                    server_broadcast(server, &pack, false);
+                }
+            }
+        }
 
-		if (data->plr.flags & PLAYER_DEMONIZED)
-			demonized++;
-		else if (!(data->plr.flags & PLAYER_DEAD))
-			survivors++;
-	}
+        if (!(data->plr.flags & PLAYER_ESCAPED))
+        {
+            data->plr.timeout += server->delta;
+            if (data->plr.timeout >= 4.f * TICKSPERSEC)
+                server_disconnect(server, data->peer, DR_AFKTIMEOUT, NULL);
+            continue;
+        }
 
-	if(server->game.map != 8 && exe_camp)
-		exe->plr.stats.camp_time += server->delta;
+        if (data->id == server->game.exe)
+            continue;
 
-	// Start demonization
-	if (!server->game.sudden_death && server->game.time_sec <= TICKSPERSEC * 2)
-	{
-		server->game.sudden_death = true;
+        if (data->plr.flags & PLAYER_DEMONIZED)
+            demonized++;
+        else if (!(data->plr.flags & PLAYER_DEAD))
+            survivors++;
+    }
 
-		PeerData* sort[6];
-		int len = 0;
-		memset(sort, 0, sizeof(Player*) * 6);
+    if(server->game.map != 8 && exe_camp)
+        exe->plr.stats.camp_time += server->delta;
 
-		for (size_t i = 0; i < server->peers.capacity; i++)
-		{
-			PeerData* data = (PeerData*)server->peers.ptr[i];
-			if (!data)
-				continue;
+    // Start demonization
+    if (!server->game.sudden_death && server->game.time_sec <= TICKSPERSEC * 2)
+    {
+        server->game.sudden_death = true;
 
-			if(!data->in_game)
-				continue;
+        PeerData* sort[6];
+        int len = 0;
+        memset(sort, 0, sizeof(Player*) * 6);
 
-			if (!(data->plr.flags & PLAYER_DEAD))
-				continue;
+        for (size_t i = 0; i < server->peers.capacity; i++)
+        {
+            PeerData* data = (PeerData*)server->peers.ptr[i];
+            if (!data)
+                continue;
 
-			sort[len++] = data;
-		}
+            if(!data->in_game)
+                continue;
 
-		for (int i = 0; i < len; ++i)
-		{
-			for (int j = i + 1; j < len; ++j)
-			{
-				double totalA = sort[i]->plr.death_timer_sec + (sort[i]->plr.death_timer / 60.0);
-				double totalB = sort[j]->plr.death_timer_sec + (sort[j]->plr.death_timer / 60.0);
-				
-				if (totalA > totalB)
-				{
-					PeerData* a = sort[i];
-					sort[i] = sort[j];
-					sort[j] = a;
-				}
-			}
-		}
+            if (!(data->plr.flags & PLAYER_DEAD))
+                continue;
 
-		Debug("Demonization order:");
-		for (int i = 0; i < len; i++)
-		{
-			Debug("%d: %f", sort[i]->id, sort[i]->plr.death_timer_sec + (sort[i]->plr.death_timer / 60.0));
-			game_demonize(server, sort[i]);
-		}
-	}
+            sort[len++] = data;
+        }
 
-	for (size_t i = 0; i < server->peers.capacity; i++)
-	{
-		PeerData* data = (PeerData*)server->peers.ptr[i];
-		if (!data)
-			continue;
+        for (int i = 0; i < len; ++i)
+        {
+            for (int j = i + 1; j < len; ++j)
+            {
+                double totalA = sort[i]->plr.death_timer_sec + (sort[i]->plr.death_timer / 60.0);
+                double totalB = sort[j]->plr.death_timer_sec + (sort[j]->plr.death_timer / 60.0);
+                
+                if (totalA > totalB)
+                {
+                    PeerData* a = sort[i];
+                    sort[i] = sort[j];
+                    sort[j] = a;
+                }
+            }
+        }
 
-		if(!data->in_game)
-			continue;
+        Debug("Demonization order:");
+        for (int i = 0; i < len; i++)
+        {
+            Debug("%d: %f", sort[i]->id, sort[i]->plr.death_timer_sec + (sort[i]->plr.death_timer / 60.0));
+            game_demonize(server, sort[i]);
+        }
+    }
 
-		if (data->plr.flags & PLAYER_CANTREVIVE)
-			continue;
+    for (size_t i = 0; i < server->peers.capacity; i++)
+    {
+        PeerData* data = (PeerData*)server->peers.ptr[i];
+        if (!data)
+            continue;
 
-		if (data->plr.flags & PLAYER_DEAD && data->plr.death_timer_sec > 0)
-		{
-			Packet packet;
-			bool exe_near = false;
-			bool demonized_near = false;
+        if(!data->in_game)
+            continue;
 
-			// check if exe is nearby
-			for (size_t j = 0; j < server->peers.capacity; j++)
-			{
-				PeerData* check = (PeerData*)server->peers.ptr[j];
-				if (!check)
-					continue;
+        if (data->plr.flags & PLAYER_CANTREVIVE)
+            continue;
 
-				if(!check->in_game)
-					continue;
+        if (data->plr.flags & PLAYER_DEAD && data->plr.death_timer_sec > 0)
+        {
+            Packet packet;
+            bool exe_near = false;
+            bool demonized_near = false;
 
-				if (check->id != server->game.exe && !(check->plr.flags & PLAYER_DEMONIZED))
-					continue;
+            // check if exe is nearby
+            for (size_t j = 0; j < server->peers.capacity; j++)
+            {
+                PeerData* check = (PeerData*)server->peers.ptr[j];
+                if (!check)
+                    continue;
 
-				if (vector2_dist(&data->plr.pos, &check->plr.pos) <= 240)
-				{
-					if (check->plr.flags & PLAYER_DEMONIZED)
-						demonized_near = true;
-					else
-					{
-						demonized_near = false;
-						exe_near = true;
-						break;
-					}
-				}
-			}
+                if(!check->in_game)
+                    continue;
 
-			if (server->game.time_sec < TICKSPERSEC * 2)
-			{
-				game_demonize(server, data);
-				continue;
-			}
+                if (check->id != server->game.exe && !(check->plr.flags & PLAYER_DEMONIZED))
+                    continue;
 
-			if (data->plr.death_timer >= TICKSPERSEC)
-			{
-				if (!exe_near)
-				{
-					if (--data->plr.death_timer_sec <= 0)
-					{
-						game_demonize(server, data);
-						continue;
-					}
-				}
+                if (vector2_dist(&data->plr.pos, &check->plr.pos) <= 240)
+                {
+                    if (check->plr.flags & PLAYER_DEMONIZED)
+                        demonized_near = true;
+                    else
+                    {
+                        demonized_near = false;
+                        exe_near = true;
+                        break;
+                    }
+                }
+            }
 
-				PacketCreate(&packet, SERVER_GAME_DEATHTIMER_TICK);
-				PacketWrite(&packet, packet_write8, exe_near);
-				PacketWrite(&packet, packet_write16, data->id);
-				PacketWrite(&packet, packet_write8, data->plr.death_timer_sec);
-				server_broadcast(server, &packet, true);
+            if (server->game.time_sec < TICKSPERSEC * 2)
+            {
+                game_demonize(server, data);
+                continue;
+            }
 
-				data->plr.death_timer = 0;
-			}
+            if (data->plr.death_timer >= TICKSPERSEC)
+            {
+                if (!exe_near)
+                {
+                    if (--data->plr.death_timer_sec <= 0)
+                    {
+                        game_demonize(server, data);
+                        continue;
+                    }
+                }
 
-			data->plr.death_timer += (demonized_near ? 0.5f : 1.0f) * server->delta;
-		}
-	}
+                PacketCreate(&packet, SERVER_GAME_DEATHTIMER_TICK);
+                PacketWrite(&packet, packet_write8, exe_near);
+                PacketWrite(&packet, packet_write16, data->id);
+                PacketWrite(&packet, packet_write8, data->plr.death_timer_sec);
+                server_broadcast(server, &packet, true);
 
-	return true;
+                data->plr.death_timer = 0;
+            }
+
+            data->plr.death_timer += (demonized_near ? 0.5f : 1.0f) * server->delta;
+        }
+    }
+
+    return true;
 }
 
 bool game_state_tick(Server* server)
