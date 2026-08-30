@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 				break;
 			}
 		}
-		
+
 		SDL_RenderClear(renderer);
 		{
 			SDL_FRect src = { 480 + ((int)bg / 3 % 28) * 96, 446, 96, 96 };

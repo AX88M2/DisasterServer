@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.16.3)
-project(DisasterServer CXX C)
+project(disasterserver_c CXX C)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -50,4 +50,4 @@ endif ()
 
 add_subdirectory(thirdparty/enet)
 
-add_subdirectory(disasterserver/)
+add_subdirectory(disasterserver_c/)

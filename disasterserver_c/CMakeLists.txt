@@ -124,17 +124,17 @@ else()
 	else() # Build executable
 		if(BUILD_UI)
 			set(UI_SOURCES
-				"ui/Resources.c"
-				"ui/Main.c"
-				"ui/Image.c"
-				"ui/Label.c"
-				"ui/Button.c"
-				"ui/TButton.c"
-				"ui/MapList.c"
-			  	"ui/Presets.c"
-				"ui/MapListPreset.c"
-				"ui/PingPreset.c"
-				"ui/PlayerList.c"
+					"ui/Resources.c"
+					"ui/Main.c"
+					"ui/Image.c"
+					"ui/Label.c"
+					"ui/Button.c"
+					"ui/TButton.c"
+					"ui/MapList.c"
+			  		"ui/Presets.c"
+					"ui/MapListPreset.c"
+					"ui/PingPreset.c"
+					"ui/PlayerList.c"
 			)
 
 			if (WIN32)
