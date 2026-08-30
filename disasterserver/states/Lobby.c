@@ -165,12 +165,12 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			char msg[100];
 			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server_count);
 
-			server_send_msg(v->server, v->peer, "-----------------------");
-			server_send_msg(v->server, v->peer, CLRCODE_RED "better/server~ v" STRINGIFY(BUILD_VERSION));
-			server_send_msg(v->server, v->peer, "build from " CLRCODE_PUR  __DATE__ " " CLRCODE_GRN  __TIME__ CLRCODE_RST);
-			server_send_msg(v->server, v->peer, msg);
-			server_send_msg(v->server, v->peer, "-----------------------");
-			server_send_msg(v->server, v->peer, CLRCODE_GRA "type .help for command list~");
+			server_send_msg(v->server, v->peer, BRACKET);
+			server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
+			server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
+			server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
+			server_send_msg(v->server, v->peer, "|type .help for command list~");
+			server_send_msg(v->server, v->peer, BRACKET);
 
             if(g_config.motd[0] != '\0')
                 server_send_msg(v->server, v->peer, g_config.motd);
@@ -348,11 +348,11 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					char buffer[356];
 					snprintf(buffer, 356, "%s~ " CLRCODE_YLW "started practice vote." CLRCODE_RST, v->nickname.value);
 
-					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, BRACKET);
 					server_broadcast_msg(v->server, 0, buffer);
 					server_broadcast_msg(v->server, 0, "type " CLRCODE_GRN ".yes~ or ignore");
 					server_broadcast_msg(v->server, 0, "results will be summarized in " CLRCODE_GRA "20~ sec");
-					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, BRACKET);
 
 					vote_add(&v->server->lobby.vote, v->id);
 					v->vote_cooldown = 30 * TICKSPERSEC;
@@ -495,11 +495,11 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 					char buffer[555];
 					snprintf(buffer, 555, "%s~ " CLRCODE_RED "started kick vote for " CLRCODE_RST "%s" CLRCODE_RST, v->nickname.value, v->server->lobby.kick_target.nickname.value);
 
-					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, BRACKET);
 					server_broadcast_msg(v->server, 0, buffer);
 					server_broadcast_msg(v->server, 0, "type " CLRCODE_GRN ".yes~ or ignore");
-					server_broadcast_msg(v->server, 0,"results will be summarized in " CLRCODE_GRA "20~ sec");
-					server_broadcast_msg(v->server, 0, "-----------------------");
+					server_broadcast_msg(v->server, 0, "results will be summarized in " CLRCODE_GRA "20~ sec");
+					server_broadcast_msg(v->server, 0, BRACKET);
 
 					vote_add(&v->server->lobby.vote, v->id);
 					v->vote_cooldown = 30 * TICKSPERSEC;
