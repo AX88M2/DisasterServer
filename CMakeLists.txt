@@ -1,10 +1,19 @@
 ﻿cmake_minimum_required(VERSION 3.16.3)
-project(disasterserver_c CXX C)
+project(DisasterServer CXX C)
 
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
+
+if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+  set(CMAKE_C_FLAGS_DEBUG "-g")
+  set(CMAKE_C_FLAGS_RELEASE "-O3")
+  message("Clang/GCC flags applied")
+endif()
+
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CXX_STANDARD_REQUIRED ON)
@@ -12,6 +21,22 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 option(DYLIB "Builds dynamic library" OFF)
 option(BUILD_UI "Builds UI using SDL" OFF)
+
+if(IS_BIG_ENDIAN)
+  add_compile_definitions(SYS_BIG_ENDIAN)
+endif()
+
+if(DYLIB)
+  add_compile_definitions(SYS_DYLIB)
+endif()
+
+if(BUILD_UI)
+  add_compile_definitions(SYS_USE_SDL2)
+endif()
+
+if(ANDROID)
+  add_compile_definitions(SYS_ANDROID)
+endif()
 
 if (BUILD_UI)
   set(BUILD_SHARED_LIBS OFF)
@@ -51,3 +76,4 @@ endif ()
 add_subdirectory(thirdparty/enet)
 
 add_subdirectory(disasterserver_c/)
+add_subdirectory(disasterserver)

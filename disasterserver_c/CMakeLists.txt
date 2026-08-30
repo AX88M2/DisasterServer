@@ -1,30 +1,4 @@
-﻿# Needed for packet stuff
-include(TestBigEndian)
-TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-
-if(IS_BIG_ENDIAN)
-	add_compile_definitions(SYS_BIG_ENDIAN)
-endif()
-
-if(DYLIB)
-	add_compile_definitions(SYS_DYLIB)
-endif()
-
-if(BUILD_UI)
-	add_compile_definitions(SYS_USE_SDL2)
-endif()
-
-if(ANDROID)
-	add_compile_definitions(SYS_ANDROID)
-endif()
-
-if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-	set(CMAKE_C_FLAGS_DEBUG "-g")
-	set(CMAKE_C_FLAGS_RELEASE "-O3")
-	message("Clang/GCC flags applied")
-endif()
-
-set(SOURCES
+﻿set(SOURCES
 	"Auth.c"
 	"Config.c"
 	"cJSON.c"
