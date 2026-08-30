@@ -133,7 +133,7 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		server_send_msg(v->server, v->peer, "-----------------------");
 
 		if(g_config.motd[0] != '\0')
-                server_send_msg(v->server, v->peer, g_config.motd);
+			server_send_msg(v->server, v->peer, g_config.motd);
 		if (v->op)
 			server_send_msg(v->server, v->peer, CLRCODE_GRN "you're an operator on this server" CLRCODE_RST);
 
