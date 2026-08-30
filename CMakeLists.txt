@@ -47,5 +47,3 @@ endif ()
 add_subdirectory(thirdparty/enet)
 
 add_subdirectory(disasterserver/)
-target_include_directories(DisasterServer PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/enet/include)
-target_link_libraries(DisasterServer PRIVATE enet)
