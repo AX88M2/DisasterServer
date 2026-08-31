@@ -14,7 +14,7 @@
 	"Palette.c"
 	"Zone.c"
 
-	"states/Server.c"
+	"Server.c"
 	"states/Lobby.c"
 	"states/Mapvote.c"
 	"states/CharSelect.c"

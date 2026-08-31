@@ -2,11 +2,12 @@
 #define PACKET_H
 
 #include <enet/enet.h>
-#include <stdint.h>
+#include <cstdint>
+#include "Util/String.hpp"
 
 #define PACKET_MAXSIZE 256
 
-enum PacketType
+enum class PacketType
 {
 	IDENTITY,
 	SERVER_IDENTITY_RESPONSE,
@@ -168,19 +169,14 @@ enum PacketType
 	CLIENT_PLAYER_POTATER
 };
 
-typedef struct
-{
-	char		value[250];
-	uint16_t	len;
-} String;
-
 class Packet {
 	uint8_t buffer[PACKET_MAXSIZE] = {};
 	uint8_t pos = 0;
-	uint8_t len = {};
+	uint8_t len = 0;
 public:
-	Packet() = default;
+	Packet();
 
+	explicit Packet(PacketType type);
 	explicit Packet(ENetPacket* packet);
 	~Packet() = default;
 
@@ -201,6 +197,8 @@ public:
 	bool writeFloat(float value);
 	bool writeDouble(double value);
 	bool writeStr(String value);
+
+	bool send(ENetPeer* peer, bool reliable);
 };
 
 #endif

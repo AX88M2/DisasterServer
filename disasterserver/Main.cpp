@@ -1,17 +1,15 @@
 #include "DisasterServer.hpp"
 #include "Log.hpp"
-#include "enet/enet.h"
 
 int main(int argc, char *argv[]) {
     try {
-        DisasterServer server;
-        if (!server.init()) {
+        DisasterServer *server = DisasterServer::getInstance();
+        if (!server->init()) {
             return 1;
         }
 
-        return server.run();
-
+        return server->run();
     } catch (std::exception& e) {
-        Err(e.what());
+        Err("Exception: {}", e.what());
     }
 }

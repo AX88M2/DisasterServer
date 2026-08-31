@@ -1,5 +1,5 @@
 #include "Packet.hpp"
-
+#include "Server.hpp"
 #include "Log.hpp"
 
 #ifdef __GNUC__ // GCC, clang...
@@ -11,6 +11,14 @@
 	#define BYTESWAP_32(x) _byteswap_ulong((x))
 	#define BYTESWAP_64(x) _byteswap_uint64((x))
 #endif
+
+Packet::Packet() {
+}
+
+Packet::Packet(PacketType type) {
+	write8(0);
+	write8(static_cast<uint8_t>(type));
+}
 
 Packet::Packet(ENetPacket *packet) {
 	memcpy(buffer, packet->data, (uint8_t)packet->dataLength);
@@ -230,4 +238,14 @@ bool Packet::writeStr(String value) {
 		RAssert(write8(value.value[i]));
 
 	return true;
+}
+
+bool Packet::send(ENetPeer *peer, bool reliable) {
+	PeerData* data = static_cast<PeerData *>(peer->data);
+	if(data && data->disconnecting)
+		return true;
+
+	pos = 0;
+	ENetPacket* pack = enet_packet_create(this, len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+	return enet_peer_send(peer, reliable ? 0 : 1, pack) == 0;
 }

@@ -31,6 +31,9 @@
     #define WIN32_LEAN_AND_MEAN
     #include <Windows.h>
 
+    #include <string>
+    using namespace std::string_literals;
+
     typedef HANDLE	Thread;
     typedef DWORD	ThreadVar;
 

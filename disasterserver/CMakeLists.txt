@@ -1,12 +1,4 @@
-
-set(SOURCES
-        "Io/Packet.cpp"
-        "Io/TcpListener.cpp"
-        "Io/Time.cpp"
-        "Io/UdpListener.cpp"
-        "Log.cpp"
-        "DisasterServer.cpp"
-)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 if(ANDROID)
     add_library(DisasterServerCXX SHARED "Android.cpp" ${SOURCES})
@@ -14,17 +6,17 @@ if(ANDROID)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(DisasterServerCXX PRIVATE log enet m Threads::Threads)
+    target_link_libraries(DisasterServerCXX PRIVATE cJSON log enet m Threads::Threads)
 else()
     if(DYLIB) # Build .dll or .so
         add_library(DisasterServerCXX SHARED ${SOURCES})
 
         if (WIN32)
-            target_link_libraries(DisasterServerCXX PRIVATE enet ws2_32 winmm dbghelp)
+            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
         else() # UNIX
             set(THREADS_PREFER_PTHREAD_FLAG ON)
             find_package(Threads REQUIRED)
-            target_link_libraries(DisasterServerCXX PRIVATE enet m Threads::Threads)
+            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
         endif()
 
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -87,11 +79,11 @@ else()
             )
 
             if (WIN32)
-                target_link_libraries(DisasterServerCXX PRIVATE enet ws2_32 winmm dbghelp)
+                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
             else() # UNIX
                 set(THREADS_PREFER_PTHREAD_FLAG ON)
                 find_package(Threads REQUIRED)
-                target_link_libraries(DisasterServerCXX PRIVATE enet m Threads::Threads)
+                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
             endif()
 
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
