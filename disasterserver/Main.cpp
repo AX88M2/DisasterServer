@@ -1,14 +1,14 @@
-#include "DisasterServer.hpp"
-#include "Log.hpp"
+#include "Server.hpp"
+#include "Core/Log.hpp"
 
 int main(int argc, char *argv[]) {
     try {
-        DisasterServer *server = DisasterServer::getInstance();
-        if (!server->init()) {
-            return 1;
-        }
+        Info("- DisasterServerCXX v{}", BUILD_VERSION);
+        Info("- Build from {} {}", __DATE__, __TIME__);
 
-        return server->run();
+        boost::asio::io_context io_context;
+        DisasterServer::Server server(io_context);
+        io_context.run();
     } catch (std::exception& e) {
         Err("Exception: {}", e.what());
     }

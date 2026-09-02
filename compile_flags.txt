@@ -1,3 +1,0 @@
--I./include
--I/usr/local/include
--IC:\vcpkg\installed\x64-windows\include

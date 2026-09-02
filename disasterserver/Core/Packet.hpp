@@ -1,11 +1,13 @@
 #ifndef PACKET_H
+
 #define PACKET_H
 
-#include <enet/enet.h>
+#include <array>
 #include <cstdint>
-#include "Util/String.hpp"
-
-#define PACKET_MAXSIZE 256
+#include <optional>
+#include <string>
+#include <vector>
+#include <boost/asio/ip/udp.hpp>
 
 enum class PacketType
 {
@@ -169,36 +171,37 @@ enum class PacketType
 	CLIENT_PLAYER_POTATER
 };
 
+
+static constexpr int PACKET_MAXSIZE = 256;
+
+using boost::asio::ip::udp;
+
 class Packet {
-	uint8_t buffer[PACKET_MAXSIZE] = {};
-	uint8_t pos = 0;
+	std::array<uint8_t, PACKET_MAXSIZE> buffer;
+	uint8_t position = 0;
 	uint8_t len = 0;
 public:
-	Packet();
-
+	explicit Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
 	explicit Packet(PacketType type);
-	explicit Packet(ENetPacket* packet);
-	~Packet() = default;
+	~Packet();
 
-	bool seek(int wh);
-	
-	bool read8(uint8_t* out);
-	bool read16(uint16_t* out);
-	bool read32(uint32_t* out);
-	bool read64(uint64_t* out);
-	bool readFloat(float* out);
-	bool readDouble(double* out);
-	bool readStr(String* out);
+	std::optional<uint8_t> readUint8();
+	std::optional<uint16_t> readUint16();
+	std::optional<uint32_t> readUint32();
+	std::optional<uint64_t> readUint64();
+	std::optional<float> readFloat();
+	std::optional<double> readDouble();
+	std::optional<std::string> readString();
 
-	bool write8(uint8_t value);
-	bool write16(uint16_t value);
-	bool write32(uint32_t value);
-	bool write64(uint64_t value);
-	bool writeFloat(float value);
-	bool writeDouble(double value);
-	bool writeStr(String value);
+	void writeUint8(uint8_t value);
+	void writeUint16(uint16_t value);
+	void writeUint32(uint32_t value);
+	void writeUint64(uint64_t value);
+	void writeFloat(float value);
+	void writeDouble(double value);
+	void writeString(const std::string &value);
 
-	bool send(ENetPeer* peer, bool reliable);
+	void send(udp::endpoint &endpoint, udp::socket &socket);
 };
 
 #endif

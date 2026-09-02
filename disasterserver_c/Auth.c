@@ -47,9 +47,9 @@ bool auth_create_ticket(PeerData* peer, Packet* packet)
 	PacketWrite(packet, packet_write8, peer->auth.one);
 	PacketWrite(packet, packet_write8, (uint8_t) rand() % 2);
 	PacketWrite(packet, packet_write8, peer->auth.two);
-	const char key[] = { 0x00, 0x00, 0xFF, 0x1F, 0x80, 0x14 };
 	for (int i = 0; i < 3; i++)
 	{
+		const char key[] = { 0x00, 0x00, 0xFF, 0x1F, 0x80, 0x14 };
 		PacketWrite(packet, packet_write8, key[rand() % sizeof(key)]);
 	}
 	PacketWrite(packet, packet_write32, peer->auth.type);

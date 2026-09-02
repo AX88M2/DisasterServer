@@ -327,7 +327,7 @@ bool server_worker(Server *server)
 
 				memset(ev.peer->data, 0, sizeof(PeerData));
 
-				PeerData *v = (PeerData *)ev.peer->data;
+				PeerData *v = ev.peer->data;
 				v->server = server;
 				v->peer = ev.peer;
 				v->id = ev.peer->incomingPeerID + 1;
@@ -384,19 +384,19 @@ bool server_worker(Server *server)
 
 				switch (packet.buff[1])
 				{
-				case IDENTITY:
-				{
-					if (!peer_identity(v, &packet))
+					case IDENTITY:
 					{
-						Debug("Identity failed for id %d", v->id);
-					}
-					break;
-				}
-				default:
-				{
-					if (!peer_msg(v, &packet))
+						if (!peer_identity(v, &packet))
+						{
+							Debug("Identity failed for id %d", v->id);
+						}
 						break;
-				}
+					}
+					default:
+					{
+						if (!peer_msg(v, &packet))
+							break;
+					}
 				}
 
 				break;

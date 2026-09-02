@@ -1,5 +1,6 @@
 #ifndef SINGLETON_HPP
 #define SINGLETON_HPP
+#include <memory>
 
 // https://de.wikibooks.org/wiki/C%2B%2B-Programmierung:_Entwurfsmuster:_Singleton
 template <typename C>

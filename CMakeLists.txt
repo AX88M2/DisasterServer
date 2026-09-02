@@ -1,16 +1,5 @@
-﻿cmake_minimum_required(VERSION 3.16.3)
+﻿cmake_minimum_required(VERSION 3.30)
 project(DisasterServer CXX C)
-
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
-
-if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-  set(CMAKE_C_FLAGS_DEBUG "-g")
-  set(CMAKE_C_FLAGS_RELEASE "-O3")
-  message("Clang/GCC flags applied")
-endif()
 
 include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)

@@ -53,7 +53,7 @@ class Logger {
             case LogLevel::Error: ss << "[Error]"; break;
         }
         ss << " ";
-        ss << "["<< std::this_thread::get_id() << "] ";
+        ss << "["<< std::this_thread::get_id() << "]";
         ss << " ";
         ss << std::format("({}:{})", file, line);
         ss << " ";

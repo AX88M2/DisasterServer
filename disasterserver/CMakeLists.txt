@@ -1,22 +1,24 @@
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
+find_package(Boost REQUIRED COMPONENTS smart_ptr asio bind)
+
 if(ANDROID)
     add_library(DisasterServerCXX SHARED "Android.cpp" ${SOURCES})
 
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(DisasterServerCXX PRIVATE cJSON log enet m Threads::Threads)
+    target_link_libraries(DisasterServerCXX PRIVATE cJSON log Boost::smart_ptr Boost::asio Boost::bind m Threads::Threads)
 else()
     if(DYLIB) # Build .dll or .so
         add_library(DisasterServerCXX SHARED ${SOURCES})
 
         if (WIN32)
-            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
+            target_link_libraries(DisasterServerCXX PRIVATE cJSON Boost::smart_ptr Boost::asio Boost::bind ws2_32 winmm dbghelp)
         else() # UNIX
             set(THREADS_PREFER_PTHREAD_FLAG ON)
             find_package(Threads REQUIRED)
-            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
+            target_link_libraries(DisasterServerCXX PRIVATE cJSON Boost::smart_ptr Boost::asio Boost::bind m Threads::Threads)
         endif()
 
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -79,11 +81,11 @@ else()
             )
 
             if (WIN32)
-                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
+                target_link_libraries(DisasterServerCXX PRIVATE cJSON Boost::smart_ptr Boost::asio Boost::bind ws2_32 winmm dbghelp)
             else() # UNIX
                 set(THREADS_PREFER_PTHREAD_FLAG ON)
                 find_package(Threads REQUIRED)
-                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
+                target_link_libraries(DisasterServerCXX PRIVATE cJSON Boost::smart_ptr Boost::asio Boost::bind m Threads::Threads)
             endif()
 
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
