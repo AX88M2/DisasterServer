@@ -318,89 +318,90 @@ bool server_worker(Server *server)
 		{
 			switch (ev.type)
 			{
-			case ENET_EVENT_TYPE_CONNECT:
-			{
-				Debug("ENET_EVENT_TYPE_CONNECT...");
-				ev.peer->data = (PeerData *)malloc(sizeof(PeerData));
-				if (!ev.peer->data)
-					return false;
+				case ENET_EVENT_TYPE_CONNECT:
+				{
+					Debug("ENET_EVENT_TYPE_CONNECT...");
+					ev.peer->data = (PeerData *)malloc(sizeof(PeerData));
+					if (!ev.peer->data)
+						return false;
 
-				memset(ev.peer->data, 0, sizeof(PeerData));
+					memset(ev.peer->data, 0, sizeof(PeerData));
 
-				PeerData *v = ev.peer->data;
-				v->server = server;
-				v->peer = ev.peer;
-				v->id = ev.peer->incomingPeerID + 1;
-				enet_address_get_host_ip(&ev.peer->address, v->ip.value, 250);
+					PeerData *v = ev.peer->data;
+					v->server = server;
+					v->peer = ev.peer;
+					v->id = ev.peer->incomingPeerID + 1;
+					enet_address_get_host_ip(&ev.peer->address, v->ip.value, 250);
 
-				Packet packet;
-				PacketCreate(&packet, SERVER_PREIDENTITY);
-				RAssert(auth_create_ticket(v, &packet));
-				RAssert(packet_send(ev.peer, &packet, true));
-				break;
-			}
-
-			case ENET_EVENT_TYPE_DISCONNECT:
-			{
-				Debug("ENET_EVENT_TYPE_DISCONNECT...");
-				PeerData *v = (PeerData *)ev.peer->data;
-				if (!v)
+					Packet packet;
+					PacketCreate(&packet, SERVER_PREIDENTITY);
+					RAssert(auth_create_ticket(v, &packet));
+					RAssert(packet_send(ev.peer, &packet, true));
 					break;
-
-				if (!v->op && v->should_timeout)
-				{
-					uint64_t result;
-					if (timeout_check(v->udid.value, v->ip.value, &result) && result == 0)
-						timeout_set(v->nickname.value, v->udid.value, v->ip.value, time(NULL) + 5);
 				}
 
-				if (v->verified)
+				case ENET_EVENT_TYPE_DISCONNECT:
 				{
-					MutexLock(ip_addr_mut);
-					{
-						cJSON_DeleteItemFromObject(ip_addr_list, v->udid.value);
-						cJSON_DeleteItemFromObject(ip_addr_list, v->ip.value);
-					}
-					MutexUnlock(ip_addr_mut);
-
-					MutexLock(v->server->state_lock);
-					{
-						// Step 3: Cleanup (Only if joined before)
-						if (dylist_remove(&v->server->peers, v))
-							server_state_left(v);
-					}
-					MutexUnlock(v->server->state_lock);
-				}
-
-				Info("%s (id %d) " LOG_YLW "left.", v->nickname.value, v->id);
-				free(v);
-				break;
-			}
-
-			case ENET_EVENT_TYPE_RECEIVE:
-			{
-				PeerData *v = (PeerData *)ev.peer->data;
-				Packet packet = packet_from(ev.packet);
-
-				switch (packet.buff[1])
-				{
-					case IDENTITY:
-					{
-						if (!peer_identity(v, &packet))
-						{
-							Debug("Identity failed for id %d", v->id);
-						}
+					Debug("ENET_EVENT_TYPE_DISCONNECT...");
+					PeerData *v = (PeerData *)ev.peer->data;
+					if (!v)
 						break;
-					}
-					default:
+
+					if (!v->op && v->should_timeout)
 					{
-						if (!peer_msg(v, &packet))
-							break;
+						uint64_t result;
+						if (timeout_check(v->udid.value, v->ip.value, &result) && result == 0)
+							timeout_set(v->nickname.value, v->udid.value, v->ip.value, time(NULL) + 5);
 					}
+
+					if (v->verified)
+					{
+						MutexLock(ip_addr_mut);
+						{
+							cJSON_DeleteItemFromObject(ip_addr_list, v->udid.value);
+							cJSON_DeleteItemFromObject(ip_addr_list, v->ip.value);
+						}
+						MutexUnlock(ip_addr_mut);
+
+						MutexLock(v->server->state_lock);
+						{
+							// Step 3: Cleanup (Only if joined before)
+							if (dylist_remove(&v->server->peers, v))
+								server_state_left(v);
+						}
+						MutexUnlock(v->server->state_lock);
+					}
+
+					Info("%s (id %d) " LOG_YLW "left.", v->nickname.value, v->id);
+					free(v);
+					break;
 				}
 
-				break;
-			}
+				case ENET_EVENT_TYPE_RECEIVE:
+				{
+					PeerData *v = (PeerData *)ev.peer->data;
+					Packet packet = packet_from(ev.packet);
+
+					switch (packet.buff[1])
+					{
+						case IDENTITY:
+						{
+							if (!peer_identity(v, &packet))
+							{
+								Debug("Identity failed for id %d", v->id);
+							}
+							break;
+						}
+						default:
+						{
+							if (!peer_msg(v, &packet))
+								break;
+						}
+					}
+
+					break;
+				}
+				default: break;
 			}
 		}
 

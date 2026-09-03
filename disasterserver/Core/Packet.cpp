@@ -12,64 +12,42 @@
 	#define BYTESWAP_64(x) _byteswap_uint64((x))
 #endif
 
-#define READ_TYPE(type) \
-	type value = reinterpret_cast<type*>(buffer.data() + position)[0]; \
-	position += sizeof(type); \
+using namespace DisasterServer;
 
 Packet::Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer) : buffer(buffer) {
-
+	read<uint8_t>();
+	type = static_cast<PacketType>(read<uint8_t>());
 }
 
-Packet::Packet(PacketType type) : buffer({}) {
+#undef min
+
+Packet::Packet(const enet_uint8 *data, size_t data_size) {
+	std::copy_n(data, std::min(data_size, buffer.size()), buffer.begin());
+	len = data_size;
+	type = static_cast<PacketType>(255);
+}
+
+Packet::Packet(PacketType type) : buffer({}), type(type) {
+	Debug("Creating packet PacketType::{}", getPacketTypeName(type));
 	writeUint8(0);
 	writeUint8(static_cast<uint8_t>(type));
 }
 
 Packet::~Packet() = default;
 
-std::optional<uint8_t> Packet::readUint8() {
-	READ_TYPE(uint8_t);
-	return value;
-}
+std::string Packet::readString() {
+	std::string result;
 
-std::optional<uint16_t> Packet::readUint16() {
-	READ_TYPE(uint16_t);
-	return value;
-}
-
-std::optional<uint32_t> Packet::readUint32() {
-	READ_TYPE(uint32_t);
-	return value;
-}
-
-std::optional<uint64_t> Packet::readUint64() {
-	READ_TYPE(uint64_t);
-	return value;
-}
-
-std::optional<float> Packet::readFloat() {
-	READ_TYPE(float);
-	return value;
-}
-
-std::optional<double> Packet::readDouble() {
-	READ_TYPE(double);
-	return value;
-}
-
-std::optional<std::string> Packet::readString() {
-	char buf[250];
-
-	while (true) {
-		char ch = buffer[position];
-		buf[position] = ch;
-		position++;
+	while (position < buffer.size()) {
+		char ch = static_cast<char>(buffer[position++]);
 
 		if (ch == '\0')
 			break;
+
+		result += ch;
 	}
 
-	return std::string(buf);
+	return result;
 }
 
 void Packet::writeUint8(uint8_t value) {
@@ -182,6 +160,7 @@ void Packet::writeString(const std::string &value) {
 	}
 }
 
-void Packet::send(udp::endpoint &endpoint, udp::socket &socket) {
-	socket.send_to(boost::asio::buffer(buffer, len), endpoint);
+void Packet::send(enetpp::server<Peer> &server, uint32_t client_id, bool reliable) {
+	Debug("packet PacketType::{} sending to {}", getPacketTypeName(type), client_id);
+	server.send_packet_to(client_id, reliable ? 0 : 1, buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 }

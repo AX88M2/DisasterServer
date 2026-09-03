@@ -6,10 +6,11 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <vector>
-#include <boost/asio/ip/udp.hpp>
 
-enum class PacketType
+#include "enet/enet.h"
+#include "ENet/server.h"
+
+enum class PacketType : uint8_t
 {
 	IDENTITY,
 	SERVER_IDENTITY_RESPONSE,
@@ -171,37 +172,189 @@ enum class PacketType
 	CLIENT_PLAYER_POTATER
 };
 
+inline std::string getPacketTypeName(PacketType type) {
+	switch (type) {
+		case PacketType::IDENTITY: return "IDENTITY";
+		case PacketType::SERVER_IDENTITY_RESPONSE: return "SERVER_IDENTITY_RESPONSE";
+		case PacketType::SERVER_PLAYER_JOINED: return "SERVER_PLAYER_JOINED";
+		case PacketType::SERVER_PLAYER_LEFT: return "SERVER_PLAYER_LEFT";
+		case PacketType::SERVER_PLAYER_FORCE_DISCONNECT: return "SERVER_PLAYER_FORCE_DISCONNECT";
+		case PacketType::SERVER_WAITING_PLAYER_INFO: return "SERVER_WAITING_PLAYER_INFO";
+		case PacketType::SERVER_LOBBY_READY_STATE: return "SERVER_LOBBY_READY_STATE";
+		case PacketType::SERVER_LOBBY_EXE: return "SERVER_LOBBY_EXE";
+		case PacketType::SERVER_LOBBY_COUNTDOWN: return "SERVER_LOBBY_COUNTDOWN";
+		case PacketType::SERVER_LOBBY_EXE_CHANGE: return "SERVER_LOBBY_EXE_CHANGE";
+		case PacketType::SERVER_LOBBY_CHARACTER_CHANGE: return "SERVER_LOBBY_CHARACTER_CHANGE";
+		case PacketType::SERVER_LOBBY_CHARACTER_RESPONSE: return "SERVER_LOBBY_CHARACTER_RESPONSE";
+		case PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE: return "SERVER_LOBBY_EXECHARACTER_RESPONSE";
+		case PacketType::SERVER_LOBBY_GAME_START: return "SERVER_LOBBY_GAME_START";
+		case PacketType::SERVER_LOBBY_PLAYER: return "SERVER_LOBBY_PLAYER";
+		case PacketType::SERVER_LOBBY_EXE_CHANCE: return "SERVER_LOBBY_EXE_CHANCE";
+		case PacketType::SERVER_LOBBY_CORRECT: return "SERVER_LOBBY_CORRECT";
+		case PacketType::SERVER_LOBBY_CHOOSEVOTEKICK: return "SERVER_LOBBY_CHOOSEVOTEKICK";
+		case PacketType::SERVER_LOBBY_CHOOSEBAN: return "SERVER_LOBBY_CHOOSEBAN";
+		case PacketType::SERVER_LOBBY_CHOOSEKICK: return "SERVER_LOBBY_CHOOSEKICK";
+		case PacketType::SERVER_LOBBY_CHOOSEOP: return "SERVER_LOBBY_CHOOSEOP";
+		case PacketType::SERVER_LOBBY_CHANGELOBBY: return "SERVER_LOBBY_CHANGELOBBY";
+		case PacketType::SERVER_CHAR_TIME_SYNC: return "SERVER_CHAR_TIME_SYNC";
+		case PacketType::SERVER_VOTE_MAPS: return "SERVER_VOTE_MAPS";
+		case PacketType::SERVER_VOTE_SET: return "SERVER_VOTE_SET";
+		case PacketType::SERVER_VOTE_TIME_SYNC: return "SERVER_VOTE_TIME_SYNC";
+		case PacketType::SERVER_GAME_PLAYERS_READY: return "SERVER_GAME_PLAYERS_READY";
+		case PacketType::SERVER_GAME_EXE_WINS: return "SERVER_GAME_EXE_WINS";
+		case PacketType::SERVER_GAME_SURVIVOR_WIN: return "SERVER_GAME_SURVIVOR_WIN";
+		case PacketType::SERVER_GAME_SPAWN_RING: return "SERVER_GAME_SPAWN_RING";
+		case PacketType::SERVER_GAME_PLAYER_ESCAPED: return "SERVER_GAME_PLAYER_ESCAPED";
+		case PacketType::SERVER_GAME_BACK_TO_LOBBY: return "SERVER_GAME_BACK_TO_LOBBY";
+		case PacketType::SERVER_GAME_TIME_SYNC: return "SERVER_GAME_TIME_SYNC";
+		case PacketType::SERVER_GAME_TIME_OVER: return "SERVER_GAME_TIME_OVER";
+		case PacketType::SERVER_GAME_PING: return "SERVER_GAME_PING";
+		case PacketType::SERVER_PLAYER_DEATH_STATE: return "SERVER_PLAYER_DEATH_STATE";
+		case PacketType::SERVER_GAME_DEATHTIMER_TICK: return "SERVER_GAME_DEATHTIMER_TICK";
+		case PacketType::SERVER_GAME_DEATHTIMER_END: return "SERVER_GAME_DEATHTIMER_END";
+		case PacketType::SERVER_REQUEST_INFO: return "SERVER_REQUEST_INFO";
+		case PacketType::SERVER_HEARTBEAT: return "SERVER_HEARTBEAT";
+		case PacketType::SERVER_PONG: return "SERVER_PONG";
+		case PacketType::SERVER_FORCE_DAMAGE: return "SERVER_FORCE_DAMAGE";
+		case PacketType::SERVER_GAME_RING_READY: return "SERVER_GAME_RING_READY";
+		case PacketType::SERVER_PLAYER_BACKTRACK: return "SERVER_PLAYER_BACKTRACK";
+		case PacketType::SERVER_TPROJECTILE_STATE: return "SERVER_TPROJECTILE_STATE";
+		case PacketType::SERVER_ETRACKER_STATE: return "SERVER_ETRACKER_STATE";
+		case PacketType::SERVER_ERECTOR_BRING_SPAWN: return "SERVER_ERECTOR_BRING_SPAWN";
+		case PacketType::SERVER_RMZSLIME_STATE: return "SERVER_RMZSLIME_STATE";
+		case PacketType::SERVER_RMZSLIME_RINGBONUS: return "SERVER_RMZSLIME_RINGBONUS";
+		case PacketType::SERVER_RMZSHARD_STATE: return "SERVER_RMZSHARD_STATE";
+		case PacketType::SERVER_LCEYE_STATE: return "SERVER_LCEYE_STATE";
+		case PacketType::SERVER_LCCHAIN_STATE: return "SERVER_LCCHAIN_STATE";
+		case PacketType::SERVER_NPCONTROLLER_STATE: return "SERVER_NPCONTROLLER_STATE";
+		case PacketType::SERVER_KAFMONITOR_STATE: return "SERVER_KAFMONITOR_STATE";
+		case PacketType::SERVER_YCRSMOKE_STATE: return "SERVER_YCRSMOKE_STATE";
+		case PacketType::SERVER_YCRSMOKE_READY: return "SERVER_YCRSMOKE_READY";
+		case PacketType::SERVER_MOVINGSPIKE_STATE: return "SERVER_MOVINGSPIKE_STATE";
+		case PacketType::SERVER_RING_STATE: return "SERVER_RING_STATE";
+		case PacketType::SERVER_RING_COLLECTED: return "SERVER_RING_COLLECTED";
+		case PacketType::SERVER_ACT9WALL_STATE: return "SERVER_ACT9WALL_STATE";
+		case PacketType::SERVER_NAPBALL_STATE: return "SERVER_NAPBALL_STATE";
+		case PacketType::SERVER_NAPICE_STATE: return "SERVER_NAPICE_STATE";
+		case PacketType::SERVER_PFLIFT_STATE: return "SERVER_PFLIFT_STATE";
+		case PacketType::SERVER_BRING_STATE: return "SERVER_BRING_STATE";
+		case PacketType::SERVER_BRING_COLLECTED: return "SERVER_BRING_COLLECTED";
+		case PacketType::SERVER_VVLCOLUMN_STATE: return "SERVER_VVLCOLUMN_STATE";
+		case PacketType::SERVER_VVVASE_STATE: return "SERVER_VVVASE_STATE";
+		case PacketType::SERVER_GHZTHUNDER_STATE: return "SERVER_GHZTHUNDER_STATE";
+		case PacketType::SERVER_TCGOM_STATE: return "SERVER_TCGOM_STATE";
+		case PacketType::SERVER_EXELLERCLONE_STATE: return "SERVER_EXELLERCLONE_STATE";
+		case PacketType::SERVER_DTTAILSDOLL_STATE: return "SERVER_DTTAILSDOLL_STATE";
+		case PacketType::SERVER_DTBALL_STATE: return "SERVER_DTBALL_STATE";
+		case PacketType::SERVER_DTASS_STATE: return "SERVER_DTASS_STATE";
+		case PacketType::SERVER_HDDOOR_STATE: return "SERVER_HDDOOR_STATE";
+		case PacketType::SERVER_WDLATERN_ACTIVATE: return "SERVER_WDLATERN_ACTIVATE";
+		case PacketType::SERVER_FART_STATE: return "SERVER_FART_STATE";
+		case PacketType::SERVER_MJLAVA_STATE: return "SERVER_MJLAVA_STATE";
+		case PacketType::SERVER_MJJUDGER_STATE: return "SERVER_MJJUDGER_STATE";
+		case PacketType::SERVER_MJCRYSTAL_STATE: return "SERVER_MJCRYSTAL_STATE";
+		case PacketType::CLIENT_ETRACKER: return "CLIENT_ETRACKER";
+		case PacketType::CLIENT_ETRACKER_ACTIVATED: return "CLIENT_ETRACKER_ACTIVATED";
+		case PacketType::CLIENT_TPROJECTILE: return "CLIENT_TPROJECTILE";
+		case PacketType::CLIENT_TPROJECTILE_HIT: return "CLIENT_TPROJECTILE_HIT";
+		case PacketType::CLIENT_TPROJECTILE_STARTCHARGE: return "CLIENT_TPROJECTILE_STARTCHARGE";
+		case PacketType::CLIENT_ERECTOR_BALLS: return "CLIENT_ERECTOR_BALLS";
+		case PacketType::CLIENT_ERECTOR_BRING_SPAWN: return "CLIENT_ERECTOR_BRING_SPAWN";
+		case PacketType::CLIENT_EXELLER_SPAWN_CLONE: return "CLIENT_EXELLER_SPAWN_CLONE";
+		case PacketType::CLIENT_EXELLER_TELEPORT_CLONE: return "CLIENT_EXELLER_TELEPORT_CLONE";
+		case PacketType::CLIENT_MERCOIN_BONUS: return "CLIENT_MERCOIN_BONUS";
+		case PacketType::CLIENT_RMZSLIME_HIT: return "CLIENT_RMZSLIME_HIT";
+		case PacketType::CLIENT_LCEYE_REQUEST_ACTIVATE: return "CLIENT_LCEYE_REQUEST_ACTIVATE";
+		case PacketType::CLIENT_KAFMONITOR_ACTIVATE: return "CLIENT_KAFMONITOR_ACTIVATE";
+		case PacketType::CLIENT_RING_COLLECTED: return "CLIENT_RING_COLLECTED";
+		case PacketType::CLIENT_RING_BROKE: return "CLIENT_RING_BROKE";
+		case PacketType::CLIENT_BRING_COLLECTED: return "CLIENT_BRING_COLLECTED";
+		case PacketType::CLIENT_NAPICE_ACTIVATE: return "CLIENT_NAPICE_ACTIVATE";
+		case PacketType::CLIENT_SPRING_USE: return "CLIENT_SPRING_USE";
+		case PacketType::CLIENT_PFLIT_ACTIVATE: return "CLIENT_PFLIT_ACTIVATE";
+		case PacketType::CLIENT_VVVASE_BREAK: return "CLIENT_VVVASE_BREAK";
+		case PacketType::CLIENT_RMZSHARD_COLLECT: return "CLIENT_RMZSHARD_COLLECT";
+		case PacketType::CLIENT_RMZSHARD_LAND: return "CLIENT_RMZSHARD_LAND";
+		case PacketType::CLIENT_DTASS_ACTIVATE: return "CLIENT_DTASS_ACTIVATE";
+		case PacketType::CLIENT_HDDOOR_TOGGLE: return "CLIENT_HDDOOR_TOGGLE";
+		case PacketType::CLIENT_FART_PUSH: return "CLIENT_FART_PUSH";
+		case PacketType::CLIENT_LOBBY_READY_STATE: return "CLIENT_LOBBY_READY_STATE";
+		case PacketType::CLIENT_REQUESTED_INFO: return "CLIENT_REQUESTED_INFO";
+		case PacketType::CLIENT_PLAYER_DATA: return "CLIENT_PLAYER_DATA";
+		case PacketType::CLIENT_PLAYER_HURT: return "CLIENT_PLAYER_HURT";
+		case PacketType::CLIENT_SOUND_EMIT: return "CLIENT_SOUND_EMIT";
+		case PacketType::CLIENT_PING: return "CLIENT_PING";
+		case PacketType::CLIENT_REVIVAL_PROGRESS: return "CLIENT_REVIVAL_PROGRESS";
+		case PacketType::CLIENT_PLAYER_HEAL: return "CLIENT_PLAYER_HEAL";
+		case PacketType::CLIENT_PLAYER_HEAL_PART: return "CLIENT_PLAYER_HEAL_PART";
+		case PacketType::SERVER_REVIVAL_PROGRESS: return "SERVER_REVIVAL_PROGRESS";
+		case PacketType::SERVER_REVIVAL_STATUS: return "SERVER_REVIVAL_STATUS";
+		case PacketType::SERVER_REVIVAL_RINGSUB: return "SERVER_REVIVAL_RINGSUB";
+		case PacketType::SERVER_REVIVAL_REVIVED: return "SERVER_REVIVAL_REVIVED";
+		case PacketType::CLIENT_REQUEST_CHARACTER: return "CLIENT_REQUEST_CHARACTER";
+		case PacketType::CLIENT_REQUEST_EXECHARACTER: return "CLIENT_REQUEST_EXECHARACTER";
+		case PacketType::CLIENT_VOTE_REQUEST: return "CLIENT_VOTE_REQUEST";
+		case PacketType::CLIENT_PLAYER_DEATH_STATE: return "CLIENT_PLAYER_DEATH_STATE";
+		case PacketType::CLIENT_PLAYER_ESCAPED: return "CLIENT_PLAYER_ESCAPED";
+		case PacketType::SERVER_PLAYER_ESCAPED: return "SERVER_PLAYER_ESCAPED";
+		case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: return "CLIENT_LOBBY_PLAYERS_REQUEST";
+		case PacketType::CLIENT_CREAM_SPAWN_RINGS: return "CLIENT_CREAM_SPAWN_RINGS";
+		case PacketType::CLIENT_SPAWN_EFFECT: return "CLIENT_SPAWN_EFFECT";
+		case PacketType::CLIENT_CHAT_MESSAGE: return "CLIENT_CHAT_MESSAGE";
+		case PacketType::CLIENT_LOBBY_CHOOSEVOTEKICK: return "CLIENT_LOBBY_CHOOSEVOTEKICK";
+		case PacketType::CLIENT_LOBBY_CHOOSEBAN: return "CLIENT_LOBBY_CHOOSEBAN";
+		case PacketType::CLIENT_LOBBY_CHOOSEKICK: return "CLIENT_LOBBY_CHOOSEKICK";
+		case PacketType::CLIENT_LOBBY_CHOOSEOP: return "CLIENT_LOBBY_CHOOSEOP";
+		case PacketType::CLIENT_PLAYER_PALETTE: return "CLIENT_PLAYER_PALETTE";
+		case PacketType::CLIENT_PET_PALETTE: return "CLIENT_PET_PALETTE";
+		case PacketType::SERVER_RESULTS: return "SERVER_RESULTS";
+		case PacketType::SERVER_RESULTS_DATA: return "SERVER_RESULTS_DATA";
+		case PacketType::CLIENT_RESULTS_REQUEST: return "CLIENT_RESULTS_REQUEST";
+		case PacketType::CLIENT_STATS_REPORT: return "CLIENT_STATS_REPORT";
+		case PacketType::SERVER_PREIDENTITY: return "SERVER_PREIDENTITY";
+		case PacketType::SERVER_FELLA: return "SERVER_FELLA";
+		case PacketType::CLIENT_PLAYER_POTATER: return "CLIENT_PLAYER_POTATER";
+		default: return "Unknown";
+	}
+}
+
 
 static constexpr int PACKET_MAXSIZE = 256;
 
-using boost::asio::ip::udp;
+namespace DisasterServer {
+	class Peer;
 
-class Packet {
-	std::array<uint8_t, PACKET_MAXSIZE> buffer;
-	uint8_t position = 0;
-	uint8_t len = 0;
-public:
-	explicit Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
-	explicit Packet(PacketType type);
-	~Packet();
+	class Packet {
+		std::array<uint8_t, PACKET_MAXSIZE> buffer;
+		PacketType type;
+		size_t position = 0;
+		size_t len = 0;
+	public:
+		explicit Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
+		explicit Packet(const enet_uint8 *data, size_t data_size);
+		explicit Packet(PacketType type);
+		~Packet();
 
-	std::optional<uint8_t> readUint8();
-	std::optional<uint16_t> readUint16();
-	std::optional<uint32_t> readUint32();
-	std::optional<uint64_t> readUint64();
-	std::optional<float> readFloat();
-	std::optional<double> readDouble();
-	std::optional<std::string> readString();
+		template <typename T>
+		T read() {
+			T value = reinterpret_cast<T *>(buffer.data() + position)[0];
+			position += sizeof(T);
+			return value;
+		}
 
-	void writeUint8(uint8_t value);
-	void writeUint16(uint16_t value);
-	void writeUint32(uint32_t value);
-	void writeUint64(uint64_t value);
-	void writeFloat(float value);
-	void writeDouble(double value);
-	void writeString(const std::string &value);
+		std::string readString();
 
-	void send(udp::endpoint &endpoint, udp::socket &socket);
-};
+		void writeUint8(uint8_t value);
+		void writeUint16(uint16_t value);
+		void writeUint32(uint32_t value);
+		void writeUint64(uint64_t value);
+		void writeFloat(float value);
+		void writeDouble(double value);
+		void writeString(const std::string &value);
+
+		void send(enetpp::server<Peer> &server, uint32_t client_id, bool reliable);
+	};
+}
+
 
 #endif

@@ -1,31 +1,28 @@
 #ifndef DISASTERSERVER_SERVER_HPP
 #define DISASTERSERVER_SERVER_HPP
 
-#include <boost/asio.hpp>
-
 #include "Peer.hpp"
-#include "Core/Packet.hpp"
+
+#include "Core/ENet/server.h"
 
 #define TICKSPERSEC 60
 #define BUILD_VERSION 1101
 #define BASE_SERVER_PORT 8606
 
-using boost::asio::ip::udp;
-
 namespace DisasterServer
 {
     class Server {
-        boost::asio::io_context &io_context;
-        udp::socket socket;
-        std::array<uint8_t, PACKET_MAXSIZE> recv_buffer = {};
-
-        uint16_t id_counter = 0;
-        std::unordered_map<udp::endpoint, Peer> peers;
+        bool running = false;
+        enetpp::server<Peer> server;
+        double delta = 0;
     public:
-        Server(boost::asio::io_context& io_context);
-
+        Server();
+        void initialize();
     private:
-        bool worker();
+        void on_client_connected(Peer &peer);
+        void on_client_disconnected(uint32_t client_id);
+        void on_client_received(Peer &peer, const enet_uint8 *data, size_t data_size);
+        //bool worker();
     };
 }
 

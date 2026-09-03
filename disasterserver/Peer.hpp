@@ -1,17 +1,35 @@
 #ifndef DISASTERSERVER_PEER_HPP
 #define DISASTERSERVER_PEER_HPP
 
-#include <boost/smart_ptr/enable_shared_from_this.hpp>
-#include <boost/asio.hpp>
-
 #include "Core/Packet.hpp"
+#include "Core/ENet/server_listen_params.h"
 
 namespace DisasterServer
 {
-    class Peer : public boost::enable_shared_from_this<Peer> {
+    enum class SurvCharacters {
+        CH_NONE = -1,
+
+        CH_TAILS,
+        CH_KNUX,
+        CH_EGGMAN,
+        CH_AMY,
+        CH_CREAM,
+        CH_SALLY
+    };
+
+    enum class ExesCharacters {
+        EX_NONE = -1,
+
+        EX_ORIGINAL,
+        EX_CHAOS,
+        EX_EXETIOR,
+        EX_EXELLER
+    };
+
+    class Peer {
         uint16_t id;
         std::string ip;
-        udp::endpoint endpoint;
+        void *endpoint;
 
         /* General info */
         //Player plr;
@@ -38,11 +56,28 @@ namespace DisasterServer
 
         AuthPeer auth;
 
+        /* Character */
+        SurvCharacters survChars;
+        ExesCharacters exesChars;
+
+        bool should_timeout;
+
+        /* State info */
+        uint8_t exe_chance;
+        double timeout;
+        double vote_cooldown;
+
     public:
-        Peer(uint16_t id, std::string ip, udp::endpoint endpoint);
+        Peer();
         ~Peer();
 
+        static void initialize_client(Peer &client, const char *ip);
+
+        uint32_t get_id();
         AuthPeer &getAuthPeer();
+
+
+        bool identity(Packet &packet);
     };
 }
 

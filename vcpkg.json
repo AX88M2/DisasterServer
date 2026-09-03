@@ -2,8 +2,6 @@
   "name": "disasterserver",
   "version": "0.0.1",
   "dependencies": [
-    "boost-bind",
-    "boost-smart-ptr",
-    "boost-asio"
+    "boost-bind"
   ]
 }
