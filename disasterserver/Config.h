@@ -26,6 +26,7 @@ typedef struct
 	int32_t port;
 	int32_t	server_count;
 	int32_t ping_limit;
+	int32_t antiafk_timeout;
 	bool	log_debug;
 	bool	log_file;
 	bool	anticheat;

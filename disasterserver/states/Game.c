@@ -1530,7 +1530,7 @@ bool game_player_tick(Server* server)
             {
                 data->plr.afk_counter += 60;
 
-                if (data->plr.afk_counter >= 1800)
+                if (data->plr.afk_counter >= g_config.antiafk_timeout * 60)
                 {
                     Info("%s (id %d) kicked for AFK or Timeout!", data->nickname.value, data->id);
                     server_disconnect(server, data->peer, DR_AFKTIMEOUT, "AFK or Timeout");
