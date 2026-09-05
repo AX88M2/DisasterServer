@@ -162,6 +162,7 @@ bool peer_identity(PeerData *v, Packet *packet)
 	// Read header
 	PacketRead(passtrough, packet, packet_read8, uint8_t);
 	PacketRead(type, packet, packet_read8, uint8_t);
+
 	PacketRead(build_version, packet, packet_read16, uint16_t);
 	PacketRead(server_index, packet, packet_read32, int32_t);
 	PacketRead(nickname, packet, packet_readstr, String);

@@ -2,10 +2,11 @@
 #define DISASTERSERVER_PEER_HPP
 
 #include "Core/Packet.hpp"
-#include "Core/ENet/server_listen_params.h"
 
 namespace DisasterServer
 {
+    class Server;
+
     enum class SurvCharacters {
         CH_NONE = -1,
 
@@ -27,9 +28,8 @@ namespace DisasterServer
     };
 
     class Peer {
-        uint16_t id;
+        uint32_t id;
         std::string ip;
-        void *endpoint;
 
         /* General info */
         //Player plr;
@@ -46,7 +46,6 @@ namespace DisasterServer
         bool is_mobile;
         bool can_vote;
         bool voted;
-        bool disconnecting;
 
         struct AuthPeer {
             uint32_t type;
@@ -68,16 +67,33 @@ namespace DisasterServer
         double vote_cooldown;
 
     public:
+        Server *server = nullptr;
+
         Peer();
         ~Peer();
 
         static void initialize_client(Peer &client, const char *ip);
 
-        uint32_t get_id();
-        AuthPeer &getAuthPeer();
+        uint32_t getId() const { return id; }
+        std::string getIp() const { return ip; }
+        std::string getNickname() { return nickname; }
+        std::string getUdid() { return udid; }
+        uint8_t getLobbyIcon() { return lobby_icon; }
+        int8_t getPet() { return pet; }
+        AuthPeer &getAuthPeer() { return auth; }
+        bool isVerified() { return verified; }
+        bool isInGame() { return in_game; }
+        bool isOpped() { return op; }
+        bool isModified() { return mod_tool; }
 
+        void setReady(bool flag) { ready = flag; }
+        bool isReady() { return ready; }
+
+        void setVoted(bool flag) { voted = flag; }
+        bool isVoted() { return voted; }
 
         bool identity(Packet &packet);
+        bool identity_process(const std::string & addr, bool is_banned, uint64_t timeout, bool do_timeout);
     };
 }
 

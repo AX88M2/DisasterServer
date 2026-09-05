@@ -314,18 +314,20 @@ inline std::string getPacketTypeName(PacketType type) {
 		case PacketType::SERVER_PREIDENTITY: return "SERVER_PREIDENTITY";
 		case PacketType::SERVER_FELLA: return "SERVER_FELLA";
 		case PacketType::CLIENT_PLAYER_POTATER: return "CLIENT_PLAYER_POTATER";
-		default: return "Unknown";
+		default: return "<Unknown>";
 	}
 }
 
-
 static constexpr int PACKET_MAXSIZE = 256;
 
+#undef min
+
 namespace DisasterServer {
+	class Server;
 	class Peer;
 
 	class Packet {
-		std::array<uint8_t, PACKET_MAXSIZE> buffer;
+		std::array<uint8_t, PACKET_MAXSIZE> buffer{};
 		PacketType type;
 		size_t position = 0;
 		size_t len = 0;
@@ -335,6 +337,10 @@ namespace DisasterServer {
 		explicit Packet(PacketType type);
 		~Packet();
 
+		PacketType getPacketType() {
+			return type;
+		}
+
 		template <typename T>
 		T read() {
 			T value = reinterpret_cast<T *>(buffer.data() + position)[0];
@@ -342,17 +348,28 @@ namespace DisasterServer {
 			return value;
 		}
 
-		std::string readString();
+		template <typename T>
+		void write(T value) {
+			if (position + sizeof(T) > PACKET_MAXSIZE) {
+				Err("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+				return;
+			}
 
-		void writeUint8(uint8_t value);
-		void writeUint16(uint16_t value);
-		void writeUint32(uint32_t value);
-		void writeUint64(uint64_t value);
-		void writeFloat(float value);
-		void writeDouble(double value);
+			if (position + sizeof(T) >= len) {
+				len++;
+			}
+
+			const auto *ptr = reinterpret_cast<uint8_t*>(&value);
+			for (uint32_t i = 0; i < sizeof(T); i++) {
+				buffer[position++] = ptr[i];
+			}
+		}
+
+		std::string readString();
 		void writeString(const std::string &value);
 
-		void send(enetpp::server<Peer> &server, uint32_t client_id, bool reliable);
+		void send(Server &server, uint32_t client_id, bool reliable);
+		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate = [](const Peer& client) { return true; });
 	};
 }
 

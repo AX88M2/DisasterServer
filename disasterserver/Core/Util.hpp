@@ -1,0 +1,7 @@
+#ifndef DISASTERSERVER_UTIL_HPP
+#define DISASTERSERVER_UTIL_HPP
+
+#include "Server.hpp"
+
+
+#endif //DISASTERSERVER_UTIL_HPP

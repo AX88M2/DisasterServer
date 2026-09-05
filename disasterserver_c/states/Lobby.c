@@ -537,9 +537,9 @@ bool lobby_state_tick(Server* server)
 
 				if (!peer->ready)
 				{
-					peer->timeout += server->delta;
-					if ((int)peer->timeout % 60 == 0)
-						Debug("tick for %s: %f", peer->nickname.value, peer->timeout/60.0f);
+					//peer->timeout += server->delta;
+					//if ((int)peer->timeout % 60 == 0)
+					//	Debug("tick for %s: %f", peer->nickname.value, peer->timeout/60.0f);
 
 					if (peer->timeout >= 25 * TICKSPERSEC)
 						server_disconnect(server, peer->peer, DR_AFKTIMEOUT, NULL);

@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
     try {
         enetpp::global_state::get().initialize();
 
-        Info("- DisasterServerCXX v{}", BUILD_VERSION);
+        Info("- DisasterServerCXX v{}", DisasterServer::BUILD_VERSION);
         Info("- Build from {} {}", __DATE__, __TIME__);
 
         DisasterServer::Server server;

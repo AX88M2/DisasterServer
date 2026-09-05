@@ -109,7 +109,7 @@ namespace enetpp {
 				auto packet = enet_packet_create(data, data_size, flags);
 				for (auto c : _connected_clients) {
 					if (predicate(*c)) {
-						_packet_queue.emplace(channel_id, packet, c->get_id());
+						_packet_queue.emplace(channel_id, packet, c->getId());
 					}
 				}
 			}
@@ -117,7 +117,7 @@ namespace enetpp {
 
 		void consume_events(
 			std::function<void(ClientT& client)> on_client_connected,
-			std::function<void(unsigned int client_id)> on_client_disconnected,
+			std::function<void(ClientT &client, uint32_t client_id)> on_client_disconnected,
 			std::function<void(ClientT& client, const enet_uint8* data, size_t data_size)> on_client_data_received) {
 
 			if (!_event_queue.empty()) {
@@ -141,10 +141,10 @@ namespace enetpp {
 						case ENET_EVENT_TYPE_DISCONNECT: {
 							auto iter = std::find(_connected_clients.begin(), _connected_clients.end(), e._client);
 							assert(iter != _connected_clients.end());
+							unsigned int client_id = e._client->getId();
+							on_client_disconnected(*e._client, client_id);
 							_connected_clients.erase(iter);
-							unsigned int client_id = e._client->get_id();
 							delete e._client;
-							on_client_disconnected(client_id);
 							break;
 						}
 
@@ -168,6 +168,52 @@ namespace enetpp {
 			return _connected_clients;
 		}
 
+/// ====================== Могут быть проблемы ==================
+		void disconnect_leter(uint32_t id, uint32_t reason) {
+			auto iter = _thread_peer_map.find(id);
+			if (iter != _thread_peer_map.end()) {
+				Err("{} not found", id);
+				return;
+			}
+			enet_peer_disconnect_later(iter->second, reason);
+			iter->second->data = nullptr;
+			_thread_peer_map.erase(iter->first);
+
+			std::lock_guard<std::mutex> lock(_event_queue_mutex);
+			_event_queue.emplace(ENET_EVENT_TYPE_DISCONNECT, 0, nullptr, reinterpret_cast<ClientT*>(iter->second->data));
+		}
+
+		void disconnect(uint32_t id, uint32_t reason) {
+			auto iter = _thread_peer_map.find(id);
+			if (iter != _thread_peer_map.end()) {
+				Err("{} not found", id);
+				return;
+			}
+			enet_peer_disconnect(iter->second, reason);
+			iter->second->data = nullptr;
+			_thread_peer_map.erase(iter->first);
+
+			std::lock_guard<std::mutex> lock(_event_queue_mutex);
+			_event_queue.emplace(ENET_EVENT_TYPE_DISCONNECT, 0, nullptr, reinterpret_cast<ClientT*>(iter->second->data));
+		}
+/// ==============================================================
+/*
+ *
+	* void handle_disconnect_event_in_thread(const ENetEvent& e) {
+				auto client = reinterpret_cast<ClientT*>(e.peer->data);
+				if (client != nullptr) {
+					auto iter = _thread_peer_map.find(client->getId());
+					assert(iter != _thread_peer_map.end());
+					assert(iter->second == e.peer);
+					e.peer->data = nullptr;
+					_thread_peer_map.erase(iter);
+
+					std::lock_guard<std::mutex> lock(_event_queue_mutex);
+					_event_queue.emplace(ENET_EVENT_TYPE_DISCONNECT, 0, nullptr, client);
+				}
+			}
+ *
+ */
 	private:
 		void run_in_thread(const listen_params_type& params) {
 			set_current_thread_name("enetpp::server");
@@ -281,7 +327,7 @@ namespace enetpp {
 			assert(e.peer->data == nullptr);
 			e.peer->data = client;
 
-			_thread_peer_map[client->get_id()] = e.peer;
+			_thread_peer_map[client->getId()] = e.peer;
 
 			{
 				std::lock_guard<std::mutex> lock(_event_queue_mutex);
@@ -292,7 +338,7 @@ namespace enetpp {
 		void handle_disconnect_event_in_thread(const ENetEvent& e) {
 			auto client = reinterpret_cast<ClientT*>(e.peer->data);
 			if (client != nullptr) {
-				auto iter = _thread_peer_map.find(client->get_id());
+				auto iter = _thread_peer_map.find(client->getId());
 				assert(iter != _thread_peer_map.end());
 				assert(iter->second == e.peer);
 				e.peer->data = nullptr;
