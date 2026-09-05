@@ -6,7 +6,8 @@
 
 #define INFO_TEXT CLRCODE_PUR "disasterserverui " CLRCODE_BLU __DATE__  " " CLRCODE_GRN __TIME__ CLRCODE_RST "\n"\
 CLRCODE_RST "(c) 2024 team exe empire\n\n\n"\
-"game version: v" CLRCODE_PUR STRINGIFY(BUILD_VERSION) "\n"\
+"game version: v" CLRCODE_PUR STRINGIFY(BUILD_VERSION) "~\n"\
+"server version: " CLRCODE_YLW STRINGIFY(BUILD_MOD_VER) "\n"\
 CLRCODE_RST "compiler: " CLRCODE_PUR "%s\n"\
 CLRCODE_RST "sdl2 version: " CLRCODE_PUR "%d.%d.%d\n"\
 CLRCODE_RST "sdl2_image version: " CLRCODE_PUR "%d.%d.%d\n"\

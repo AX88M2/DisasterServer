@@ -71,9 +71,10 @@ bool disaster_init(void)
 #endif
 
 	Info("--------------------------------");
-	Info(LOG_RED "Better" LOG_BLU "Server " LOG_RST "v" STRINGIFY(BUILD_VERSION));
+	Info(LOG_RED "Disaster" LOG_BLU "Server " LOG_RST "v" STRINGIFY(BUILD_VERSION));
 	Info("Build from " LOG_PUR __DATE__ " " LOG_GRN __TIME__);
 	Info("(c) 2024 Team Exe Empire");
+	Info("Edited by /MilesGlitch");
 	Info("--------------------------------");
 	Info("");
 
