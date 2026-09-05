@@ -165,7 +165,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			char msg[100];
 			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server_count);
 
-			server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
+			server_send_msg(v->server, v->peer, "|- version " CLRCODE_YLW STRINGIFY(BUILD_MOD_VER) "~");
 			server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
 			server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
 			server_send_msg(v->server, v->peer, "|type .help for command list~");

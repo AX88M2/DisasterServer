@@ -26,6 +26,7 @@ SERVER_API Config g_config =
 	.ping_limit = 250,
 #endif
 
+	.antiafk_timeout = 30,
 	.log_debug = false,
 	.log_file = false,
 	.map_list = { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true },
@@ -154,6 +155,7 @@ bool config_init(void)
 	g_config.port =			(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "port"));
 	g_config.server_count = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "server_count"));
 	g_config.ping_limit =	(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "ping_limit"));
+	g_config.antiafk_timeout = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "antiafk_timeout"));
 	g_config.log_file =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_file"));
 	g_config.log_debug =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_debug"));
 	g_config.anticheat =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "anticheat"));
@@ -189,6 +191,7 @@ SERVER_API bool config_save(void)
 	cJSON_AddItemToObject(json, "port", cJSON_CreateNumber(g_config.port));
 	cJSON_AddItemToObject(json, "server_count", cJSON_CreateNumber(g_config.server_count));
 	cJSON_AddItemToObject(json, "ping_limit", cJSON_CreateNumber(g_config.ping_limit));
+	cJSON_AddItemToObject(json, "antiafk_timeout", cJSON_CreateNumber(g_config.antiafk_timeout));
 	cJSON_AddItemToObject(json, "log_file", cJSON_CreateBool(g_config.log_file));
 	cJSON_AddItemToObject(json, "log_debug", cJSON_CreateBool(g_config.log_debug));
 	cJSON_AddItemToObject(json, "anticheat", cJSON_CreateBool(g_config.anticheat));

@@ -17,6 +17,7 @@
 
 #define TICKSPERSEC 60
 #define BUILD_VERSION 1101
+#define BUILD_MOD_VER v1.0.9
 
 #define BRACKET "-----------------------"
 
