@@ -1,5 +1,6 @@
 ﻿{
-  "configurations": [
+  "version": 3,
+  "configurePresets": [
     {
       "name": "base",
       "hidden": true,
@@ -8,19 +9,24 @@
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-static"
       },
-
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/2.0": {
           "sourceRootDir": "$ms{localSourceDir}\\..",
           "remoteSourceRootDir": "$env{HOME}/.vs/wsl",
           "copySourcesOptions": {
             "method": "rsync",
-            "exclusionList": [ ".vs", ".git", "out", "dist", "attic", "build" ]
+            "exclusionList": [
+              ".vs",
+              ".git",
+              "out",
+              "dist",
+              "attic",
+              "build"
+            ]
           }
         }
       }
     },
-
     {
       "inherits": "base",
       "name": "windows-release",
@@ -35,7 +41,9 @@
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "hostOS": [ "Windows" ]
+          "hostOS": [
+            "Windows"
+          ]
         }
       }
     },
@@ -53,11 +61,12 @@
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "hostOS": [ "Windows" ]
+          "hostOS": [
+            "Windows"
+          ]
         }
       }
     },
-
     {
       "inherits": "base",
       "name": "windows-clang-release",
@@ -72,7 +81,9 @@
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "hostOS": [ "Windows" ]
+          "hostOS": [
+            "Windows"
+          ]
         }
       }
     },
@@ -90,7 +101,9 @@
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "hostOS": [ "Windows" ]
+          "hostOS": [
+            "Windows"
+          ]
         }
       }
     }

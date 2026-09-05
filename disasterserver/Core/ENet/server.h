@@ -282,7 +282,7 @@ namespace enetpp {
 
 		void capture_events_in_thread(const listen_params_type& params, ENetHost* host) {
 			//http://lists.cubik.org/pipermail/enet-discuss/2013-September/002240.html
-			enet_host_service(host, 0, 0);
+			enet_host_service(host, 0, 5);
 
 			ENetEvent e;
 			while (enet_host_check_events(host, &e) > 0) {

@@ -28,43 +28,43 @@ namespace DisasterServer
     };
 
     class Peer {
-        uint32_t id;
-        std::string ip;
+        uint32_t id = 0;
+        std::string ip = "";
 
         /* General info */
         //Player plr;
         std::string nickname;
         std::string udid;
-        uint8_t lobby_icon;
-        int8_t pet;
+        uint8_t lobby_icon = 0;
+        int8_t pet = -1;
 
-        bool verified;
-        bool in_game;
-        bool op;
-        bool ready;
-        bool mod_tool;
-        bool is_mobile;
-        bool can_vote;
-        bool voted;
+        bool verified = false;
+        bool in_game = false;
+        bool op = false;
+        bool ready = false;
+        bool mod_tool = false;
+        bool is_mobile = false;
+        bool can_vote = false;
+        bool voted = false;
 
         struct AuthPeer {
-            uint32_t type;
-            uint8_t	 one;
-            uint8_t	 two;
+            uint32_t type = 0;
+            uint8_t	 one = 0;
+            uint8_t	 two = 0;
         };
 
-        AuthPeer auth;
+        AuthPeer auth = {};
 
         /* Character */
-        SurvCharacters survChars;
-        ExesCharacters exesChars;
+        SurvCharacters survChar = SurvCharacters::CH_NONE;
+        ExesCharacters exeChar = ExesCharacters::EX_NONE;
 
-        bool should_timeout;
+        bool should_timeout = false;
 
         /* State info */
-        uint8_t exe_chance;
-        double timeout;
-        double vote_cooldown;
+        uint8_t exe_chance = 0;
+        double timeout = 0;
+        double vote_cooldown = 0;
 
     public:
         Server *server = nullptr;
@@ -82,6 +82,7 @@ namespace DisasterServer
         int8_t getPet() { return pet; }
         AuthPeer &getAuthPeer() { return auth; }
 
+        void setExeChance(uint8_t chance) { exe_chance = chance; }
         uint8_t getExeChance() { return exe_chance; }
 
         bool isVerified() { return verified; }

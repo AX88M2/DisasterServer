@@ -60,6 +60,9 @@ void Packet::writeString(const std::string &value) {
 void Packet::send(Server &server, uint32_t client_id, bool reliable) {
 	Debug("PacketType::{} sending to {}", getPacketTypeName(type), client_id);
 	server.getBackend().send_packet_to(client_id, reliable ? 0 : 1, buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+
+	std::vector<uint8_t> empty = {0x00, static_cast<uint8_t>(PacketType::SERVER_HEARTBEAT)};
+	server.getBackend().send_packet_to(client_id, reliable ? 0 : 1, empty.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 }
 
 void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate) {

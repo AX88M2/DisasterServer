@@ -38,8 +38,7 @@ bool Peer::identity(Packet &packet) {
     this->lobby_icon = lobby_icon;
     this->pet = pet;
 
-
-    //this->in_game = (server->state == ST_LOBBY); //TODO: Create States Machine
+    this->in_game = (server->getStateManager().getCurrentState() == States::LOBBY);
     this->exe_chance = 1 + rand() % 4;
 
     if (this->server->getPeers().size() >= MAX_PLAYERS) {
@@ -104,14 +103,14 @@ bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t ti
         }
     }
 
-    if (!this->server->state_joined(*this)) {
+    if (!this->server->getStateManager().state_joined(*this)) {
         should_timeout = false;
-        this->server->disconnect(*this, DisconnectReason::OTHER, "Report this to dev: code 300");
+        this->server->disconnect(*this, DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
     }
 
     Packet identity_response(PacketType::SERVER_IDENTITY_RESPONSE);
-    identity_response.write<uint8_t>(1 /*this->state == ST_LOBBY*/); //TODO: Create States Machine
+    identity_response.write<uint8_t>(server->getStateManager().getCurrentState() == States::LOBBY);
     identity_response.write<uint16_t>(static_cast<uint16_t>(id));
     identity_response.send(*this->server, id, true);
 
@@ -127,11 +126,11 @@ bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t ti
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(0); /* v->server->state == ST_GAME && peer->in_game */ //TODO: Create States Machine
+            pack.write<uint8_t>(server->getStateManager().getCurrentState() == States::GAME && peer->in_game);
             pack.write<uint16_t>(static_cast<uint16_t>(peer->getId()));
             pack.writeString(nickname);
 
-            if (false /* v->server->state == ST_GAME && peer->in_game */) {
+            if (server->getStateManager().getCurrentState() == States::GAME && peer->in_game) {
 
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id */ );
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
@@ -164,7 +163,7 @@ bool Peer::message_received(Packet &packet) {
 
     bool result;
 
-    result = this->server->state_handle(*this, packet);
+    result = this->server->getStateManager().state_handle(*this, packet);
 
     return result;
 }

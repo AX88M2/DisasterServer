@@ -2,6 +2,7 @@
 #define DISASTERSERVER_SERVER_HPP
 
 #include "Peer.hpp"
+#include "StateManager.hpp"
 
 #include "Core/ENet/server.h"
 
@@ -9,6 +10,7 @@
 
 namespace DisasterServer
 {
+    class StateManager;
     static constexpr int MAX_PLAYERS = 7;
     static constexpr int BUILD_VERSION = 1101;
     static constexpr int BASE_SERVER_PORT = 8606;
@@ -55,28 +57,25 @@ namespace DisasterServer
     class Server {
         bool running = false;
         enetpp::server<Peer> backend;
+        StateManager stateManager;
         double delta = 0;
     public:
         Server();
+        ~Server();
         void initialize();
 
         void disconnect(Peer &peer, DisconnectReason reason, const std::string& message = "");
         void disconnect_by_id(uint32_t id, DisconnectReason reason, const std::string& message = "");
 
-        void send_message(uint32_t clientId, std::string &message);
-        void send_message(uint32_t clientId, const char *message);
+        void send_message(uint32_t clientId, std::string message);
         void send_broadcast_message(uint16_t sender, std::string &message);
 
         void broadcast(Packet &packet, bool reliable);
         void broadcast_ex(Packet &packet, bool reliable, uint32_t ignore);
 
-
-        bool state_joined(Peer &peer);
-        bool state_handle(Peer &peer, Packet &packet);
-
-
         std::vector<Peer*> getPeers() { return backend.get_connected_clients(); }
         enetpp::server<Peer>& getBackend() { return backend; }
+        StateManager &getStateManager();
     private:
         void on_client_connected(Peer &peer);
         void on_client_disconnected(Peer & peer, uint32_t client_id);

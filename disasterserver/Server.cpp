@@ -1,12 +1,21 @@
 #include "Server.hpp"
 
+#include <algorithm>
+
 #include "Core/Packet.hpp"
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 
+#include "StateManager.hpp"
+
 using namespace DisasterServer;
 
-Server::Server() = default;
+
+Server::Server() : stateManager(this) {
+    //this->stateManager.registerState<ServerState>(this);
+}
+
+Server::~Server() = default;
 
 void Server::initialize() {
     backend.start_listening(enetpp::server_listen_params<Peer>()
@@ -20,9 +29,9 @@ void Server::initialize() {
 
     double next_tick = time_end(&ticker);
     double heartbeat = 0.0;
-    const double TARGET_FPS = 1000.0 / 60;
+    constexpr double TARGET_FPS = 1000.0 / 60;
 
-
+    //
 
     while (!running) {
         backend.consume_events(
@@ -34,15 +43,15 @@ void Server::initialize() {
         while (next_tick < now) {
             next_tick += TARGET_FPS;
 
-            //States tick
-
+            stateManager.state_tick();
 
             // Heartbeat
             if (backend.get_connected_clients().empty()) {
+                Packet packet_heartbeat(PacketType::SERVER_HEARTBEAT);
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
-                    Packet packet_heartbeat(PacketType::SERVER_HEARTBEAT);
-                    packet_heartbeat.sendBroadcast(*this, true);
+                    broadcast(packet_heartbeat, true);
+                    Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -84,27 +93,28 @@ void Server::disconnect_by_id(uint32_t id, DisconnectReason reason, const std::s
 
 void Server::broadcast(Packet &packet, bool reliable) {
     Debug("PacketType::{} sending broadcast", getPacketTypeName(packet.getPacketType()));
-    packet.sendBroadcast(*this, reliable);
+
+    for (size_t i = 0; i < backend.get_connected_clients().size(); i++) {
+        auto client = backend.get_connected_clients()[i];
+        packet.send(*this, client->getId(), reliable);
+    }
 }
 
 void Server::broadcast_ex(Packet &packet, bool reliable, uint32_t ignore) {
     Debug("PacketType::{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
-    packet.sendBroadcast(*this, reliable, [&](const Peer& peer) {
-        if (peer.getId() == ignore) {
-            return false;
+    for (size_t i = 0; i < backend.get_connected_clients().size(); i++) {
+        auto client = backend.get_connected_clients()[i];
+
+        if (client->getId() == ignore) {
+            continue;
         }
-        return true;
-    });
+
+        packet.send(*this, client->getId(), reliable);
+    }
 }
 
-void Server::send_message(uint32_t clientId, std::string &message) {
-    Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
-    packet.write<uint16_t>(0);
-    packet.writeString(message);
-    packet.send(*this, clientId, true);
-}
-
-void Server::send_message(uint32_t clientId, const char *message) {
+void Server::send_message(uint32_t clientId, std::string message) {
+    std::ranges::transform(message, message.begin(), [](unsigned char c){ return std::tolower(c); });
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
     packet.write<uint16_t>(0);
     packet.writeString(message);
@@ -120,27 +130,12 @@ void Server::send_broadcast_message(uint16_t sender, std::string &message) {
     broadcast(packet, true);
 }
 
-bool Server::state_joined(Peer &peer) {
-    Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
-    packet.write<uint8_t>(peer.getExeChance());
-    packet.send(*this, peer.getId(), true);
-
-    Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
-    playerJoined.write<uint16_t>(static_cast<uint16_t>(peer.getId()));
-    playerJoined.writeString(peer.getNickname());
-    playerJoined.write<uint8_t>(peer.getLobbyIcon());
-    playerJoined.write<uint8_t>(peer.getPet());
-    this->broadcast_ex(playerJoined, true, peer.getId());
-
-    return true;
-}
-
-bool Server::state_handle(Peer &peer, Packet &packet) {
-    return true;
+StateManager &Server::getStateManager() {
+    return stateManager;
 }
 
 void Server::on_client_connected(Peer &peer) {
-    peer.server = std::move(this);
+    peer.server = this;
     Debug("Connection client {}", peer.getId());
 
     Packet preidentity(PacketType::SERVER_PREIDENTITY);
