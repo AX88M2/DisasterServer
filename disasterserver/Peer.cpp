@@ -83,11 +83,11 @@ bool Peer::identity(Packet &packet) {
 }
 
 bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout) {
-    /*if (!is_banned) {
+    if (is_banned) {
         Info("{} banned by host (id {}, ip {})", nickname, id, addr);
         this->server->disconnect(*this, DisconnectReason::BANNEDBYHOST);
         return false;
-    }*/
+    }
 
     if (this->server->getPeers().size() >= 7) {
         this->server->disconnect(*this, DisconnectReason::LOBBYFULL);
@@ -104,12 +104,21 @@ bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t ti
         }
     }
 
+    if (!this->server->state_joined(*this)) {
+        should_timeout = false;
+        this->server->disconnect(*this, DisconnectReason::OTHER, "Report this to dev: code 300");
+        return false;
+    }
+
     Packet identity_response(PacketType::SERVER_IDENTITY_RESPONSE);
-    identity_response.write<uint8_t>(1 /*this->state == ST_LOBBY*/);
+    identity_response.write<uint8_t>(1 /*this->state == ST_LOBBY*/); //TODO: Create States Machine
     identity_response.write<uint16_t>(static_cast<uint16_t>(id));
     identity_response.send(*this->server, id, true);
 
+    // If in queue, do following
     if (!in_game) {
+
+        // For icons
         for (size_t i = 0; i < this->server->getPeers().size(); i++) {
             auto peer = this->server->getPeers()[i];
 
@@ -118,7 +127,7 @@ bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t ti
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(0); /* v->server->state == ST_GAME && peer->in_game */
+            pack.write<uint8_t>(0); /* v->server->state == ST_GAME && peer->in_game */ //TODO: Create States Machine
             pack.write<uint16_t>(static_cast<uint16_t>(peer->getId()));
             pack.writeString(nickname);
 
@@ -146,4 +155,16 @@ bool Peer::identity_process(const std::string &addr, bool is_banned, uint64_t ti
     }
 
     return true;
+}
+
+bool Peer::message_received(Packet &packet) {
+    if (id == 0) {
+        return false;
+    }
+
+    bool result;
+
+    result = this->server->state_handle(*this, packet);
+
+    return result;
 }

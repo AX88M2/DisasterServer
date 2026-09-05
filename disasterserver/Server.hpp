@@ -62,22 +62,25 @@ namespace DisasterServer
 
         void disconnect(Peer &peer, DisconnectReason reason, const std::string& message = "");
         void disconnect_by_id(uint32_t id, DisconnectReason reason, const std::string& message = "");
-        void broadcast(Packet &packet, bool reliable);
-        void broadcast_ex(Packet &packet, bool reliable, uint32_t ignore);
+
         void send_message(uint32_t clientId, std::string &message);
         void send_message(uint32_t clientId, const char *message);
-        void broadcast_message(uint16_t sender, std::string &message);
-        std::vector<Peer*> getPeers() { return backend.get_connected_clients(); }
+        void send_broadcast_message(uint16_t sender, std::string &message);
 
+        void broadcast(Packet &packet, bool reliable);
+        void broadcast_ex(Packet &packet, bool reliable, uint32_t ignore);
+
+
+        bool state_joined(Peer &peer);
+        bool state_handle(Peer &peer, Packet &packet);
+
+
+        std::vector<Peer*> getPeers() { return backend.get_connected_clients(); }
         enetpp::server<Peer>& getBackend() { return backend; }
     private:
         void on_client_connected(Peer &peer);
         void on_client_disconnected(Peer & peer, uint32_t client_id);
         void on_client_received(Peer &peer, const enet_uint8 *data, size_t data_size);
-
-        bool state_handle(const Peer & peer, const Packet & packet);
-
-        bool peer_message(Peer &peer, Packet &packet);
     };
 }
 

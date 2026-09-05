@@ -14,7 +14,7 @@ void Server::initialize() {
         .set_channel_count(2)
         .set_listen_port(BASE_SERVER_PORT)
         .set_initialize_client_function(Peer::initialize_client));
-    
+
     TimeStamp ticker;
     time_start(&ticker);
 
@@ -22,7 +22,7 @@ void Server::initialize() {
     double heartbeat = 0.0;
     const double TARGET_FPS = 1000.0 / 60;
 
-    Packet pack(PacketType::SERVER_HEARTBEAT);
+
 
     while (!running) {
         backend.consume_events(
@@ -39,10 +39,10 @@ void Server::initialize() {
 
             // Heartbeat
             if (backend.get_connected_clients().empty()) {
-                broadcast(pack, true);
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
-                    Debug("Heartbeat done.");
+                    Packet packet_heartbeat(PacketType::SERVER_HEARTBEAT);
+                    packet_heartbeat.sendBroadcast(*this, true);
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -83,10 +83,12 @@ void Server::disconnect_by_id(uint32_t id, DisconnectReason reason, const std::s
 }
 
 void Server::broadcast(Packet &packet, bool reliable) {
+    Debug("PacketType::{} sending broadcast", getPacketTypeName(packet.getPacketType()));
     packet.sendBroadcast(*this, reliable);
 }
 
 void Server::broadcast_ex(Packet &packet, bool reliable, uint32_t ignore) {
+    Debug("PacketType::{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
     packet.sendBroadcast(*this, reliable, [&](const Peer& peer) {
         if (peer.getId() == ignore) {
             return false;
@@ -109,13 +111,32 @@ void Server::send_message(uint32_t clientId, const char *message) {
     packet.send(*this, clientId, true);
 }
 
-void Server::broadcast_message(uint16_t sender, std::string &message) {
+void Server::send_broadcast_message(uint16_t sender, std::string &message) {
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
 
     packet.write<uint16_t>(sender);
     packet.writeString(message);
 
     broadcast(packet, true);
+}
+
+bool Server::state_joined(Peer &peer) {
+    Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
+    packet.write<uint8_t>(peer.getExeChance());
+    packet.send(*this, peer.getId(), true);
+
+    Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
+    playerJoined.write<uint16_t>(static_cast<uint16_t>(peer.getId()));
+    playerJoined.writeString(peer.getNickname());
+    playerJoined.write<uint8_t>(peer.getLobbyIcon());
+    playerJoined.write<uint8_t>(peer.getPet());
+    this->broadcast_ex(playerJoined, true, peer.getId());
+
+    return true;
+}
+
+bool Server::state_handle(Peer &peer, Packet &packet) {
+    return true;
 }
 
 void Server::on_client_connected(Peer &peer) {
@@ -189,24 +210,9 @@ void Server::on_client_received(Peer &peer, const enet_uint8 *data, size_t data_
             break;
         }
         default: {
-            if (!peer_message(peer, packet)) {
+            if (!peer.message_received(packet)) {
                 break;
             }
         }
     }
 }
-
-bool Server::state_handle(const Peer &peer, const Packet &packet) {
-    return true;
-}
-
-bool Server::peer_message(Peer &peer, Packet &packet) {
-    if (peer.getId() == 0) {
-        return false;
-    }
-
-    bool result = state_handle(peer, packet);
-
-    return result;
-}
-

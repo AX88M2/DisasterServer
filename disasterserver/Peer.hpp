@@ -81,6 +81,9 @@ namespace DisasterServer
         uint8_t getLobbyIcon() { return lobby_icon; }
         int8_t getPet() { return pet; }
         AuthPeer &getAuthPeer() { return auth; }
+
+        uint8_t getExeChance() { return exe_chance; }
+
         bool isVerified() { return verified; }
         bool isInGame() { return in_game; }
         bool isOpped() { return op; }
@@ -94,6 +97,7 @@ namespace DisasterServer
 
         bool identity(Packet &packet);
         bool identity_process(const std::string & addr, bool is_banned, uint64_t timeout, bool do_timeout);
+        bool message_received(Packet &packet);
     };
 }
 

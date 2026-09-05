@@ -107,7 +107,7 @@ bool game_state_check(Server* server)
 bool game_init(int exe, int8_t map, Server* server)
 {
 	Debug("Attepting to enter ST_GAME...");
-	RAssert(server_ingame(server) > 1);
+	//RAssert(server_ingame(server) > 1);
 
 	server->state = ST_GAME;
 	server->game = (Game)

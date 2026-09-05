@@ -369,7 +369,7 @@ namespace DisasterServer {
 		void writeString(const std::string &value);
 
 		void send(Server &server, uint32_t client_id, bool reliable);
-		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate = [](const Peer& client) { return true; });
+		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate = [](const Peer& _) { return true; });
 	};
 }
 
