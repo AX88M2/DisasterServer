@@ -5,13 +5,19 @@ namespace DisasterServer
 {
     class PacketError : public std::exception {
     public:
-        explicit PacketError(std::string& message) : std::exception(message.data()) {}
-        explicit PacketError(const std::string& message) : std::exception(message.data()) {}
+        explicit PacketError(std::string message) : message(std::move(message)) {}
 
-        template <typename ...Args>
-        static PacketError Format(std::string_view fmt, Args&&... args) {
-            return PacketError(std::vformat(fmt, std::make_format_args(args...)));
+        const char* what() const noexcept override {
+            return message.c_str();
         }
+
+        template <typename... Args>
+        static PacketError format(std::format_string<Args...> fmt, Args&&... args) {
+            return PacketError(std::format(fmt, std::forward<Args>(args)...));
+        }
+
+    private:
+        std::string message;
     };
 }
 

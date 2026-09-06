@@ -11,11 +11,11 @@
 
 namespace DisasterServer
 {
-    class StateManager;
+    class GameStateController;
 
-    class Lobby {
+    class LobbyState {
         Server *server = nullptr;
-        StateManager *stateManager = nullptr;
+        GameStateController *stateManager = nullptr;
 
         double countdown = 0;
         double prac_countdown = 0;
@@ -31,8 +31,8 @@ namespace DisasterServer
         uint16_t exe = 0;
         std::unordered_map<SurvCharacters, bool> avail;
     public:
-        explicit Lobby(Server *server, StateManager *stateManager);
-        ~Lobby();
+        explicit LobbyState(Server *server, GameStateController *stateManager);
+        ~LobbyState();
 
         bool init();
         bool joined(Client &peer);

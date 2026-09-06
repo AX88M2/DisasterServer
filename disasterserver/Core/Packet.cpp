@@ -21,27 +21,25 @@ using namespace DisasterServer;
 
 Packet::Packet(ENetPacket *packet) : buffer({}) {
 	if (!packet) {
-		throw std::invalid_argument("Packet is null");
+		throw PacketError::format("Packet is null");
 	}
 
 	if (packet->dataLength > buffer.size()) {
 		enet_packet_destroy(packet);
-		throw PacketError::Format("Packet is too large");
+		throw PacketError::format("Packet is too large {} bytes", packet->dataLength);
 	}
 
-	len = std::min(static_cast<size_t>(packet->dataLength), buffer.size());
+	len = packet->dataLength;
 
 	std::memcpy(buffer.data(), packet->data, len);
 	enet_packet_destroy(packet);
 
 	if (len < 2) {
-		throw std::runtime_error("Packet is too small");
+		throw PacketError::format("Packet is too small");
 	}
 
 	read<uint8_t>();
-	const auto rawType = read<uint8_t>();
-
-	type = static_cast<PacketType>(rawType);
+	type = static_cast<PacketType>(read<uint8_t>());
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
@@ -63,12 +61,12 @@ std::string Packet::readString() {
 		result += c;
 	}
 
-	throw PacketError::Format("Unterminated string");
+	throw PacketError::format("Unterminated string");
 }
 
 void Packet::writeString(const std::string &value) {
-	if (position > PACKET_MAXSIZE || value.size() > PACKET_MAXSIZE - position - 1) {
-		throw std::runtime_error("String is too long");
+	if (position >= buffer.size() || value.size() >= buffer.size() - position) {
+		throw PacketError::format("String is too long: {} bytes", value.size());
 	}
 
 	for (unsigned char c : value) {
@@ -91,17 +89,7 @@ bool Packet::send(Client &client, bool reliable) {
 		return false;
 	}
 
-	const int result = enet_peer_send(
-		client.getPeer(),
-		reliable ? 0 : 1,
-		pack
-	);
-
-	if (result != 0) {
-		return false;
-	}
-
-	return true;
+	return enet_peer_send(client.getPeer(), reliable ? 0 : 1, pack) == 0;
 }
 
 void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(const Client& client)> predicate) {

@@ -1,16 +1,16 @@
-#include "Lobby.hpp"
+#include "LobbyState.hpp"
 
 #include "Server.hpp"
-#include "StateManager.hpp"
+#include "GameStateController.hpp"
 
 using namespace DisasterServer;
 
-Lobby::Lobby(Server *server, StateManager *stateManager) : server(server), stateManager(stateManager) {
+LobbyState::LobbyState(Server *server, GameStateController *stateManager) : server(server), stateManager(stateManager) {
 }
 
-Lobby::~Lobby() = default;
+LobbyState::~LobbyState() = default;
 
-bool Lobby::init() {
+bool LobbyState::init() {
     for (auto &peer : server->getPeers()) {
         peer->setReady(false);
         peer->setVoted(false);
@@ -46,11 +46,11 @@ bool Lobby::init() {
     return true;
 }
 
-bool Lobby::joined(Client &peer) {
+bool LobbyState::joined(Client &peer) {
     return true;
 }
 
-bool Lobby::tick() {
+bool LobbyState::tick() {
     switch (stateManager->getCurrentState()) {
         case States::LOBBY: {
             for (auto &peer : server->getPeers()) {
@@ -98,7 +98,7 @@ bool Lobby::tick() {
     return true;
 }
 
-bool Lobby::handle(Client &client, Packet &packet) {
+bool LobbyState::handle(Client &client, Packet &packet) {
     switch (packet.getPacketType()) {
         default:
             break;

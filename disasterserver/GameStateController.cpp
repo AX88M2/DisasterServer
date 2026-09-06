@@ -1,14 +1,14 @@
-#include "StateManager.hpp"
+#include "GameStateController.hpp"
 #include "Server.hpp"
 
 using namespace DisasterServer;
 
-StateManager::StateManager(Server *server) : server(server), lobby(server, this) {
+GameStateController::GameStateController(Server *server) : server(server), lobby(server, this) {
 }
 
-StateManager::~StateManager() = default;
+GameStateController::~GameStateController() = default;
 
-bool StateManager::state_joined(Client &peer) {
+bool GameStateController::playerJoined(Client &peer) {
     Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
     packet.write<uint8_t>(peer.getExeChance());
     packet.send(peer, true);
@@ -38,7 +38,7 @@ bool StateManager::state_joined(Client &peer) {
     return true;
 }
 
-void StateManager::state_tick() {
+void GameStateController::tick() {
     switch (state)
     {
         case States::LOBBY:
@@ -57,7 +57,7 @@ void StateManager::state_tick() {
     }
 }
 
-bool StateManager::state_handle(Client &peer, Packet &packet) {
+bool GameStateController::handle(Client &peer, Packet &packet) {
 
     switch (state) {
         case States::LOBBY:
@@ -78,10 +78,6 @@ bool StateManager::state_handle(Client &peer, Packet &packet) {
     return true;
 }
 
-void StateManager::setState(States state) {
-    this->state = state;
-}
-
-void StateManager::state_left(Client &peer) {
+void GameStateController::playerLeft(Client &peer) {
 
 }

@@ -6,7 +6,7 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 
-#include "StateManager.hpp"
+#include "GameStateController.hpp"
 
 using namespace DisasterServer;
 
@@ -120,7 +120,7 @@ void Server::initialize() {
                     }
 
                     if (client->isVerified()) {
-                        stateManager.state_left(*client);
+                        stateManager.playerLeft(*client);
                     }
 
                     ev.peer->data = nullptr;
@@ -146,21 +146,20 @@ void Server::initialize() {
                         break;
                     }
 
-                    switch (static_cast<PacketType>(ev.packet->data[1])) {
-                        case PacketType::IDENTITY: {
-                            Packet packet(ev.packet);
-                            if (!client->identity(packet)) {
-                                Debug("Identity failed for id {}", client->getId());
-                            }
-                            break;
-                        }
-                        default: {
-                            Packet packet(ev.packet);
-                            client->message_received(packet);
-                            break;
-                        }
+                    if (ev.packet->dataLength < 2) {
+                        enet_packet_destroy(ev.packet);
+                        break;
                     }
 
+                    Packet packet(ev.packet);
+
+                    if (packet.getPacketType() == PacketType::IDENTITY) {
+                        if (!client->identity(packet)) {
+                            Debug("Identity failed for id {}", client->getId());
+                        }
+                    } else {
+                        client->message_received(packet);
+                    }
                     break;
                 }
 
@@ -172,10 +171,10 @@ void Server::initialize() {
         while (next_tick < now) {
             next_tick += TARGET_FPS;
 
-            stateManager.state_tick();
+            stateManager.tick();
 
             // Heartbeat
-            if (peers.empty()) {
+            if (peers.size() > 0) {
                 Packet pack(PacketType::SERVER_HEARTBEAT);
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
@@ -201,7 +200,7 @@ void Server::disconnect_by_id(const uint16_t client_id, DisconnectReason reason,
 
 void Server::broadcast_ex(Packet &packet, bool reliable, uint16_t ignore) {
     Debug("PacketType::{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
-    packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() == ignore; });
+    packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 
 void Server::send_message(Client &client, std::string message) {
@@ -219,6 +218,6 @@ void Server::send_broadcast_message(uint16_t sender, std::string &message) {
     packet.sendBroadcast(*this, true);
 }
 
-StateManager &Server::getStateManager() {
+GameStateController &Server::getStateManager() {
     return stateManager;
 }

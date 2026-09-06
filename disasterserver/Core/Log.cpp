@@ -156,4 +156,38 @@ void log_fmt(const char* fmt, const char* type, const char* file, int line, ...)
 
 #include "Log.hpp"
 
+#include <iomanip>
+#include <sstream>
 
+using namespace DisasterServer;
+
+void Logger::write(const LogLevel level, std::string_view message, std::source_location &location) {
+	using namespace std::chrono;
+
+	std::stringstream ss;
+
+	const time_t now = std::time(nullptr);
+
+	std::tm local{};
+#ifdef _WIN32
+	localtime_s(&local, &now);
+#else
+	localtime_r(&now, &local);
+#endif
+
+	ss << std::put_time(&local, "%d.%m.%Y %T");
+	ss << " ";
+	switch (level) {
+		case LogLevel::Debug: ss << "[Debug]"; break;
+		case LogLevel::Info: ss << "[Info]"; break;
+		case LogLevel::Warning: ss << "[Warn]"; break;
+		case LogLevel::Error: ss << "[Error]"; break;
+	}
+	ss << " ";
+	ss << "["<< std::this_thread::get_id() << "]";
+	ss << " ";
+	ss << std::format("({}:{})", location.file_name(), location.line());
+	ss << " ";
+	ss << message;
+	std::cout << ss.str() << std::endl;
+}

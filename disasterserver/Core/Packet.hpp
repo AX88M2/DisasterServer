@@ -4,11 +4,12 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 
+#include "Log.hpp"
 #include "enet/enet.h"
-#include "ENet/server.h"
 
 enum class PacketType : uint8_t
 {

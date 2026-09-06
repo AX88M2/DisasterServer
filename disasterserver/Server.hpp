@@ -2,13 +2,13 @@
 #define DISASTERSERVER_SERVER_HPP
 
 #include "Client.hpp"
-#include "StateManager.hpp"
+#include "GameStateController.hpp"
 
 #define TICKSPERSEC 60
 
 namespace DisasterServer
 {
-    class StateManager;
+    class GameStateController;
     static constexpr int MAX_PLAYERS = 7;
     static constexpr int BUILD_VERSION = 1101;
     static constexpr int BASE_SERVER_PORT = 8606;
@@ -22,7 +22,7 @@ namespace DisasterServer
         ENetHost *host = nullptr;
 
         std::vector<std::unique_ptr<Client>> peers;
-        StateManager stateManager;
+        GameStateController stateManager;
         double delta = 0;
     public:
         Server(uint16_t n = 0);
@@ -37,7 +37,7 @@ namespace DisasterServer
         void broadcast_ex(Packet &packet, bool reliable, uint16_t ignore);
 
         std::vector<std::unique_ptr<Client>> &getPeers() { return peers; }
-        StateManager &getStateManager();
+        GameStateController &getStateManager();
 
         double getDelta() {
             return delta;

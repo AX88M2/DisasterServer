@@ -85,7 +85,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         return false;
     }
 
-    if (this->server->getPeers().size() >= 7) {
+    if (this->server->getPeers().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);
         return false;
     }
@@ -100,7 +100,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         }
     }
 
-    if (!this->server->getStateManager().state_joined(*this)) {
+    if (!this->server->getStateManager().playerJoined(*this)) {
         should_timeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
@@ -159,7 +159,7 @@ bool Client::message_received(Packet &packet) {
 
     bool result;
 
-    result = this->server->getStateManager().state_handle(*this, packet);
+    result = this->server->getStateManager().handle(*this, packet);
 
     return result;
 }

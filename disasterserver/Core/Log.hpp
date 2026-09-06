@@ -1,8 +1,8 @@
 #ifndef LOG_HPP
 #define LOG_HPP
 
-#include <chrono>
 #include <iostream>
+#include <source_location>
 #include <thread>
 
 #ifdef true //SYS_USE_SDL2
@@ -33,71 +33,56 @@
     #define LOG_RST
 #endif
 
-enum class LogLevel {
-    Debug, Info, Warning, Error
-};
+namespace DisasterServer
+{
+    enum class LogLevel {
+        Debug, Info, Warning, Error
+    };
 
-class Logger {
-    static void write(const LogLevel &level, const std::string &file, int line, const std::string &msg) {
-        using namespace std::chrono;
+    class Logger {
+        static void write(LogLevel level, std::string_view message, std::source_location &location);
 
-        std::stringstream ss;
-
-        const time_t time = std::time(nullptr);
-        ss << std::put_time(std::localtime(&time), "%d.%m.%Y %T");
-        ss << " ";
-        switch (level) {
-            case LogLevel::Debug: ss << "[Debug]"; break;
-            case LogLevel::Info: ss << "[Info]"; break;
-            case LogLevel::Warning: ss << "[Warn]"; break;
-            case LogLevel::Error: ss << "[Error]"; break;
+        template <typename... Args>
+        static void log(LogLevel level, std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
+            write(level, std::format(fmt, std::forward<Args>(args)...), location);
         }
-        ss << " ";
-        ss << "["<< std::this_thread::get_id() << "]";
-        ss << " ";
-        ss << std::format("({}:{})", file, line);
-        ss << " ";
-        ss << msg;
-        std::cout << ss.str() << std::endl;
-    }
-public:
-    template <class ...Types>
-    static void PrintLog(LogLevel level, const std::string &file, const int line, std::string_view fmt, Types&&... args) {
-        write(level, file, line, std::vformat(fmt, std::make_format_args(args...)));
-    }
 
-    template <class ...Types>
-    static void Debug(const std::string &file, const int line, std::string_view fmt, Types&&... args) {
+    public:
+
+        template <typename... Args>
+        static void debug(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
 #ifdef _DEBUG
-        PrintLog(LogLevel::Debug, file, line, fmt, std::forward<Types>(args)...);
+            log(LogLevel::Debug, location, fmt, std::forward<Args>(args)...);
 #endif
+        }
+
+        template <typename... Args>
+        static void info(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
+            log(LogLevel::Info, location, fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args>
+        static void warning(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
+            log(LogLevel::Warning, location, fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args>
+        static void error(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
+            log(LogLevel::Error, location, fmt, std::forward<Args>(args)...);
+        }
+    };
+
+    constexpr std::string_view BoolStringify(bool value) {
+        return value ? "true" : "false";
     }
-
-    template <class ...Types>
-    static void Info(const std::string &file, const int line, std::string_view fmt, Types&&... args) {
-        PrintLog(LogLevel::Info, file, line, fmt, std::forward<Types>(args)...);
-    }
-
-    template <class ...Types>
-    static void Warning(const std::string &file, const int line, std::string_view fmt, Types&&... args) {
-        PrintLog(LogLevel::Warning, file, line, fmt, std::forward<Types>(args)...);
-    }
-
-    template <class ...Types>
-    static void Error(const std::string &file, const int line, std::string_view fmt, Types&&... args) {
-        PrintLog(LogLevel::Error, file, line, fmt, std::forward<Types>(args)...);
-    }
-};
-
-#define Log(type, fmt, ...) Logger::PrintLog(type, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-
-#define Debug(fmt, ...) Logger::Debug(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define Info(fmt, ...) Logger::Info(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define Warn(fmt, ...) Logger::Warning(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#define Err(fmt, ...)  Logger::Error(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+}
 
 #define RAssert(x) if (!(x)) { Err("RAssert({}) failed!", #x); return false; }
 #define RAssertEx(x) if (!(x)) { Err("RAssert({}) failed!", #x); }
-#define BoolStringify(bool) (bool ? "true" : "false")
+
+#define Info(fmt, ...) DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Warn(fmt, ...) DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Err(fmt, ...) DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Debug(fmt, ...) DisasterServer::Logger::debug(std::source_location::current(), fmt, ##__VA_ARGS__)
 
 #endif //LOG_HPP
