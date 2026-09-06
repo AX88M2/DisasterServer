@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) {
     try {
-        enetpp::global_state::get().initialize();
+        enet_initialize();
 
         Info("- DisasterServerCXX v{}", DisasterServer::BUILD_VERSION);
         Info("- Build from {} {}", __DATE__, __TIME__);
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         DisasterServer::Server server;
         server.initialize();
 
-        enetpp::global_state::get().deinitialize();
+        enet_deinitialize();
     } catch (std::exception& e) {
         Err("Exception: {}", e.what());
     }

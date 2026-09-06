@@ -32,7 +32,7 @@ namespace enetpp {
 		std::unique_ptr<std::thread> _thread;
 
 		//mapping of uid to peer so that sending packets to specific peers is safe.
-		std::unordered_map<uint32_t, ENetPeer*> _thread_peer_map;
+		std::unordered_map<uint16_t, ENetPeer*> _thread_peer_map;
 
 		client_ptr_vector _connected_clients;
 
@@ -93,6 +93,44 @@ namespace enetpp {
 			delete_all_connected_clients();
 		}
 
+		/*
+		* void send_queued_packets_in_thread() {
+			if (!_packet_queue.empty()) {
+				std::lock_guard<std::mutex> lock(_packet_queue_mutex);
+				while (!_packet_queue.empty()) {
+					auto qp = _packet_queue.front();
+					_packet_queue.pop();
+
+					auto pi = _thread_peer_map.find(qp._client_id);
+					if (pi != _thread_peer_map.end()) {
+
+						//enet_peer_send fails if state not connected. was getting random asserts on peers disconnecting and going into ENET_PEER_STATE_ZOMBIE.
+						if (pi->second->state == ENET_PEER_STATE_CONNECTED) {
+
+							if (enet_peer_send(pi->second, qp._channel_id, qp._packet) != 0) {
+								Debug("enet_peer_send failed");
+							}
+
+							if (qp._packet->referenceCount == 0) {
+								enet_packet_destroy(qp._packet);
+							}
+						}
+					}
+				}
+			}
+		}
+		 *
+		 */
+
+		void send_packet(uint16_t client_id, uint8_t channel_id, ENetPacket* packet) {
+			auto pi = _thread_peer_map.find(client_id);
+			if (pi != _thread_peer_map.end()) {
+				if (enet_peer_send(pi->second, channel_id, packet) != 0) {
+					Debug("enet_peer_send failed");
+				}
+			}
+		}
+
 		void send_packet_to(unsigned int client_id, enet_uint8 channel_id, const enet_uint8* data, size_t data_size, enet_uint32 flags) {
 			assert(is_listening());
 			if (_thread != nullptr) {
@@ -117,7 +155,7 @@ namespace enetpp {
 
 		void consume_events(
 			std::function<void(ClientT& client)> on_client_connected,
-			std::function<void(ClientT &client, uint32_t client_id)> on_client_disconnected,
+			std::function<void(ClientT &client, uint16_t client_id)> on_client_disconnected,
 			std::function<void(ClientT& client, const enet_uint8* data, size_t data_size)> on_client_data_received) {
 
 			if (!_event_queue.empty()) {
@@ -169,7 +207,7 @@ namespace enetpp {
 		}
 
 /// ====================== Могут быть проблемы ==================
-		void disconnect_leter(uint32_t id, uint32_t reason) {
+		void disconnect_leter(uint16_t id, uint32_t reason) {
 			auto iter = _thread_peer_map.find(id);
 			if (iter != _thread_peer_map.end()) {
 				Err("{} not found", id);
@@ -183,7 +221,7 @@ namespace enetpp {
 			_event_queue.emplace(ENET_EVENT_TYPE_DISCONNECT, 0, nullptr, reinterpret_cast<ClientT*>(iter->second->data));
 		}
 
-		void disconnect(uint32_t id, uint32_t reason) {
+		void disconnect(uint16_t id, uint32_t reason) {
 			auto iter = _thread_peer_map.find(id);
 			if (iter != _thread_peer_map.end()) {
 				Err("{} not found", id);
@@ -322,7 +360,7 @@ namespace enetpp {
 			//initialized with data causing them to be discarded.
 
 			auto client = new ClientT();
-			params._initialize_client_function(*client, peer_ip);
+			params._initialize_client_function(*client, e.peer->incomingPeerID, peer_ip);
 
 			assert(e.peer->data == nullptr);
 			e.peer->data = client;

@@ -8,13 +8,13 @@ StateManager::StateManager(Server *server) : server(server), lobby(server, this)
 
 StateManager::~StateManager() = default;
 
-bool StateManager::state_joined(Peer &peer) {
+bool StateManager::state_joined(Client &peer) {
     Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
     packet.write<uint8_t>(peer.getExeChance());
-    packet.send(*this->server, peer.getId(), true);
+    packet.send(peer, true);
 
     Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
-    playerJoined.write<uint16_t>(static_cast<uint16_t>(peer.getId()));
+    playerJoined.write<uint16_t>(peer.getId());
     playerJoined.writeString(peer.getNickname());
     playerJoined.write<uint8_t>(peer.getLobbyIcon());
     playerJoined.write<uint8_t>(peer.getPet());
@@ -57,7 +57,7 @@ void StateManager::state_tick() {
     }
 }
 
-bool StateManager::state_handle(Peer &peer, Packet &packet) {
+bool StateManager::state_handle(Client &peer, Packet &packet) {
 
     switch (state) {
         case States::LOBBY:
@@ -76,4 +76,12 @@ bool StateManager::state_handle(Peer &peer, Packet &packet) {
     }
 
     return true;
+}
+
+void StateManager::setState(States state) {
+    this->state = state;
+}
+
+void StateManager::state_left(Client &peer) {
+
 }

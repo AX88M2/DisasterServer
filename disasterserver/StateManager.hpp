@@ -6,7 +6,7 @@
 
 namespace DisasterServer
 {
-    class Peer;
+    class Client;
 
     enum class States {
         LOBBY,
@@ -25,11 +25,17 @@ namespace DisasterServer
         explicit StateManager(Server *server);
         ~StateManager();
 
-        bool state_joined(Peer &peer);
+        bool state_joined(Client &peer);
         void state_tick();
-        bool state_handle(Peer &peer, Packet &packet);
+        bool state_handle(Client &peer, Packet &packet);
 
         [[nodiscard]] States getCurrentState() const { return this->state; }
+
+        void setState(States state);
+
+        void state_left(Client &peer);
+
+
     };
 }
 

@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <unordered_map>
 
-
+#define NO_COUNTDOWN (5 + 1)
+#define COUNTDOWN (5)
 
 namespace DisasterServer
 {
@@ -33,9 +34,10 @@ namespace DisasterServer
         explicit Lobby(Server *server, StateManager *stateManager);
         ~Lobby();
 
-        bool joined(Peer &peer);
-        void tick();
-        bool handle(Peer &v, Packet &packet);
+        bool init();
+        bool joined(Client &peer);
+        bool tick();
+        bool handle(Client &client, Packet &packet);
     };
 }
 #endif //DISASTERSERVER_LOBBY_HPP

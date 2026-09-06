@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "Log.hpp"
-#include "Peer.hpp"
+#include "Client.hpp"
 #include "Server.hpp"
 
 #ifdef __GNUC__ // GCC, clang...
@@ -23,8 +23,9 @@ Packet::Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer) : buffer(buffe
 	type = static_cast<PacketType>(read<uint8_t>());
 }
 
-Packet::Packet(const enet_uint8 *data, size_t data_size) : buffer({}) {
-	std::copy_n(data, std::min(data_size, buffer.size()), buffer.begin());
+Packet::Packet(ENetPacket *packet) : buffer({}) {
+	std::copy_n(packet->data, std::min(packet->dataLength, buffer.size()), buffer.begin());
+	enet_packet_destroy(packet);
 	read<uint8_t>();
 	type = static_cast<PacketType>(read<uint8_t>());
 }
@@ -57,14 +58,18 @@ void Packet::writeString(const std::string &value) {
 	}
 }
 
-void Packet::send(Server &server, uint32_t client_id, bool reliable) {
-	Debug("PacketType::{} sending to {}", getPacketTypeName(type), client_id);
-	server.getBackend().send_packet_to(client_id, reliable ? 0 : 1, buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+bool Packet::send(Client &client, bool reliable) {
+	Debug("PacketType::{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
 
-	std::vector<uint8_t> empty = {0x00, static_cast<uint8_t>(PacketType::SERVER_HEARTBEAT)};
-	server.getBackend().send_packet_to(client_id, reliable ? 0 : 1, empty.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+	return enet_peer_send(client.getPeer(), reliable ? 0 : 1, pack);
 }
 
-void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate) {
-	server.getBackend().send_packet_to_all_if(reliable ? 0 : 1, buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0, std::move(predicate));
+void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(const Client& client)> predicate) {
+	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+	for (auto client : server.getPeers()) {
+		if (predicate(*client)) {
+			enet_peer_send(client->getPeer(), reliable ? 0 : 1, pack);
+		}
+	}
 }

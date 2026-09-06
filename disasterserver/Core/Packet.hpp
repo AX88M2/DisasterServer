@@ -324,7 +324,7 @@ static constexpr int PACKET_MAXSIZE = 256;
 
 namespace DisasterServer {
 	class Server;
-	class Peer;
+	class Client;
 
 	class Packet {
 		std::array<uint8_t, PACKET_MAXSIZE> buffer{};
@@ -333,7 +333,7 @@ namespace DisasterServer {
 		size_t len = 0;
 	public:
 		explicit Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
-		explicit Packet(const enet_uint8 *data, size_t data_size);
+		explicit Packet(ENetPacket *packet);
 		explicit Packet(PacketType type);
 		~Packet();
 
@@ -368,8 +368,8 @@ namespace DisasterServer {
 		std::string readString();
 		void writeString(const std::string &value);
 
-		void send(Server &server, uint32_t client_id, bool reliable);
-		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Peer& client)> predicate = [](const Peer& _) { return true; });
+		bool send(Client &client, bool reliable);
+		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
 	};
 }
 

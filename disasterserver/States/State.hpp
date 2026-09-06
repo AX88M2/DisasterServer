@@ -2,7 +2,7 @@
 #ifndef DISASTERSERVER_STATE_HPP
 #define DISASTERSERVER_STATE_HPP
 
-#include "Peer.hpp"
+#include "Client.hpp"
 
 namespace DisasterServer
 {
@@ -19,7 +19,7 @@ namespace DisasterServer
             server = nullptr;
         }
 
-        virtual bool joined(Peer &peer) {
+        virtual bool joined(Client &peer) {
             return true;
         }
 
@@ -27,7 +27,7 @@ namespace DisasterServer
 
         }
 
-        virtual bool handle(Peer &peer, Packet &packet) {
+        virtual bool handle(Client &peer, Packet &packet) {
             return true;
         }
     };

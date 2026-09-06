@@ -13,7 +13,9 @@ namespace enetpp {
 		enet_uint8 _channel_id;
 		ENetPacket* _packet;
 		ClientT* _client;
-	
+		ENetEvent _event;
+		uint16_t incomingPeerID;
+
 	public:
 		server_event()
 			: _event_type(ENET_EVENT_TYPE_NONE)
