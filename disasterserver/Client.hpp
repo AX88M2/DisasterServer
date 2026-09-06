@@ -107,7 +107,7 @@ namespace DisasterServer
 
         Server *server = nullptr;
     public:
-        Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const char *ip);
+        Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const std::string &ip);
         ~Client();
 
         uint16_t getId() const { return id; }
@@ -123,6 +123,7 @@ namespace DisasterServer
         void setTimeout(double value) { timeout = value; }
         double getTimeout() const { return timeout; }
         bool isShouldTimeout() { return should_timeout; }
+        bool isDisconnecting() { return disconnecting; }
 
         void setVoteCooldown(double value) { vote_cooldown = value; }
         double getVoteCooldown() { return vote_cooldown; }

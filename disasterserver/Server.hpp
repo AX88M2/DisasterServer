@@ -21,7 +21,7 @@ namespace DisasterServer
 
         ENetHost *host = nullptr;
 
-        std::vector<Client*> peers;
+        std::vector<std::unique_ptr<Client>> peers;
         StateManager stateManager;
         double delta = 0;
     public:
@@ -29,15 +29,14 @@ namespace DisasterServer
         ~Server();
         void initialize();
 
-        void disconnect_by_id(uint16_t id, DisconnectReason reason, const std::string& message = "");
+        void disconnect_by_id(uint16_t client_id, DisconnectReason reason, const std::string& message = "");
 
         void send_message(Client &client, std::string message);
         void send_broadcast_message(uint16_t sender, std::string &message);
 
-        void broadcast(Packet &packet, bool reliable);
         void broadcast_ex(Packet &packet, bool reliable, uint16_t ignore);
 
-        std::vector<Client*> getPeers() { return peers; }
+        std::vector<std::unique_ptr<Client>> &getPeers() { return peers; }
         StateManager &getStateManager();
 
         double getDelta() {

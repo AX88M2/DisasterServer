@@ -321,6 +321,7 @@ inline std::string getPacketTypeName(PacketType type) {
 static constexpr int PACKET_MAXSIZE = 256;
 
 #undef min
+#undef max
 
 namespace DisasterServer {
 	class Server;
@@ -332,7 +333,6 @@ namespace DisasterServer {
 		size_t position = 0;
 		size_t len = 0;
 	public:
-		explicit Packet(const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
 		explicit Packet(ENetPacket *packet);
 		explicit Packet(PacketType type);
 		~Packet();
@@ -343,26 +343,33 @@ namespace DisasterServer {
 
 		template <typename T>
 		T read() {
-			T value = reinterpret_cast<T *>(buffer.data() + position)[0];
+			static_assert(std::is_trivially_copyable_v<T>, "Packet::read requires trivially copyable type");
+
+			if (position > len || sizeof(T) > len - position) {
+				Err("Packet underflow: trying to read {} bytes at position {} from {} byte packet ({})", sizeof(T), position, len, getPacketTypeName(type));
+				throw std::runtime_error("Packet underflow");
+			}
+
+			T value {};
+			std::memcpy(&value, buffer.data() + position, sizeof(T));
 			position += sizeof(T);
+
 			return value;
 		}
 
 		template <typename T>
 		void write(T value) {
-			if (position + sizeof(T) > PACKET_MAXSIZE) {
+			static_assert(std::is_trivially_copyable_v<T>, "Packet::write requires trivially copyable type");
+
+			if (position > buffer.size() || sizeof(T) > buffer.size() - position) {
 				Err("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
-				return;
+				throw std::runtime_error("Packet overflow");
 			}
 
-			if (position + sizeof(T) >= len) {
-				len++;
-			}
+			std::memcpy(buffer.data() + position, &value, sizeof(T));
+			position += sizeof(T);
 
-			const auto *ptr = reinterpret_cast<uint8_t*>(&value);
-			for (uint32_t i = 0; i < sizeof(T); i++) {
-				buffer[position++] = ptr[i];
-			}
+			len = std::max(len, position);
 		}
 
 		std::string readString();

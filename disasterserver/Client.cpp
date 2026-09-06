@@ -6,9 +6,9 @@
 
 using namespace DisasterServer;
 
-Client::Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const char *ip) :
+Client::Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const std::string &ip) :
     id(incomingPeerID),
-    ip(std::string(ip)),
+    ip(ip),
     peer(peer),
     server(server) {}
 
@@ -100,8 +100,6 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         }
     }
 
-    this->server->getPeers().push_back(this);
-
     if (!this->server->getStateManager().state_joined(*this)) {
         should_timeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
@@ -117,7 +115,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
     if (!in_game) {
 
         // For icons
-        for (auto client : this->server->getPeers()) {
+        for (auto &client : this->server->getPeers()) {
             if (client->getId() == id) {
                 continue;
             }
@@ -167,6 +165,10 @@ bool Client::message_received(Packet &packet) {
 }
 
 void Client::disconnect(DisconnectReason reason, const std::string &message) {
+    if (disconnecting) {
+        return;
+    }
+
     if (reason == DisconnectReason::OTHER && !message.empty()) {
         Packet packet(PacketType::SERVER_PLAYER_FORCE_DISCONNECT);
         packet.write<uint8_t>(static_cast<uint8_t>(reason));
@@ -182,4 +184,6 @@ void Client::disconnect(DisconnectReason reason, const std::string &message) {
     } else {
         Info("Disconnected id {} {}: {}.", id, getDisconnectReasonName(reason), message);
     }
+
+    disconnecting = true;
 }

@@ -11,7 +11,7 @@ Lobby::Lobby(Server *server, StateManager *stateManager) : server(server), state
 Lobby::~Lobby() = default;
 
 bool Lobby::init() {
-    for (Client *peer : server->getPeers()) {
+    for (auto &peer : server->getPeers()) {
         peer->setReady(false);
         peer->setVoted(false);
         peer->setTimeout(false);
@@ -41,7 +41,7 @@ bool Lobby::init() {
     prac_countdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
-    server->broadcast(pack, true);
+    pack.sendBroadcast(*this->server, true);
 
     return true;
 }
@@ -53,16 +53,16 @@ bool Lobby::joined(Client &peer) {
 bool Lobby::tick() {
     switch (stateManager->getCurrentState()) {
         case States::LOBBY: {
-            for (Client *peer : server->getPeers()) {
+            for (auto &peer : server->getPeers()) {
                 if (peer->getVoteCooldown() > 0) {
                     peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
                 }
 
-                if (peer->isReady()) {
-                    peer->setTimeout(peer->getTimeout() + server->getDelta());
+                if (!peer->isReady()) {
+                    /*peer->setTimeout(peer->getTimeout() + server->getDelta());
                     if (std::fmod(peer->getTimeout(), 60) == 0) {
                         Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
-                    }
+                    }*/
 
                     if (peer->getTimeout() >= 25 * TICKSPERSEC) {
                         peer->disconnect(DisconnectReason::AFKTIMEOUT);
@@ -104,7 +104,7 @@ bool Lobby::handle(Client &client, Packet &packet) {
             break;
 
         case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: {
-            for (auto value : server->getPeers()) {
+            for (auto &value : server->getPeers()) {
                 if (client.getId() == value->getId()) {
                     continue;
                 }
@@ -129,10 +129,11 @@ bool Lobby::handle(Client &client, Packet &packet) {
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
             uint16_t pid = packet.read<uint16_t>();
-            auto message = packet.readString();
+            std::string message = packet.readString();
 
             Info("{} " LOG_RST "(id {}): {}", client.getNickname(), client.getId(), message);
             server->send_broadcast_message(client.getId(), message);
+            break;
         }
         case PacketType::CLIENT_LOBBY_READY_STATE: {
             uint8_t state = packet.read<uint8_t>();
@@ -141,7 +142,7 @@ bool Lobby::handle(Client &client, Packet &packet) {
             Packet pack(PacketType::SERVER_LOBBY_READY_STATE);
             pack.write<uint16_t>(client.getId());
             pack.write<uint8_t>(state);
-            server->broadcast(pack, true);
+            pack.sendBroadcast(*this->server, true);
 
             break;
         }
