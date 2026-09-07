@@ -3,6 +3,7 @@
 
 #include "Core/Packet.hpp"
 #include "States/LobbyState.hpp"
+#include "States/CharSelect.hpp"
 
 namespace DisasterServer
 {
@@ -38,20 +39,25 @@ namespace DisasterServer
         States state = States::LOBBY;
 
         LobbyState lobby;
+        CharSelectState charSelect;
     public:
-        explicit GameStateController(Server *server);
+        explicit GameStateController(Server* server);
         ~GameStateController();
 
-        bool playerJoined(Client &peer);
-        void playerLeft(Client &peer);
+        bool playerJoined(Client& peer);
+        void playerLeft(Client& peer);
         void tick();
-        bool handle(Client &peer, Packet &packet);
+        bool handle(Client& peer, Packet& packet);
 
-        commandHash cmd_parse(std::string &string);
-        bool cmd_handle(const Client & client, commandHash hash, const std::string & string);
+        commandHash cmd_parse(std::string& string);
+        bool cmd_handle(const Client& client, commandHash hash, const std::string& string);
 
-        States getCurrentState() const { return this->state; }
+        States getCurrentState() const { return state; }
         void setState(States state) { this->state = state; }
+
+        CharSelectState& getCharSelect() {
+            return charSelect;
+        }
     };
 }
 
