@@ -4,14 +4,15 @@
 #include "Client.hpp"
 #include "GameStateController.hpp"
 
-#define TICKSPERSEC 60
+constexpr int TICKSPERSEC = 60;
 
 namespace DisasterServer
 {
     class GameStateController;
-    static constexpr int MAX_PLAYERS = 7;
-    static constexpr int BUILD_VERSION = 1101;
-    static constexpr int BASE_SERVER_PORT = 8606;
+
+    constexpr int MAX_PLAYERS = 7;
+    constexpr int BUILD_VERSION = 1101;
+    constexpr int BASE_SERVER_PORT = 8606;
 
 
 
@@ -29,10 +30,10 @@ namespace DisasterServer
         ~Server();
         void initialize();
 
-        void disconnect_by_id(uint16_t client_id, DisconnectReason reason, const std::string& message = "");
+        void disconnect_by_id(clientId client_id, DisconnectReason reason, const std::string& message = "");
 
         void send_message(Client &client, std::string message);
-        void send_broadcast_message(uint16_t sender, std::string &message);
+        void send_broadcast_message(clientId sender, std::string message);
 
         template <typename... Args>
         void send_message(Client &client, std::format_string<Args...> fmt, Args&&... args) {
@@ -40,14 +41,16 @@ namespace DisasterServer
         }
 
         template <typename... Args>
-        void send_broadcast_message(uint16_t sender, std::format_string<Args...> fmt, Args&&... args) {
+        void send_broadcast_message(clientId sender, std::format_string<Args...> fmt, Args&&... args) {
             send_broadcast_message(sender, std::format(fmt, std::forward<Args>(args)...));
         }
 
-        void broadcast_ex(Packet &packet, bool reliable, uint16_t ignore);
+        void broadcast_ex(Packet &packet, bool reliable, clientId ignore);
+
+
 
         std::vector<std::unique_ptr<Client>> &getPeers() { return peers; }
-        GameStateController &getStateManager();
+        GameStateController &getGameStateController();
 
         double getDelta() {
             return delta;

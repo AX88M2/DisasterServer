@@ -66,8 +66,10 @@ namespace DisasterServer
         }
     }
 
+    using clientId = uint16_t;
+
     class Client {
-        uint16_t id;
+        clientId id;
         std::string ip;
         ENetPeer *peer;
 
@@ -107,10 +109,10 @@ namespace DisasterServer
 
         Server *server = nullptr;
     public:
-        Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, std::string ip);
+        Client(Server *server, ENetPeer *peer, clientId incomingPeerID, std::string ip);
         ~Client();
 
-        uint16_t getId() const { return id; }
+        clientId getId() const { return id; }
         std::string getIp() const { return ip; }
         ENetPeer * getPeer() { return peer; }
         std::string getNickname() { return nickname; }
@@ -120,15 +122,18 @@ namespace DisasterServer
         AuthPeer &getAuthPeer() { return auth; }
         void setExeChance(uint8_t chance) { exe_chance = chance; }
         uint8_t getExeChance() { return exe_chance; }
+
         void setTimeout(double value) { timeout = value; }
         double getTimeout() const { return timeout; }
         bool isShouldTimeout() { return should_timeout; }
         bool isDisconnecting() { return disconnecting; }
-
         void setVoteCooldown(double value) { vote_cooldown = value; }
         double getVoteCooldown() { return vote_cooldown; }
         void setInGame(bool flag) { in_game = flag; }
         bool isInGame() { return in_game; }
+        void setCanVote(bool flag) { can_vote = flag; }
+        bool isCanVote() { return can_vote; }
+
         bool isVerified() { return verified; }
         bool isOpped() { return op; }
         bool isModified() { return mod_tool; }

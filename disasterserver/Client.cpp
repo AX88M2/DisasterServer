@@ -8,7 +8,7 @@
 
 using namespace DisasterServer;
 
-Client::Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, std::string ip) :
+Client::Client(Server *server, ENetPeer *peer, clientId incomingPeerID, std::string ip) :
     id(incomingPeerID),
     ip(std::move(ip)),
     peer(peer),
@@ -42,7 +42,7 @@ bool Client::identity(Packet &packet) {
     this->lobby_icon = lobby_icon;
     this->pet = pet;
 
-    this->in_game = (server->getStateManager().getCurrentState() == States::LOBBY);
+    this->in_game = (server->getGameStateController().getCurrentState() == States::LOBBY);
     this->exe_chance = 1 + rand() % 4;
 
     if (this->server->getPeers().size() >= MAX_PLAYERS) {
@@ -102,15 +102,15 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         }
     }
 
-    if (!this->server->getStateManager().playerJoined(*this)) {
+    if (!this->server->getGameStateController().playerJoined(*this)) {
         should_timeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
     }
 
     Packet packet(PacketType::SERVER_IDENTITY_RESPONSE);
-    packet.write<uint8_t>(server->getStateManager().getCurrentState() == States::LOBBY);
-    packet.write<uint16_t>(id);
+    packet.write<uint8_t>(server->getGameStateController().getCurrentState() == States::LOBBY);
+    packet.write<clientId>(id);
     packet.send(*this, true);
 
     // If in queue, do following
@@ -123,11 +123,11 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(server->getStateManager().getCurrentState() == States::GAME && client->in_game);
-            pack.write<uint16_t>(client->getId());
+            pack.write<uint8_t>(server->getGameStateController().getCurrentState() == States::GAME && client->in_game);
+            pack.write<clientId>(client->getId());
             pack.writeString(nickname);
 
-            if (server->getStateManager().getCurrentState() == States::GAME && client->in_game) {
+            if (server->getGameStateController().getCurrentState() == States::GAME && client->in_game) {
 
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id */ );
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
@@ -142,7 +142,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         // For other players in queue
         Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
         pack.write<uint8_t>(0);
-        pack.write<uint16_t>(id);
+        pack.write<clientId>(id);
         pack.writeString(nickname);
         pack.write<uint8_t>(lobby_icon);
         this->server->broadcast_ex(pack, true, id);
@@ -159,7 +159,7 @@ bool Client::message_received(Packet &packet) {
         return false;
     }
 
-    return this->server->getStateManager().handle(*this, packet);
+    return this->server->getGameStateController().handle(*this, packet);
 }
 
 void Client::disconnect(DisconnectReason reason, const std::string &message) {

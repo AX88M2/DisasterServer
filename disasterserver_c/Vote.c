@@ -54,5 +54,5 @@ bool vote_tick(Server* server, Vote* vote)
 
 bool vote_check(Vote* vote)
 {
-	return vote->votecnt > (vote->votetotal / 2.0);
+	return vote->votecnt * 2 > (vote->votetotal / 2.0);
 }

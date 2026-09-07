@@ -7,6 +7,7 @@
 #include "Core/Time.hpp"
 
 #include "GameStateController.hpp"
+#include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
@@ -42,7 +43,7 @@ void Server::initialize() {
                     char buf[250];
                     enet_address_get_host_ip(&ev.peer->address, buf, 250);
 
-                    const uint16_t id = ev.peer->incomingPeerID + 1;
+                    const clientId id = ev.peer->incomingPeerID + 1;
 
                     auto client = std::make_unique<Client>(this, ev.peer, id, buf);
                     Client *rawClient = client.get();
@@ -190,7 +191,7 @@ void Server::initialize() {
     }
 }
 
-void Server::disconnect_by_id(const uint16_t client_id, DisconnectReason reason, const std::string &message) {
+void Server::disconnect_by_id(const clientId client_id, DisconnectReason reason, const std::string &message) {
     for (auto &client : peers) {
         if (client->getId() == client_id) {
             return client->disconnect(reason, message);
@@ -198,7 +199,7 @@ void Server::disconnect_by_id(const uint16_t client_id, DisconnectReason reason,
     }
 }
 
-void Server::broadcast_ex(Packet &packet, bool reliable, uint16_t ignore) {
+void Server::broadcast_ex(Packet &packet, bool reliable, clientId ignore) {
     Debug("PacketType::{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
@@ -206,18 +207,18 @@ void Server::broadcast_ex(Packet &packet, bool reliable, uint16_t ignore) {
 void Server::send_message(Client &client, std::string message) {
     std::ranges::transform(message, message.begin(), [](const unsigned char c){ return std::tolower(c); });
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
-    packet.write<uint16_t>(0);
+    packet.write<clientId>(0);
     packet.writeString(message);
     packet.send(client, true);
 }
 
-void Server::send_broadcast_message(uint16_t sender, std::string &message) {
+void Server::send_broadcast_message(clientId sender, std::string message) {
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
-    packet.write<uint16_t>(sender);
+    packet.write<clientId>(sender);
     packet.writeString(message);
     packet.sendBroadcast(*this, true);
 }
 
-GameStateController &Server::getStateManager() {
+GameStateController &Server::getGameStateController() {
     return stateManager;
 }

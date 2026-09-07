@@ -16,7 +16,7 @@ bool GameStateController::playerJoined(Client &peer) {
     packet.send(peer, true);
 
     Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
-    playerJoined.write<uint16_t>(peer.getId());
+    playerJoined.write<clientId>(peer.getId());
     playerJoined.writeString(peer.getNickname());
     playerJoined.write<uint8_t>(peer.getLobbyIcon());
     playerJoined.write<uint8_t>(peer.getPet());
@@ -42,7 +42,7 @@ bool GameStateController::playerJoined(Client &peer) {
 
 void GameStateController::playerLeft(Client &peer) {
     Packet packet(PacketType::SERVER_PLAYER_LEFT);
-    packet.write<uint8_t>(peer.getId());
+    packet.write<clientId>(peer.getId());
     packet.sendBroadcast(*server, true);
 
     switch (state)
@@ -90,7 +90,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
                 break;
             }
 
-            uint16_t pid = packet.read<uint16_t>();
+            clientId pid = packet.read<clientId>();
 
             for (auto &c : server->getPeers()) {
                 if (c->getId() == pid) {
@@ -106,7 +106,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
                 break;
             }
 
-            uint16_t pid = packet.read<uint16_t>();
+            clientId pid = packet.read<clientId>();
 
             for (auto &c : server->getPeers()) {
                 if (c->getId() == pid) {
@@ -122,7 +122,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
                 break;
             }
 
-            uint16_t pid = packet.read<uint16_t>();
+            clientId pid = packet.read<clientId>();
 
             for (auto &c : server->getPeers()) {
                 if (c->getId() == pid) {
@@ -149,6 +149,53 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
             break;
         }
         default: break;
+    }
+
+    return true;
+}
+
+unsigned long GameStateController::cmd_parse(std::string &string) {
+    static std::array clr_list = CLRLIST;
+
+    std::string current;
+    bool started = false;
+
+    for (char ch : string)
+    {
+        if (!started && std::isspace(static_cast<unsigned char>(ch)))
+            continue;
+
+        started = true;
+
+        if (std::isspace(static_cast<unsigned char>(ch)))
+            break;
+
+        bool invalid = false;
+
+        for (int j = 0; j < CLRLIST_LEN; ++j)
+        {
+            if (ch == clr_list[j][0])
+            {
+                invalid = true;
+                break;
+            }
+        }
+
+        if (!invalid)
+            current += ch;
+    }
+
+    unsigned long hash = 0;
+
+    for (unsigned char ch : current)
+        hash = 31 * hash + ch;
+
+    return hash;
+}
+
+bool GameStateController::cmd_handle(const Client &client, commandHash hash, const std::string &string) {
+    switch (hash) {
+        default: return false; break;
     }
 
     return true;

@@ -12,4 +12,7 @@ constexpr std::string_view CLRCODE_YLW = "`";
 constexpr std::string_view CLRCODE_ORG = "\xE2\x84\x96";
 constexpr std::string_view CLRCODE_RST = "~";
 
+#define CLRLIST  { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST }
+#define CLRLIST_LEN 8
+
 #endif //DISASTERSERVER_COLORS_HPP
