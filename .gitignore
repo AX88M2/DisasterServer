@@ -1,0 +1,7 @@
+.vs/
+.vscode/
+.direnv/
+.idea/*
+build/
+build_android/
+/.cache/clangd/index

@@ -1,0 +1,6 @@
+[submodule "thirdparty/SDL"]
+	path = thirdparty/SDL
+	url = https://github.com/MilesGlitch/SDL.git
+[submodule "thirdparty/SDL_image"]
+	path = thirdparty/SDL_image
+	url = https://github.com/MilesGlitch/SDL_image.git
