@@ -124,15 +124,15 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		RAssert(server_broadcast_ex(v->server, &pack, true, v->id));
 
 		char msg[100];
-		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server_count);
+		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server.server_count);
 
 		server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_MOD_VER) "~");
 		server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
 		server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
 		server_send_msg(v->server, v->peer, "|type .help for command list~");
 
-		if(g_config.motd[0] != '\0')
-			server_send_msg(v->server, v->peer, g_config.motd);
+		if(g_config.message.motd[0] != '\0')
+			server_send_msg(v->server, v->peer, g_config.message.motd);
 		if (v->mod_tool)
 			server_send_msg(v->server, v->peer, CLRCODE_RED "your mod is disallowed on this server" CLRCODE_RST);
 		if (v->op)
@@ -183,7 +183,7 @@ bool peer_identity(PeerData *v, Packet *packet)
 	v->lobby_icon = lobby_icon;
 	v->pet = pet;
 
-	if (g_config.anticheat)
+	if (g_config.gameplay.anticheat)
 	{
 		AssertOrDisconnect(v->server, auth_verify_ticket(v, packet));
 	}
@@ -207,7 +207,7 @@ bool peer_identity(PeerData *v, Packet *packet)
 
 				Packet pack;
 				PacketCreate(&pack, SERVER_LOBBY_CHANGELOBBY);
-				PacketWrite(&pack, packet_write32, g_config.port + server->id);
+				PacketWrite(&pack, packet_write32, g_config.server.port + server->id);
 				packet_send(v->peer, &pack, true);
 
 				Debug("Redirecting %d to another free server: %d", v->id, server->id);
@@ -793,7 +793,7 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		}
 
 		PacketCreate(&pack, SERVER_LOBBY_CHANGELOBBY);
-		PacketWrite(&pack, packet_write32, g_config.port + ind - 1);
+		PacketWrite(&pack, packet_write32, g_config.server.port + ind - 1);
 		RAssert(packet_send(v->peer, &pack, true));
 		break;
 	}
@@ -826,7 +826,7 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 	case CMD_INFO:
 	{
 		char msg[100];
-		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server_count);
+		snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id + 1, g_config.server.server_count);
 
 		server_send_msg(v->server, v->peer, BRACKET);
 		server_send_msg(v->server, v->peer, "|- version " STRINGIFY(BUILD_VERSION) "~");
@@ -835,8 +835,8 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		server_send_msg(v->server, v->peer, "|- server version " CLRCODE_YLW STRINGIFY(BUILD_MOD_VER) "~");
 		server_send_msg(v->server, v->peer, "|- original binary by " CLRCODE_YLW "hander");
 		server_send_msg(v->server, v->peer, BRACKET);
-		if(g_config.motd[0] != '\0')
-                server_send_msg(v->server, v->peer, g_config.motd);
+		if(g_config.message.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.message.motd);
 		break;
 	}
 

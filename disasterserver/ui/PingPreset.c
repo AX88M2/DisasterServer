@@ -52,7 +52,7 @@ bool ping_update(SDL_Renderer* renderer, struct _Component* component)
                     list->preset = 0;
             }
 
-            g_config.ping_limit = g_defaultPingPresets[list->preset];
+            g_config.server.ping_limit = g_defaultPingPresets[list->preset];
             config_save();
         }
 
@@ -63,7 +63,7 @@ bool ping_update(SDL_Renderer* renderer, struct _Component* component)
         SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
 
     char* name;
-    switch (g_config.ping_limit)
+    switch (g_config.server.ping_limit)
     {
     case 80:
         name = CLRCODE_RED "very strict";
@@ -105,7 +105,7 @@ bool ping_update(SDL_Renderer* renderer, struct _Component* component)
     if(list->preset == 4)
         snprintf(value, 128, "%s", name);
     else
-        snprintf(value, 128, "%s - " CLRCODE_RST "%d", name, g_config.ping_limit);
+        snprintf(value, 128, "%s - " CLRCODE_RST "%d", name, g_config.server.ping_limit);
     
     list->label.text = value;
     label_update(renderer, (Component*)&list->label);

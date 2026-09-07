@@ -74,7 +74,7 @@ void log_uninit(void)
 
 bool log_init(void)
 {
-	if (g_config.log_file) // dont do shit if we dont wanna log to file
+	if (g_config.log.log_file) // dont do shit if we dont wanna log to file
 	{
 		// Create dir for logging
 		(void)mkdir("logs", 0777);

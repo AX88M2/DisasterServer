@@ -11,7 +11,7 @@ bool lc_init(Server* server)
     RAssert(game_spawn(server, (Entity*)&(MakeLCEye(1)), sizeof(LCEye), NULL));
     RAssert(game_spawn(server, (Entity*)&(MakeLCChain()), sizeof(LCChain), NULL));
 
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         srand((unsigned int)time(NULL));
         int addTimeRandom = (rand() % 128) + 1; // 1-128

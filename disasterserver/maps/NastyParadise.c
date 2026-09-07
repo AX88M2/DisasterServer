@@ -51,7 +51,7 @@ bool nap_init(Server* server)
     // Snowball 4
     RAssert(game_spawn(server, (Entity*)&(MakeSnowball(4, 5, -1)), sizeof(Snowball), (Entity**)&sb));
 
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         srand((unsigned int)time(NULL));
         int addTimeRandom = (rand() % 128) + 1; // 1-128

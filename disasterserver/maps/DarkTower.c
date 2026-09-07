@@ -29,7 +29,7 @@ bool dt_init(Server* server)
     RAssert(game_spawn(server, (Entity*)&(MakeDTStalactiti(12, 3032, 64)), sizeof(DTStalactits), NULL));
     RAssert(game_spawn(server, (Entity*)&(MakeDTStalactiti(13, 3088, 64)), sizeof(DTStalactits), NULL));
 
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         srand((unsigned int)time(NULL));
         int addTimeRandom = (rand() % 128) + 1; // 1-128

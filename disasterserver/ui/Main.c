@@ -73,8 +73,8 @@ Component* options_components[] =
 	(Component*)&(MapListPresetCreate(320, 48, 128, 40)),
 	(Component*)&(ButtonCreate(320, 96, 128, 20, map_list_reset, 3540, 0, 128, 20)),
 	(Component*)&(PingLimitCreate(320, 125, 128, 40)),
-	(Component*)&(TButtonCreate(320, 172, 128, 20, (ButtonCallback)config_save, &g_config.anticheat, true, 3120, 0, 128, 20)),
-	(Component*)&(TButtonCreate(320, 200, 128, 20, (ButtonCallback)config_save, &g_config.pride, false, 2736, 0, 128, 20)),
+	(Component*)&(TButtonCreate(320, 172, 128, 20, (ButtonCallback)config_save, &g_config.gameplay.anticheat, true, 3120, 0, 128, 20)),
+	(Component*)&(TButtonCreate(320, 200, 128, 20, (ButtonCallback)config_save, &g_config.gameplay.pride, false, 2736, 0, 128, 20)),
 };
 
 Component* players_components[] =
@@ -433,7 +433,7 @@ bool map_list_changed(Component* component)
 
 	for (int i = 0; i < PRESET_COUNT; i++)
 	{
-		if (memcmp(g_config.map_list, g_defaultPresets[i].values, sizeof(g_config.map_list)) == 0)
+		if (memcmp(g_config.maps.map_list, g_defaultPresets[i].values, sizeof(g_config.maps.map_list)) == 0)
 		{
 			preset_list->preset = i;
 			break;
@@ -448,9 +448,9 @@ bool map_list_reset(Component* component)
 	MapListPreset* preset_list = (MapListPreset*)options_components[7];
 	preset_list->preset = PRESET_CUSTOM;
 
-	MutexLock(g_config.map_list_lock);
-	memset(g_config.map_list, 0, sizeof(g_config.map_list));
-	MutexUnlock(g_config.map_list_lock);
+	MutexLock(g_config.maps.map_list_lock);
+	memset(g_config.maps.map_list, 0, sizeof(g_config.maps.map_list));
+	MutexUnlock(g_config.maps.map_list_lock);
 	return true;
 }
 

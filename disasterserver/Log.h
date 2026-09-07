@@ -45,7 +45,7 @@
 #endif
 
 #define Log(type, fmt, ...) log_fmt(fmt, type, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define Debug(fmt, ...) if(g_config.log_debug) log_fmt(fmt, DEBUG_TYPE, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define Debug(fmt, ...) if(g_config.log.log_debug) log_fmt(fmt, DEBUG_TYPE, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define Info(fmt, ...) log_fmt(fmt, INFO_TYPE, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define Warn(fmt, ...) log_fmt(fmt, WARN_TYPE, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define Err(fmt, ...)  log_fmt(fmt, ERROR_TYPE, __FILENAME__, __LINE__, ##__VA_ARGS__)

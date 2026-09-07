@@ -44,7 +44,7 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
 
     list->scroll = lerp(list->scroll, list->target_scroll, 0.30);
 
-    MutexLock(g_config.map_list_lock);
+    MutexLock(g_config.maps.map_list_lock);
     for(int i = 0; i < MAP_COUNT; i++)
     {
         SDL_FRect src = { 0, 272, 123, 104 };
@@ -58,7 +58,7 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
 
             if (mouse_down)
             {
-                g_config.map_list[i] = !g_config.map_list[i];
+                g_config.maps.map_list[i] = !g_config.maps.map_list[i];
                 list->cb(component);
             }
 
@@ -66,11 +66,11 @@ bool maplist_update(SDL_Renderer* renderer, struct _Component* component)
                 dst.y += 2;
         }
 
-        const Uint8 color = g_config.map_list[i] ? 255 : 96;
+        const Uint8 color = g_config.maps.map_list[i] ? 255 : 96;
         SDL_SetTextureColorMod(g_textureSheet, color, color, color);
         SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
     }
-    MutexUnlock(g_config.map_list_lock);
+    MutexUnlock(g_config.maps.map_list_lock);
 
     SDL_SetTextureColorMod(g_textureSheet, 255, 255, 255);
     return true;

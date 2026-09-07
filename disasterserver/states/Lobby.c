@@ -163,15 +163,15 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			RAssert(packet_send(v->peer, &pack, true));
 
 			char msg[100];
-			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server_count);
+			snprintf(msg, 100, "server " CLRCODE_RED "%d" CLRCODE_RST " of " CLRCODE_BLU "%d" CLRCODE_RST, v->server->id+1, g_config.server.server_count);
 
 			server_send_msg(v->server, v->peer, "|- version " CLRCODE_YLW STRINGIFY(BUILD_MOD_VER) "~");
 			server_send_msg(v->server, v->peer, "|- edit by /miles&glitch~");
 			server_send_msg(v->server, v->peer, "|- port by |faker\\null@0~");
 			server_send_msg(v->server, v->peer, "|type .help for command list~");
 
-            if(g_config.motd[0] != '\0')
-                server_send_msg(v->server, v->peer, g_config.motd);
+            if(g_config.message.motd[0] != '\0')
+                server_send_msg(v->server, v->peer, g_config.message.motd);
 			if (v->mod_tool)
 				server_send_msg(v->server, v->peer, CLRCODE_RED "your mod is disallowed on this server" CLRCODE_RST);
 			if (v->op)
@@ -387,7 +387,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			}
 
             Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
-            if (!ignore && g_config.chatfix)
+            if (!ignore && g_config.message.chatfix)
                 server_broadcast_msg(v->server, v->id, msg.value);
 			
 			break;

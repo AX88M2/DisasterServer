@@ -179,7 +179,7 @@ bool mapvote_init(Server* server)
 	server->lobby.countdown = TICKSPERSEC;
 	memset(server->lobby.votes, 0, sizeof(server->lobby.votes));
 
-	MutexLock(g_config.map_list_lock);
+	MutexLock(g_config.maps.map_list_lock);
 	{
 		// first we check if map count is less than 3
 		int8_t allowed[MAP_COUNT] = { 0 };
@@ -187,7 +187,7 @@ bool mapvote_init(Server* server)
 
 		for (int8_t i = 0; i < MAP_COUNT; i++)
 		{
-			if (g_config.map_list[i])
+			if (g_config.maps.map_list[i])
 				allowed[allowed_count++] = i;
 		}
 
@@ -229,7 +229,7 @@ bool mapvote_init(Server* server)
 
 	}
 skip_rand:
-	MutexUnlock(g_config.map_list_lock);
+	MutexUnlock(g_config.maps.map_list_lock);
 
 	Packet pack;
 	PacketCreate(&pack, SERVER_VOTE_MAPS);
