@@ -1,3 +1,32 @@
+set(COMPILER_OPTIONS
+        $<$<CXX_COMPILER_ID:MSVC>:
+            /utf-8
+            /MP
+            /W4
+            /wd4100 # unreferenced formal parameter
+            /wd4457 # declaration of 'var' hides function parameter
+            /wd4458 # declaration of 'var' hides class member
+            /wd4459 # declaration of 'var' hides global declaration
+            /wd4101 # 'var': unreferenced local variable
+            /wd4388 # 'token' : signed/unsigned mismatch
+            /wd4018 # '>': signed/unsigned mismatch
+        >
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:
+            -Wall
+            -Wextra
+            -Wpedantic
+            -finput-charset=UTF-8
+            -fexec-charset=UTF-8
+        >
+        $<$<CXX_COMPILER_ID:GNU>:
+            -Wall
+            -Wextra
+            -Wpedantic
+            -finput-charset=UTF-8
+            -fexec-charset=UTF-8
+        >
+)
+
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 if(ANDROID)
@@ -6,6 +35,7 @@ if(ANDROID)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
     target_link_libraries(DisasterServerCXX PRIVATE cJSON log enet m Threads::Threads)
 else()
     if(DYLIB) # Build .dll or .so
@@ -19,6 +49,7 @@ else()
             target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
         endif()
 
+        target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
     else() # Build executable
@@ -86,6 +117,7 @@ else()
                 target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
             endif()
 
+            target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
         endif()

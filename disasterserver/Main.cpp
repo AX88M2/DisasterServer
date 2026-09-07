@@ -4,6 +4,9 @@
 
 int main(int argc, char *argv[]) {
 #ifdef _WIN32
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     DWORD mode = 0;
@@ -12,7 +15,7 @@ int main(int argc, char *argv[]) {
         SetConsoleMode(handle, mode);
     }
 #endif
-    
+
     try {
         enet_initialize();
 
