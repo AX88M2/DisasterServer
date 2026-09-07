@@ -188,7 +188,7 @@ bool LobbyState::tick() {
             countdown += TICKSPERSEC;
 
             if (--countdown_sec == 0) {
-                return init();
+                return controller->getCharSelect().init(map);
             }
 
             RAssert(sendCountdown());
@@ -247,6 +247,23 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 }
 
                 case CMD_MAP: {
+                    controller->getCharSelect().init(0);
+                    break;
+                }
+
+                case CMD_HELP: {
+                    this->server->send_message(client, "~-----~ {}command list:{} ~-----~", CLRCODE_GRN, CLRCODE_RST);
+                    this->server->send_message(client, "|- .vk~ - vote kick ");
+                    this->server->send_message(client, "|- .info~ - information about server");
+                    this->server->send_message(client, "|- .vp~ - vote practice mode (wip)");
+                    break;
+                }
+
+                case CMD_INFO: {
+                    this->server->send_message(client, "|build from &{} @{}~", __DATE__, __TIME__);
+                    this->server->send_message(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
+                    this->server->send_message(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
+                    this->server->send_message(client, "{}faker{}null{}0{} - help with code", CLRCODE_GRA, CLRCODE_RED, CLRCODE_GRN, CLRCODE_RST);
                     break;
                 }
 

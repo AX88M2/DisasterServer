@@ -5,7 +5,7 @@
 
 using namespace DisasterServer;
 
-GameStateController::GameStateController(Server *server) : server(server), lobby(server, this) {
+GameStateController::GameStateController(Server *server): server(server), lobby(server, this), charSelect(server, this) {
 }
 
 GameStateController::~GameStateController() = default;
@@ -24,9 +24,11 @@ bool GameStateController::playerJoined(Client &peer) {
 
     switch (state) {
         case States::LOBBY:
-        case States::CHARSELECT:
-        case States::MAPVOTE: {
+        case States::MAPVOTE:
             return lobby.joined(peer);
+
+        case States::CHARSELECT: {
+            return charSelect.joined(peer);
         }
         case States::GAME: {
             return true;
@@ -48,9 +50,12 @@ void GameStateController::playerLeft(Client &peer) {
     switch (state)
     {
         case States::LOBBY:
-        case States::CHARSELECT:
         case States::MAPVOTE:
             lobby.leaved(peer);
+            break;
+
+        case States::CHARSELECT:
+            charSelect.leaved(peer);
             break;
 
         case States::GAME:
@@ -63,22 +68,24 @@ void GameStateController::playerLeft(Client &peer) {
     }
 }
 
-
 void GameStateController::tick() {
     switch (state)
     {
         case States::LOBBY:
-        case States::CHARSELECT:
         case States::MAPVOTE:
             lobby.tick();
             break;
 
+        case States::CHARSELECT:
+            charSelect.tick();
+            break;
+
         case States::GAME:
-            //game_state_tick(server);
+            // game_state_tick(server);
             break;
 
         case States::RESULTS:
-            //results_state_tick(server);
+            // results_state_tick(server);
             break;
     }
 }
@@ -137,18 +144,21 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
     }
     switch (state) {
         case States::LOBBY:
-        case States::CHARSELECT:
-        case States::MAPVOTE: {
+        case States::MAPVOTE:
             lobby.handle(peer, packet);
             break;
-        }
-        case States::GAME: {
+
+        case States::CHARSELECT:
+            charSelect.handle(peer, packet);
             break;
-        }
-        case States::RESULTS: {
+
+        case States::GAME:
+            // game state handle
             break;
-        }
-        default: break;
+
+        case States::RESULTS:
+            // results state handle
+            break;
     }
 
     return true;

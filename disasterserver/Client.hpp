@@ -123,6 +123,11 @@ namespace DisasterServer
         void setExeChance(uint8_t chance) { exe_chance = chance; }
         uint8_t getExeChance() { return exe_chance; }
 
+        SurvCharacters getSurvCharacter() const { return survChar; }
+        void setSurvCharacter(SurvCharacters character) { survChar = character; }
+        ExesCharacters getExeCharacter() const { return exeChar; }
+        void setExeCharacter(ExesCharacters character) { exeChar = character; }
+
         void setTimeout(double value) { timeout = value; }
         double getTimeout() const { return timeout; }
         bool isShouldTimeout() { return should_timeout; }
