@@ -55,9 +55,9 @@ namespace DisasterServer
         States getCurrentState() const { return state; }
         void setState(States state) { this->state = state; }
 
-        CharSelectState& getCharSelect() {
-            return charSelect;
-        }
+
+        LobbyState& getLobbyState() { return lobby; }
+        CharSelectState& getCharSelect() { return charSelect; }
     };
 }
 

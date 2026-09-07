@@ -45,7 +45,7 @@ bool Client::identity(Packet &packet) {
     this->in_game = (server->getGameStateController().getCurrentState() == States::LOBBY);
     this->exe_chance = 1 + rand() % 4;
 
-    if (this->server->getPeers().size() >= MAX_PLAYERS) {
+    if (this->server->getClients().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);
         return false;
     }
@@ -87,7 +87,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         return false;
     }
 
-    if (this->server->getPeers().size() >= MAX_PLAYERS) {
+    if (this->server->getClients().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);
         return false;
     }
@@ -117,7 +117,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
     if (!in_game) {
 
         // For icons
-        for (auto &client : this->server->getPeers()) {
+        for (auto &client : this->server->getClients()) {
             if (client->getId() == id) {
                 continue;
             }

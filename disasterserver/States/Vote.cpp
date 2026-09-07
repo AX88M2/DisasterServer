@@ -14,10 +14,10 @@ Vote::~Vote() = default;
 bool Vote::init(VoteType type, clientId id) {
     ongoing = false;
     votes.clear();
-    auto &players = server->getPeers();
+    auto &players = server->getClients();
     this->type = type;
 
-    for (auto &c: server->getPeers()) {
+    for (auto &c: server->getClients()) {
         c->setCanVote(c->getId() != id);
     }
     this->votedTotal = std::ranges::count_if(players, [](const auto& peer) { return peer->isCanVote(); });

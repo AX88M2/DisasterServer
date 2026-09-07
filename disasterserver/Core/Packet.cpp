@@ -98,7 +98,7 @@ bool Packet::send(Client &client, bool reliable) {
 }
 
 void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(const Client& client)> predicate) {
-	for (auto &client : server.getPeers()) {
+	for (auto &client : server.getClients()) {
 		if (predicate(*client)) {
 			if (!send(*client, reliable)) {
 				Warn("Failed to send {} to client {}", getPacketTypeName(type), client->getId());

@@ -14,7 +14,7 @@ LobbyState::LobbyState(Server *server, GameStateController *controller) : server
 LobbyState::~LobbyState() = default;
 
 bool LobbyState::init() {
-    for (auto &peer : server->getPeers()) {
+    for (auto &peer : server->getClients()) {
         peer->setReady(false);
         peer->setVoted(false);
         peer->setTimeout(0);
@@ -61,7 +61,7 @@ bool LobbyState::sendCountdown() {
 }
 
 bool LobbyState::checkCountdown() {
-    const auto players = &server->getPeers();
+    const auto players = &server->getClients();
 
     if (players->size() <= 1) {
         return true;
@@ -145,7 +145,7 @@ bool LobbyState::leaved(Client &peer) {
 bool LobbyState::tick() {
     switch (controller->getCurrentState()) {
         case States::LOBBY: {
-            for (auto &peer : server->getPeers()) {
+            for (auto &peer : server->getClients()) {
                 if (peer->getVoteCooldown() > 0) {
                     peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
                 }
@@ -205,7 +205,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: {
-            for (auto &c : server->getPeers()) {
+            for (auto &c : server->getClients()) {
                 if (client.getId() == c->getId()) {
                     continue;
                 }
@@ -380,7 +380,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                         break;
                     }
 
-                    if (this->server->getPeers().size() > 2) {
+                    if (this->server->getClients().size() > 2) {
                         Packet pack(PacketType::SERVER_LOBBY_CHOOSEVOTEKICK);
                         pack.send(client, true);
                     } else {
@@ -439,7 +439,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 break;
             } else {
                 bool found = false;
-                for (auto &c : this->server->getPeers()) {
+                for (auto &c : this->server->getClients()) {
                     if (c->getId() == pid) {
 
                         if (c->isOpped()) {

@@ -1,6 +1,5 @@
 #include "CharSelect.hpp"
 
-#include <algorithm>
 #include <string>
 
 #include "Server.hpp"
@@ -36,7 +35,7 @@ CharSelectState::CharSelectState(Server* server, GameStateController* controller
 bool CharSelectState::chooseExe() {
     uint32_t weight = 0;
 
-    for (auto& peer : server->getPeers()) {
+    for (auto& peer : server->getClients()) {
         if (!peer || !peer->isInGame())
             continue;
 
@@ -51,7 +50,7 @@ bool CharSelectState::chooseExe() {
 
     uint32_t rnd = static_cast<uint32_t>(std::rand()) % weight;
 
-    for (auto& peer : server->getPeers()) {
+    for (auto& peer : server->getClients()) {
         if (!peer || !peer->isInGame())
             continue;
 
@@ -79,8 +78,8 @@ bool CharSelectState::chooseExe() {
 bool CharSelectState::checkState() {
     bool shouldStart = true;
 
-    for (auto& peer : server->getPeers()) {
-        if (!peer || !peer->isInGame())
+    for (auto& peer : server->getClients()) {
+        if (!peer->isInGame())
             continue;
 
         if (peer->getExeCharacter() == ExesCharacters::NONE &&
@@ -91,7 +90,7 @@ bool CharSelectState::checkState() {
     }
 
     if (shouldStart) {
-        controller->setState(States::LOBBY);
+        controller->setState(States::GAME); //Game start
         return true;
     }
 
@@ -109,7 +108,6 @@ bool CharSelectState::init(int8_t selectedMap) {
     }
 
     map = selectedMap;
-
     controller->setState(States::CHARSELECT);
 
     countdownSec = 30;
@@ -239,7 +237,7 @@ void CharSelectState::tick() {
         countdown += TICKSPERSEC;
 
         if (--countdownSec == 0) {
-            for (auto& peer : server->getPeers()) {
+            for (auto& peer : server->getClients()) {
                 if (!peer || !peer->isInGame())
                     continue;
 
@@ -273,15 +271,8 @@ bool CharSelectState::leaved(Client& client) {
         }
     }
 
-    const size_t inGame = std::ranges::count_if(server->getPeers(),
-        [](const auto& cl) {
-            return cl->isInGame();
-        }
-    );
-
-    if (inGame <= 1 || client.getId() == exe) {
-        controller->setState(States::LOBBY);
-        return true;
+    if (this->server->getClientsInGameCount() <= 1 || client.getId() == exe) {
+        return controller->getLobbyState().init();
     }
 
     return checkState();

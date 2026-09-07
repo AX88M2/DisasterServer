@@ -4,7 +4,7 @@
 #include <array>
 #include <cstdint>
 
-#include "State.hpp"
+#include "Client.hpp"
 #include "Core/Packet.hpp"
 
 namespace DisasterServer {
@@ -32,12 +32,10 @@ public:
 
     bool init(int8_t map);
 
-    void tick();
-
-    bool handle(Client& client, Packet& packet);
-
     bool joined(Client& client);
     bool leaved(Client& client);
+    void tick();
+    bool handle(Client& client, Packet& packet);
 
     clientId getExe() const { return exe; }
     int8_t getMap() const { return map; }

@@ -99,7 +99,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getPeers()) {
+            for (auto &c : server->getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add ban logic
                     c->disconnect(DisconnectReason::BANNEDBYHOST);
@@ -115,7 +115,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getPeers()) {
+            for (auto &c : server->getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add kick logic
                     c->disconnect(DisconnectReason::KICKEDBYHOST);
@@ -131,7 +131,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getPeers()) {
+            for (auto &c : server->getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add operator logic
                     server->send_message(peer, "{}you're an operator now", CLRCODE_GRN);
