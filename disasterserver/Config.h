@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <io/Dir.h>
 
 #ifndef SYS_ANDROID
     #define DATA_DIR "data/"
