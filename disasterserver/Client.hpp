@@ -29,6 +29,22 @@ namespace DisasterServer
         COUNT
     };
 
+    constexpr std::array<std::string_view, 4> EXE_NAMES = {
+        "Classic Exe",
+        "Chaos",
+        "Exetior",
+        "Exeller"
+    };
+
+    constexpr std::array<std::string_view, 6> SURV_NAMES = {
+        "Tails",
+        "Knuckles",
+        "Eggman",
+        "Amy",
+        "Cream",
+        "Sally"
+    };
+
     enum class DisconnectReason
     {
         FAILEDTOCONNECT,

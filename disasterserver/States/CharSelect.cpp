@@ -7,27 +7,7 @@
 #include "GameStateController.hpp"
 #include "Core/Colors.hpp"
 
-namespace DisasterServer {
-
-namespace {
-
-constexpr std::array<std::string_view, 4> EXE_NAMES = {
-    "Classic Exe",
-    "Chaos",
-    "Exetior",
-    "Exeller"
-};
-
-constexpr std::array<std::string_view, 6> SURV_NAMES = {
-    "Tails",
-    "Knuckles",
-    "Eggman",
-    "Amy",
-    "Cream",
-    "Sally"
-};
-
-}
+using namespace DisasterServer;
 
 CharSelectState::CharSelectState(Server* server, GameStateController* controller) : server(server), controller(controller) {
 }
@@ -276,5 +256,4 @@ bool CharSelectState::leaved(Client& client) {
     }
 
     return checkState();
-}
 }
