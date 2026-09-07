@@ -34,6 +34,16 @@ namespace DisasterServer
         void send_message(Client &client, std::string message);
         void send_broadcast_message(uint16_t sender, std::string &message);
 
+        template <typename... Args>
+        void send_message(Client &client, std::format_string<Args...> fmt, Args&&... args) {
+            send_message(client, std::format(fmt, std::forward<Args>(args)...));
+        }
+
+        template <typename... Args>
+        void send_broadcast_message(uint16_t sender, std::format_string<Args...> fmt, Args&&... args) {
+            send_broadcast_message(sender, std::format(fmt, std::forward<Args>(args)...));
+        }
+
         void broadcast_ex(Packet &packet, bool reliable, uint16_t ignore);
 
         std::vector<std::unique_ptr<Client>> &getPeers() { return peers; }

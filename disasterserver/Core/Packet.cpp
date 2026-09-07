@@ -40,11 +40,16 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 
 	read<uint8_t>();
 	type = static_cast<PacketType>(read<uint8_t>());
+
+	Debug("Packet received PacketType::{}", getPacketTypeName(type));
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
 	write<uint8_t>(static_cast<uint8_t>(type));
+	if (type != PacketType::SERVER_HEARTBEAT) {
+		Debug("Packet created PacketType::{}", getPacketTypeName(type));
+	}
 }
 
 Packet::~Packet() = default;
@@ -80,7 +85,7 @@ bool Packet::send(Client &client, bool reliable) {
 	if(client.isDisconnecting())
 		return true;
 
-	Debug("PacketType::{} sending to {}", getPacketTypeName(type), client.getId());
+	Debug("PacketType::{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
 
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 

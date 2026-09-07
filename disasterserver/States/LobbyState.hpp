@@ -35,7 +35,11 @@ namespace DisasterServer
         ~LobbyState();
 
         bool init();
+
+        bool sendCountdown();
+        bool checkCountdown();
         bool joined(Client &peer);
+        bool leaved(Client &peer);
         bool tick();
         bool handle(Client &client, Packet &packet);
     };

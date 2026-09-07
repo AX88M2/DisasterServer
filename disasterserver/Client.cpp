@@ -1,14 +1,16 @@
 #include "Client.hpp"
 
+#include <utility>
+
 #include "Server.hpp"
 #include "Core/Log.hpp"
 #include "Core/Packet.hpp"
 
 using namespace DisasterServer;
 
-Client::Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const std::string &ip) :
+Client::Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, std::string ip) :
     id(incomingPeerID),
-    ip(ip),
+    ip(std::move(ip)),
     peer(peer),
     server(server) {}
 
@@ -16,6 +18,11 @@ Client::~Client() = default;
 
 bool Client::identity(Packet &packet) {
     RAssert(id > 0);
+
+    if (packet.getPacketType() != PacketType::IDENTITY) {
+        this->disconnect(DisconnectReason::OTHER, "type != IDENTITY?");
+        return false;
+    }
 
     bool isBanned = false;
     uint64_t timeout = 0;
@@ -43,11 +50,6 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    if (packet.getPacketType() != PacketType::IDENTITY) {
-        this->disconnect(DisconnectReason::OTHER, "type != IDENTITY?");
-        return false;
-    }
-
     if (build_version != BUILD_VERSION) {
         this->disconnect(DisconnectReason::VERMISMATCH);
         return false;
@@ -58,7 +60,7 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    if (udid.length() <= 0) {
+    if (udid.empty()) {
         this->disconnect(DisconnectReason::OTHER, "whoops you have to put the CD in you conputer");
         return false;
     }
@@ -106,10 +108,10 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         return false;
     }
 
-    Packet identityResponse(PacketType::SERVER_IDENTITY_RESPONSE);
-    identityResponse.write<uint8_t>(server->getStateManager().getCurrentState() == States::LOBBY);
-    identityResponse.write<uint16_t>(id);
-    identityResponse.send(*this, true);
+    Packet packet(PacketType::SERVER_IDENTITY_RESPONSE);
+    packet.write<uint8_t>(server->getStateManager().getCurrentState() == States::LOBBY);
+    packet.write<uint16_t>(id);
+    packet.send(*this, true);
 
     // If in queue, do following
     if (!in_game) {
@@ -145,7 +147,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         pack.write<uint8_t>(lobby_icon);
         this->server->broadcast_ex(pack, true, id);
 
-        this->server->send_message(*this, std::format("|build from &{} @{}~", __DATE__, __TIME__));
+        this->server->send_message(*this, "|build from &{} @{}~", __DATE__, __TIME__);
         this->server->send_message(*this, "|type .help for command list~");
     }
 
@@ -157,11 +159,7 @@ bool Client::message_received(Packet &packet) {
         return false;
     }
 
-    bool result;
-
-    result = this->server->getStateManager().handle(*this, packet);
-
-    return result;
+    return this->server->getStateManager().handle(*this, packet);
 }
 
 void Client::disconnect(DisconnectReason reason, const std::string &message) {

@@ -49,7 +49,7 @@ void Server::initialize() {
                     ev.peer->data = rawClient;
                     peers.push_back(std::move(client));
 
-                    Debug("Connection client {}", rawClient->getId());
+                    Debug("Connection peer id {}", rawClient->getId());
 
                     Packet pack(PacketType::SERVER_PREIDENTITY);
 
@@ -179,7 +179,7 @@ void Server::initialize() {
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
-                    Debug("Heartbeat done.");
+                    //Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;

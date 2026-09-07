@@ -35,6 +35,44 @@
 
 namespace DisasterServer
 {
+    namespace TerminalColors {
+        constexpr std::string_view reset = "\x1b[0m";
+        constexpr std::string_view bright = "\x1b[1m";
+        constexpr std::string_view dim = "\x1b[2m";
+        constexpr std::string_view underscore = "\x1b[4m";
+        constexpr std::string_view blink = "\x1b[5m";
+        constexpr std::string_view reverse = "\x1b[7m";
+        constexpr std::string_view hidden = "\x1b[8m";
+
+        constexpr std::string_view black = "\x1b[30m";
+        constexpr std::string_view red = "\x1b[31m";
+        constexpr std::string_view green = "\x1b[32m";
+        constexpr std::string_view yellow = "\x1b[33m";
+        constexpr std::string_view blue = "\x1b[34m";
+        constexpr std::string_view magenta = "\x1b[35m";
+        constexpr std::string_view cyan = "\x1b[36m";
+        constexpr std::string_view white = "\x1b[37m";
+        constexpr std::string_view standard = "\x1b[39m";
+        constexpr std::string_view light_gray = "\x1b[90m";
+        constexpr std::string_view light_red = "\x1b[91m";
+        constexpr std::string_view light_green = "\x1b[92m";
+        constexpr std::string_view light_yellow = "\x1b[93m";
+        constexpr std::string_view light_blue = "\x1b[94m";
+        constexpr std::string_view light_magenta = "\x1b[95m";
+        constexpr std::string_view light_cyan = "\x1b[96m";
+        constexpr std::string_view light_white = "\x1b[97m";
+
+
+        constexpr std::string_view bg_black = "\x1b[40m";
+        constexpr std::string_view bg_red = "\x1b[41m";
+        constexpr std::string_view bg_green = "\x1b[42m";
+        constexpr std::string_view bg_yellow = "\x1b[43m";
+        constexpr std::string_view bg_blue = "\x1b[44m";
+        constexpr std::string_view bg_magenta = "\x1b[45m";
+        constexpr std::string_view bg_cyan = "\x1b[46m";
+        constexpr std::string_view bg_white = "\x1b[47m";
+    }
+
     enum class LogLevel {
         Debug, Info, Warning, Error
     };

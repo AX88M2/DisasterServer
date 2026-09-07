@@ -178,15 +178,15 @@ void Logger::write(const LogLevel level, std::string_view message, std::source_l
 	ss << std::put_time(&local, "%d.%m.%Y %T");
 	ss << " ";
 	switch (level) {
-		case LogLevel::Debug: ss << "[Debug]"; break;
-		case LogLevel::Info: ss << "[Info]"; break;
-		case LogLevel::Warning: ss << "[Warn]"; break;
-		case LogLevel::Error: ss << "[Error]"; break;
+		case LogLevel::Debug: ss << TerminalColors::cyan; ss << "[Debug]"; ss << TerminalColors::reset; break;
+		case LogLevel::Info: ss << TerminalColors::green; ss << "[Info]"; ss << TerminalColors::reset; break;
+		case LogLevel::Warning: ss << TerminalColors::yellow; ss << "[Warn]"; ss << TerminalColors::reset; break;
+		case LogLevel::Error: ss << TerminalColors::light_red; ss << "[Error]"; ss << TerminalColors::reset; break;
 	}
 	ss << " ";
-	ss << "["<< std::this_thread::get_id() << "]";
+	ss << TerminalColors::light_gray; ss << "["<< std::this_thread::get_id() << "]";
 	ss << " ";
-	ss << std::format("({}:{})", location.file_name(), location.line());
+	ss << std::format("({}:{})", location.file_name(), location.line()); ss << TerminalColors::reset;
 	ss << " ";
 	ss << message;
 	std::cout << ss.str() << std::endl;

@@ -41,12 +41,52 @@ bool LobbyState::init() {
     prac_countdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
-    pack.sendBroadcast(*this->server, true);
+    pack.sendBroadcast(*server, true);
+
+    return true;
+}
+
+bool LobbyState::sendCountdown() {
+    Packet pack(PacketType::SERVER_LOBBY_COUNTDOWN);
+    pack.write<uint8_t>(this->countdown_sec < NO_COUNTDOWN);
+    pack.write<uint8_t>(countdown_sec);
+    pack.sendBroadcast(*server, true);
+    return true;
+}
+
+bool LobbyState::checkCountdown() {
+    uint8_t count = 0;
+
+    for (auto &c : server->getPeers()) {
+        if (c->isReady()) {
+            count++;
+        }
+    }
+
+    Debug("Players isReady {}", count);
+
+    if (count == (server->getPeers().size() > 1)) {
+        this->countdown = TICKSPERSEC;
+        this->countdown_sec = COUNTDOWN;
+        RAssert(sendCountdown());
+    } else if (this->countdown_sec != NO_COUNTDOWN) {
+        this->countdown = TICKSPERSEC;
+        this->countdown_sec = COUNTDOWN;
+        RAssert(sendCountdown());
+    }
 
     return true;
 }
 
 bool LobbyState::joined(Client &peer) {
+    return true;
+}
+
+bool LobbyState::leaved(Client &peer) {
+    if (!peer.isInGame()) {
+        return true;
+    }
+
     return true;
 }
 
@@ -59,10 +99,14 @@ bool LobbyState::tick() {
                 }
 
                 if (!peer->isReady()) {
-                    /*peer->setTimeout(peer->getTimeout() + server->getDelta());
-                    if (std::fmod(peer->getTimeout(), 60) == 0) {
-                        Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
-                    }*/
+
+                    //Чтобы не мешалось
+                    /*
+                        peer->setTimeout(peer->getTimeout() + server->getDelta());
+                        if (std::fmod(peer->getTimeout(), 60) == 0) {
+                            Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
+                        }
+                    */
 
                     if (peer->getTimeout() >= 25 * TICKSPERSEC) {
                         peer->disconnect(DisconnectReason::AFKTIMEOUT);
@@ -90,6 +134,8 @@ bool LobbyState::tick() {
             if (--countdown_sec == 0) {
                 return init();
             }
+
+            RAssert(sendCountdown());
         }
 
         countdown_sec -= server->getDelta();
@@ -99,29 +145,31 @@ bool LobbyState::tick() {
 }
 
 bool LobbyState::handle(Client &client, Packet &packet) {
-    switch (packet.getPacketType()) {
-        default:
-            break;
+    bool result = true;
 
+    switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: {
-            for (auto &value : server->getPeers()) {
-                if (client.getId() == value->getId()) {
+            for (auto &c : server->getPeers()) {
+                if (client.getId() == c->getId()) {
                     continue;
                 }
 
                 Packet pack(PacketType::SERVER_LOBBY_PLAYER);
-                pack.write<uint16_t>(value->getId());
-                pack.write<uint8_t>(value->isReady());
-                pack.writeString(value->getNickname());
-                pack.write<uint8_t>(value->getLobbyIcon());
-                pack.write<uint8_t>(value->getPet());
-                server->broadcast_ex(pack, true, client.getId());
+                pack.write<uint16_t>(c->getId());
+                pack.write<uint8_t>(c->isReady());
+                pack.writeString(c->getNickname());
+                pack.write<uint8_t>(c->getLobbyIcon());
+                pack.write<uint8_t>(c->getPet());
+                if (!pack.send(client, true)) {
+                    result = false;
+                    break;
+                }
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CORRECT);
             pack.send(client, true);
 
-            server->send_message(client, std::format("|build from &{} @{}~", __DATE__, __TIME__));
+            server->send_message(client, "|build from &{} @{}~", __DATE__, __TIME__);
             server->send_message(client, "|type .help for command list~");
 
             break;
@@ -146,11 +194,14 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             break;
         }
+
         case PacketType::CLIENT_LOBBY_CHOOSEVOTEKICK: {
             uint16_t pid = packet.read<uint16_t>();
             break;
         }
+
+        default: break;
     }
 
-    return true;
+    return result;
 }

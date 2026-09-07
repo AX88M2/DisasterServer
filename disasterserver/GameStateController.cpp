@@ -1,6 +1,8 @@
 #include "GameStateController.hpp"
 #include "Server.hpp"
 
+#include "Core/Colors.hpp"
+
 using namespace DisasterServer;
 
 GameStateController::GameStateController(Server *server) : server(server), lobby(server, this) {
@@ -38,6 +40,30 @@ bool GameStateController::playerJoined(Client &peer) {
     return true;
 }
 
+void GameStateController::playerLeft(Client &peer) {
+    Packet packet(PacketType::SERVER_PLAYER_LEFT);
+    packet.write<uint8_t>(peer.getId());
+    packet.sendBroadcast(*server, true);
+
+    switch (state)
+    {
+        case States::LOBBY:
+        case States::CHARSELECT:
+        case States::MAPVOTE:
+            lobby.leaved(peer);
+            break;
+
+        case States::GAME:
+            //game_state_tick(server);
+            break;
+
+        case States::RESULTS:
+            //results_state_tick(server);
+            break;
+    }
+}
+
+
 void GameStateController::tick() {
     switch (state)
     {
@@ -58,7 +84,57 @@ void GameStateController::tick() {
 }
 
 bool GameStateController::handle(Client &peer, Packet &packet) {
+    switch (packet.getPacketType()) {
+        case PacketType::CLIENT_LOBBY_CHOOSEBAN: {
+            if (!peer.isOpped()) {
+                break;
+            }
 
+            uint16_t pid = packet.read<uint16_t>();
+
+            for (auto &c : server->getPeers()) {
+                if (c->getId() == pid) {
+                    //TODO: add ban logic
+                    c->disconnect(DisconnectReason::BANNEDBYHOST);
+                }
+            }
+
+            break;
+        }
+        case PacketType::CLIENT_LOBBY_CHOOSEKICK: {
+            if (!peer.isOpped()) {
+                break;
+            }
+
+            uint16_t pid = packet.read<uint16_t>();
+
+            for (auto &c : server->getPeers()) {
+                if (c->getId() == pid) {
+                    //TODO: add kick logic
+                    c->disconnect(DisconnectReason::KICKEDBYHOST);
+                }
+            }
+
+            break;
+        }
+        case PacketType::CLIENT_LOBBY_CHOOSEOP: {
+            if (!peer.isOpped()) {
+                break;
+            }
+
+            uint16_t pid = packet.read<uint16_t>();
+
+            for (auto &c : server->getPeers()) {
+                if (c->getId() == pid) {
+                    //TODO: add operator logic
+                    server->send_message(peer, "{}you're an operator now", CLRCODE_GRN);
+                }
+            }
+
+            break;
+        }
+        default: break;
+    }
     switch (state) {
         case States::LOBBY:
         case States::CHARSELECT:
@@ -76,8 +152,4 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
     }
 
     return true;
-}
-
-void GameStateController::playerLeft(Client &peer) {
-
 }

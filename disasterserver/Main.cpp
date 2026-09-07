@@ -3,6 +3,16 @@
 #include "Core/Log.hpp"
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    DWORD mode = 0;
+    if (GetConsoleMode(handle, &mode)) {
+        mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(handle, mode);
+    }
+#endif
+    
     try {
         enet_initialize();
 

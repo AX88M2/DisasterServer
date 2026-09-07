@@ -8,23 +8,23 @@ namespace DisasterServer
     class Server;
 
     enum class SurvCharacters {
-        CH_NONE = -1,
+        NONE = -1,
 
-        CH_TAILS,
-        CH_KNUX,
-        CH_EGGMAN,
-        CH_AMY,
-        CH_CREAM,
-        CH_SALLY
+        TAILS,
+        KNUX,
+        EGGMAN,
+        AMY,
+        CREAM,
+        SALLY
     };
 
     enum class ExesCharacters {
-        EX_NONE = -1,
+        NONE = -1,
 
-        EX_ORIGINAL,
-        EX_CHAOS,
-        EX_EXETIOR,
-        EX_EXELLER
+        ORIGINAL,
+        CHAOS,
+        EXETIOR,
+        EXELLER
     };
 
     enum class DisconnectReason
@@ -59,10 +59,10 @@ namespace DisasterServer
             case DisconnectReason::LOBBYFULL: return "LOBBY FULL";
             case DisconnectReason::RATELIMITED: return "RATE LIMITED";
             case DisconnectReason::SHUTDOWN: return "SHUTDOWN";
-            case DisconnectReason::IPINUSE: return "IPINUSE";
+            case DisconnectReason::IPINUSE: return "IP IN USE";
             case DisconnectReason::DONTREPORT: return "DONT REPORT";
             case DisconnectReason::OTHER: return "OTHER";
-            default: return "<Unknown>";
+            default: return "<unknown>";
         }
     }
 
@@ -73,7 +73,7 @@ namespace DisasterServer
 
         /* General info */
         //Player plr;
-        std::string nickname;
+        std::string nickname = "<unknown>";
         std::string udid;
         uint8_t lobby_icon = 0;
         int8_t pet = -1;
@@ -95,8 +95,8 @@ namespace DisasterServer
         } auth = {};
 
         /* Character */
-        SurvCharacters survChar = SurvCharacters::CH_NONE;
-        ExesCharacters exeChar = ExesCharacters::EX_NONE;
+        SurvCharacters survChar = SurvCharacters::NONE;
+        ExesCharacters exeChar = ExesCharacters::NONE;
 
         bool should_timeout = false;
 
@@ -107,7 +107,7 @@ namespace DisasterServer
 
         Server *server = nullptr;
     public:
-        Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, const std::string &ip);
+        Client(Server *server, ENetPeer *peer, uint16_t incomingPeerID, std::string ip);
         ~Client();
 
         uint16_t getId() const { return id; }
@@ -136,8 +136,6 @@ namespace DisasterServer
         bool isReady() { return ready; }
         void setVoted(bool flag) { voted = flag; }
         bool isVoted() { return voted; }
-
-
 
         bool identity(Packet &packet);
         bool identity_process(const std::string & addr, bool is_banned, uint64_t timeout, bool do_timeout);
