@@ -188,7 +188,7 @@ bool LobbyState::tick() {
             countdown += TICKSPERSEC;
 
             if (--countdown_sec == 0) {
-                return controller->getCharSelect().init(map);
+                return controller->getCharSelect().init(map) || init();
             }
 
             RAssert(sendCountdown());
@@ -247,7 +247,24 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 }
 
                 case CMD_MAP: {
-                    controller->getCharSelect().init(0);
+                    /*if (!client.isOpped()) {
+                        this->server->send_message(client, "{}you aren't an operator", CLRCODE_RED);
+                        break;
+                    }*/
+
+                    int ind;
+                    if (sscanf(message.c_str(), ".map %d", &ind) <= 0) {
+                        this->server->send_message(client, "{}example:~ .map 1", CLRCODE_RED);
+                        break;
+                    }
+
+                    ind--;
+                    if (ind < 0 || ind >= MAP_COUNT+1) {
+                        this->server->send_message(client, "{}map should be between 1 and {}", CLRCODE_RED, MAP_COUNT+1);
+                        break;
+                    }
+
+                    controller->getCharSelect().init(ind);
                     break;
                 }
 

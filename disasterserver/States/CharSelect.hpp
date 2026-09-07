@@ -11,8 +11,8 @@ namespace DisasterServer {
 
 class GameStateController;
 
-class CharSelectState : public State<CharSelectState> {
-private:
+class CharSelectState {
+    Server *server = nullptr;
     GameStateController* controller = nullptr;
 
     double countdown = 0;
@@ -26,21 +26,17 @@ private:
     bool checkState();
     bool chooseExe();
 
-    bool isValidSurvivorCharacter(uint8_t id) const;
-    bool isValidExeCharacter(uint8_t id) const;
-
 public:
     CharSelectState(Server* server, GameStateController* controller);
-
-    ~CharSelectState() override = default;
+    ~CharSelectState() = default;
 
     bool init(int8_t map);
 
-    void tick() override;
+    void tick();
 
-    bool handle(Client& client, Packet& packet) override;
+    bool handle(Client& client, Packet& packet);
 
-    bool joined(Client& client) override;
+    bool joined(Client& client);
     bool leaved(Client& client);
 
     clientId getExe() const { return exe; }

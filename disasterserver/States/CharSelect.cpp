@@ -1,9 +1,10 @@
 #include "CharSelect.hpp"
 
-#include <cstdlib>
+#include <algorithm>
 #include <string>
 
 #include "Server.hpp"
+#include "Client.hpp"
 #include "GameStateController.hpp"
 #include "Core/Colors.hpp"
 
@@ -11,14 +12,14 @@ namespace DisasterServer {
 
 namespace {
 
-constexpr std::array<const char*, 4> EXE_NAMES = {
+constexpr std::array<std::string_view, 4> EXE_NAMES = {
     "Classic Exe",
     "Chaos",
     "Exetior",
     "Exeller"
 };
 
-constexpr std::array<const char*, 6> SURV_NAMES = {
+constexpr std::array<std::string_view, 6> SURV_NAMES = {
     "Tails",
     "Knuckles",
     "Eggman",
@@ -29,15 +30,7 @@ constexpr std::array<const char*, 6> SURV_NAMES = {
 
 }
 
-CharSelectState::CharSelectState(Server* server, GameStateController* controller) : State<CharSelectState>(server), controller(controller) {
-}
-
-bool CharSelectState::isValidExeCharacter(uint8_t id) const {
-    return id >= 1 && id <= 4;
-}
-
-bool CharSelectState::isValidSurvivorCharacter(uint8_t id) const {
-    return id >= 1 && id <= 6;
+CharSelectState::CharSelectState(Server* server, GameStateController* controller) : server(server), controller(controller) {
 }
 
 bool CharSelectState::chooseExe() {
@@ -125,14 +118,11 @@ bool CharSelectState::init(int8_t selectedMap) {
     avail.fill(true);
 
     Packet pack(PacketType::SERVER_LOBBY_EXE);
-
     pack.write<clientId>(exe);
-    pack.write<int16_t>(map);
-
+    pack.write<uint16_t>(map);
     pack.sendBroadcast(*server, true);
 
     Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
-
     timePack.write<uint8_t>(countdownSec);
     timePack.sendBroadcast(*server, true);
 
@@ -143,107 +133,88 @@ bool CharSelectState::init(int8_t selectedMap) {
 
 bool CharSelectState::handle(Client& client, Packet& packet) {
     switch (packet.getPacketType()) {
-
         case PacketType::CLIENT_REQUEST_EXECHARACTER: {
             if (!client.isInGame())
                 break;
 
             if (exe != client.getId()) {
-                client.disconnect(DisconnectReason::OTHER, "Invalid exe character request"
-                );
+                client.disconnect(DisconnectReason::OTHER, "Invalid exe character request");
                 return false;
             }
 
             uint8_t id = packet.read<uint8_t>();
+            id--;
 
-            if (!isValidExeCharacter(id)) {
+            if (id > static_cast<uint8_t>(ExesCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid exe character");
                 return false;
             }
 
-            const auto character =
-                static_cast<ExesCharacters>(id - 1);
+            client.setExeCharacter(static_cast<ExesCharacters>(id));
 
-            client.setExeCharacter(character);
+            Packet pack(PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE);
+            pack.write<uint8_t>(id);
+            RAssert(pack.send(client, true));
 
-            Packet response(
-                PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE
-            );
-
-            response.write<uint8_t>(id);
-
-            if (!response.send(client, true))
-                return false;
-
-            Packet change(
-                PacketType::SERVER_LOBBY_CHARACTER_CHANGE
-            );
-
+            Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
             change.write<clientId>(client.getId());
             change.write<uint8_t>(id);
             change.sendBroadcast(*server, true);
 
-            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_RED, EXE_NAMES[id - 1], CLRCODE_RST);
+            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
         case PacketType::CLIENT_REQUEST_CHARACTER: {
-            if (!client.isInGame())
+            if (!client.isInGame()) {
                 break;
+            }
 
-            if (client.getSurvCharacter() != SurvCharacters::NONE)
+            if (client.getSurvCharacter() != SurvCharacters::NONE) {
                 break;
+            }
 
             if (exe == client.getId()) {
                 client.disconnect(DisconnectReason::OTHER, "Exe cannot select survivor character");
                 return false;
             }
 
-            const uint8_t id = packet.read<uint8_t>();
+            uint8_t id = packet.read<uint8_t>();
+            id--;
 
-            if (!isValidSurvivorCharacter(id)) {
+            if (id > static_cast<uint8_t>(SurvCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid survivor character");
                 return false;
             }
 
-            const size_t index = id - 1;
-            const bool available = avail[index];
+            const bool available = avail[id];
 
-            if (available)
-                avail[index] = false;
+            if (available) {
+                avail[id] = false;
+            }
 
-            Packet response(
-                PacketType::SERVER_LOBBY_CHARACTER_RESPONSE
-            );
-
-            response.write<uint8_t>(id);
-            response.write<bool>(available);
+            Packet response(PacketType::SERVER_LOBBY_CHARACTER_RESPONSE);
+            response.write<uint8_t>(id + 1);
+            response.write<uint8_t>(available);
 
             if (!response.send(client, true))
                 return false;
 
             if (available) {
-                client.setSurvCharacter(
-                    static_cast<SurvCharacters>(index)
-                );
+                client.setSurvCharacter(static_cast<SurvCharacters>(id));
 
-                Packet change(
-                    PacketType::SERVER_LOBBY_CHARACTER_CHANGE
-                );
-
+                Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
                 change.write<clientId>(client.getId());
-                change.write<uint8_t>(id);
+                change.write<uint8_t>(id + 1);
                 change.sendBroadcast(*server, true);
             }
 
-            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_GRN, SURV_NAMES[index], CLRCODE_RST);
+            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
             const clientId pid = packet.read<clientId>();
-            (void)pid;
-
             const std::string message = packet.readString();
 
             if (message.size() > 40) {
@@ -257,11 +228,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             break;
         }
 
-        default:
-            /*
-             * placeholder
-             */
-            break;
+        default: break;
     }
 
     return true;
@@ -276,18 +243,15 @@ void CharSelectState::tick() {
                 if (!peer || !peer->isInGame())
                     continue;
 
-                if (peer->getExeCharacter() == ExesCharacters::NONE &&
-                    peer->getSurvCharacter() == SurvCharacters::NONE) {
+                if (peer->getExeCharacter() == ExesCharacters::NONE
+                    && peer->getSurvCharacter() == SurvCharacters::NONE) {
 
-                    peer->disconnect(
-                        DisconnectReason::AFKTIMEOUT
-                    );
+                    peer->disconnect(DisconnectReason::AFKTIMEOUT);
                 }
             }
         }
 
         Packet pack(PacketType::SERVER_CHAR_TIME_SYNC);
-
         pack.write<uint8_t>(countdownSec);
         pack.sendBroadcast(*server, true);
     }
@@ -296,7 +260,6 @@ void CharSelectState::tick() {
 }
 
 bool CharSelectState::joined(Client& client) {
-    (void)client;
     return true;
 }
 
@@ -305,16 +268,16 @@ bool CharSelectState::leaved(Client& client) {
         const auto character = client.getSurvCharacter();
         const size_t index = static_cast<size_t>(character);
 
-        if (index < avail.size())
+        if (index < avail.size()) {
             avail[index] = true;
+        }
     }
 
-    size_t inGame = 0;
-
-    for (auto& peer : server->getPeers()) {
-        if (peer && peer->isInGame())
-            ++inGame;
-    }
+    const size_t inGame = std::ranges::count_if(server->getPeers(),
+        [](const auto& cl) {
+            return cl->isInGame();
+        }
+    );
 
     if (inGame <= 1 || client.getId() == exe) {
         controller->setState(States::LOBBY);

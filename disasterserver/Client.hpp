@@ -15,7 +15,8 @@ namespace DisasterServer
         EGGMAN,
         AMY,
         CREAM,
-        SALLY
+        SALLY,
+        COUNT
     };
 
     enum class ExesCharacters {
@@ -24,7 +25,8 @@ namespace DisasterServer
         ORIGINAL,
         CHAOS,
         EXETIOR,
-        EXELLER
+        EXELLER,
+        COUNT
     };
 
     enum class DisconnectReason
