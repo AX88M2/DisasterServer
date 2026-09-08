@@ -12,69 +12,23 @@ using namespace DisasterServer;
 CharSelectState::CharSelectState(Server* server, GameStateController* controller) : server(server), controller(controller) {
 }
 
-bool CharSelectState::chooseExe() {
-    uint32_t weight = 0;
 
-    for (auto& peer : server->getClients()) {
-        if (!peer || !peer->isInGame())
-            continue;
 
-        peer->setExeCharacter(ExesCharacters::NONE);
-        peer->setSurvCharacter(SurvCharacters::NONE);
-
-        weight += peer->getExeChance();
-    }
-
-    if (weight == 0)
-        weight++;
-
-    uint32_t rnd = static_cast<uint32_t>(std::rand()) % weight;
-
-    for (auto& peer : server->getClients()) {
-        if (!peer || !peer->isInGame())
-            continue;
-
-        if (peer->getExeChance() >= 100) {
-            exe = peer->getId();
-            return true;
-        }
-
-        if (rnd < peer->getExeChance() && !peer->isModified()) {
-            Info("{} (id {}, c {}) is exe!", peer->getNickname(), peer->getId(), peer->getExeChance());
-
-            peer->setExeChance(1 + std::rand() % 1);
-
-            exe = peer->getId();
-            return true;
-        }
-
-        rnd -= peer->getExeChance();
-    }
-
-    exe = static_cast<clientId>(-1);
-    return false;
+bool CharSelectState::joined(Client& client) {
+    return true;
 }
 
-bool CharSelectState::checkState() {
-    bool shouldStart = true;
-
-    for (auto& peer : server->getClients()) {
-        if (!peer->isInGame())
-            continue;
-
-        if (peer->getExeCharacter() == ExesCharacters::NONE &&
-            peer->getSurvCharacter() == SurvCharacters::NONE) {
-            shouldStart = false;
-            break;
-        }
+bool CharSelectState::leaved(Client& client) {
+    if (client.getSurvCharacter() != SurvCharacters::NONE) {
+        const auto character = client.getSurvCharacter();
+        avail[character] = false;
     }
 
-    if (shouldStart) {
-        controller->setState(States::GAME); //Game start
-        return true;
+    if (this->server->getInGameCount() <= 1 || client.getId() == exe) {
+        return controller->getLobbyState().init();
     }
 
-    return true;
+    return checkState();
 }
 
 bool CharSelectState::init(int8_t selectedMap) {
@@ -92,8 +46,6 @@ bool CharSelectState::init(int8_t selectedMap) {
 
     countdownSec = 30;
     countdown = TICKSPERSEC;
-
-    avail.fill(true);
 
     Packet pack(PacketType::SERVER_LOBBY_EXE);
     pack.write<clientId>(exe);
@@ -165,10 +117,12 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 return false;
             }
 
-            const bool available = avail[id];
+            SurvCharacters character = static_cast<SurvCharacters>(id);
+
+            const bool available = !avail[character];
 
             if (available) {
-                avail[id] = false;
+                avail[character] = true;
             }
 
             Packet response(PacketType::SERVER_LOBBY_CHARACTER_RESPONSE);
@@ -237,23 +191,67 @@ void CharSelectState::tick() {
     countdown -= server->getDelta();
 }
 
-bool CharSelectState::joined(Client& client) {
-    return true;
+bool CharSelectState::chooseExe() {
+    uint32_t weight = 0;
+
+    for (auto& peer : server->getClients()) {
+        if (!peer || !peer->isInGame())
+            continue;
+
+        peer->setExeCharacter(ExesCharacters::NONE);
+        peer->setSurvCharacter(SurvCharacters::NONE);
+
+        weight += peer->getExeChance();
+    }
+
+    if (weight == 0)
+        weight++;
+
+    uint32_t rnd = static_cast<uint32_t>(std::rand()) % weight;
+
+    for (auto& peer : server->getClients()) {
+        if (!peer || !peer->isInGame())
+            continue;
+
+        if (peer->getExeChance() >= 100) {
+            exe = peer->getId();
+            return true;
+        }
+
+        if (rnd < peer->getExeChance() && !peer->isModified()) {
+            Info("{} (id {}, c {}) is exe!", peer->getNickname(), peer->getId(), peer->getExeChance());
+
+            peer->setExeChance(1 + std::rand() % 1);
+
+            exe = peer->getId();
+            return true;
+        }
+
+        rnd -= peer->getExeChance();
+    }
+
+    exe = static_cast<clientId>(-1);
+    return false;
 }
 
-bool CharSelectState::leaved(Client& client) {
-    if (client.getSurvCharacter() != SurvCharacters::NONE) {
-        const auto character = client.getSurvCharacter();
-        const size_t index = static_cast<size_t>(character);
+bool CharSelectState::checkState() {
+    bool shouldStart = true;
 
-        if (index < avail.size()) {
-            avail[index] = true;
-        }
+    for (auto& peer : server->getClients()) {
+        if (!peer->isInGame())
+            continue;
+
+        if (peer->getExeCharacter() == ExesCharacters::NONE &&
+            peer->getSurvCharacter() == SurvCharacters::NONE) {
+            shouldStart = false;
+            break;
+            }
     }
 
-    if (this->server->getClientsInGameCount() <= 1 || client.getId() == exe) {
-        return controller->getLobbyState().init();
+    if (shouldStart) {
+        controller->setState(States::GAME); //Game start
+        return true;
     }
 
-    return checkState();
+    return true;
 }

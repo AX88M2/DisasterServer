@@ -27,9 +27,11 @@ set(COMPILER_OPTIONS
         >
 )
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-# file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+set(DEFINES
+        $<$<CONFIG:Debug>:SERVER_DEBUG>
+)
 
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 if(ANDROID)
     add_library(DisasterServerCXX SHARED "Android.cpp" ${SOURCES})
@@ -37,7 +39,8 @@ if(ANDROID)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
+    target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
+    target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
     target_link_libraries(DisasterServerCXX PRIVATE cJSON log enet m Threads::Threads)
 else()
     if(DYLIB) # Build .dll or .so
@@ -51,7 +54,8 @@ else()
             target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
         endif()
 
-        target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
+        target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
+        target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
     else() # Build executable
@@ -119,7 +123,8 @@ else()
                 target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
             endif()
 
-            target_compile_options(DisasterServer PRIVATE ${COMPILER_OPTIONS})
+            target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
+            target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
         endif()

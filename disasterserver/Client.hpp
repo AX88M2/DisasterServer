@@ -2,6 +2,7 @@
 #define DISASTERSERVER_PEER_HPP
 
 #include "Core/Packet.hpp"
+#include "Core/Types.hpp"
 
 namespace DisasterServer
 {
@@ -84,7 +85,6 @@ namespace DisasterServer
         }
     }
 
-    using clientId = uint16_t;
 
     class Client {
         clientId id;
@@ -156,9 +156,10 @@ namespace DisasterServer
         bool isInGame() { return in_game; }
         void setCanVote(bool flag) { can_vote = flag; }
         bool isCanVote() { return can_vote; }
+        void setOperator(bool flag) { op = flag; }
+        bool isOpped() { return op; }
 
         bool isVerified() { return verified; }
-        bool isOpped() { return op; }
         bool isModified() { return mod_tool; }
         void setReady(bool flag) { ready = flag; }
         bool isReady() { return ready; }

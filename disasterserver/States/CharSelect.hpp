@@ -6,6 +6,7 @@
 
 #include "Client.hpp"
 #include "Core/Packet.hpp"
+#include "Core/Types.hpp"
 
 namespace DisasterServer {
 
@@ -20,11 +21,7 @@ class CharSelectState {
 
     int8_t map = 0;
     clientId exe = 0;
-
-    std::array<bool, 6> avail{};
-
-    bool checkState();
-    bool chooseExe();
+    std::unordered_map<SurvCharacters, bool> avail;
 
 public:
     CharSelectState(Server* server, GameStateController* controller);
@@ -39,6 +36,9 @@ public:
 
     clientId getExe() const { return exe; }
     int8_t getMap() const { return map; }
+private:
+    bool checkState();
+    bool chooseExe();
 };
 
 }

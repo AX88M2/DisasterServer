@@ -48,8 +48,9 @@ namespace DisasterServer
 
         void broadcast_ex(Packet &packet, bool reliable, clientId ignore);
 
+        int getClientCount();
+        int getInGameCount();
 
-        size_t getClientsInGameCount();
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         GameStateController &getGameStateController();
 

@@ -204,12 +204,12 @@ void Server::broadcast_ex(Packet &packet, bool reliable, clientId ignore) {
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 
-size_t Server::getClientsInGameCount() {
-    return std::ranges::count_if(peers,
-        [](const auto& cl) {
-            return cl->isInGame();
-        }
-    );
+int Server::getClientCount() {
+    return std::ranges::count_if(peers, [](const auto& _) { return true; });
+}
+
+int Server::getInGameCount() {
+    return std::ranges::count_if(peers, [](const auto& cl) { return cl->isInGame(); });
 }
 
 void Server::send_message(Client &client, std::string message) {

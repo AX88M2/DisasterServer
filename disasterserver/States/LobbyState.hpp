@@ -2,7 +2,9 @@
 #define DISASTERSERVER_LOBBY_HPP
 
 #include <cstdint>
+
 #include "Vote.hpp"
+#include "Core/Types.hpp"
 
 constexpr int COUNTDOWN = 5;
 constexpr int NO_COUNTDOWN  = 5 + 1;
@@ -20,18 +22,9 @@ namespace DisasterServer
         uint8_t countdown_sec = 0;
         Vote vote;
         clientId kick_target = 0;
-
-        /* Map Vote */
-        uint8_t maps[3] = {};
-        uint8_t votes[3] = {};
-
-        /* Character Select */
-        int8_t map = 0;
-        clientId exe = 0;
-        std::unordered_map<SurvCharacters, bool> avail;
     public:
-        explicit LobbyState(Server *server, GameStateController *controller);
-        ~LobbyState();
+        LobbyState(Server *server, GameStateController *controller);
+        ~LobbyState() = default;
 
         bool init();
 
@@ -43,6 +36,8 @@ namespace DisasterServer
         bool leaved(Client &peer);
         bool tick();
         bool handle(Client &client, Packet &packet);
+
+        bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
     };
 
 
