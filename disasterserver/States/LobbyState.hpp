@@ -2,6 +2,8 @@
 #define DISASTERSERVER_LOBBY_HPP
 
 #include <cstdint>
+
+#include "State.hpp"
 #include "Vote.hpp"
 
 constexpr int COUNTDOWN = 5;
@@ -11,27 +13,15 @@ namespace DisasterServer
 {
     class GameStateController;
 
-    class LobbyState {
-        Server *server = nullptr;
-        GameStateController *controller = nullptr;
-
+    class LobbyState : public State<LobbyState> {
         double countdown = 0;
         double prac_countdown = 0;
         uint8_t countdown_sec = 0;
         Vote vote;
         clientId kick_target = 0;
-
-        /* Map Vote */
-        uint8_t maps[3] = {};
-        uint8_t votes[3] = {};
-
-        /* Character Select */
-        int8_t map = 0;
-        clientId exe = 0;
-        std::unordered_map<SurvCharacters, bool> avail;
     public:
-        explicit LobbyState(Server *server, GameStateController *controller);
-        ~LobbyState();
+        LobbyState(Server *server, GameStateController *controller);
+        ~LobbyState() override = default;
 
         bool init();
 
@@ -39,10 +29,14 @@ namespace DisasterServer
         bool checkCountdown();
         void checkVote();
 
-        bool joined(Client &peer);
-        bool leaved(Client &peer);
-        bool tick();
-        bool handle(Client &client, Packet &packet);
+        bool joined(Client &peer) override;
+        bool leaved(Client &peer) override;
+        bool tick() override;
+        bool handle(Client &client, Packet &packet) override;
+
+        bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
+
+        LobbyState &get() override { return *this; }
     };
 
 

@@ -201,7 +201,7 @@ bool packet_new(Packet* packet, PacketType type)
 	PacketWrite(packet, packet_write8, 0);
 	PacketWrite(packet, packet_write8, (uint8_t)type);
 
-	Debug("Created packet %s", getPacketTypeName(type));
+	//Debug("Created packet %s", getPacketTypeName(type));
 
 	return true;
 }
@@ -221,7 +221,7 @@ bool packet_send(ENetPeer* peer, Packet* packet, bool reliable)
 		return true;
 
 	if (packet->buff[1] != SERVER_HEARTBEAT) {
-		Debug("Sending packet %s", getPacketTypeName(packet->buff[1]));
+		//Debug("Sending packet %s", getPacketTypeName(packet->buff[1]));
 	}
 
 	packet->pos = 0;

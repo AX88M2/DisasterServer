@@ -24,7 +24,7 @@ namespace DisasterServer
         ENetHost *host = nullptr;
 
         std::vector<std::unique_ptr<Client>> peers;
-        GameStateController stateManager;
+        GameStateController stateController;
         double delta = 0;
     public:
         Server(uint16_t n = 0);
@@ -48,8 +48,9 @@ namespace DisasterServer
 
         void broadcast_ex(Packet &packet, bool reliable, clientId ignore);
 
+        size_t getClientCount();
+        size_t getInGameCount();
 
-        size_t getClientsInGameCount();
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         GameStateController &getGameStateController();
 

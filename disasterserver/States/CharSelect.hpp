@@ -1,30 +1,24 @@
 #ifndef DISASTERSERVER_CHARSELECTSTATE_HPP
 #define DISASTERSERVER_CHARSELECTSTATE_HPP
 
-#include <array>
-#include <cstdint>
-
 #include "Client.hpp"
+#include "State.hpp"
 #include "Core/Packet.hpp"
+#include "Core/Types.hpp"
 
-namespace DisasterServer {
+namespace DisasterServer
+{
 
 class GameStateController;
 
-class CharSelectState {
-    Server *server = nullptr;
-    GameStateController* controller = nullptr;
+class CharSelectState : public State<CharSelectState> {
 
     double countdown = 0;
     uint8_t countdownSec = 30;
 
     int8_t map = 0;
     clientId exe = 0;
-
-    std::array<bool, 6> avail{};
-
-    bool checkState();
-    bool chooseExe();
+    std::unordered_map<SurvCharacters, bool> avail;
 
 public:
     CharSelectState(Server* server, GameStateController* controller);
@@ -32,13 +26,18 @@ public:
 
     bool init(int8_t map);
 
-    bool joined(Client& client);
-    bool leaved(Client& client);
-    void tick();
-    bool handle(Client& client, Packet& packet);
+    bool joined(Client& client) override;
+    bool leaved(Client& client) override;
+    bool tick() override;
+    bool handle(Client& client, Packet& packet) override;
 
     clientId getExe() const { return exe; }
     int8_t getMap() const { return map; }
+
+    CharSelectState &get() override { return *this; }
+private:
+    bool checkState();
+    bool chooseExe();
 };
 
 }

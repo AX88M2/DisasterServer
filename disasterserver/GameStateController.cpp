@@ -164,7 +164,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
     return true;
 }
 
-unsigned long GameStateController::cmd_parse(std::string &string) {
+commandHash GameStateController::cmd_parse(std::string string) {
     static std::array clr_list = CLRLIST;
 
     std::string current;
@@ -203,9 +203,98 @@ unsigned long GameStateController::cmd_parse(std::string &string) {
     return hash;
 }
 
-bool GameStateController::cmd_handle(const Client &client, commandHash hash, const std::string &string) {
+bool GameStateController::cmd_handle(Client &client, commandHash hash, const std::string &message) {
     switch (hash) {
-        default: return false; break;
+        case CMD_BAN: {
+            if (!client.isOpped()) {
+                this->server->send_message(client, "{}you aren't an operator.", CLRCODE_RED);
+                break;
+            }
+
+            if (this->server->getInGameCount() <= 1) {
+                this->server->send_message(client, "{}dude are you gonna ban yourself?", CLRCODE_RED);
+                break;
+            }
+
+            Packet pack(PacketType::CLIENT_LOBBY_CHOOSEBAN);
+            RAssert(pack.send(client));
+            break;
+        }
+
+        case CMD_KICK: {
+            if (!client.isOpped()) {
+                this->server->send_message(client, "{}you aren't an operator.", CLRCODE_RED);
+                break;
+            }
+
+            if (this->server->getInGameCount() <= 1) {
+                this->server->send_message(client, "{}dude are you gonna kick yourself?", CLRCODE_RED);
+                break;
+            }
+
+            Packet pack(PacketType::SERVER_LOBBY_CHOOSEKICK);
+            RAssert(pack.send(client));
+            break;
+        }
+
+        case CMD_OP: {
+            if (!client.isOpped()) {
+                this->server->send_message(client, "{}you aren't an operator.", CLRCODE_RED);
+                break;
+            }
+
+            if (this->server->getInGameCount() <= 1) {
+                this->server->send_message(client, "{}you're already an operator tho??", CLRCODE_RED);
+                break;
+            }
+
+            Packet pack(PacketType::SERVER_LOBBY_CHOOSEOP);
+            RAssert(pack.send(client));
+            break;
+        }
+
+        case CMD_LOBBY: {
+            int ind;
+            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0)
+            {
+                this->server->send_message(client, "{}example:~ .lobby 1");
+                break;
+            }
+            break;
+        }
+
+        case CMD_HELP: {
+            this->server->send_message(client, "~-----~ {}command list:{} ~-----~", CLRCODE_GRN, CLRCODE_RST);
+            this->server->send_message(client, "|- .vk~ - vote kick ");
+            this->server->send_message(client, "|- .info~ - information about server");
+            this->server->send_message(client, "|- .vp~ - vote practice mode (wip)");
+            break;
+        }
+
+        case CMD_INFO: {
+            this->server->send_message(client, "|build from &{} @{}~", __DATE__, __TIME__);
+            this->server->send_message(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
+            this->server->send_message(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
+            this->server->send_message(client, "{}faker{}null{}0{} - help with code", CLRCODE_GRA, CLRCODE_RED, CLRCODE_GRN, CLRCODE_RST);
+            break;
+        }
+
+#if defined(SERVER_DEBUG)
+        case CMD_SELFOP: {
+            client.setOperator(true);
+            this->server->send_message(client, "{}you aren't an operator.", CLRCODE_GRN);
+            break;
+        }
+        case CMD_DEBUG: {
+            if (!client.isOpped()) {
+                this->server->send_message(client, "{}иди нахуй :3", CLRCODE_PUR);
+                break;
+            }
+            break;
+        }
+#endif
+
+        default: return false;
     }
 
     return true;
