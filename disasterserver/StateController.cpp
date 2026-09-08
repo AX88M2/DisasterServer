@@ -1,11 +1,10 @@
 #include "StateController.hpp"
 #include "Server.hpp"
-
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-StateController::StateController(Server *server): server(server), lobby(server, this), charSelect(server, this) {
+StateController::StateController(Server *server): server(server), lobby(server, this), charSelect(server, this), current(std::make_unique<LobbyState>(server, this)) {
 }
 
 StateController::~StateController() = default;
@@ -22,21 +21,8 @@ bool StateController::playerJoined(Client &peer) {
     playerJoined.write<uint8_t>(peer.getPet());
     this->server->broadcast_ex(playerJoined, true, peer.getId());
 
-    switch (state) {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            return lobby.joined(peer);
-
-        case States::CHARSELECT: {
-            return charSelect.joined(peer);
-        }
-        case States::GAME: {
-            return true;
-        }
-        case States::RESULTS: {
-            break;
-        }
-        default: break;
+    if (current) {
+        current->joined(peer);
     }
 
     return true;
@@ -47,46 +33,14 @@ void StateController::playerLeft(Client &peer) {
     packet.write<clientId>(peer.getId());
     packet.sendBroadcast(*server, true);
 
-    switch (state)
-    {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.leaved(peer);
-            break;
-
-        case States::CHARSELECT:
-            charSelect.leaved(peer);
-            break;
-
-        case States::GAME:
-            //game_state_tick(server);
-            break;
-
-        case States::RESULTS:
-            //results_state_tick(server);
-            break;
+    if (current) {
+        current->leaved(peer);
     }
 }
 
 void StateController::tick() {
-    switch (state)
-    {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.tick();
-            break;
-
-        case States::CHARSELECT:
-            charSelect.tick();
-            break;
-
-        case States::GAME:
-            // game_state_tick(server);
-            break;
-
-        case States::RESULTS:
-            // results_state_tick(server);
-            break;
+    if (current) {
+        current->tick();
     }
 }
 
@@ -142,23 +96,9 @@ bool StateController::handle(Client &peer, Packet &packet) {
         }
         default: break;
     }
-    switch (state) {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.handle(peer, packet);
-            break;
 
-        case States::CHARSELECT:
-            charSelect.handle(peer, packet);
-            break;
-
-        case States::GAME:
-            // game state handle
-            break;
-
-        case States::RESULTS:
-            // results state handle
-            break;
+    if (current) {
+        current->handle(peer, packet);
     }
 
     return true;

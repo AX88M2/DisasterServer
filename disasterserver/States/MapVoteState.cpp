@@ -16,8 +16,7 @@ bool MapVoteState::leaved(Client &client) {
     return true;
 }
 
-bool MapVoteState::tick() {
-    return true;
+void MapVoteState::tick() {
 }
 
 bool MapVoteState::handle(Client &client, Packet &packet) {

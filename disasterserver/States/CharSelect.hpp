@@ -2,7 +2,7 @@
 #define DISASTERSERVER_CHARSELECTSTATE_HPP
 
 #include "Client.hpp"
-#include "State.hpp"
+#include "Core/State.hpp"
 #include "Core/Packet.hpp"
 #include "Core/Types.hpp"
 
@@ -11,7 +11,7 @@ namespace DisasterServer
 
 class StateController;
 
-class CharSelectState : public State<CharSelectState> {
+class CharSelectState : public State {
 
     double countdown = 0;
     uint8_t countdownSec = 30;
@@ -28,13 +28,13 @@ public:
 
     bool joined(Client& client) override;
     bool leaved(Client& client) override;
-    bool tick() override;
+    void tick() override;
     bool handle(Client& client, Packet& packet) override;
 
     clientId getExe() const { return exe; }
     int8_t getMap() const { return map; }
 
-    CharSelectState &get() override { return *this; }
+    CharSelectState &get() { return *this; }
 private:
     bool checkState();
     bool chooseExe();

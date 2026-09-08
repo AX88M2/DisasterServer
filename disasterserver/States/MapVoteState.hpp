@@ -2,14 +2,14 @@
 #define DISASTERSERVER_MAPVOTESTATE_HPP
 
 #include "Client.hpp"
-#include "State.hpp"
+#include "Core/State.hpp"
 
 namespace DisasterServer
 {
     class Server;
     class StateController;
 
-    class MapVoteState : public State<MapVoteState> {
+    class MapVoteState : public State {
         std::array<uint8_t, 3> maps;
         std::array<uint8_t, 3> votes;
     public:
@@ -18,10 +18,10 @@ namespace DisasterServer
 
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
-        bool tick() override;
+        void tick() override;
         bool handle(Client& client, Packet& packet) override;
 
-        MapVoteState &get() override { return *this; }
+        MapVoteState &get() { return *this; }
     };
 }
 

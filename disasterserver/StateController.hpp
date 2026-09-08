@@ -2,6 +2,7 @@
 #define DISASTERSERVER_STATEMACHINE_HPP
 
 #include "Core/Packet.hpp"
+#include "Core/State.hpp"
 #include "States/LobbyState.hpp"
 #include "States/CharSelect.hpp"
 
@@ -41,9 +42,20 @@ namespace DisasterServer
 
         LobbyState lobby;
         CharSelectState charSelect;
+        std::unique_ptr<State> current;
     public:
         explicit StateController(Server* server);
         ~StateController();
+
+        template <std::derived_from<State> T, typename... Args>
+        requires requires (T& state, Args&&... args) { state.init(std::forward<Args>(args)...); }
+        void changeTo(Args&&... args) {
+            auto state = std::make_unique<T>(server, this);
+
+            state->init(std::forward<Args>(args)...);
+
+            current = std::move(state);
+        }
 
         bool playerJoined(Client& peer);
         void playerLeft(Client& peer);
@@ -64,7 +76,7 @@ namespace DisasterServer
 
 #define AssertOrDisconnect(client, x) \
 if(!(x)) { \
-    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); return false; \
+    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); break; \
 }
 
 #endif //DISASTERSERVER_STATEMACHINE_HPP

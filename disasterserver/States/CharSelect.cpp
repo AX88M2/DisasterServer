@@ -23,7 +23,8 @@ bool CharSelectState::leaved(Client& client) {
     }
 
     if (this->server->getInGameCount() <= 1 || client.getId() == exe) {
-        return controller->getLobbyState().init();
+        controller->changeTo<LobbyState>();
+        return true;
     }
 
     return checkState();
@@ -167,7 +168,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
     return true;
 }
 
-bool CharSelectState::tick() {
+void CharSelectState::tick() {
     if (countdown <= 0) {
         countdown += TICKSPERSEC;
 
@@ -190,8 +191,6 @@ bool CharSelectState::tick() {
     }
 
     countdown -= server->getDelta();
-
-    return true;
 }
 
 bool CharSelectState::chooseExe() {

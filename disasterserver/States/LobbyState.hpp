@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "State.hpp"
+#include "Core/State.hpp"
 #include "Vote.hpp"
 
 constexpr int COUNTDOWN = 5;
@@ -13,7 +13,7 @@ namespace DisasterServer
 {
     class StateController;
 
-    class LobbyState : public State<LobbyState> {
+    class LobbyState : public State {
         double countdown = 0;
         double prac_countdown = 0;
         uint8_t countdown_sec = 0;
@@ -31,12 +31,12 @@ namespace DisasterServer
 
         bool joined(Client &peer) override;
         bool leaved(Client &peer) override;
-        bool tick() override;
+        void tick() override;
         bool handle(Client &client, Packet &packet) override;
 
         bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
 
-        LobbyState &get() override { return *this; }
+        LobbyState &get() { return *this; }
     };
 
 

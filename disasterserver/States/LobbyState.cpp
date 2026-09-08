@@ -140,43 +140,32 @@ bool LobbyState::leaved(Client &peer) {
     return true;
 }
 
-bool LobbyState::tick() {
-    switch (controller->getCurrentState()) {
-        case States::LOBBY: {
-            for (auto &peer : server->getClients()) {
-                if (peer->getVoteCooldown() > 0) {
-                    peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
-                }
+void LobbyState::tick() {
+    for (auto &peer : server->getClients()) {
+        if (peer->getVoteCooldown() > 0) {
+            peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
+        }
 
-                if (!peer->isReady()) {
-
-                    //Чтобы не мешалось
-                    /*
-                        peer->setTimeout(peer->getTimeout() + server->getDelta());
-                        if (std::fmod(peer->getTimeout(), 60) == 0) {
-                            Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
-                        }
-                    */
-
-                    if (peer->getTimeout() >= 25 * TICKSPERSEC) {
-                        peer->disconnect(DisconnectReason::AFKTIMEOUT);
-                    }
-                } else {
-                    peer->setTimeout(0);
-                }
+        if (!peer->isReady()) {
+#if !defined(SERVER_DEBUG)
+            peer->setTimeout(peer->getTimeout() + server->getDelta());
+            if (std::fmod(peer->getTimeout(), 60) == 0) {
+                Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
             }
-            break;
+#endif
+            if (peer->getTimeout() >= 25 * TICKSPERSEC) {
+                peer->disconnect(DisconnectReason::AFKTIMEOUT);
+            }
+        } else {
+            peer->setTimeout(0);
         }
-        case States::CHARSELECT: {
-            return controller->getCharSelect().tick();
-        }
-        default: break;
     }
 
     if (prac_countdown > 0) {
         prac_countdown -= server->getDelta();
         if (prac_countdown <= 0) {
-            return controller->getCharSelect().init(20) || init();
+            controller->changeTo<CharSelectState>(20);
+            return;
         }
     }
 
@@ -189,16 +178,15 @@ bool LobbyState::tick() {
             countdown += TICKSPERSEC;
 
             if (--countdown_sec == 0) {
-                return controller->getCharSelect().init(0) || init();
+                controller->changeTo<CharSelectState>(0);
+                return;
             }
 
-            RAssert(sendCountdown());
+            sendCountdown();
         }
 
         countdown -= server->getDelta();
     }
-
-    return true;
 }
 
 bool LobbyState::handle(Client &client, Packet &packet) {
@@ -359,7 +347,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            controller->getCharSelect().init(ind);
+            controller->changeTo<CharSelectState>(ind);
             break;
         }
 

@@ -9,7 +9,6 @@ namespace DisasterServer
     class StateController;
     class Server;
 
-    template <typename T>
     class State {
     protected:
         Server *server;
@@ -26,15 +25,12 @@ namespace DisasterServer
             return true;
         }
 
-        virtual bool tick() {
-            return true;
+        virtual void tick() {
         }
 
         virtual bool handle(Client& client, Packet& packet) {
             return true;
         }
-
-        virtual T &get() = 0;
     };
 }
 
