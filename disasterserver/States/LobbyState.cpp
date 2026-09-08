@@ -3,12 +3,12 @@
 #include <algorithm>
 
 #include "Server.hpp"
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-LobbyState::LobbyState(Server *server, GameStateController *controller) : State(server, controller), vote(server) {
+LobbyState::LobbyState(Server *server, StateController *controller) : State(server, controller), vote(server) {
 }
 
 bool LobbyState::init() {

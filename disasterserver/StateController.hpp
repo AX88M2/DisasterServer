@@ -35,22 +35,22 @@ namespace DisasterServer
     constexpr commandHash CMD_SELFOP = 1264443355; //Only debugging
     constexpr commandHash CMD_DEBUG = 1412399845; //Only debugging
 
-    class GameStateController {
+    class StateController {
         Server *server = nullptr;
         States state = States::LOBBY;
 
         LobbyState lobby;
         CharSelectState charSelect;
     public:
-        explicit GameStateController(Server* server);
-        ~GameStateController();
+        explicit StateController(Server* server);
+        ~StateController();
 
         bool playerJoined(Client& peer);
         void playerLeft(Client& peer);
         void tick();
         bool handle(Client& peer, Packet& packet);
 
-        static commandHash cmd_parse(std::string string);
+        commandHash cmd_parse(std::string string);
         bool cmd_handle(Client& client, commandHash hash, const std::string& message);
 
         States getCurrentState() const { return state; }

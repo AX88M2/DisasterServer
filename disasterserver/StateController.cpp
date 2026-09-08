@@ -1,16 +1,16 @@
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Server.hpp"
 
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-GameStateController::GameStateController(Server *server): server(server), lobby(server, this), charSelect(server, this) {
+StateController::StateController(Server *server): server(server), lobby(server, this), charSelect(server, this) {
 }
 
-GameStateController::~GameStateController() = default;
+StateController::~StateController() = default;
 
-bool GameStateController::playerJoined(Client &peer) {
+bool StateController::playerJoined(Client &peer) {
     Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
     packet.write<uint8_t>(peer.getExeChance());
     packet.send(peer, true);
@@ -42,7 +42,7 @@ bool GameStateController::playerJoined(Client &peer) {
     return true;
 }
 
-void GameStateController::playerLeft(Client &peer) {
+void StateController::playerLeft(Client &peer) {
     Packet packet(PacketType::SERVER_PLAYER_LEFT);
     packet.write<clientId>(peer.getId());
     packet.sendBroadcast(*server, true);
@@ -68,7 +68,7 @@ void GameStateController::playerLeft(Client &peer) {
     }
 }
 
-void GameStateController::tick() {
+void StateController::tick() {
     switch (state)
     {
         case States::LOBBY:
@@ -90,7 +90,7 @@ void GameStateController::tick() {
     }
 }
 
-bool GameStateController::handle(Client &peer, Packet &packet) {
+bool StateController::handle(Client &peer, Packet &packet) {
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_CHOOSEBAN: {
             if (!peer.isOpped()) {
@@ -164,7 +164,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
     return true;
 }
 
-commandHash GameStateController::cmd_parse(std::string string) {
+commandHash StateController::cmd_parse(std::string string) {
     static std::array clr_list = CLRLIST;
 
     std::string current;
@@ -203,7 +203,7 @@ commandHash GameStateController::cmd_parse(std::string string) {
     return hash;
 }
 
-bool GameStateController::cmd_handle(Client &client, commandHash hash, const std::string &message) {
+bool StateController::cmd_handle(Client &client, commandHash hash, const std::string &message) {
     switch (hash) {
         case CMD_BAN: {
             if (!client.isOpped()) {

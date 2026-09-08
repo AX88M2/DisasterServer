@@ -6,7 +6,7 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
@@ -227,6 +227,6 @@ void Server::send_broadcast_message(clientId sender, std::string message) {
     packet.sendBroadcast(*this, true);
 }
 
-GameStateController &Server::getGameStateController() {
+StateController &Server::getStateController() {
     return stateController;
 }

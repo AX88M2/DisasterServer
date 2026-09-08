@@ -9,7 +9,7 @@
 namespace DisasterServer
 {
 
-class GameStateController;
+class StateController;
 
 class CharSelectState : public State<CharSelectState> {
 
@@ -21,7 +21,7 @@ class CharSelectState : public State<CharSelectState> {
     std::unordered_map<SurvCharacters, bool> avail;
 
 public:
-    CharSelectState(Server* server, GameStateController* controller);
+    CharSelectState(Server* server, StateController* controller);
     ~CharSelectState() = default;
 
     bool init(int8_t map);

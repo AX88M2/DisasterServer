@@ -1,11 +1,11 @@
 #include "MapVoteState.hpp"
 
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Server.hpp"
 
 using namespace DisasterServer;
 
-MapVoteState::MapVoteState(Server *server, GameStateController *controller) : State(server, controller) {
+MapVoteState::MapVoteState(Server *server, StateController *controller) : State(server, controller) {
 }
 
 bool MapVoteState::joined(Client &client) {

@@ -11,7 +11,7 @@ constexpr int NO_COUNTDOWN  = 5 + 1;
 
 namespace DisasterServer
 {
-    class GameStateController;
+    class StateController;
 
     class LobbyState : public State<LobbyState> {
         double countdown = 0;
@@ -20,7 +20,7 @@ namespace DisasterServer
         Vote vote;
         clientId kick_target = 0;
     public:
-        LobbyState(Server *server, GameStateController *controller);
+        LobbyState(Server *server, StateController *controller);
         ~LobbyState() override = default;
 
         bool init();

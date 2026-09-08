@@ -7,13 +7,13 @@
 namespace DisasterServer
 {
     class Server;
-    class GameStateController;
+    class StateController;
 
     class MapVoteState : public State<MapVoteState> {
         std::array<uint8_t, 3> maps;
         std::array<uint8_t, 3> votes;
     public:
-        MapVoteState(Server *server, GameStateController *controller);
+        MapVoteState(Server *server, StateController *controller);
         ~MapVoteState() override = default;
 
         bool joined(Client& client) override;

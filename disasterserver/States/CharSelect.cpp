@@ -4,12 +4,12 @@
 
 #include "Server.hpp"
 #include "Client.hpp"
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server* server, GameStateController* controller) : State(server, controller) {
+CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller) {
 }
 
 bool CharSelectState::joined(Client& client) {
