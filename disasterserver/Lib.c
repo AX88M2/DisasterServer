@@ -81,9 +81,9 @@ bool disaster_init(void)
 	RAssert(config_init());
 	RAssert(log_init());
 
-	RAssert(dylist_create(&servers, g_config.server_count));
-	for (int32_t i = 0; i < g_config.server_count; i++)
-		RAssert(allocate_server((uint16_t)g_config.port, i));
+	RAssert(dylist_create(&servers, g_config.server.server_count));
+	for (int32_t i = 0; i < g_config.server.server_count; i++)
+		RAssert(allocate_server((uint16_t)g_config.server.port, i));
 	
 	return true;
 }
@@ -96,7 +96,7 @@ int disaster_run(void)
 	running = true;
 	Debug("Entering main loop...");
 
-	for(int32_t i = 0; i < g_config.server_count; i++)
+	for(int32_t i = 0; i < g_config.server.server_count; i++)
 	{
 		Server* server = servers.ptr[i];
 		if(!server)

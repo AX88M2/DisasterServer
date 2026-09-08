@@ -6,7 +6,7 @@
 
 bool act9_init(Server* server)
 {
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         // init the random number generator
         srand((unsigned int)time(NULL));

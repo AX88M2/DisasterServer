@@ -7,7 +7,7 @@
 
 bool pf_init(Server* server)
 {
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         srand((unsigned int)time(NULL));
         int addTimeRandom = (rand() % 128) + 1; // 1-128
@@ -25,7 +25,7 @@ bool pf_init(Server* server)
     RAssert(game_spawn(server, (Entity*)&(MakePFLift(2, 829, 400)),   sizeof(PFLift), NULL));
     RAssert(game_spawn(server, (Entity*)&(MakePFLift(3, 1070, 544)),  sizeof(PFLift), NULL));
 
-    if (g_config.random_mode)
+    if (g_config.gameplay.random_mode)
     {
         int countRandomSpawnBlackRing = (rand() % 29) + 1; // 1-29
         for (int i = 0; i < countRandomSpawnBlackRing; i++)

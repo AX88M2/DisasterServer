@@ -87,7 +87,7 @@ bool results_send(Server* server, PeerData* v, PeerData* data, bool has_quit)
 	String nickname;
 	const char* postfix = "";
 
-	if (g_config.pride)
+	if (g_config.gameplay.pride)
 	{
 		if (data->plr.stats.brain_damage && (data->plr.flags & PLAYER_ESCAPED))
 			postfix = SHAMES_1[rand() % SHAMES1_CNT];
@@ -232,7 +232,7 @@ bool results_state_handle(PeerData* v, Packet* packet)
 			v->timeout = 0;
 
             Info("[%s] (id %d): %s", v->nickname.value, v->id, msg.value);
-            if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg) && g_config.chatfix)
+            if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg) && g_config.message.chatfix)
                 server_broadcast_msg(v->server, v->id, msg.value);
 
 			break;

@@ -7,37 +7,68 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <io/Dir.h>
 
 #ifndef SYS_ANDROID
-	#define CONFIG_FILE "Config.json"
-	#define BANS_FILE "Bans.json"
-	#define OPERATORS_FILE "Operators.json"
-	#define TIMEOUTS_FILE "Timeouts.json"
+	#define CONFIG_FILE 	"Config.json"
+	#define BANS_FILE 		"Bans.json"
+	#define OPERATORS_FILE 	"Operators.json"
+	#define TIMEOUTS_FILE 	"Timeouts.json"
 #else
-	#define ANDROID_DIR "/data/data/com.teamexeempire.disaster2d/files/"
-	#define CONFIG_FILE ANDROID_DIR "Config.json"
-	#define BANS_FILE ANDROID_DIR "Bans.json"
-	#define OPERATORS_FILE ANDROID_DIR "Operators.json"
-	#define TIMEOUTS_FILE ANDROID_DIR "Timeouts.json"
+	#define ANDROID_DIR 	"/data/data/com.teamexeempire.disaster2d/files/"
+	#define CONFIG_FILE 	ANDROID_DIR "Config.json"
+	#define BANS_FILE 		ANDROID_DIR "Bans.json"
+	#define OPERATORS_FILE 	ANDROID_DIR "Operators.json"
+	#define TIMEOUTS_FILE 	ANDROID_DIR "Timeouts.json"
+
 #endif
 
 typedef struct
 {
-	int32_t port;
-	int32_t	server_count;
-	int32_t ping_limit;
-	int32_t antiafk_timeout;
-	bool	log_debug;
-	bool	log_file;
-	bool	anticheat;
-	bool	pride;
-	bool 	map_list[20];
-	Mutex	map_list_lock;
-	bool	chatfix;
-	bool	random_mode;
-	bool	antiafk_system;
+    int32_t port;
+    int32_t server_count;
+    int32_t ping_limit;
+} ServerConfig;
 
-	char 	motd[256];
+typedef struct
+{
+    int32_t antiafk_timeout;
+    bool antiafk_system;
+} AfkConfig;
+
+typedef struct
+{
+    bool log_debug;
+    bool log_file;
+} LogConfig;
+
+typedef struct
+{
+    bool anticheat;
+    bool pride;
+    bool random_mode;
+} GameplayConfig;
+
+typedef struct
+{
+    bool map_list[20];
+    Mutex map_list_lock;
+} MapConfig;
+
+typedef struct
+{
+	bool chatfix;
+    char motd[256];
+} MessageConfig;
+
+typedef struct
+{
+    ServerConfig server;
+    AfkConfig afk;
+    LogConfig log;
+    GameplayConfig gameplay;
+    MapConfig maps;
+    MessageConfig message;
 } Config;
 
 SERVER_API extern Config g_config;

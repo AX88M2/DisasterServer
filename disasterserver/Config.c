@@ -1,49 +1,76 @@
 #include <Config.h>
 #include <Log.h>
 #include <cJSON.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <io/Dir.h>
 
 #ifdef SYS_ANDROID
-	#include <Android.h>
+    #include <Android.h>
 #endif
 
 #ifdef SYS_USE_SDL2
-#include <ui/Main.h>
+    #include <ui/Main.h>
 #endif
+
 
 SERVER_API Config g_config =
 {
-	.port = 8606,
-	.server_count = 1,
+    .server =
+    {
+        .port = 8606,
+        .server_count = 1,
 
 #ifdef SYS_ANDROID
-	.ping_limit = UINT16_MAX,
+        .ping_limit = UINT16_MAX,
 #else
-	.ping_limit = 250,
+        .ping_limit = 250,
 #endif
+    },
+    .afk =
+    {
+        .antiafk_timeout = 30,
+        .antiafk_system = false,
+    },
+    .log =
+    {
+        .log_debug = false,
+        .log_file = false,
+    },
+    .gameplay =
+    {
+        .anticheat = true,
+        .pride = true,
+        .random_mode = false,
+    },
+    .maps =
+    {
+        .map_list =
+        {
+            true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true
+        },
+    },
 
-	.antiafk_timeout = 30,
-	.log_debug = false,
-	.log_file = false,
-	.map_list = { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true },
-	.motd = "",
-	.anticheat = true,
-	.pride = true,
-	.chatfix = true,
-	.random_mode = false,
-	.antiafk_system = false,
+    /* Message */
+    .message =
+    {
+        .chatfix = true,
+        .motd = "",
+    },
 };
 
-cJSON*	g_bans = NULL;
-cJSON*	g_timeouts = NULL;
-cJSON*	g_ops = NULL;
-Mutex	g_banMut;
-Mutex	g_timeoutMut;
-Mutex	g_opMut;
+
+cJSON *g_bans = NULL;
+cJSON *g_timeouts = NULL;
+cJSON *g_ops = NULL;
+
+Mutex g_banMut;
+Mutex g_timeoutMut;
+Mutex g_opMut;
 
 bool write_default(const char* filename, const char* default_str)
 {
@@ -122,87 +149,133 @@ bool collection_init(cJSON** output, const char* file, const char* default_value
 
 bool config_init(void)
 {
-	MutexCreate(g_config.map_list_lock);
-	
-	// Try to open config
-	FILE* file = fopen(CONFIG_FILE, "r");
-	if (!file)
-	{
-		RAssert(config_save());
+    MutexCreate(g_config.maps.map_list_lock);
 
-		// Reopen
-		file = fopen(CONFIG_FILE, "r");
-		if (!file)
-		{
-			Warn("Failed to save default config file properly!");
-			goto init_balls;
-		}
-	}
+    /* Try to open config */
+    FILE *file = fopen(CONFIG_FILE, "r");
 
-	char buffer[1024] = { 0 };
-	size_t len = fread(buffer, 1, 1024, file);
-	fclose(file);
+    if (!file)
+    {
+        RAssert(config_save());
 
-	cJSON* json = cJSON_ParseWithLength(buffer, len);
-	if (!json)
-	{
-		Err("Failed to parse %s: %s", CONFIG_FILE, cJSON_GetErrorPtr());
-		return false;
-	}
-	else
-		Debug("%s loaded.", CONFIG_FILE);
+        /* Reopen */
+        file = fopen(CONFIG_FILE, "r");
 
-	g_config.port =			(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "port"));
-	g_config.server_count = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "server_count"));
-	g_config.ping_limit =	(int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "ping_limit"));
-	g_config.antiafk_timeout = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(json, "antiafk_timeout"));
-	g_config.log_file =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_file"));
-	g_config.log_debug =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "log_debug"));
-	g_config.anticheat =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "anticheat"));
-	g_config.pride =		cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "pride"));
-	g_config.random_mode =	cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "random_mode"));
-	g_config.antiafk_system = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(json, "antiafk_system"));
+        if (!file)
+        {
+            Warn("Failed to save default config file properly!");
+            goto init_balls;
+        }
+    }
 
-	snprintf(g_config.motd, 256, "%s", cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(json, "motd")));
-	cJSON_Delete(json);
+    char buffer[1024] = { 0 };
+    size_t len = fread(buffer, 1, sizeof(buffer) - 1, file);
+
+    fclose(file);
+
+    cJSON *json = cJSON_ParseWithLength(buffer, len);
+
+    if (!json)
+    {
+        Err("Failed to parse %s: %s", CONFIG_FILE, cJSON_GetErrorPtr());
+        return false;
+    }
+
+    Debug("%s loaded.", CONFIG_FILE);
+
+    cJSON *server = cJSON_GetObjectItemCaseSensitive(json, "server");
+    if (server)
+    {
+        g_config.server.port = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(server, "port"));
+        g_config.server.server_count = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(server, "server_count"));
+        g_config.server.ping_limit = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(server, "ping_limit"));
+    }
+
+    cJSON *afk = cJSON_GetObjectItemCaseSensitive(json, "afk");
+    if (afk)
+    {
+        g_config.afk.antiafk_timeout = (int32_t)cJSON_GetNumberValue(cJSON_GetObjectItemCaseSensitive(afk, "antiafk_timeout"));
+		g_config.afk.antiafk_system = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(afk, "antiafk_system"));
+    }
+
+    cJSON *log = cJSON_GetObjectItemCaseSensitive(json, "log");
+    if (log)
+    {
+        g_config.log.log_debug = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(log, "log_debug"));
+		g_config.log.log_file = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(log, "log_file"));
+    }
+
+    cJSON *gameplay = cJSON_GetObjectItemCaseSensitive(json, "gameplay");
+    if (gameplay)
+    {
+        g_config.gameplay.anticheat = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "anticheat"));
+        g_config.gameplay.pride = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "pride"));
+        g_config.gameplay.random_mode = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "random_mode"));
+    }
+
+    cJSON *message = cJSON_GetObjectItemCaseSensitive(json, "message");
+    if (message)
+    {
+        snprintf(g_config.message.motd, sizeof(g_config.message.motd), "%s", cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(message, "motd")));
+        g_config.message.chatfix = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(message, "chatfix"));
+    }
+
+    cJSON_Delete(json);
 
 init_balls:
-	MutexCreate(g_timeoutMut);
-	MutexCreate(g_banMut);
-	MutexCreate(g_opMut);
 
-	RAssert(collection_init(&g_timeouts,	TIMEOUTS_FILE,	"{}"));
-	RAssert(collection_init(&g_bans,		BANS_FILE,		"{}"));
-	RAssert(collection_init(&g_ops,		OPERATORS_FILE, "{ \"127.0.0.1\": \"Host (127.0.0.1)\" }"));
+    MutexCreate(g_timeoutMut);
+    MutexCreate(g_banMut);
+    MutexCreate(g_opMut);
 
-	if (!g_config.anticheat)
-	{
-		Info(LOG_YLW "Anticheat is disabled, client modifications are allowed.");
-	}
+    RAssert(collection_init(&g_timeouts, TIMEOUTS_FILE, "{}"));
+    RAssert(collection_init(&g_bans, BANS_FILE, "{}"));
 
-	return true;
+    RAssert(collection_init(&g_ops, OPERATORS_FILE, "{ \"127.0.0.1\": \"Host (127.0.0.1)\" }"));
+
+    if (!g_config.gameplay.anticheat)
+    {
+        Info(LOG_YLW "Anticheat is disabled, client modifications are allowed.");
+    }
+
+    return true;
 }
 
 SERVER_API bool config_save(void)
 {
-	cJSON* json = cJSON_CreateObject();
-	RAssert(json);
+    cJSON *json = cJSON_CreateObject();
+    RAssert(json);
 
-	cJSON_AddItemToObject(json, "port", cJSON_CreateNumber(g_config.port));
-	cJSON_AddItemToObject(json, "server_count", cJSON_CreateNumber(g_config.server_count));
-	cJSON_AddItemToObject(json, "ping_limit", cJSON_CreateNumber(g_config.ping_limit));
-	cJSON_AddItemToObject(json, "antiafk_timeout", cJSON_CreateNumber(g_config.antiafk_timeout));
-	cJSON_AddItemToObject(json, "log_file", cJSON_CreateBool(g_config.log_file));
-	cJSON_AddItemToObject(json, "log_debug", cJSON_CreateBool(g_config.log_debug));
-	cJSON_AddItemToObject(json, "anticheat", cJSON_CreateBool(g_config.anticheat));
-	cJSON_AddItemToObject(json, "pride", cJSON_CreateBool(g_config.pride));
-	cJSON_AddItemToObject(json, "random_mode", cJSON_CreateBool(g_config.random_mode));
-	cJSON_AddItemToObject(json, "antiafk_system", cJSON_CreateBool(g_config.antiafk_system));
-	cJSON_AddItemToObject(json, "motd", cJSON_CreateString(g_config.motd));
+    cJSON *server = cJSON_CreateObject();
+    cJSON_AddItemToObject(server, "port", cJSON_CreateNumber(g_config.server.port));
+    cJSON_AddItemToObject(server, "server_count", cJSON_CreateNumber(g_config.server.server_count));
+    cJSON_AddItemToObject(server, "ping_limit", cJSON_CreateNumber(g_config.server.ping_limit));
+    cJSON_AddItemToObject(json, "server", server);
 
-	RAssert(collection_save(CONFIG_FILE, json));
-	cJSON_Delete(json);
-	return true;
+    cJSON *afk = cJSON_CreateObject();
+    cJSON_AddItemToObject(afk, "antiafk_timeout", cJSON_CreateNumber(g_config.afk.antiafk_timeout));
+    cJSON_AddItemToObject(afk, "antiafk_system", cJSON_CreateBool(g_config.afk.antiafk_system));
+    cJSON_AddItemToObject(json, "afk", afk);
+
+    cJSON *log = cJSON_CreateObject();
+    cJSON_AddItemToObject(log, "log_debug", cJSON_CreateBool(g_config.log.log_debug));
+    cJSON_AddItemToObject(log, "log_file", cJSON_CreateBool(g_config.log.log_file));
+    cJSON_AddItemToObject(json, "log", log);
+
+    cJSON *gameplay = cJSON_CreateObject();
+    cJSON_AddItemToObject(gameplay, "anticheat", cJSON_CreateBool(g_config.gameplay.anticheat));
+    cJSON_AddItemToObject(gameplay, "pride", cJSON_CreateBool(g_config.gameplay.pride));
+    cJSON_AddItemToObject(gameplay, "random_mode", cJSON_CreateBool(g_config.gameplay.random_mode));
+    cJSON_AddItemToObject(json, "gameplay", gameplay);
+
+    cJSON *message = cJSON_CreateObject();
+    cJSON_AddItemToObject(message, "chatfix", cJSON_CreateBool(g_config.message.chatfix));
+    cJSON_AddItemToObject(message, "motd", cJSON_CreateString(g_config.message.motd));
+    cJSON_AddItemToObject(json, "message", message);
+
+    RAssert(collection_save(CONFIG_FILE, json));
+    cJSON_Delete(json);
+    return true;
 }
 
 bool ban_add(const char* nickname, const char* udid, const char* ip)

@@ -18,7 +18,7 @@ bool player_add_error(Server* server, PeerData* v, uint16_t by)
 
 void player_check_zone(Server* server, PeerData* v)
 {
-	if (!g_config.anticheat)
+	if (!g_config.gameplay.anticheat)
 		return;
 
 	if (!server->game.started)

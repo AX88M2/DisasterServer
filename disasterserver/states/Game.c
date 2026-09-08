@@ -535,7 +535,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 		case CLIENT_PLAYER_PALETTE:
 		{
 			AssertOrDisconnect(v->server, v->in_game);
-			AssertOrDisconnect(v->server, !g_config.anticheat || palette_player_validate(v, packet));
+			AssertOrDisconnect(v->server, !g_config.gameplay.anticheat || palette_player_validate(v, packet));
 			server_broadcast_ex(v->server, packet, true,  v->id);
 			break;
 		}
@@ -1212,7 +1212,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			AssertOrDisconnect(v->server, string_length(&msg) <= 40);
 
             Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
-            if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg) && g_config.chatfix)
+            if (!server_cmd_handle(v->server, server_cmd_parse(&msg), v, &msg) && g_config.message.chatfix)
                 server_broadcast_msg(v->server, v->id, msg.value);
 
 			break;
@@ -1258,7 +1258,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 
 			Vector2 new_pos = { x, y };
 
-			if (g_config.antiafk_system) {
+			if (g_config.afk.antiafk_system) {
 				float dist_moved = vector2_dist(&v->plr.last_pos, &new_pos);
 				if (dist_moved > 0.5f) {
 					v->plr.afk_counter = 0;
@@ -1334,7 +1334,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			else
 				v->plr.attack_timer = 0;
 
-			if (g_config.ping_limit == UINT16_MAX)
+			if (g_config.server.ping_limit == UINT16_MAX)
 			{
 				float dist = vector2_dist(&v->plr.pos, &new_pos);
 				if (v->server->game.started && !v->plr.mod_tool && v->plr.pos.x != 0 && v->plr.pos.y != 0)
@@ -1524,13 +1524,13 @@ bool game_player_tick(Server* server)
 
         player_check_zone(server, data);
 
-        if (g_config.antiafk_system && check_afk && server->game.started)
+        if (g_config.afk.antiafk_system && check_afk && server->game.started)
         {
             if (!(data->plr.flags & PLAYER_ESCAPED) && !(data->plr.flags & PLAYER_DEAD) && !(data->plr.flags & PLAYER_DEMONIZED))
             {
                 data->plr.afk_counter += 60;
 
-                if (data->plr.afk_counter >= g_config.antiafk_timeout * 60)
+                if (data->plr.afk_counter >= g_config.afk.antiafk_timeout * 60)
                 {
                     Info("%s (id %d) kicked for AFK or Timeout!", data->nickname.value, data->id);
                     server_disconnect(server, data->peer, DR_AFKTIMEOUT, "AFK or Timeout");
@@ -1552,7 +1552,7 @@ bool game_player_tick(Server* server)
             if (data->plr.ping_timer >= 20 * TICKSPERSEC)
             {
                 double avg_ping = data->plr.ping_total / data->plr.ping_timer;
-                if (avg_ping >= g_config.ping_limit)
+                if (avg_ping >= g_config.server.ping_limit)
                 {
                     char msg[130];
                     snprintf(msg, 130, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: %dms", (int)avg_ping);

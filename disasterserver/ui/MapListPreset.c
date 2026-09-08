@@ -38,7 +38,7 @@ bool mappreset_update(SDL_Renderer* renderer, struct _Component* component)
         {
             arrow_dst.y += 2;
 
-            MutexLock(g_config.map_list_lock);
+            MutexLock(g_config.maps.map_list_lock);
             {
                 if (mouse_x < dst.x + dst.w / 2)
                 {
@@ -51,9 +51,9 @@ bool mappreset_update(SDL_Renderer* renderer, struct _Component* component)
                         list->preset = 0;
                 }
 
-                memcpy(g_config.map_list, g_defaultPresets[list->preset].values, sizeof(g_config.map_list));
+                memcpy(g_config.maps.map_list, g_defaultPresets[list->preset].values, sizeof(g_config.maps.map_list));
             }
-            MutexUnlock(g_config.map_list_lock);
+            MutexUnlock(g_config.maps.map_list_lock);
         }
 
         SDL_RenderTexture(renderer, g_textureSheet, &src, &dst);
