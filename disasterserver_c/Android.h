@@ -1,0 +1,20 @@
+#include <jni.h>
+#ifndef _Included_com_teamexeempire_disaster2d_Disaster
+#define _Included_com_teamexeempire_disaster2d_Disaster
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef com_teamexeempire_disaster2d_Disaster_MIN_PRIORITY
+#define com_teamexeempire_disaster2d_Disaster_MIN_PRIORITY 1L
+#undef com_teamexeempire_disaster2d_Disaster_NORM_PRIORITY
+#define com_teamexeempire_disaster2d_Disaster_NORM_PRIORITY 5L
+#undef com_teamexeempire_disaster2d_Disaster_MAX_PRIORITY
+#define com_teamexeempire_disaster2d_Disaster_MAX_PRIORITY 10L
+
+JNIEXPORT jboolean JNICALL Java_com_teamexeempire_disaster2d_Disaster_disaster_1start
+(JNIEnv*, jclass);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
