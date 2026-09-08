@@ -9,10 +9,8 @@
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server* server, GameStateController* controller) : server(server), controller(controller) {
+CharSelectState::CharSelectState(Server* server, GameStateController* controller) : State(server, controller) {
 }
-
-
 
 bool CharSelectState::joined(Client& client) {
     return true;
@@ -91,7 +89,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             change.write<uint8_t>(id);
             change.sendBroadcast(*server, true);
 
-            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
+            Info("{} {} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
@@ -141,7 +139,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 change.sendBroadcast(*server, true);
             }
 
-            Info("{}{}{} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, "", client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
+            Info("{} {} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
@@ -156,7 +154,10 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            Info("{}{}{} (id {}): {}", client.getNickname(), CLRCODE_RST, "", client.getId(), message);
+            Info("{} {} (id {}): {}", client.getNickname(), CLRCODE_RST, client.getId(), message);
+
+            controller->cmd_handle(client, this->controller->cmd_parse(message), message);
+
             break;
         }
 
@@ -166,7 +167,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
     return true;
 }
 
-void CharSelectState::tick() {
+bool CharSelectState::tick() {
     if (countdown <= 0) {
         countdown += TICKSPERSEC;
 
@@ -189,6 +190,8 @@ void CharSelectState::tick() {
     }
 
     countdown -= server->getDelta();
+
+    return true;
 }
 
 bool CharSelectState::chooseExe() {
@@ -243,9 +246,10 @@ bool CharSelectState::checkState() {
 
         if (peer->getExeCharacter() == ExesCharacters::NONE &&
             peer->getSurvCharacter() == SurvCharacters::NONE) {
+
             shouldStart = false;
             break;
-            }
+        }
     }
 
     if (shouldStart) {

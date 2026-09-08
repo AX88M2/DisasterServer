@@ -2,27 +2,26 @@
 #define DISASTERSERVER_MAPVOTESTATE_HPP
 
 #include "Client.hpp"
-#include "Core/Types.hpp"
+#include "State.hpp"
 
 namespace DisasterServer
 {
     class Server;
     class GameStateController;
 
-    class MapVoteState {
-        Server *server;
-        GameStateController *controller;
-
-        uint8_t maps[3] = {};
-        uint8_t votes[3] = {};
+    class MapVoteState : public State<MapVoteState> {
+        std::array<uint8_t, 3> maps;
+        std::array<uint8_t, 3> votes;
     public:
         MapVoteState(Server *server, GameStateController *controller);
-        ~MapVoteState() = default;
+        ~MapVoteState() override = default;
 
-        bool joined(Client& client);
-        bool leaved(Client& client);
-        void tick();
-        bool handle(Client& client, Packet& packet);
+        bool joined(Client& client) override;
+        bool leaved(Client& client) override;
+        bool tick() override;
+        bool handle(Client& client, Packet& packet) override;
+
+        MapVoteState &get() override { return *this; }
     };
 }
 

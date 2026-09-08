@@ -50,16 +50,21 @@ namespace DisasterServer
         void tick();
         bool handle(Client& peer, Packet& packet);
 
-        commandHash cmd_parse(std::string& string);
+        static commandHash cmd_parse(std::string string);
         bool cmd_handle(Client& client, commandHash hash, const std::string& message);
 
         States getCurrentState() const { return state; }
         void setState(States state) { this->state = state; }
 
 
-        LobbyState& getLobbyState() { return lobby; }
-        CharSelectState& getCharSelect() { return charSelect; }
+        LobbyState& getLobbyState() { return lobby.get(); }
+        CharSelectState& getCharSelect() { return charSelect.get(); }
     };
+}
+
+#define AssertOrDisconnect(client, x) \
+if(!(x)) { \
+    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); return false; \
 }
 
 #endif //DISASTERSERVER_STATEMACHINE_HPP

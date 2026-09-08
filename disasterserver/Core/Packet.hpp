@@ -377,7 +377,7 @@ namespace DisasterServer {
 		void writeString(const std::string &value);
 
 		bool send(Client &client, bool reliable = true);
-		void sendBroadcast(Server &server, bool reliable, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
+		void sendBroadcast(Server &server, bool reliable = true, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
 	};
 }
 

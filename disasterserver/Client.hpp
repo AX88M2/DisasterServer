@@ -170,6 +170,11 @@ namespace DisasterServer
         bool identity_process(const std::string & addr, bool is_banned, uint64_t timeout, bool do_timeout);
         bool message_received(Packet &packet);
         void disconnect(DisconnectReason reason, const std::string& message = "");
+
+        template <typename... Args>
+        void disconnect(DisconnectReason reason, std::format_string<Args...> fmt, Args&&... args) {
+            disconnect(reason, std::format(fmt, std::forward<Args>(args)...));
+        }
     };
 }
 

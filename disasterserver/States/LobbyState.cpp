@@ -8,7 +8,7 @@
 
 using namespace DisasterServer;
 
-LobbyState::LobbyState(Server *server, GameStateController *controller) : server(server), controller(controller), vote(server) {
+LobbyState::LobbyState(Server *server, GameStateController *controller) : State(server, controller), vote(server) {
 }
 
 bool LobbyState::init() {
@@ -167,18 +167,21 @@ bool LobbyState::tick() {
             }
             break;
         }
+        case States::CHARSELECT: {
+            return controller->getCharSelect().tick();
+        }
         default: break;
-    }
-
-    if (vote.isOnGoing() && !vote.tick()) {
-        checkVote();
     }
 
     if (prac_countdown > 0) {
         prac_countdown -= server->getDelta();
         if (prac_countdown <= 0) {
-            return init();
+            return controller->getCharSelect().init(20) || init();
         }
+    }
+
+    if (vote.isOnGoing() && !vote.tick()) {
+        checkVote();
     }
 
     if (countdown_sec <= COUNTDOWN) {
@@ -252,6 +255,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             pack.write<uint8_t>(state);
             pack.sendBroadcast(*this->server, true);
 
+            checkCountdown();
             break;
         }
 
@@ -286,7 +290,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 bool found = false;
                 for (auto &c : this->server->getClients()) {
                     if (c->getId() == pid) {
-                        if (c->isOpped()) {
+                        if (!c->isOpped()) {
                             this->server->send_message(client, "you're permissionless");
                             return true;
                         }

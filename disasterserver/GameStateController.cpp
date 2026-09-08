@@ -164,7 +164,7 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
     return true;
 }
 
-unsigned long GameStateController::cmd_parse(std::string &string) {
+commandHash GameStateController::cmd_parse(std::string string) {
     static std::array clr_list = CLRLIST;
 
     std::string current;

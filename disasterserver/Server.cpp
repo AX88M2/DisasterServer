@@ -12,7 +12,7 @@
 using namespace DisasterServer;
 
 
-Server::Server(const uint16_t n) : id(n), stateManager(this) {
+Server::Server(const uint16_t n) : id(n), stateController(this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
     addr.port = BASE_SERVER_PORT + n;
@@ -121,7 +121,7 @@ void Server::initialize() {
                     }
 
                     if (client->isVerified()) {
-                        stateManager.playerLeft(*client);
+                        stateController.playerLeft(*client);
                     }
 
                     ev.peer->data = nullptr;
@@ -172,7 +172,7 @@ void Server::initialize() {
         while (next_tick < now) {
             next_tick += TARGET_FPS;
 
-            stateManager.tick();
+            stateController.tick();
 
             // Heartbeat
             if (peers.size() > 0) {
@@ -204,11 +204,11 @@ void Server::broadcast_ex(Packet &packet, bool reliable, clientId ignore) {
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 
-int Server::getClientCount() {
+size_t Server::getClientCount() {
     return std::ranges::count_if(peers, [](const auto& _) { return true; });
 }
 
-int Server::getInGameCount() {
+size_t Server::getInGameCount() {
     return std::ranges::count_if(peers, [](const auto& cl) { return cl->isInGame(); });
 }
 
@@ -228,5 +228,5 @@ void Server::send_broadcast_message(clientId sender, std::string message) {
 }
 
 GameStateController &Server::getGameStateController() {
-    return stateManager;
+    return stateController;
 }
