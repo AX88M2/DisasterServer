@@ -5,10 +5,8 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 #include "StateController.hpp"
-#include "Core/Colors.hpp"
 
 using namespace DisasterServer;
-
 
 Server::Server(const uint16_t n) : id(n), stateController(this) {
     ENetAddress addr;
@@ -21,7 +19,7 @@ Server::Server(const uint16_t n) : id(n), stateController(this) {
 
 Server::~Server() {
     enet_host_destroy(host);
-};
+}
 
 void Server::initialize() {
     TimeStamp ticker;

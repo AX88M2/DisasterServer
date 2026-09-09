@@ -19,11 +19,11 @@ bool Config::load(const std::string& filename)
         }
 
         new_file << R"({
-    "server": {
-        "port": 8606,
-        "lobby_count": 1
-    }
-})";
+            "server": {
+                "port": 8606,
+                "lobby_count": 1
+            }
+        })";
 
         new_file.close();
 
@@ -44,23 +44,20 @@ bool Config::load(const std::string& filename)
         return false;
     }
 
-    cJSON* server =
-        cJSON_GetObjectItemCaseSensitive(root, "server");
+    cJSON* server = cJSON_GetObjectItemCaseSensitive(root, "server");
 
     if (!server || !cJSON_IsObject(server)) {
         cJSON_Delete(root);
         return false;
     }
 
-    cJSON* port_json =
-        cJSON_GetObjectItemCaseSensitive(server, "port");
+    cJSON* port_json = cJSON_GetObjectItemCaseSensitive(server, "port");
 
     if (port_json && cJSON_IsNumber(port_json)) {
         port = static_cast<uint32_t>(port_json->valueint);
     }
 
-    cJSON* lobby_json =
-        cJSON_GetObjectItemCaseSensitive(server, "lobby_count");
+    cJSON* lobby_json = cJSON_GetObjectItemCaseSensitive(server, "lobby_count");
 
     if (lobby_json && cJSON_IsNumber(lobby_json)) {
         lobby_count = static_cast<uint32_t>(lobby_json->valueint);
