@@ -2,6 +2,7 @@
 #define DISASTERSERVER_STATEMACHINE_HPP
 
 #include "Core/Packet.hpp"
+#include "States/State.hpp"
 #include "States/LobbyState.hpp"
 #include "States/CharSelect.hpp"
 
@@ -35,30 +36,40 @@ namespace DisasterServer
     constexpr commandHash CMD_SELFOP = 1264443355; //Only debugging
     constexpr commandHash CMD_DEBUG = 1412399845; //Only debugging
 
-    class GameStateController {
+    class StateController {
         Server *server = nullptr;
         States state = States::LOBBY;
 
-        LobbyState lobby;
-        CharSelectState charSelect;
+        std::unique_ptr<State> current;
     public:
-        explicit GameStateController(Server* server);
-        ~GameStateController();
+        explicit StateController(Server* server);
+        ~StateController();
+
+        template <std::derived_from<State> T, typename... Args>
+        requires requires (T& state, Args&&... args) { state.init(std::forward<Args>(args)...); }
+        void changeTo(Args&&... args) {
+            auto state = std::make_unique<T>(server, this);
+
+            state->init(std::forward<Args>(args)...);
+
+            current = std::move(state);
+        }
+
+        template <std::derived_from<State> T>
+        bool isState() const {
+            return dynamic_cast<T*>(current.get()) != nullptr;
+        }
 
         bool playerJoined(Client& peer);
         void playerLeft(Client& peer);
         void tick();
         bool handle(Client& peer, Packet& packet);
 
-        static commandHash cmd_parse(std::string string);
-        bool cmd_handle(Client& client, commandHash hash, const std::string& message);
+        commandHash cmdParse(std::string string);
+        bool cmdHandle(Client& client, commandHash hash, const std::string& message);
 
         States getCurrentState() const { return state; }
         void setState(States state) { this->state = state; }
-
-
-        LobbyState& getLobbyState() { return lobby.get(); }
-        CharSelectState& getCharSelect() { return charSelect.get(); }
     };
 }
 

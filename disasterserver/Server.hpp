@@ -2,13 +2,13 @@
 #define DISASTERSERVER_SERVER_HPP
 
 #include "Client.hpp"
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 
 constexpr int TICKSPERSEC = 60;
 
 namespace DisasterServer
 {
-    class GameStateController;
+    class StateController;
 
     constexpr int MAX_PLAYERS = 7;
     constexpr int MAP_COUNT = 20;
@@ -24,7 +24,7 @@ namespace DisasterServer
         ENetHost *host = nullptr;
 
         std::vector<std::unique_ptr<Client>> peers;
-        GameStateController stateController;
+        StateController stateController;
         double delta = 0;
     public:
         Server(uint16_t n = 0);
@@ -52,7 +52,7 @@ namespace DisasterServer
         size_t getInGameCount();
 
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
-        GameStateController &getGameStateController();
+        StateController &getStateController();
 
         double getDelta() {
             return delta;

@@ -42,7 +42,7 @@ bool Client::identity(Packet &packet) {
     this->lobby_icon = lobby_icon;
     this->pet = pet;
 
-    this->in_game = (server->getGameStateController().getCurrentState() == States::LOBBY);
+    this->in_game = server->getStateController().isState<LobbyState>();
     this->exe_chance = 1 + rand() % 4;
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
@@ -102,14 +102,14 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         }
     }
 
-    if (!this->server->getGameStateController().playerJoined(*this)) {
+    if (!this->server->getStateController().playerJoined(*this)) {
         should_timeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
     }
 
     Packet packet(PacketType::SERVER_IDENTITY_RESPONSE);
-    packet.write<uint8_t>(server->getGameStateController().getCurrentState() == States::LOBBY);
+    packet.write<uint8_t>(server->getStateController().isState<LobbyState>());
     packet.write<clientId>(id);
     packet.send(*this, true);
 
@@ -123,11 +123,11 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(server->getGameStateController().getCurrentState() == States::GAME && client->in_game);
+            pack.write<uint8_t>(server->getStateController().getCurrentState() == States::GAME && client->in_game);
             pack.write<clientId>(client->getId());
             pack.writeString(nickname);
 
-            if (server->getGameStateController().getCurrentState() == States::GAME && client->in_game) {
+            if (server->getStateController().getCurrentState() == States::GAME && client->in_game) {
 
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id */ );
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
@@ -159,7 +159,7 @@ bool Client::message_received(Packet &packet) {
         return false;
     }
 
-    return this->server->getGameStateController().handle(*this, packet);
+    return this->server->getStateController().handle(*this, packet);
 }
 
 void Client::disconnect(DisconnectReason reason, const std::string &message) {

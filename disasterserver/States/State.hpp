@@ -6,16 +6,15 @@
 
 namespace DisasterServer
 {
-    class GameStateController;
+    class StateController;
     class Server;
 
-    template <typename T>
     class State {
     protected:
         Server *server;
-        GameStateController *controller;
+        StateController *controller;
     public:
-        State(Server *server, GameStateController *controller) : server(server), controller(controller) {}
+        State(Server *server, StateController *controller) : server(server), controller(controller) {}
         virtual ~State() = default;
 
         virtual bool joined(Client& client) {
@@ -26,15 +25,12 @@ namespace DisasterServer
             return true;
         }
 
-        virtual bool tick() {
-            return true;
+        virtual void tick() {
         }
 
         virtual bool handle(Client& client, Packet& packet) {
             return true;
         }
-
-        virtual T &get() = 0;
     };
 }
 

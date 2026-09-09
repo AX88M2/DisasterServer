@@ -1,16 +1,15 @@
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Server.hpp"
-
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-GameStateController::GameStateController(Server *server): server(server), lobby(server, this), charSelect(server, this) {
+StateController::StateController(Server *server): server(server), current(std::make_unique<LobbyState>(server, this)) {
 }
 
-GameStateController::~GameStateController() = default;
+StateController::~StateController() = default;
 
-bool GameStateController::playerJoined(Client &peer) {
+bool StateController::playerJoined(Client &peer) {
     Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
     packet.write<uint8_t>(peer.getExeChance());
     packet.send(peer, true);
@@ -22,75 +21,30 @@ bool GameStateController::playerJoined(Client &peer) {
     playerJoined.write<uint8_t>(peer.getPet());
     this->server->broadcast_ex(playerJoined, true, peer.getId());
 
-    switch (state) {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            return lobby.joined(peer);
-
-        case States::CHARSELECT: {
-            return charSelect.joined(peer);
-        }
-        case States::GAME: {
-            return true;
-        }
-        case States::RESULTS: {
-            break;
-        }
-        default: break;
+    if (current) {
+        current->joined(peer);
     }
 
     return true;
 }
 
-void GameStateController::playerLeft(Client &peer) {
+void StateController::playerLeft(Client &peer) {
     Packet packet(PacketType::SERVER_PLAYER_LEFT);
     packet.write<clientId>(peer.getId());
     packet.sendBroadcast(*server, true);
 
-    switch (state)
-    {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.leaved(peer);
-            break;
-
-        case States::CHARSELECT:
-            charSelect.leaved(peer);
-            break;
-
-        case States::GAME:
-            //game_state_tick(server);
-            break;
-
-        case States::RESULTS:
-            //results_state_tick(server);
-            break;
+    if (current) {
+        current->leaved(peer);
     }
 }
 
-void GameStateController::tick() {
-    switch (state)
-    {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.tick();
-            break;
-
-        case States::CHARSELECT:
-            charSelect.tick();
-            break;
-
-        case States::GAME:
-            // game_state_tick(server);
-            break;
-
-        case States::RESULTS:
-            // results_state_tick(server);
-            break;
+void StateController::tick() {
+    if (current) {
+        current->tick();
     }
 }
 
-bool GameStateController::handle(Client &peer, Packet &packet) {
+bool StateController::handle(Client &peer, Packet &packet) {
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_CHOOSEBAN: {
             if (!peer.isOpped()) {
@@ -142,29 +96,15 @@ bool GameStateController::handle(Client &peer, Packet &packet) {
         }
         default: break;
     }
-    switch (state) {
-        case States::LOBBY:
-        case States::MAPVOTE:
-            lobby.handle(peer, packet);
-            break;
 
-        case States::CHARSELECT:
-            charSelect.handle(peer, packet);
-            break;
-
-        case States::GAME:
-            // game state handle
-            break;
-
-        case States::RESULTS:
-            // results state handle
-            break;
+    if (current) {
+        current->handle(peer, packet);
     }
 
     return true;
 }
 
-commandHash GameStateController::cmd_parse(std::string string) {
+commandHash StateController::cmdParse(std::string string) {
     static std::array clr_list = CLRLIST;
 
     std::string current;
@@ -203,7 +143,7 @@ commandHash GameStateController::cmd_parse(std::string string) {
     return hash;
 }
 
-bool GameStateController::cmd_handle(Client &client, commandHash hash, const std::string &message) {
+bool StateController::cmdHandle(Client &client, commandHash hash, const std::string &message) {
     switch (hash) {
         case CMD_BAN: {
             if (!client.isOpped()) {
@@ -217,7 +157,10 @@ bool GameStateController::cmd_handle(Client &client, commandHash hash, const std
             }
 
             Packet pack(PacketType::CLIENT_LOBBY_CHOOSEBAN);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
@@ -233,7 +176,10 @@ bool GameStateController::cmd_handle(Client &client, commandHash hash, const std
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEKICK);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
@@ -249,14 +195,16 @@ bool GameStateController::cmd_handle(Client &client, commandHash hash, const std
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEOP);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
         case CMD_LOBBY: {
             int ind;
-            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0)
-            {
+            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0) {
                 this->server->send_message(client, "{}example:~ .lobby 1");
                 break;
             }
@@ -265,9 +213,10 @@ bool GameStateController::cmd_handle(Client &client, commandHash hash, const std
 
         case CMD_HELP: {
             this->server->send_message(client, "~-----~ {}command list:{} ~-----~", CLRCODE_GRN, CLRCODE_RST);
-            this->server->send_message(client, "|- .vk~ - vote kick ");
             this->server->send_message(client, "|- .info~ - information about server");
+            this->server->send_message(client, "|- .vk~ - vote kick");
             this->server->send_message(client, "|- .vp~ - vote practice mode (wip)");
+            this->server->send_message(client, "|- .lobby~ - change lobby (wip)");
             break;
         }
 
@@ -282,7 +231,7 @@ bool GameStateController::cmd_handle(Client &client, commandHash hash, const std
 #if defined(SERVER_DEBUG)
         case CMD_SELFOP: {
             client.setOperator(true);
-            this->server->send_message(client, "{}you aren't an operator.", CLRCODE_GRN);
+            this->server->send_message(client, "{}you're an operator now", CLRCODE_GRN);
             break;
         }
         case CMD_DEBUG: {

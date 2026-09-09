@@ -175,149 +175,159 @@ enum class PacketType : uint8_t
 
 inline std::string getPacketTypeName(PacketType type) {
 	switch (type) {
-		case PacketType::IDENTITY: return "IDENTITY";
-		case PacketType::SERVER_IDENTITY_RESPONSE: return "SERVER_IDENTITY_RESPONSE";
-		case PacketType::SERVER_PLAYER_JOINED: return "SERVER_PLAYER_JOINED";
-		case PacketType::SERVER_PLAYER_LEFT: return "SERVER_PLAYER_LEFT";
-		case PacketType::SERVER_PLAYER_FORCE_DISCONNECT: return "SERVER_PLAYER_FORCE_DISCONNECT";
-		case PacketType::SERVER_WAITING_PLAYER_INFO: return "SERVER_WAITING_PLAYER_INFO";
-		case PacketType::SERVER_LOBBY_READY_STATE: return "SERVER_LOBBY_READY_STATE";
-		case PacketType::SERVER_LOBBY_EXE: return "SERVER_LOBBY_EXE";
-		case PacketType::SERVER_LOBBY_COUNTDOWN: return "SERVER_LOBBY_COUNTDOWN";
-		case PacketType::SERVER_LOBBY_EXE_CHANGE: return "SERVER_LOBBY_EXE_CHANGE";
-		case PacketType::SERVER_LOBBY_CHARACTER_CHANGE: return "SERVER_LOBBY_CHARACTER_CHANGE";
-		case PacketType::SERVER_LOBBY_CHARACTER_RESPONSE: return "SERVER_LOBBY_CHARACTER_RESPONSE";
-		case PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE: return "SERVER_LOBBY_EXECHARACTER_RESPONSE";
-		case PacketType::SERVER_LOBBY_GAME_START: return "SERVER_LOBBY_GAME_START";
-		case PacketType::SERVER_LOBBY_PLAYER: return "SERVER_LOBBY_PLAYER";
-		case PacketType::SERVER_LOBBY_EXE_CHANCE: return "SERVER_LOBBY_EXE_CHANCE";
-		case PacketType::SERVER_LOBBY_CORRECT: return "SERVER_LOBBY_CORRECT";
-		case PacketType::SERVER_LOBBY_CHOOSEVOTEKICK: return "SERVER_LOBBY_CHOOSEVOTEKICK";
-		case PacketType::SERVER_LOBBY_CHOOSEBAN: return "SERVER_LOBBY_CHOOSEBAN";
-		case PacketType::SERVER_LOBBY_CHOOSEKICK: return "SERVER_LOBBY_CHOOSEKICK";
-		case PacketType::SERVER_LOBBY_CHOOSEOP: return "SERVER_LOBBY_CHOOSEOP";
-		case PacketType::SERVER_LOBBY_CHANGELOBBY: return "SERVER_LOBBY_CHANGELOBBY";
-		case PacketType::SERVER_CHAR_TIME_SYNC: return "SERVER_CHAR_TIME_SYNC";
-		case PacketType::SERVER_VOTE_MAPS: return "SERVER_VOTE_MAPS";
-		case PacketType::SERVER_VOTE_SET: return "SERVER_VOTE_SET";
-		case PacketType::SERVER_VOTE_TIME_SYNC: return "SERVER_VOTE_TIME_SYNC";
-		case PacketType::SERVER_GAME_PLAYERS_READY: return "SERVER_GAME_PLAYERS_READY";
-		case PacketType::SERVER_GAME_EXE_WINS: return "SERVER_GAME_EXE_WINS";
-		case PacketType::SERVER_GAME_SURVIVOR_WIN: return "SERVER_GAME_SURVIVOR_WIN";
-		case PacketType::SERVER_GAME_SPAWN_RING: return "SERVER_GAME_SPAWN_RING";
-		case PacketType::SERVER_GAME_PLAYER_ESCAPED: return "SERVER_GAME_PLAYER_ESCAPED";
-		case PacketType::SERVER_GAME_BACK_TO_LOBBY: return "SERVER_GAME_BACK_TO_LOBBY";
-		case PacketType::SERVER_GAME_TIME_SYNC: return "SERVER_GAME_TIME_SYNC";
-		case PacketType::SERVER_GAME_TIME_OVER: return "SERVER_GAME_TIME_OVER";
-		case PacketType::SERVER_GAME_PING: return "SERVER_GAME_PING";
-		case PacketType::SERVER_PLAYER_DEATH_STATE: return "SERVER_PLAYER_DEATH_STATE";
-		case PacketType::SERVER_GAME_DEATHTIMER_TICK: return "SERVER_GAME_DEATHTIMER_TICK";
-		case PacketType::SERVER_GAME_DEATHTIMER_END: return "SERVER_GAME_DEATHTIMER_END";
-		case PacketType::SERVER_REQUEST_INFO: return "SERVER_REQUEST_INFO";
-		case PacketType::SERVER_HEARTBEAT: return "SERVER_HEARTBEAT";
-		case PacketType::SERVER_PONG: return "SERVER_PONG";
-		case PacketType::SERVER_FORCE_DAMAGE: return "SERVER_FORCE_DAMAGE";
-		case PacketType::SERVER_GAME_RING_READY: return "SERVER_GAME_RING_READY";
-		case PacketType::SERVER_PLAYER_BACKTRACK: return "SERVER_PLAYER_BACKTRACK";
-		case PacketType::SERVER_TPROJECTILE_STATE: return "SERVER_TPROJECTILE_STATE";
-		case PacketType::SERVER_ETRACKER_STATE: return "SERVER_ETRACKER_STATE";
-		case PacketType::SERVER_ERECTOR_BRING_SPAWN: return "SERVER_ERECTOR_BRING_SPAWN";
-		case PacketType::SERVER_RMZSLIME_STATE: return "SERVER_RMZSLIME_STATE";
-		case PacketType::SERVER_RMZSLIME_RINGBONUS: return "SERVER_RMZSLIME_RINGBONUS";
-		case PacketType::SERVER_RMZSHARD_STATE: return "SERVER_RMZSHARD_STATE";
-		case PacketType::SERVER_LCEYE_STATE: return "SERVER_LCEYE_STATE";
-		case PacketType::SERVER_LCCHAIN_STATE: return "SERVER_LCCHAIN_STATE";
-		case PacketType::SERVER_NPCONTROLLER_STATE: return "SERVER_NPCONTROLLER_STATE";
-		case PacketType::SERVER_KAFMONITOR_STATE: return "SERVER_KAFMONITOR_STATE";
-		case PacketType::SERVER_YCRSMOKE_STATE: return "SERVER_YCRSMOKE_STATE";
-		case PacketType::SERVER_YCRSMOKE_READY: return "SERVER_YCRSMOKE_READY";
-		case PacketType::SERVER_MOVINGSPIKE_STATE: return "SERVER_MOVINGSPIKE_STATE";
-		case PacketType::SERVER_RING_STATE: return "SERVER_RING_STATE";
-		case PacketType::SERVER_RING_COLLECTED: return "SERVER_RING_COLLECTED";
-		case PacketType::SERVER_ACT9WALL_STATE: return "SERVER_ACT9WALL_STATE";
-		case PacketType::SERVER_NAPBALL_STATE: return "SERVER_NAPBALL_STATE";
-		case PacketType::SERVER_NAPICE_STATE: return "SERVER_NAPICE_STATE";
-		case PacketType::SERVER_PFLIFT_STATE: return "SERVER_PFLIFT_STATE";
-		case PacketType::SERVER_BRING_STATE: return "SERVER_BRING_STATE";
-		case PacketType::SERVER_BRING_COLLECTED: return "SERVER_BRING_COLLECTED";
-		case PacketType::SERVER_VVLCOLUMN_STATE: return "SERVER_VVLCOLUMN_STATE";
-		case PacketType::SERVER_VVVASE_STATE: return "SERVER_VVVASE_STATE";
-		case PacketType::SERVER_GHZTHUNDER_STATE: return "SERVER_GHZTHUNDER_STATE";
-		case PacketType::SERVER_TCGOM_STATE: return "SERVER_TCGOM_STATE";
-		case PacketType::SERVER_EXELLERCLONE_STATE: return "SERVER_EXELLERCLONE_STATE";
-		case PacketType::SERVER_DTTAILSDOLL_STATE: return "SERVER_DTTAILSDOLL_STATE";
-		case PacketType::SERVER_DTBALL_STATE: return "SERVER_DTBALL_STATE";
-		case PacketType::SERVER_DTASS_STATE: return "SERVER_DTASS_STATE";
-		case PacketType::SERVER_HDDOOR_STATE: return "SERVER_HDDOOR_STATE";
-		case PacketType::SERVER_WDLATERN_ACTIVATE: return "SERVER_WDLATERN_ACTIVATE";
-		case PacketType::SERVER_FART_STATE: return "SERVER_FART_STATE";
-		case PacketType::SERVER_MJLAVA_STATE: return "SERVER_MJLAVA_STATE";
-		case PacketType::SERVER_MJJUDGER_STATE: return "SERVER_MJJUDGER_STATE";
-		case PacketType::SERVER_MJCRYSTAL_STATE: return "SERVER_MJCRYSTAL_STATE";
-		case PacketType::CLIENT_ETRACKER: return "CLIENT_ETRACKER";
-		case PacketType::CLIENT_ETRACKER_ACTIVATED: return "CLIENT_ETRACKER_ACTIVATED";
-		case PacketType::CLIENT_TPROJECTILE: return "CLIENT_TPROJECTILE";
-		case PacketType::CLIENT_TPROJECTILE_HIT: return "CLIENT_TPROJECTILE_HIT";
-		case PacketType::CLIENT_TPROJECTILE_STARTCHARGE: return "CLIENT_TPROJECTILE_STARTCHARGE";
-		case PacketType::CLIENT_ERECTOR_BALLS: return "CLIENT_ERECTOR_BALLS";
-		case PacketType::CLIENT_ERECTOR_BRING_SPAWN: return "CLIENT_ERECTOR_BRING_SPAWN";
-		case PacketType::CLIENT_EXELLER_SPAWN_CLONE: return "CLIENT_EXELLER_SPAWN_CLONE";
-		case PacketType::CLIENT_EXELLER_TELEPORT_CLONE: return "CLIENT_EXELLER_TELEPORT_CLONE";
-		case PacketType::CLIENT_MERCOIN_BONUS: return "CLIENT_MERCOIN_BONUS";
-		case PacketType::CLIENT_RMZSLIME_HIT: return "CLIENT_RMZSLIME_HIT";
-		case PacketType::CLIENT_LCEYE_REQUEST_ACTIVATE: return "CLIENT_LCEYE_REQUEST_ACTIVATE";
-		case PacketType::CLIENT_KAFMONITOR_ACTIVATE: return "CLIENT_KAFMONITOR_ACTIVATE";
-		case PacketType::CLIENT_RING_COLLECTED: return "CLIENT_RING_COLLECTED";
-		case PacketType::CLIENT_RING_BROKE: return "CLIENT_RING_BROKE";
-		case PacketType::CLIENT_BRING_COLLECTED: return "CLIENT_BRING_COLLECTED";
-		case PacketType::CLIENT_NAPICE_ACTIVATE: return "CLIENT_NAPICE_ACTIVATE";
-		case PacketType::CLIENT_SPRING_USE: return "CLIENT_SPRING_USE";
-		case PacketType::CLIENT_PFLIT_ACTIVATE: return "CLIENT_PFLIT_ACTIVATE";
-		case PacketType::CLIENT_VVVASE_BREAK: return "CLIENT_VVVASE_BREAK";
-		case PacketType::CLIENT_RMZSHARD_COLLECT: return "CLIENT_RMZSHARD_COLLECT";
-		case PacketType::CLIENT_RMZSHARD_LAND: return "CLIENT_RMZSHARD_LAND";
-		case PacketType::CLIENT_DTASS_ACTIVATE: return "CLIENT_DTASS_ACTIVATE";
-		case PacketType::CLIENT_HDDOOR_TOGGLE: return "CLIENT_HDDOOR_TOGGLE";
-		case PacketType::CLIENT_FART_PUSH: return "CLIENT_FART_PUSH";
-		case PacketType::CLIENT_LOBBY_READY_STATE: return "CLIENT_LOBBY_READY_STATE";
-		case PacketType::CLIENT_REQUESTED_INFO: return "CLIENT_REQUESTED_INFO";
-		case PacketType::CLIENT_PLAYER_DATA: return "CLIENT_PLAYER_DATA";
-		case PacketType::CLIENT_PLAYER_HURT: return "CLIENT_PLAYER_HURT";
-		case PacketType::CLIENT_SOUND_EMIT: return "CLIENT_SOUND_EMIT";
-		case PacketType::CLIENT_PING: return "CLIENT_PING";
-		case PacketType::CLIENT_REVIVAL_PROGRESS: return "CLIENT_REVIVAL_PROGRESS";
-		case PacketType::CLIENT_PLAYER_HEAL: return "CLIENT_PLAYER_HEAL";
-		case PacketType::CLIENT_PLAYER_HEAL_PART: return "CLIENT_PLAYER_HEAL_PART";
-		case PacketType::SERVER_REVIVAL_PROGRESS: return "SERVER_REVIVAL_PROGRESS";
-		case PacketType::SERVER_REVIVAL_STATUS: return "SERVER_REVIVAL_STATUS";
-		case PacketType::SERVER_REVIVAL_RINGSUB: return "SERVER_REVIVAL_RINGSUB";
-		case PacketType::SERVER_REVIVAL_REVIVED: return "SERVER_REVIVAL_REVIVED";
-		case PacketType::CLIENT_REQUEST_CHARACTER: return "CLIENT_REQUEST_CHARACTER";
-		case PacketType::CLIENT_REQUEST_EXECHARACTER: return "CLIENT_REQUEST_EXECHARACTER";
-		case PacketType::CLIENT_VOTE_REQUEST: return "CLIENT_VOTE_REQUEST";
-		case PacketType::CLIENT_PLAYER_DEATH_STATE: return "CLIENT_PLAYER_DEATH_STATE";
-		case PacketType::CLIENT_PLAYER_ESCAPED: return "CLIENT_PLAYER_ESCAPED";
-		case PacketType::SERVER_PLAYER_ESCAPED: return "SERVER_PLAYER_ESCAPED";
-		case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: return "CLIENT_LOBBY_PLAYERS_REQUEST";
-		case PacketType::CLIENT_CREAM_SPAWN_RINGS: return "CLIENT_CREAM_SPAWN_RINGS";
-		case PacketType::CLIENT_SPAWN_EFFECT: return "CLIENT_SPAWN_EFFECT";
-		case PacketType::CLIENT_CHAT_MESSAGE: return "CLIENT_CHAT_MESSAGE";
-		case PacketType::CLIENT_LOBBY_CHOOSEVOTEKICK: return "CLIENT_LOBBY_CHOOSEVOTEKICK";
-		case PacketType::CLIENT_LOBBY_CHOOSEBAN: return "CLIENT_LOBBY_CHOOSEBAN";
-		case PacketType::CLIENT_LOBBY_CHOOSEKICK: return "CLIENT_LOBBY_CHOOSEKICK";
-		case PacketType::CLIENT_LOBBY_CHOOSEOP: return "CLIENT_LOBBY_CHOOSEOP";
-		case PacketType::CLIENT_PLAYER_PALETTE: return "CLIENT_PLAYER_PALETTE";
-		case PacketType::CLIENT_PET_PALETTE: return "CLIENT_PET_PALETTE";
-		case PacketType::SERVER_RESULTS: return "SERVER_RESULTS";
-		case PacketType::SERVER_RESULTS_DATA: return "SERVER_RESULTS_DATA";
-		case PacketType::CLIENT_RESULTS_REQUEST: return "CLIENT_RESULTS_REQUEST";
-		case PacketType::CLIENT_STATS_REPORT: return "CLIENT_STATS_REPORT";
-		case PacketType::SERVER_PREIDENTITY: return "SERVER_PREIDENTITY";
-		case PacketType::SERVER_FELLA: return "SERVER_FELLA";
-		case PacketType::CLIENT_PLAYER_POTATER: return "CLIENT_PLAYER_POTATER";
+		case PacketType::IDENTITY: return "PacketType::IDENTITY";
+		case PacketType::SERVER_IDENTITY_RESPONSE: return "PacketType::SERVER_IDENTITY_RESPONSE";
+		case PacketType::SERVER_PLAYER_JOINED: return "PacketType::SERVER_PLAYER_JOINED";
+		case PacketType::SERVER_PLAYER_LEFT: return "PacketType::SERVER_PLAYER_LEFT";
+		case PacketType::SERVER_PLAYER_FORCE_DISCONNECT: return "PacketType::SERVER_PLAYER_FORCE_DISCONNECT";
+		case PacketType::SERVER_WAITING_PLAYER_INFO: return "PacketType::SERVER_WAITING_PLAYER_INFO";
+		case PacketType::SERVER_LOBBY_READY_STATE: return "PacketType::SERVER_LOBBY_READY_STATE";
+		case PacketType::SERVER_LOBBY_EXE: return "PacketType::SERVER_LOBBY_EXE";
+		case PacketType::SERVER_LOBBY_COUNTDOWN: return "PacketType::SERVER_LOBBY_COUNTDOWN";
+		case PacketType::SERVER_LOBBY_EXE_CHANGE: return "PacketType::SERVER_LOBBY_EXE_CHANGE";
+		case PacketType::SERVER_LOBBY_CHARACTER_CHANGE: return "PacketType::SERVER_LOBBY_CHARACTER_CHANGE";
+		case PacketType::SERVER_LOBBY_CHARACTER_RESPONSE: return "PacketType::SERVER_LOBBY_CHARACTER_RESPONSE";
+		case PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE: return "PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE";
+		case PacketType::SERVER_LOBBY_GAME_START: return "PacketType::SERVER_LOBBY_GAME_START";
+		case PacketType::SERVER_LOBBY_PLAYER: return "PacketType::SERVER_LOBBY_PLAYER";
+		case PacketType::SERVER_LOBBY_EXE_CHANCE: return "PacketType::SERVER_LOBBY_EXE_CHANCE";
+		case PacketType::SERVER_LOBBY_CORRECT: return "PacketType::SERVER_LOBBY_CORRECT";
+		case PacketType::SERVER_LOBBY_CHOOSEVOTEKICK: return "PacketType::SERVER_LOBBY_CHOOSEVOTEKICK";
+		case PacketType::SERVER_LOBBY_CHOOSEBAN: return "PacketType::SERVER_LOBBY_CHOOSEBAN";
+		case PacketType::SERVER_LOBBY_CHOOSEKICK: return "PacketType::SERVER_LOBBY_CHOOSEKICK";
+		case PacketType::SERVER_LOBBY_CHOOSEOP: return "PacketType::SERVER_LOBBY_CHOOSEOP";
+		case PacketType::SERVER_LOBBY_CHANGELOBBY: return "PacketType::SERVER_LOBBY_CHANGELOBBY";
+		case PacketType::SERVER_CHAR_TIME_SYNC: return "PacketType::SERVER_CHAR_TIME_SYNC";
+		case PacketType::SERVER_VOTE_MAPS: return "PacketType::SERVER_VOTE_MAPS";
+		case PacketType::SERVER_VOTE_SET: return "PacketType::SERVER_VOTE_SET";
+		case PacketType::SERVER_VOTE_TIME_SYNC: return "PacketType::SERVER_VOTE_TIME_SYNC";
+		case PacketType::SERVER_GAME_PLAYERS_READY: return "PacketType::SERVER_GAME_PLAYERS_READY";
+		case PacketType::SERVER_GAME_EXE_WINS: return "PacketType::SERVER_GAME_EXE_WINS";
+		case PacketType::SERVER_GAME_SURVIVOR_WIN: return "PacketType::SERVER_GAME_SURVIVOR_WIN";
+		case PacketType::SERVER_GAME_SPAWN_RING: return "PacketType::SERVER_GAME_SPAWN_RING";
+		case PacketType::SERVER_GAME_PLAYER_ESCAPED: return "PacketType::SERVER_GAME_PLAYER_ESCAPED";
+		case PacketType::SERVER_GAME_BACK_TO_LOBBY: return "PacketType::SERVER_GAME_BACK_TO_LOBBY";
+		case PacketType::SERVER_GAME_TIME_SYNC: return "PacketType::SERVER_GAME_TIME_SYNC";
+		case PacketType::SERVER_GAME_TIME_OVER: return "PacketType::SERVER_GAME_TIME_OVER";
+		case PacketType::SERVER_GAME_PING: return "PacketType::SERVER_GAME_PING";
+		case PacketType::SERVER_PLAYER_DEATH_STATE: return "PacketType::SERVER_PLAYER_DEATH_STATE";
+		case PacketType::SERVER_GAME_DEATHTIMER_TICK: return "PacketType::SERVER_GAME_DEATHTIMER_TICK";
+		case PacketType::SERVER_GAME_DEATHTIMER_END: return "PacketType::SERVER_GAME_DEATHTIMER_END";
+		case PacketType::SERVER_REQUEST_INFO: return "PacketType::SERVER_REQUEST_INFO";
+		case PacketType::SERVER_HEARTBEAT: return "PacketType::SERVER_HEARTBEAT";
+		case PacketType::SERVER_PONG: return "PacketType::SERVER_PONG";
+		case PacketType::SERVER_FORCE_DAMAGE: return "PacketType::SERVER_FORCE_DAMAGE";
+		case PacketType::SERVER_GAME_RING_READY: return "PacketType::SERVER_GAME_RING_READY";
+		case PacketType::SERVER_PLAYER_BACKTRACK: return "PacketType::SERVER_PLAYER_BACKTRACK";
+		case PacketType::SERVER_TPROJECTILE_STATE: return "PacketType::SERVER_TPROJECTILE_STATE";
+		case PacketType::SERVER_ETRACKER_STATE: return "PacketType::SERVER_ETRACKER_STATE";
+		case PacketType::SERVER_ERECTOR_BRING_SPAWN: return "PacketType::SERVER_ERECTOR_BRING_SPAWN";
+		case PacketType::SERVER_RMZSLIME_STATE: return "PacketType::SERVER_RMZSLIME_STATE";
+		case PacketType::SERVER_RMZSLIME_RINGBONUS: return "PacketType::SERVER_RMZSLIME_RINGBONUS";
+		case PacketType::SERVER_RMZSHARD_STATE: return "PacketType::SERVER_RMZSHARD_STATE";
+		case PacketType::SERVER_LCEYE_STATE: return "PacketType::SERVER_LCEYE_STATE";
+		case PacketType::SERVER_LCCHAIN_STATE: return "PacketType::SERVER_LCCHAIN_STATE";
+		case PacketType::SERVER_NPCONTROLLER_STATE: return "PacketType::SERVER_NPCONTROLLER_STATE";
+		case PacketType::SERVER_KAFMONITOR_STATE: return "PacketType::SERVER_KAFMONITOR_STATE";
+		case PacketType::SERVER_YCRSMOKE_STATE: return "PacketType::SERVER_YCRSMOKE_STATE";
+		case PacketType::SERVER_YCRSMOKE_READY: return "PacketType::SERVER_YCRSMOKE_READY";
+		case PacketType::SERVER_MOVINGSPIKE_STATE: return "PacketType::SERVER_MOVINGSPIKE_STATE";
+		case PacketType::SERVER_RING_STATE: return "PacketType::SERVER_RING_STATE";
+		case PacketType::SERVER_RING_COLLECTED: return "PacketType::SERVER_RING_COLLECTED";
+		case PacketType::SERVER_ACT9WALL_STATE: return "PacketType::SERVER_ACT9WALL_STATE";
+		case PacketType::SERVER_NAPBALL_STATE: return "PacketType::SERVER_NAPBALL_STATE";
+		case PacketType::SERVER_NAPICE_STATE: return "PacketType::SERVER_NAPICE_STATE";
+		case PacketType::SERVER_PFLIFT_STATE: return "PacketType::SERVER_PFLIFT_STATE";
+		case PacketType::SERVER_BRING_STATE: return "PacketType::SERVER_BRING_STATE";
+		case PacketType::SERVER_BRING_COLLECTED: return "PacketType::SERVER_BRING_COLLECTED";
+		case PacketType::SERVER_VVLCOLUMN_STATE: return "PacketType::SERVER_VVLCOLUMN_STATE";
+		case PacketType::SERVER_VVVASE_STATE: return "PacketType::SERVER_VVVASE_STATE";
+		case PacketType::SERVER_GHZTHUNDER_STATE: return "PacketType::SERVER_GHZTHUNDER_STATE";
+		case PacketType::SERVER_TCGOM_STATE: return "PacketType::SERVER_TCGOM_STATE";
+		case PacketType::SERVER_EXELLERCLONE_STATE: return "PacketType::SERVER_EXELLERCLONE_STATE";
+		case PacketType::SERVER_DTTAILSDOLL_STATE: return "PacketType::SERVER_DTTAILSDOLL_STATE";
+		case PacketType::SERVER_DTBALL_STATE: return "PacketType::SERVER_DTBALL_STATE";
+		case PacketType::SERVER_DTASS_STATE: return "PacketType::SERVER_DTASS_STATE";
+		case PacketType::SERVER_HDDOOR_STATE: return "PacketType::SERVER_HDDOOR_STATE";
+		case PacketType::SERVER_WDLATERN_ACTIVATE: return "PacketType::SERVER_WDLATERN_ACTIVATE";
+		case PacketType::SERVER_FART_STATE: return "PacketType::SERVER_FART_STATE";
+		case PacketType::SERVER_MJLAVA_STATE: return "PacketType::SERVER_MJLAVA_STATE";
+		case PacketType::SERVER_MJJUDGER_STATE: return "PacketType::SERVER_MJJUDGER_STATE";
+		case PacketType::SERVER_MJCRYSTAL_STATE: return "PacketType::SERVER_MJCRYSTAL_STATE";
+		case PacketType::CLIENT_ETRACKER: return "PacketType::CLIENT_ETRACKER";
+		case PacketType::CLIENT_ETRACKER_ACTIVATED: return "PacketType::CLIENT_ETRACKER_ACTIVATED";
+		case PacketType::CLIENT_TPROJECTILE: return "PacketType::CLIENT_TPROJECTILE";
+		case PacketType::CLIENT_TPROJECTILE_HIT: return "PacketType::CLIENT_TPROJECTILE_HIT";
+		case PacketType::CLIENT_TPROJECTILE_STARTCHARGE: return "PacketType::CLIENT_TPROJECTILE_STARTCHARGE";
+		case PacketType::CLIENT_ERECTOR_BALLS: return "PacketType::CLIENT_ERECTOR_BALLS";
+		case PacketType::CLIENT_ERECTOR_BRING_SPAWN: return "PacketType::CLIENT_ERECTOR_BRING_SPAWN";
+		case PacketType::CLIENT_EXELLER_SPAWN_CLONE: return "PacketType::CLIENT_EXELLER_SPAWN_CLONE";
+		case PacketType::CLIENT_EXELLER_TELEPORT_CLONE: return "PacketType::CLIENT_EXELLER_TELEPORT_CLONE";
+		case PacketType::CLIENT_MERCOIN_BONUS: return "PacketType::CLIENT_MERCOIN_BONUS";
+		case PacketType::CLIENT_RMZSLIME_HIT: return "PacketType::CLIENT_RMZSLIME_HIT";
+		case PacketType::CLIENT_LCEYE_REQUEST_ACTIVATE: return "PacketType::CLIENT_LCEYE_REQUEST_ACTIVATE";
+		case PacketType::CLIENT_KAFMONITOR_ACTIVATE: return "PacketType::CLIENT_KAFMONITOR_ACTIVATE";
+		case PacketType::CLIENT_RING_COLLECTED: return "PacketType::CLIENT_RING_COLLECTED";
+		case PacketType::CLIENT_RING_BROKE: return "PacketType::CLIENT_RING_BROKE";
+		case PacketType::CLIENT_BRING_COLLECTED: return "PacketType::CLIENT_BRING_COLLECTED";
+		case PacketType::CLIENT_NAPICE_ACTIVATE: return "PacketType::CLIENT_NAPICE_ACTIVATE";
+		case PacketType::CLIENT_SPRING_USE: return "PacketType::CLIENT_SPRING_USE";
+		case PacketType::CLIENT_PFLIT_ACTIVATE: return "PacketType::CLIENT_PFLIT_ACTIVATE";
+		case PacketType::CLIENT_VVVASE_BREAK: return "PacketType::CLIENT_VVVASE_BREAK";
+		case PacketType::CLIENT_RMZSHARD_COLLECT: return "PacketType::CLIENT_RMZSHARD_COLLECT";
+		case PacketType::CLIENT_RMZSHARD_LAND: return "PacketType::CLIENT_RMZSHARD_LAND";
+		case PacketType::CLIENT_DTASS_ACTIVATE: return "PacketType::CLIENT_DTASS_ACTIVATE";
+		case PacketType::CLIENT_HDDOOR_TOGGLE: return "PacketType::CLIENT_HDDOOR_TOGGLE";
+		case PacketType::CLIENT_FART_PUSH: return "PacketType::CLIENT_FART_PUSH";
+		case PacketType::CLIENT_LOBBY_READY_STATE: return "PacketType::CLIENT_LOBBY_READY_STATE";
+		case PacketType::CLIENT_REQUESTED_INFO: return "PacketType::CLIENT_REQUESTED_INFO";
+		case PacketType::CLIENT_PLAYER_DATA: return "PacketType::CLIENT_PLAYER_DATA";
+		case PacketType::CLIENT_PLAYER_HURT: return "PacketType::CLIENT_PLAYER_HURT";
+		case PacketType::CLIENT_SOUND_EMIT: return "PacketType::CLIENT_SOUND_EMIT";
+		case PacketType::CLIENT_PING: return "PacketType::CLIENT_PING";
+		case PacketType::CLIENT_REVIVAL_PROGRESS: return "PacketType::CLIENT_REVIVAL_PROGRESS";
+		case PacketType::CLIENT_PLAYER_HEAL: return "PacketType::CLIENT_PLAYER_HEAL";
+		case PacketType::CLIENT_PLAYER_HEAL_PART: return "PacketType::CLIENT_PLAYER_HEAL_PART";
+		case PacketType::SERVER_REVIVAL_PROGRESS: return "PacketType::SERVER_REVIVAL_PROGRESS";
+		case PacketType::SERVER_REVIVAL_STATUS: return "PacketType::SERVER_REVIVAL_STATUS";
+		case PacketType::SERVER_REVIVAL_RINGSUB: return "PacketType::SERVER_REVIVAL_RINGSUB";
+		case PacketType::SERVER_REVIVAL_REVIVED: return "PacketType::SERVER_REVIVAL_REVIVED";
+		case PacketType::CLIENT_REQUEST_CHARACTER: return "PacketType::CLIENT_REQUEST_CHARACTER";
+		case PacketType::CLIENT_REQUEST_EXECHARACTER: return "PacketType::CLIENT_REQUEST_EXECHARACTER";
+		case PacketType::CLIENT_VOTE_REQUEST: return "PacketType::CLIENT_VOTE_REQUEST";
+		case PacketType::CLIENT_PLAYER_DEATH_STATE: return "PacketType::CLIENT_PLAYER_DEATH_STATE";
+		case PacketType::CLIENT_PLAYER_ESCAPED: return "PacketType::CLIENT_PLAYER_ESCAPED";
+		case PacketType::SERVER_PLAYER_ESCAPED: return "PacketType::SERVER_PLAYER_ESCAPED";
+		case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: return "PacketType::CLIENT_LOBBY_PLAYERS_REQUEST";
+		case PacketType::CLIENT_CREAM_SPAWN_RINGS: return "PacketType::CLIENT_CREAM_SPAWN_RINGS";
+		case PacketType::CLIENT_SPAWN_EFFECT: return "PacketType::CLIENT_SPAWN_EFFECT";
+		case PacketType::CLIENT_CHAT_MESSAGE: return "PacketType::CLIENT_CHAT_MESSAGE";
+		case PacketType::CLIENT_LOBBY_CHOOSEVOTEKICK: return "PacketType::CLIENT_LOBBY_CHOOSEVOTEKICK";
+		case PacketType::CLIENT_LOBBY_CHOOSEBAN: return "PacketType::CLIENT_LOBBY_CHOOSEBAN";
+		case PacketType::CLIENT_LOBBY_CHOOSEKICK: return "PacketType::CLIENT_LOBBY_CHOOSEKICK";
+		case PacketType::CLIENT_LOBBY_CHOOSEOP: return "PacketType::CLIENT_LOBBY_CHOOSEOP";
+		case PacketType::CLIENT_PLAYER_PALETTE: return "PacketType::CLIENT_PLAYER_PALETTE";
+		case PacketType::CLIENT_PET_PALETTE: return "PacketType::CLIENT_PET_PALETTE";
+		case PacketType::SERVER_RESULTS: return "PacketType::SERVER_RESULTS";
+		case PacketType::SERVER_RESULTS_DATA: return "PacketType::SERVER_RESULTS_DATA";
+		case PacketType::CLIENT_RESULTS_REQUEST: return "PacketType::CLIENT_RESULTS_REQUEST";
+		case PacketType::CLIENT_STATS_REPORT: return "PacketType::CLIENT_STATS_REPORT";
+		case PacketType::SERVER_PREIDENTITY: return "PacketType::SERVER_PREIDENTITY";
+		case PacketType::SERVER_FELLA: return "PacketType::SERVER_FELLA";
+		case PacketType::CLIENT_PLAYER_POTATER: return "PacketType::CLIENT_PLAYER_POTATER";
 		default: return "<Unknown>";
 	}
 }
+
+#ifdef __GNUC__ // GCC, clang...
+#define BYTESWAP_16(x) __builtin_bswap16((x))
+#define BYTESWAP_32(x) __builtin_bswap32((x))
+#define BYTESWAP_64(x) __builtin_bswap64((x))
+#else
+#define BYTESWAP_16(x) _byteswap_ushort((x))
+#define BYTESWAP_32(x) _byteswap_ulong((x))
+#define BYTESWAP_64(x) _byteswap_uint64((x))
+#endif
 
 static constexpr int PACKET_MAXSIZE = 256;
 
@@ -352,6 +362,17 @@ namespace DisasterServer {
 			}
 
 			T value {};
+
+#ifdef SYS_BIG_ENDIAN
+			if (sizeof(T) == sizeof(uint16_t)) {
+				value = BYTESWAP_16(value);
+			} else if (sizeof(T) == sizeof(uint32_t)) {
+				value = BYTESWAP_32(value);
+			} else if (sizeof(T) == sizeof(uint64_t)) {
+				value = BYTESWAP_64(value);
+			}
+#endif
+
 			std::memcpy(&value, buffer.data() + position, sizeof(T));
 			position += sizeof(T);
 
@@ -366,6 +387,16 @@ namespace DisasterServer {
 				Err("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
 				throw std::runtime_error("Packet overflow");
 			}
+
+#ifdef SYS_BIG_ENDIAN
+			if (sizeof(T) == sizeof(uint16_t)) {
+				value = BYTESWAP_16(value);
+			} else if (sizeof(T) == sizeof(uint32_t)) {
+				value = BYTESWAP_32(value);
+			} else if (sizeof(T) == sizeof(uint64_t)) {
+				value = BYTESWAP_64(value);
+			}
+#endif
 
 			std::memcpy(buffer.data() + position, &value, sizeof(T));
 			position += sizeof(T);

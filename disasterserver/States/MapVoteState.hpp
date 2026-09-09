@@ -3,25 +3,30 @@
 
 #include "Client.hpp"
 #include "State.hpp"
+#include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
     class Server;
-    class GameStateController;
+    class StateController;
 
-    class MapVoteState : public State<MapVoteState> {
-        std::array<uint8_t, 3> maps;
-        std::array<uint8_t, 3> votes;
+    class MapVoteState : public State {
+        Countdown countdown;
+
+        std::array<uint8_t, 3> maps = {};
+        std::array<uint8_t, 3> votes = {};
     public:
-        MapVoteState(Server *server, GameStateController *controller);
+        MapVoteState(Server *server, StateController *controller);
         ~MapVoteState() override = default;
 
+        void init();
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
-        bool tick() override;
+        void tick() override;
         bool handle(Client& client, Packet& packet) override;
 
-        MapVoteState &get() override { return *this; }
+    private:
+        void checkState();
     };
 }
 

@@ -6,7 +6,7 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
@@ -200,7 +200,7 @@ void Server::disconnect_by_id(const clientId client_id, DisconnectReason reason,
 }
 
 void Server::broadcast_ex(Packet &packet, bool reliable, clientId ignore) {
-    Debug("PacketType::{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
+    Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 
@@ -227,6 +227,6 @@ void Server::send_broadcast_message(clientId sender, std::string message) {
     packet.sendBroadcast(*this, true);
 }
 
-GameStateController &Server::getGameStateController() {
+StateController &Server::getStateController() {
     return stateController;
 }

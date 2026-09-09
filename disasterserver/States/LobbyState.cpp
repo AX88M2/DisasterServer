@@ -3,15 +3,15 @@
 #include <algorithm>
 
 #include "Server.hpp"
-#include "GameStateController.hpp"
+#include "StateController.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-LobbyState::LobbyState(Server *server, GameStateController *controller) : State(server, controller), vote(server) {
+LobbyState::LobbyState(Server *server, StateController *controller) : State(server, controller), vote(server) {
 }
 
-bool LobbyState::init() {
+void LobbyState::init() {
     for (auto &peer : server->getClients()) {
         peer->setReady(false);
         peer->setVoted(false);
@@ -39,21 +39,18 @@ bool LobbyState::init() {
         }
     }
 
-    controller->setState(States::LOBBY);
     countdown = TICKSPERSEC;
-    countdown_sec = NO_COUNTDOWN;
-    prac_countdown = 0;
+    countdownSec = NO_COUNTDOWN;
+    pracCountdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
     pack.sendBroadcast(*server, true);
-
-    return true;
 }
 
 bool LobbyState::sendCountdown() {
     Packet pack(PacketType::SERVER_LOBBY_COUNTDOWN);
-    pack.write<uint8_t>(this->countdown_sec < NO_COUNTDOWN);
-    pack.write<uint8_t>(countdown_sec);
+    pack.write<uint8_t>(this->countdownSec < NO_COUNTDOWN);
+    pack.write<uint8_t>(countdownSec);
     pack.sendBroadcast(*server, true);
     return true;
 }
@@ -76,13 +73,13 @@ bool LobbyState::checkCountdown() {
 
     if (ready == players->size() && players->size() > 1) {
         countdown = TICKSPERSEC;
-        countdown_sec = COUNTDOWN;
+        countdownSec = START_COUNTDOWN;
         return sendCountdown();
     }
 
-    if (countdown_sec != NO_COUNTDOWN) {
+    if (countdownSec != NO_COUNTDOWN) {
         countdown = TICKSPERSEC;
-        countdown_sec = NO_COUNTDOWN;
+        countdownSec = NO_COUNTDOWN;
         return sendCountdown();
     }
 
@@ -100,7 +97,7 @@ void LobbyState::checkVote() {
 
             case VoteType::PRACTICE: {
                 this->server->send_broadcast_message(0, "vote practice succeeded~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
-                prac_countdown = 2 * TICKSPERSEC;
+                pracCountdown = 2 * TICKSPERSEC;
                 break;
             }
 
@@ -127,7 +124,7 @@ void LobbyState::checkVote() {
 }
 
 bool LobbyState::joined(Client &peer) {
-    RAssert(checkCountdown());
+    checkCountdown();
     return true;
 }
 
@@ -136,47 +133,36 @@ bool LobbyState::leaved(Client &peer) {
         return true;
     }
 
-    RAssert(checkCountdown());
+    checkCountdown();
     return true;
 }
 
-bool LobbyState::tick() {
-    switch (controller->getCurrentState()) {
-        case States::LOBBY: {
-            for (auto &peer : server->getClients()) {
-                if (peer->getVoteCooldown() > 0) {
-                    peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
-                }
+void LobbyState::tick() {
+    for (auto &peer : server->getClients()) {
+        if (peer->getVoteCooldown() > 0) {
+            peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
+        }
 
-                if (!peer->isReady()) {
-
-                    //Чтобы не мешалось
-                    /*
-                        peer->setTimeout(peer->getTimeout() + server->getDelta());
-                        if (std::fmod(peer->getTimeout(), 60) == 0) {
-                            Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
-                        }
-                    */
-
-                    if (peer->getTimeout() >= 25 * TICKSPERSEC) {
-                        peer->disconnect(DisconnectReason::AFKTIMEOUT);
-                    }
-                } else {
-                    peer->setTimeout(0);
-                }
+        if (!peer->isReady()) {
+#if !defined(SERVER_DEBUG)
+            peer->setTimeout(peer->getTimeout() + server->getDelta());
+            if (std::fmod(peer->getTimeout(), 60) == 0) {
+                Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
             }
-            break;
+#endif
+            if (peer->getTimeout() >= 25 * TICKSPERSEC) {
+                peer->disconnect(DisconnectReason::AFKTIMEOUT);
+            }
+        } else {
+            peer->setTimeout(0);
         }
-        case States::CHARSELECT: {
-            return controller->getCharSelect().tick();
-        }
-        default: break;
     }
 
-    if (prac_countdown > 0) {
-        prac_countdown -= server->getDelta();
-        if (prac_countdown <= 0) {
-            return controller->getCharSelect().init(20) || init();
+    if (pracCountdown > 0) {
+        pracCountdown -= server->getDelta();
+        if (pracCountdown <= 0) {
+            controller->changeTo<CharSelectState>(20);
+            return;
         }
     }
 
@@ -184,21 +170,20 @@ bool LobbyState::tick() {
         checkVote();
     }
 
-    if (countdown_sec <= COUNTDOWN) {
+    if (countdownSec <= START_COUNTDOWN) {
         if (countdown <= 0) {
             countdown += TICKSPERSEC;
 
-            if (--countdown_sec == 0) {
-                return controller->getCharSelect().init(0) || init();
+            if (--countdownSec == 0) {
+                controller->changeTo<CharSelectState>(0); //Map vote
+                return;
             }
 
-            RAssert(sendCountdown());
+            sendCountdown();
         }
 
         countdown -= server->getDelta();
     }
-
-    return true;
 }
 
 bool LobbyState::handle(Client &client, Packet &packet) {
@@ -236,7 +221,14 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
 
-            commandHash hash = controller->cmd_parse(message);
+            if (message.size() > 40) {
+                client.disconnect(DisconnectReason::OTHER, "Chat message too long");
+                return false;
+            }
+
+            client.setTimeout(0);
+
+            commandHash hash = controller->cmdParse(message);
             bool isCommand = cmdHandle(client, pid, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
@@ -335,18 +327,19 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
         default: {
-            if (!controller->cmd_handle(client, hash, message)) {
+            if (!controller->cmdHandle(client, hash, message)) {
                 return false;
             }
             break;
         }
 
         case CMD_MAP: {
-            /*if (!client.isOpped()) {
+#if !defined(SERVER_DEBUG)
+            if (!client.isOpped()) {
                 this->server->send_message(client, "{}you aren't an operator", CLRCODE_RED);
                 break;
-            }*/
-
+            }
+#endif
             int ind;
             if (sscanf(message.c_str(), ".map %d", &ind) <= 0) {
                 this->server->send_message(client, "{}example:~ .map 1", CLRCODE_RED);
@@ -359,7 +352,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            controller->getCharSelect().init(ind);
+            controller->changeTo<CharSelectState>(ind);
             break;
         }
 
@@ -459,7 +452,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            int ingame = this->server->getInGameCount();
+            size_t ingame = this->server->getInGameCount();
 
             if (ingame > 2) {
                 Packet pack(PacketType::SERVER_LOBBY_CHOOSEVOTEKICK);
