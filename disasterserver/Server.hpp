@@ -15,8 +15,6 @@ namespace DisasterServer
     constexpr int BUILD_VERSION = 1101;
     constexpr int BASE_SERVER_PORT = 8606;
 
-
-
     class Server {
         uint16_t id = 0;
         bool running = false;
