@@ -1,5 +1,4 @@
 #include "Countdown.hpp"
-
 #include "Server.hpp"
 
 using namespace DisasterServer;
