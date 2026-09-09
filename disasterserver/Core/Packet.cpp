@@ -7,15 +7,7 @@
 #include "Server.hpp"
 #include "Exceptions.hpp"
 
-#ifdef __GNUC__ // GCC, clang...
-	#define BYTESWAP_16(x) __builtin_bswap16((x))
-	#define BYTESWAP_32(x) __builtin_bswap32((x))
-	#define BYTESWAP_64(x) __builtin_bswap64((x))
-#else
-	#define BYTESWAP_16(x) _byteswap_ushort((x))
-	#define BYTESWAP_32(x) _byteswap_ulong((x))
-	#define BYTESWAP_64(x) _byteswap_uint64((x))
-#endif
+
 
 using namespace DisasterServer;
 
@@ -41,14 +33,14 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	read<uint8_t>();
 	type = static_cast<PacketType>(read<uint8_t>());
 
-	Debug("Packet received PacketType::{}", getPacketTypeName(type));
+	Debug("Packet received {}", getPacketTypeName(type));
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
 	write<uint8_t>(static_cast<uint8_t>(type));
 	if (type != PacketType::SERVER_HEARTBEAT) {
-		Debug("Packet created PacketType::{}", getPacketTypeName(type));
+		Debug("Packet created {}", getPacketTypeName(type));
 	}
 }
 
@@ -85,7 +77,7 @@ bool Packet::send(Client &client, bool reliable) {
 	if(client.isDisconnecting())
 		return true;
 
-	Debug("PacketType::{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
+	Debug("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
 
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 

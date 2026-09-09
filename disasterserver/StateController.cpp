@@ -4,7 +4,7 @@
 
 using namespace DisasterServer;
 
-StateController::StateController(Server *server): server(server), lobby(server, this), charSelect(server, this), current(std::make_unique<LobbyState>(server, this)) {
+StateController::StateController(Server *server): server(server), current(std::make_unique<LobbyState>(server, this)) {
 }
 
 StateController::~StateController() = default;
@@ -104,7 +104,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
     return true;
 }
 
-commandHash StateController::cmd_parse(std::string string) {
+commandHash StateController::cmdParse(std::string string) {
     static std::array clr_list = CLRLIST;
 
     std::string current;
@@ -143,7 +143,7 @@ commandHash StateController::cmd_parse(std::string string) {
     return hash;
 }
 
-bool StateController::cmd_handle(Client &client, commandHash hash, const std::string &message) {
+bool StateController::cmdHandle(Client &client, commandHash hash, const std::string &message) {
     switch (hash) {
         case CMD_BAN: {
             if (!client.isOpped()) {
@@ -157,7 +157,10 @@ bool StateController::cmd_handle(Client &client, commandHash hash, const std::st
             }
 
             Packet pack(PacketType::CLIENT_LOBBY_CHOOSEBAN);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
@@ -173,7 +176,10 @@ bool StateController::cmd_handle(Client &client, commandHash hash, const std::st
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEKICK);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
@@ -189,14 +195,16 @@ bool StateController::cmd_handle(Client &client, commandHash hash, const std::st
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEOP);
-            RAssert(pack.send(client));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
             break;
         }
 
         case CMD_LOBBY: {
             int ind;
-            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0)
-            {
+            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0) {
                 this->server->send_message(client, "{}example:~ .lobby 1");
                 break;
             }
@@ -205,9 +213,10 @@ bool StateController::cmd_handle(Client &client, commandHash hash, const std::st
 
         case CMD_HELP: {
             this->server->send_message(client, "~-----~ {}command list:{} ~-----~", CLRCODE_GRN, CLRCODE_RST);
-            this->server->send_message(client, "|- .vk~ - vote kick ");
             this->server->send_message(client, "|- .info~ - information about server");
+            this->server->send_message(client, "|- .vk~ - vote kick");
             this->server->send_message(client, "|- .vp~ - vote practice mode (wip)");
+            this->server->send_message(client, "|- .lobby~ - change lobby (wip)");
             break;
         }
 
@@ -222,7 +231,7 @@ bool StateController::cmd_handle(Client &client, commandHash hash, const std::st
 #if defined(SERVER_DEBUG)
         case CMD_SELFOP: {
             client.setOperator(true);
-            this->server->send_message(client, "{}you aren't an operator.", CLRCODE_GRN);
+            this->server->send_message(client, "{}you're an operator now", CLRCODE_GRN);
             break;
         }
         case CMD_DEBUG: {

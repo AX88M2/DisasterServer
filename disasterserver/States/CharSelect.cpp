@@ -9,7 +9,7 @@
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller) {
+CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller), countdown(server) {
 }
 
 bool CharSelectState::joined(Client& client) {
@@ -30,21 +30,32 @@ bool CharSelectState::leaved(Client& client) {
     return checkState();
 }
 
-bool CharSelectState::init(int8_t selectedMap) {
+void CharSelectState::init(int8_t selectedMap) {
     Debug("Attempting to enter ST_CHARSELECT...");
 
     if (!chooseExe()) {
         Err("Failed to pick exe for some reason!");
 
-        controller->setState(States::LOBBY);
-        return true;
+        controller->changeTo<LobbyState>();
+        return;
     }
 
     map = selectedMap;
     controller->setState(States::CHARSELECT);
 
-    countdownSec = 30;
-    countdown = TICKSPERSEC;
+    countdown.start(30);
+    countdown.setEndOfCountdown([&] {
+        for (auto& peer : server->getClients()) {
+            if (!peer || !peer->isInGame())
+                continue;
+
+            if (peer->getExeCharacter() == ExesCharacters::NONE
+                && peer->getSurvCharacter() == SurvCharacters::NONE) {
+
+                peer->disconnect(DisconnectReason::AFKTIMEOUT);
+            }
+        }
+    });
 
     Packet pack(PacketType::SERVER_LOBBY_EXE);
     pack.write<clientId>(exe);
@@ -52,12 +63,10 @@ bool CharSelectState::init(int8_t selectedMap) {
     pack.sendBroadcast(*server, true);
 
     Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
-    timePack.write<uint8_t>(countdownSec);
+    timePack.write<uint8_t>(countdown.getCountdownSec());
     timePack.sendBroadcast(*server, true);
 
     Info("{}Server is now in {}Character Select{}", CLRCODE_YLW, CLRCODE_PUR, CLRCODE_RST);
-
-    return true;
 }
 
 bool CharSelectState::handle(Client& client, Packet& packet) {
@@ -83,7 +92,10 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             Packet pack(PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE);
             pack.write<uint8_t>(id);
-            RAssert(pack.send(client, true));
+            if (!pack.send(client, true)) {
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                return false;
+            }
 
             Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
             change.write<clientId>(client.getId());
@@ -145,8 +157,8 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            const clientId pid = packet.read<clientId>();
-            const std::string message = packet.readString();
+            clientId pid = packet.read<clientId>();
+            std::string message = packet.readString();
 
             if (message.size() > 40) {
                 client.disconnect(DisconnectReason::OTHER, "Chat message too long");
@@ -155,10 +167,13 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            Info("{} {} (id {}): {}", client.getNickname(), CLRCODE_RST, client.getId(), message);
+            commandHash hash = controller->cmdParse(message);
+            bool isCommand = controller->cmdHandle(client, hash, message);
 
-            controller->cmd_handle(client, this->controller->cmd_parse(message), message);
-
+            Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
+            if (!isCommand) {
+                server->send_broadcast_message(client.getId(), message);
+            }
             break;
         }
 
@@ -169,28 +184,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 }
 
 void CharSelectState::tick() {
-    if (countdown <= 0) {
-        countdown += TICKSPERSEC;
-
-        if (--countdownSec == 0) {
-            for (auto& peer : server->getClients()) {
-                if (!peer || !peer->isInGame())
-                    continue;
-
-                if (peer->getExeCharacter() == ExesCharacters::NONE
-                    && peer->getSurvCharacter() == SurvCharacters::NONE) {
-
-                    peer->disconnect(DisconnectReason::AFKTIMEOUT);
-                }
-            }
-        }
-
-        Packet pack(PacketType::SERVER_CHAR_TIME_SYNC);
-        pack.write<uint8_t>(countdownSec);
-        pack.sendBroadcast(*server, true);
-    }
-
-    countdown -= server->getDelta();
+    countdown.update();
 }
 
 bool CharSelectState::chooseExe() {

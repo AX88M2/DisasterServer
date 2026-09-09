@@ -2,7 +2,8 @@
 #define DISASTERSERVER_MAPVOTESTATE_HPP
 
 #include "Client.hpp"
-#include "Core/State.hpp"
+#include "State.hpp"
+#include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
@@ -10,18 +11,22 @@ namespace DisasterServer
     class StateController;
 
     class MapVoteState : public State {
-        std::array<uint8_t, 3> maps;
-        std::array<uint8_t, 3> votes;
+        Countdown countdown;
+
+        std::array<uint8_t, 3> maps = {};
+        std::array<uint8_t, 3> votes = {};
     public:
         MapVoteState(Server *server, StateController *controller);
         ~MapVoteState() override = default;
 
+        void init();
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
 
-        MapVoteState &get() { return *this; }
+    private:
+        void checkState();
     };
 }
 

@@ -42,7 +42,7 @@ bool Client::identity(Packet &packet) {
     this->lobby_icon = lobby_icon;
     this->pet = pet;
 
-    this->in_game = (server->getStateController().getCurrentState() == States::LOBBY);
+    this->in_game = server->getStateController().isState<LobbyState>();
     this->exe_chance = 1 + rand() % 4;
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
@@ -109,7 +109,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
     }
 
     Packet packet(PacketType::SERVER_IDENTITY_RESPONSE);
-    packet.write<uint8_t>(server->getStateController().getCurrentState() == States::LOBBY);
+    packet.write<uint8_t>(server->getStateController().isState<LobbyState>());
     packet.write<clientId>(id);
     packet.send(*this, true);
 

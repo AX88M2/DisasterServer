@@ -2,7 +2,7 @@
 #define DISASTERSERVER_STATEMACHINE_HPP
 
 #include "Core/Packet.hpp"
-#include "Core/State.hpp"
+#include "States/State.hpp"
 #include "States/LobbyState.hpp"
 #include "States/CharSelect.hpp"
 
@@ -40,8 +40,6 @@ namespace DisasterServer
         Server *server = nullptr;
         States state = States::LOBBY;
 
-        LobbyState lobby;
-        CharSelectState charSelect;
         std::unique_ptr<State> current;
     public:
         explicit StateController(Server* server);
@@ -57,26 +55,27 @@ namespace DisasterServer
             current = std::move(state);
         }
 
+        template <std::derived_from<State> T>
+        bool isState() const {
+            return dynamic_cast<T*>(current.get()) != nullptr;
+        }
+
         bool playerJoined(Client& peer);
         void playerLeft(Client& peer);
         void tick();
         bool handle(Client& peer, Packet& packet);
 
-        commandHash cmd_parse(std::string string);
-        bool cmd_handle(Client& client, commandHash hash, const std::string& message);
+        commandHash cmdParse(std::string string);
+        bool cmdHandle(Client& client, commandHash hash, const std::string& message);
 
         States getCurrentState() const { return state; }
         void setState(States state) { this->state = state; }
-
-
-        LobbyState& getLobbyState() { return lobby.get(); }
-        CharSelectState& getCharSelect() { return charSelect.get(); }
     };
 }
 
 #define AssertOrDisconnect(client, x) \
 if(!(x)) { \
-    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); break; \
+    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); return false; \
 }
 
 #endif //DISASTERSERVER_STATEMACHINE_HPP
