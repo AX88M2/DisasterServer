@@ -1,11 +1,9 @@
 #include "Server.hpp"
-
+#include "Config.hpp"
 #include <algorithm>
-
 #include "Core/Packet.hpp"
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
-
 #include "StateController.hpp"
 #include "Core/Colors.hpp"
 
@@ -15,7 +13,7 @@ using namespace DisasterServer;
 Server::Server(const uint16_t n) : id(n), stateController(this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
-    addr.port = BASE_SERVER_PORT + n;
+    addr.port = static_cast<enet_uint16>(g_config.port + n);
     host = enet_host_create(&addr, 50, 2, 0, 0);
 
     Info("Listening on port {}", addr.port);
@@ -32,8 +30,6 @@ void Server::initialize() {
     double next_tick = time_end(&ticker);
     double heartbeat = 0.0;
     constexpr double TARGET_FPS = 1000.0 / 60;
-
-    //
 
     while (!running) {
         ENetEvent ev;

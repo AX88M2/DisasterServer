@@ -1,5 +1,6 @@
 #include "StateController.hpp"
 #include "Server.hpp"
+#include "Config.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
@@ -203,11 +204,26 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         }
 
         case CMD_LOBBY: {
+
             int ind;
-            if (sscanf(message.c_str(), ".lobby %d", &ind) <= 0) {
-                this->server->send_message(client, "{}example:~ .lobby 1");
+            if (sscanf(message.c_str(), ".lobby %d", &ind) != 1) {
+                this->server->send_message(client, "{}example: .lobby 1", CLRCODE_RED);
                 break;
             }
+
+            if (ind < 1 || ind > static_cast<int>(g_config.lobby_count)) {
+                this->server->send_message(client, std::string(CLRCODE_RED) + "lobby should be between 1 and " + std::to_string(g_config.lobby_count));
+                break;
+            }
+
+            Packet pack(PacketType::SERVER_LOBBY_CHANGELOBBY);
+            uint32_t port = g_config.port + static_cast<uint32_t>(ind - 1);
+            pack.write<uint32_t>(port);
+
+            if (!pack.send(client, true)) {
+                Warn("Failed to send lobby change packet to {} (id {})", client.getNickname(), client.getId());
+            }
+
             break;
         }
 

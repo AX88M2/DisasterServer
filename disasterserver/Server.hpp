@@ -13,7 +13,6 @@ namespace DisasterServer
     constexpr int MAX_PLAYERS = 7;
     constexpr int MAP_COUNT = 20;
     constexpr int BUILD_VERSION = 1101;
-    constexpr int BASE_SERVER_PORT = 8606;
 
     class Server {
         uint16_t id = 0;
