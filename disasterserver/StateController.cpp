@@ -232,7 +232,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             this->server->send_message(client, "|- .info~ - information about server");
             this->server->send_message(client, "|- .vk~ - vote kick");
             this->server->send_message(client, "|- .vp~ - vote practice mode (wip)");
-            this->server->send_message(client, "|- .lobby~ - change lobby (wip)");
+            this->server->send_message(client, "|- .lobby~ - change lobby)");
             break;
         }
 
