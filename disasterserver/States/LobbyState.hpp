@@ -20,6 +20,8 @@ namespace DisasterServer
         Vote vote;
         clientId kick_target = 0;
     public:
+        static constexpr States STATE_ID = States::LOBBY;
+
         LobbyState(Server *server, StateController *controller);
         ~LobbyState() override = default;
 
@@ -36,8 +38,6 @@ namespace DisasterServer
         void checkVote();
         bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
     };
-
-
 }
 
-#endif //DISASTERSERVER_LOBBY_HPP
+#endif

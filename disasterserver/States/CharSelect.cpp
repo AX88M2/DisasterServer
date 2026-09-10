@@ -5,6 +5,7 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "StateController.hpp"
+#include "GameState.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
@@ -30,7 +31,7 @@ bool CharSelectState::leaved(Client& client) {
     return checkState();
 }
 
-void CharSelectState::init(int8_t selectedMap) {
+void CharSelectState::init(int selectedMap) {
     Debug("Attempting to enter ST_CHARSELECT...");
 
     if (!chooseExe()) {
@@ -39,6 +40,9 @@ void CharSelectState::init(int8_t selectedMap) {
         controller->changeTo<LobbyState>();
         return;
     }
+
+    map = selectedMap;
+    controller->setState(States::CHARSELECT);
 
     countdown.start(30);
     countdown.setEndOfCountdown([&] {
@@ -156,7 +160,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            clientId pid = packet.read<clientId>();
+            packet.read<clientId>();
             std::string message = packet.readString();
 
             if (message.size() > 40) {
@@ -245,7 +249,8 @@ bool CharSelectState::checkState() {
     }
 
     if (shouldStart) {
-        controller->setState(States::GAME); //Game start
+        server->game.exe = exe;
+        controller->changeTo<GameState>(map);
         return true;
     }
 

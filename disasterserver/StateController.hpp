@@ -1,4 +1,4 @@
-#ifndef DISASTERSERVER_STATEMACHINE_HPP
+﻿#ifndef DISASTERSERVER_STATEMACHINE_HPP
 #define DISASTERSERVER_STATEMACHINE_HPP
 
 #include "Core/Packet.hpp"
@@ -9,14 +9,6 @@
 namespace DisasterServer
 {
     class Client;
-
-    enum class States {
-        LOBBY,
-        MAPVOTE,
-        CHARSELECT,
-        GAME,
-        RESULTS
-    };
 
     constexpr commandHash CMD_HELP = 45680751;
     constexpr commandHash CMD_MAP = 1478254;
@@ -46,13 +38,12 @@ namespace DisasterServer
         ~StateController();
 
         template <std::derived_from<State> T, typename... Args>
-        requires requires (T& state, Args&&... args) { state.init(std::forward<Args>(args)...); }
+        requires requires (T& s, Args&&... args) { s.init(std::forward<Args>(args)...); }
         void changeTo(Args&&... args) {
-            auto state = std::make_unique<T>(server, this);
-
-            state->init(std::forward<Args>(args)...);
-
-            current = std::move(state);
+            auto next = std::make_unique<T>(server, this);
+            next->init(std::forward<Args>(args)...);
+            current = std::move(next);
+            state   = T::STATE_ID;
         }
 
         template <std::derived_from<State> T>
@@ -79,3 +70,4 @@ if(!(x)) { \
 }
 
 #endif //DISASTERSERVER_STATEMACHINE_HPP
+

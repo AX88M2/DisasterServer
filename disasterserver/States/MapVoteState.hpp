@@ -18,6 +18,7 @@ namespace DisasterServer
     public:
         MapVoteState(Server *server, StateController *controller);
         ~MapVoteState() override = default;
+        static constexpr States STATE_ID = States::MAPVOTE;
 
         void init();
         bool joined(Client& client) override;

@@ -9,28 +9,30 @@ namespace DisasterServer
     class StateController;
     class Server;
 
+    enum class States {
+        LOBBY,
+        MAPVOTE,
+        CHARSELECT,
+        GAME,
+        RESULTS
+    };
+
     class State {
     protected:
         Server *server;
         StateController *controller;
     public:
-        State(Server *server, StateController *controller) : server(server), controller(controller) {}
+        // значение по умолчанию, наследники переопределяют
+        static constexpr States STATE_ID = States::LOBBY;
+
+        State(Server *server, StateController *controller)
+            : server(server), controller(controller) {}
         virtual ~State() = default;
 
-        virtual bool joined(Client& client) {
-            return true;
-        }
-
-        virtual bool leaved(Client& client) {
-            return true;
-        }
-
-        virtual void tick() {
-        }
-
-        virtual bool handle(Client& client, Packet& packet) {
-            return true;
-        }
+        virtual bool joined(Client& client) { return true; }
+        virtual bool leaved(Client& client) { return true; }
+        virtual void tick() {}
+        virtual bool handle(Client& client, Packet& packet) { return true; }
     };
 }
 
