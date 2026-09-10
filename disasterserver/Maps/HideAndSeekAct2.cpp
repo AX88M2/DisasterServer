@@ -2,8 +2,7 @@
 
 using namespace DisasterServer::Maps;
 
-HideAndSeekAct2::HideAndSeekAct2(Server *server) :
-    Map(server, "Hide And Seek Act2", 1, 30) {}
+HideAndSeekAct2::HideAndSeekAct2(Server *server) : Map(server, "Hide And Seek 2", 1, 30) {}
 
 void HideAndSeekAct2::init() {
 

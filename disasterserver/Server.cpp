@@ -8,7 +8,7 @@
 
 using namespace DisasterServer;
 
-Server::Server(const uint16_t n) : id(n), stateController(this) {
+Server::Server(const uint16_t n) : id(n), stateController(this), mapController(this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
     addr.port = static_cast<enet_uint16>(g_config.port + n);
@@ -22,6 +22,9 @@ Server::~Server() {
 }
 
 void Server::initialize() {
+
+    mapController.initialize();
+
     TimeStamp ticker;
     time_start(&ticker);
 

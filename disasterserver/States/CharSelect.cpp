@@ -40,9 +40,6 @@ void CharSelectState::init(int8_t selectedMap) {
         return;
     }
 
-    map = selectedMap;
-    controller->setState(States::CHARSELECT);
-
     countdown.start(30);
     countdown.setEndOfCountdown([&] {
         for (auto& peer : server->getClients()) {
@@ -59,7 +56,7 @@ void CharSelectState::init(int8_t selectedMap) {
 
     Packet pack(PacketType::SERVER_LOBBY_EXE);
     pack.write<clientId>(exe);
-    pack.write<uint16_t>(map);
+    pack.write<uint16_t>(selectedMap);
     pack.sendBroadcast(*server, true);
 
     Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
@@ -67,6 +64,8 @@ void CharSelectState::init(int8_t selectedMap) {
     timePack.sendBroadcast(*server, true);
 
     Info("{}Server is now in {}Character Select{}", CLRCODE_YLW, CLRCODE_PUR, CLRCODE_RST);
+
+    map = selectedMap;
 }
 
 bool CharSelectState::handle(Client& client, Packet& packet) {

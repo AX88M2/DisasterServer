@@ -26,6 +26,8 @@ namespace DisasterServer
         virtual void tick() = 0;
         virtual void handle(Client &client, Packet& packet) = 0;
         virtual void left(Client &client) = 0;
+
+        std::string getName() { return name; }
     };
 }
 

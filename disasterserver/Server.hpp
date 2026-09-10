@@ -2,6 +2,7 @@
 #define DISASTERSERVER_SERVER_HPP
 
 #include "Client.hpp"
+#include "MapController.hpp"
 #include "StateController.hpp"
 
 constexpr int TICKSPERSEC = 60;
@@ -22,6 +23,7 @@ namespace DisasterServer
 
         std::vector<std::unique_ptr<Client>> peers;
         StateController stateController;
+        MapController mapController;
         double delta = 0;
     public:
         Server(uint16_t n = 0);

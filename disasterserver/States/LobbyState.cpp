@@ -175,7 +175,7 @@ void LobbyState::tick() {
             countdown += TICKSPERSEC;
 
             if (--countdownSec == 0) {
-                controller->changeTo<CharSelectState>(0); //Map vote
+                controller->changeTo<CharSelectState>(1); //Map vote
                 return;
             }
 

@@ -7,7 +7,7 @@ namespace DisasterServer::Maps
 {
     class HideAndSeekAct2 : public Map {
     public:
-        explicit HideAndSeekAct2(Server *server);
+        HideAndSeekAct2(Server *server);
 
         void init() override;
 

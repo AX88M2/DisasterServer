@@ -22,6 +22,8 @@ void MapVoteState::init() {
     countdown.setEndOfCountdown([&] {
 
     });
+
+
 }
 
 bool MapVoteState::joined(Client &client) {
