@@ -4,10 +4,11 @@
 
 using namespace DisasterServer;
 
-MapController::MapController(Server *server) {
-
+MapController::MapController(Server* server) : server(server)
+{
+    //meow
 }
 
 void MapController::initialize() {
-    this->registerMap<Maps::HideAndSeekAct2>();
+    registerMap<Maps::HideAndSeekAct2>();
 }

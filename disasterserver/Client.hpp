@@ -107,6 +107,8 @@ namespace DisasterServer
         bool can_vote = false;
         bool voted = false;
         bool disconnecting = false;
+        bool dead = false;
+        bool escaped = false;
 
         struct AuthPeer {
             uint32_t type = 0;
@@ -158,6 +160,10 @@ namespace DisasterServer
         bool isCanVote() { return can_vote; }
         void setOperator(bool flag) { op = flag; }
         bool isOpped() { return op; }
+        bool isDead() {return dead; }
+        void setDead(bool flag) { dead = flag; }
+        bool isEscaped() { return escaped; }
+        void setEscaped(bool flag) { escaped = flag; }
 
         bool isVerified() { return verified; }
         bool isModified() { return mod_tool; }

@@ -1,21 +1,25 @@
 #include "HideAndSeekAct2.hpp"
 
-using namespace DisasterServer::Maps;
+#include "Server.hpp"
+#include "Maps.hpp"
+#include "Client.hpp"
+#include "Core/Packet.hpp"
+#include "Core/Colors.hpp"
 
-HideAndSeekAct2::HideAndSeekAct2(Server *server) : Map(server, "Hide And Seek 2", 1, 30) {}
+using namespace DisasterServer;
 
-void HideAndSeekAct2::init() {
+namespace DisasterServer::Maps
+{
+    HideAndSeekAct2::HideAndSeekAct2(Server* server) : Map(server, "Hide And Seek 2", 1, 30) {}
 
-}
+    void HideAndSeekAct2::init(int mapId)
+    {
+        map_time(*server, 3 * TICKSPERSEC, 20);
+        map_ring(*server, 5);
+    }
 
-void HideAndSeekAct2::tick() {
-
-}
-
-void HideAndSeekAct2::handle(Client &client, Packet &packet) {
-
-}
-
-void HideAndSeekAct2::left(Client &client) {
+    void HideAndSeekAct2::tick(){}
+    void HideAndSeekAct2::handle(Client&, Packet&){}
+    void HideAndSeekAct2::left(Client&){}
 
 }

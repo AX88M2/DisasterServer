@@ -15,17 +15,37 @@ namespace DisasterServer
     constexpr int MAP_COUNT = 20;
     constexpr int BUILD_VERSION = 1101;
 
+    enum BringState : uint8_t {
+        BS_NONE        = 0,
+        BS_ACTIVATED   = 1,
+        BS_DEACTIVATED = 2,
+    };
+
+    struct GameData {
+        int        mapId         = 0;
+        clientId   exe           = 0;
+
+        uint16_t   timeSec       = 0;
+        int        ringCoff      = 1;
+        BringState bringState    = BS_NONE;
+        uint8_t    bringLoc      = 0;
+
+        bool       started       = false;
+        double     startTimeout  = 0;
+        double     elapsed       = 0;
+        double     timeAccum     = 0;
+
+        double     end           = 0;
+        int        ending        = 0;
+        bool       suddenDeath   = false;
+        double     deathTimer    = 0;
+    };
+
     class Server {
-        uint16_t id = 0;
-        bool running = false;
-
-        ENetHost *host = nullptr;
-
-        std::vector<std::unique_ptr<Client>> peers;
-        StateController stateController;
-        MapController mapController;
-        double delta = 0;
     public:
+        GameData game;
+        MapController mapController;
+
         Server(uint16_t n = 0);
         ~Server();
         void initialize();
@@ -53,10 +73,16 @@ namespace DisasterServer
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         StateController &getStateController();
 
-        double getDelta() {
-            return delta;
-        }
+        double getDelta() { return delta; }
+
+    private:
+        uint16_t id = 0;
+        bool running = false;
+        ENetHost *host = nullptr;
+        std::vector<std::unique_ptr<Client>> peers;
+        StateController stateController;
+        double delta = 0;
     };
 }
 
-#endif //DISASTERSERVER_SERVER_HPP
+#endif

@@ -9,20 +9,21 @@
 
 namespace DisasterServer
 {
-
 class StateController;
 
 class CharSelectState : public State {
     Countdown countdown;
 
-    int8_t map = 0;
+    int map = 0;
     clientId exe = 0;
     std::unordered_map<SurvCharacters, bool> avail;
 public:
+    static constexpr States STATE_ID = States::CHARSELECT;
+
     CharSelectState(Server* server, StateController* controller);
     ~CharSelectState() = default;
 
-    void init(int8_t map);
+    void init(int selectedMap);
 
     bool joined(Client& client) override;
     bool leaved(Client& client) override;
@@ -32,7 +33,5 @@ private:
     bool checkState();
     bool chooseExe();
 };
-
 }
-
-#endif // DISASTERSERVER_CHARSELECTSTATE_HPP
+#endif

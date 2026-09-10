@@ -5,18 +5,16 @@
 
 namespace DisasterServer::Maps
 {
-    class HideAndSeekAct2 : public Map {
+    class HideAndSeekAct2 : public Map
+    {
     public:
-        HideAndSeekAct2(Server *server);
+        explicit HideAndSeekAct2(Server* server);
 
-        void init() override;
-
+        void init(int mapId) override;
         void tick() override;
-
-        void handle(Client &client, Packet &packet) override;
-
-        void left(Client &client) override;
+        void handle(Client& client, Packet& packet) override;
+        void left(Client& client) override;
     };
 }
 
-#endif //DISASTERSERVER_HIDEANDSEEKACT2_HPP
+#endif

@@ -1,10 +1,12 @@
-#ifndef DISASTERSERVER_MAPCONTROLLER_HPP
+﻿#ifndef DISASTERSERVER_MAPCONTROLLER_HPP
 #define DISASTERSERVER_MAPCONTROLLER_HPP
 
 #include <memory>
 #include <typeindex>
 #include <unordered_set>
 #include <vector>
+#include "Core/Log.hpp"
+
 
 #include "Core/Map.hpp"
 
@@ -20,6 +22,11 @@ namespace DisasterServer
     public:
         MapController(Server *server);
         ~MapController() = default;
+
+        Map* get(size_t idx) const {
+            return idx < maps.size() ? maps[idx].get() : nullptr;
+        }
+        size_t count() const { return maps.size(); }
 
         template <std::derived_from<Map> T>
         void registerMap() {
@@ -38,3 +45,4 @@ namespace DisasterServer
 }
 
 #endif //DISASTERSERVER_MAPCONTROLLER_HPP
+
