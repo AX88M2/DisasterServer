@@ -3,12 +3,12 @@
 
 #include "Core/Map.hpp"
 
-namespace DisasterServer
+namespace DisasterServer::Maps
 {
     class HideAndSeekAct2 : public Map
     {
     public:
-        explicit HideAndSeekAct2(Server *server);
+        explicit HideAndSeekAct2(Server* server);
 
         void init(int mapId) override;
         void tick() override;
@@ -17,4 +17,4 @@ namespace DisasterServer
     };
 }
 
-#endif //DISASTERSERVER_HIDEANDSEEKACT2_HPP
+#endif

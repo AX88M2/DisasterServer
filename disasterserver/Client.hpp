@@ -163,7 +163,7 @@ namespace DisasterServer
         bool isDead() {return dead; }
         void setDead(bool flag) { dead = flag; }
         bool isEscaped() { return escaped; }
-        bool setEscaped(bool flag) { escaped = flag; }
+        void setEscaped(bool flag) { escaped = flag; }
 
         bool isVerified() { return verified; }
         bool isModified() { return mod_tool; }
