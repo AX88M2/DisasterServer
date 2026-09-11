@@ -6,11 +6,12 @@
 #include "Client.hpp"
 #include "StateController.hpp"
 #include "GameState.hpp"
+#include "LobbyState.hpp"
 #include "Core/Colors.hpp"
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller), countdown(server) {
+CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller) {
 }
 
 bool CharSelectState::joined(Client& client) {
@@ -23,53 +24,39 @@ bool CharSelectState::leaved(Client& client) {
         avail[character] = false;
     }
 
-    if (this->server->getInGameCount() <= 1 || client.getId() == exe) {
-        controller->changeTo<LobbyState>();
+    if (this->server->getInGameCount() < 1 || client.getId() == exe) {
+        stateController->changeTo<LobbyState>();
         return true;
     }
 
     return checkState();
 }
 
-void CharSelectState::init(int selectedMap) {
+void CharSelectState::init(Map* map, uint8_t id) {
     Debug("Attempting to enter ST_CHARSELECT...");
 
     if (!chooseExe()) {
         Err("Failed to pick exe for some reason!");
 
-        controller->changeTo<LobbyState>();
+        stateController->changeTo<LobbyState>();
         return;
     }
 
-    map = selectedMap;
-    controller->setState(States::CHARSELECT);
-
     countdown.start(30);
-    countdown.setEndOfCountdown([&] {
-        for (auto& peer : server->getClients()) {
-            if (!peer || !peer->isInGame())
-                continue;
-
-            if (peer->getExeCharacter() == ExesCharacters::NONE
-                && peer->getSurvCharacter() == SurvCharacters::NONE) {
-
-                peer->disconnect(DisconnectReason::AFKTIMEOUT);
-            }
-        }
-    });
 
     Packet pack(PacketType::SERVER_LOBBY_EXE);
     pack.write<clientId>(exe);
-    pack.write<uint16_t>(selectedMap);
+    pack.write<uint16_t>(id);
     pack.sendBroadcast(*server, true);
 
     Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
-    timePack.write<uint8_t>(countdown.getCountdownSec());
-    timePack.sendBroadcast(*server, true);
+    timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
+    timePack.sendBroadcast(*server);
 
     Info("{}Server is now in {}Character Select{}", CLRCODE_YLW, CLRCODE_PUR, CLRCODE_RST);
 
-    map = selectedMap;
+    this->map = map;
+    this->mapId = id;
 }
 
 bool CharSelectState::handle(Client& client, Packet& packet) {
@@ -170,8 +157,8 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = controller->cmdParse(message);
-            bool isCommand = controller->cmdHandle(client, hash, message);
+            commandHash hash = stateController->cmdParse(message);
+            bool isCommand = stateController->cmdHandle(client, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
@@ -187,7 +174,28 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 }
 
 void CharSelectState::tick() {
-    countdown.update();
+    switch (countdown.tick(server->getDelta())) {
+        case Countdown::TickResult::Finished: {
+            for (auto& peer : server->getClients()) {
+                if (!peer || !peer->isInGame())
+                    continue;
+
+                if (peer->getExeCharacter() == ExesCharacters::NONE && peer->getSurvCharacter() == SurvCharacters::NONE) {
+
+                    peer->disconnect(DisconnectReason::AFKTIMEOUT);
+                }
+            }
+            break;
+        }
+
+        case Countdown::TickResult::Second: {
+            Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
+            timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
+            timePack.sendBroadcast(*server);
+            break;
+        }
+        default: break;
+    }
 }
 
 bool CharSelectState::chooseExe() {
@@ -249,8 +257,7 @@ bool CharSelectState::checkState() {
     }
 
     if (shouldStart) {
-        server->game.exe = exe;
-        controller->changeTo<GameState>(map);
+        stateController->changeTo<GameState>(exe, mapId, map);
         return true;
     }
 

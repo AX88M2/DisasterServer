@@ -3,6 +3,8 @@
 
 #include "Client.hpp"
 #include "State.hpp"
+#include "Core/Constansts.hpp"
+#include "Core/Map.hpp"
 #include "Util/Countdown.hpp"
 #include "Core/Packet.hpp"
 #include "Core/Types.hpp"
@@ -12,18 +14,17 @@ namespace DisasterServer
 class StateController;
 
 class CharSelectState : public State {
-    Countdown countdown;
+    Countdown countdown = Countdown(TICKSPERSEC);
 
-    int map = 0;
+    Map *map = nullptr;
+    int8_t mapId = 0;
     clientId exe = 0;
     std::unordered_map<SurvCharacters, bool> avail;
 public:
-    static constexpr States STATE_ID = States::CHARSELECT;
-
     CharSelectState(Server* server, StateController* controller);
     ~CharSelectState() = default;
 
-    void init(int selectedMap);
+    void init(Map* map, uint8_t id);
 
     bool joined(Client& client) override;
     bool leaved(Client& client) override;

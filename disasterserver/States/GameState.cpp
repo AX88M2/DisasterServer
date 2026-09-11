@@ -8,9 +8,11 @@
 
 using namespace DisasterServer;
 
-void GameState::init(int selectedMap)
+GameState::GameState(Server *server, StateController *controller) : State(server, controller) {}
+
+void GameState::init(clientId exe, int selectedMap, Map* currentMap)
 {
-    const int totalMaps = static_cast<int>(server->mapController.count());
+    /*const int totalMaps = static_cast<int>(server->mapController.count());
 
     if (selectedMap < 0 || selectedMap >= totalMaps) {
         Warn("GameState::init: requested map {} out of range (have {}), using 0",
@@ -25,17 +27,17 @@ void GameState::init(int selectedMap)
     }
 
     mapId_ = selectedMap;
-    map_   = server->mapController.get(selectedMap);
+    currentMap   = server->mapController.get(selectedMap);
 
-    if (!map_) {
+    if (!currentMap) {
         Err("GameState::init: map {} is null", selectedMap);
         controller->changeTo<LobbyState>();
         return;
     }
 
-    map_->setServer(server);
+    currentMap->setServer(server);
 
-    auto& g = server->game;
+    /*auto& g = server->game;
     g.mapId         = selectedMap;
     g.timeSec       = 0;
     g.ringCoff      = 1;
@@ -47,17 +49,17 @@ void GameState::init(int selectedMap)
     g.timeAccum     = 0;
     g.end           = 0;
     g.ending        = 0;
-    g.suddenDeath   = false;
+    g.suddenDeath   = false;*/
 
-    for (auto& peer : server->getClients()) {
+    /*for (auto& peer : server->getClients()) {
         if (!peer || !peer->isInGame()) continue;
         peer->setReady(false);
         peer->setTimeout(0);
     }
 
     Packet pack(PacketType::SERVER_LOBBY_GAME_START);
-    pack.sendBroadcast(*server, true);
-    Info("{}Round waiting for players on map [{}{}{}]", CLRCODE_YLW, CLRCODE_PUR, map_->getName().c_str(), CLRCODE_YLW);
+    pack.sendBroadcast(*server, true);*/
+    Info("{}Round waiting for players on map [{}{}{}]", CLRCODE_YLW, CLRCODE_PUR, currentMap->getName(), CLRCODE_YLW);
 }
 
 bool GameState::joined(Client& /*client*/)
@@ -67,7 +69,7 @@ bool GameState::joined(Client& /*client*/)
 
 bool GameState::leaved(Client& client)
 {
-    if (map_) map_->left(client);
+    if (currentMap) currentMap->left(client);
 
     if (server->getInGameCount() <= 1) {
         endRound(/*ending=*/0, /*achiv=*/false);
@@ -77,7 +79,7 @@ bool GameState::leaved(Client& client)
 
 void GameState::tick()
 {
-    if (!map_) { controller->changeTo<LobbyState>(); return; }
+    /*if (!currentMap) { controller->changeTo<LobbyState>(); return; }
 
     auto& g = server->game;
     if (!g.started) {
@@ -93,12 +95,12 @@ void GameState::tick()
         return;
     }
 
-    tickPlaying();
+    tickPlaying();*/
 }
 
 void GameState::tickStartWait()
 {
-    auto& g = server->game;
+    /*auto& g = server->game;
 
     g.startTimeout -= server->getDelta();
     if (g.startTimeout <= 0) {
@@ -126,17 +128,17 @@ void GameState::tickStartWait()
         pack.sendBroadcast(*server, true);
 
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
-        map_->init(mapId_);
+        currentMap->init(mapId_);
 
         g.started = true;
         Info("{}Game started! {}(Time {}s)",
              CLRCODE_YLW, CLRCODE_RST, g.timeSec);
-    }
+    }*/
 }
 
 void GameState::tickPlaying()
 {
-    auto& g = server->game;
+    /*auto& g = server->game;
 
     g.elapsed += server->getDelta();
 
@@ -154,19 +156,18 @@ void GameState::tickPlaying()
         sendTimeSync();
 
         if (g.timeSec == 0) {
-            endRound(/*ending=*/3 /*TIME_OVER*/, true);
+            endRound(3 0, true);
             return;
         }
     }
 
-    map_->tick();
-    checkState();
+    currentMap->tick();
+    checkState();*/
 }
 
 bool GameState::checkState()
 {
-    auto& g = server->game;
-    if (g.end > 0) return true;
+    if (end > 0) return true;
 
     size_t escaped = 0, dead = 0, exes = 0, total = 0;
     for (auto& peer : server->getClients()) {
@@ -175,8 +176,7 @@ bool GameState::checkState()
 
         total++;
 
-        if (peer->getId() == g.exe)
-            { exes++; continue; }
+        if (peer->getId() == exe) { exes++; continue; }
 
         if (peer->isDead())
             dead++;
@@ -208,8 +208,8 @@ bool GameState::handle(Client& client, Packet& packet)
             }
             client.setTimeout(0);
 
-            commandHash hash = controller->cmdParse(message);
-            bool isCommand   = controller->cmdHandle(client, hash, message);
+            commandHash hash = stateController->cmdParse(message);
+            bool isCommand   = stateController->cmdHandle(client, hash, message);
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand)
                 server->send_broadcast_message(client.getId(), message);
@@ -237,7 +237,7 @@ bool GameState::handle(Client& client, Packet& packet)
         }
 
         case PacketType::CLIENT_PLAYER_DATA: {
-            if (!server->game.started && !client.isReady()) {
+            if (!started && !client.isReady()) {
                 client.setReady(true);
             }
             return true;
@@ -247,13 +247,13 @@ bool GameState::handle(Client& client, Packet& packet)
             break;
     }
 
-    if (map_) map_->handle(client, packet);
+    if (currentMap) currentMap->handle(client, packet);
     return true;
 }
 
 bool GameState::endRound(int ending, bool achiv)
 {
-    auto& g = server->game;
+    /*auto& g = server->game;
     if (g.end > 0)
         return true;
 
@@ -282,20 +282,20 @@ bool GameState::endRound(int ending, bool achiv)
     Info("Round ending: {} (achiv {})", static_cast<int>(ending), achiv);
 
     g.end = 5.0 * TICKSPERSEC;
-    g.ending = ending;
+    g.ending = ending;*/
     return true;
 }
 
 void GameState::sendTimeSync()
 {
-    Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
-    pack.write<uint16_t>(static_cast<uint16_t>(server->game.timeSec * TICKSPERSEC));
-    pack.sendBroadcast(*server, true);
+    /*Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
+    pack.write<uint16_t>(static_cast<uint16_t>(timeSec * TICKSPERSEC));
+    pack.sendBroadcast(*server, true);*/
 }
 
 void GameState::bigRing(BringState state)
 {
-    auto& g = server->game;
+    /*auto& g = server->game;
     if (g.bringState == state) return;
 
     Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
@@ -303,5 +303,5 @@ void GameState::bigRing(BringState state)
     pack.write<uint8_t>(g.bringLoc);
     pack.sendBroadcast(*server, true);
 
-    g.bringState = state;
+    g.bringState = state;*/
 }

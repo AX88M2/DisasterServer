@@ -2,31 +2,23 @@
 #define DISASTERSERVER_STATE_HPP
 
 #include "Client.hpp"
+
 #include "Core/Types.hpp"
 
 namespace DisasterServer
 {
     class StateController;
+    class MapController;
     class Server;
-
-    enum class States {
-        LOBBY,
-        MAPVOTE,
-        CHARSELECT,
-        GAME,
-        RESULTS
-    };
 
     class State {
     protected:
         Server *server;
-        StateController *controller;
+        StateController *stateController;
     public:
-        // значение по умолчанию, наследники переопределяют
-        static constexpr States STATE_ID = States::LOBBY;
-
-        State(Server *server, StateController *controller)
-            : server(server), controller(controller) {}
+        State(Server *server, StateController *stateController) :
+            server(server),
+            stateController(stateController){}
         virtual ~State() = default;
 
         virtual bool joined(Client& client) { return true; }

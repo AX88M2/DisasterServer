@@ -5,6 +5,8 @@
 
 #include "State.hpp"
 #include "Vote.hpp"
+#include "Core/Constansts.hpp"
+#include "Util/Countdown.hpp"
 
 constexpr int START_COUNTDOWN = 5;
 constexpr int NO_COUNTDOWN  = START_COUNTDOWN + 1;
@@ -14,14 +16,11 @@ namespace DisasterServer
     class StateController;
 
     class LobbyState : public State {
-        double countdown = 0;
+        Countdown countdown { TICKSPERSEC };
         double pracCountdown = 0;
-        uint8_t countdownSec = 0;
         Vote vote;
         clientId kick_target = 0;
     public:
-        static constexpr States STATE_ID = States::LOBBY;
-
         LobbyState(Server *server, StateController *controller);
         ~LobbyState() override = default;
 

@@ -1,0 +1,9 @@
+#ifndef DISASTERSERVER_CONSTANSTS_HPP
+#define DISASTERSERVER_CONSTANSTS_HPP
+
+constexpr int TICKSPERSEC = 60;
+constexpr int MAX_PLAYERS = 7;
+constexpr int MAP_COUNT = 20;
+constexpr int BUILD_VERSION = 1101;
+
+#endif //DISASTERSERVER_CONSTANSTS_HPP

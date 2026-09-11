@@ -2,6 +2,7 @@
 #include "Server.hpp"
 #include "Config.hpp"
 #include "Core/Colors.hpp"
+#include "States/LobbyState.hpp"
 
 using namespace DisasterServer;
 

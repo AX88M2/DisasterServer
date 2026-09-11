@@ -1,31 +1,75 @@
 #ifndef DISASTERSERVER_COUNTDOWN_HPP
 #define DISASTERSERVER_COUNTDOWN_HPP
 
-#include <functional>
-
 #include "Core/Types.hpp"
 
 namespace DisasterServer
 {
-    class Server;
-
-    class Countdown {
-        Server *server = nullptr;
-
-        double countdown = 0;
-        uint8_t countdownSec = 0;
-
-        std::function<void()> endOfCountdown = [] {};
-
+    class Countdown final
+    {
     public:
-        Countdown(Server *server);
+        enum class TickResult : std::uint8_t
+        {
+            None,
+            Second,
+            Finished
+        };
 
-        void start(uint8_t seconds);
-        void update();
+        explicit Countdown(double ticksPerSecond) noexcept
+            : ticksPerSecond_{ticksPerSecond}
+        {}
 
-        void setEndOfCountdown(const std::function<void()> callback) { this->endOfCountdown = callback; }
+        void start(int seconds) noexcept {
+            seconds_ = seconds;
+            ticks_ = ticksPerSecond_;
+        }
 
-        uint8_t getCountdownSec() { return countdownSec; }
+        void stop() noexcept {
+            ticks_ = 0;
+            seconds_ = 0;
+        }
+
+        void setRemaining(int seconds) noexcept {
+            seconds_ = seconds;
+            ticks_ = 0;
+        }
+
+        [[nodiscard]]
+        TickResult tick(double delta) noexcept {
+            if (!active())
+                return TickResult::None;
+
+            ticks_ -= delta;
+
+            if (ticks_ > 0)
+                return TickResult::None;
+
+            ticks_ += ticksPerSecond_;
+            --seconds_;
+
+            if (seconds_ <= 0)
+            {
+                stop();
+                return TickResult::Finished;
+            }
+
+            return TickResult::Second;
+        }
+
+        [[nodiscard]]
+        bool active() const noexcept {
+            return seconds_ > 0;
+        }
+
+        [[nodiscard]]
+        int remaining() const noexcept {
+            return seconds_;
+        }
+
+    private:
+        double ticksPerSecond_;
+        double ticks_{};
+        int seconds_{};
     };
 }
 

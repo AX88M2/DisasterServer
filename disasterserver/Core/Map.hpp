@@ -31,8 +31,6 @@ namespace DisasterServer
         virtual void left(Client& client) = 0;
 
         const std::string& getName() const { return name; }
-        uint8_t getSpawnRedRings() const { return spawn_red_rings; }
-        uint8_t getRingCount() const     { return ring_count; }
     };
 }
 

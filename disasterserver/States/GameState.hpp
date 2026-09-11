@@ -3,29 +3,49 @@
 
 #include "State.hpp"
 #include "Core/Map.hpp"
-#include "Maps.hpp"
 
 namespace DisasterServer
 {
     class StateController;
 
+    enum class BringState : uint8_t {
+        BS_NONE,
+        BS_ACTIVATED,
+        BS_DEACTIVATED,
+    };
+
     class GameState : public State
     {
+        int mapId_     = 0;
+        Map* currentMap       = nullptr;
+        int syncAccum_ = 0;
+
+        int        mapId         = 0;
+        clientId   exe           = 0;
+
+        uint16_t   timeSec       = 0;
+        int        ringCoff      = 1;
+        BringState bringState    = BringState::BS_NONE;
+        uint8_t    bringLoc      = 0;
+
+        bool       started       = false;
+        double     startTimeout  = 0;
+        double     elapsed       = 0;
+        double     timeAccum     = 0;
+
+        double     end           = 0;
+        int        ending        = 0;
+        bool       suddenDeath   = false;
+        double     deathTimer    = 0;
     public:
-        static constexpr States STATE_ID = States::GAME;
+        GameState(Server* server, StateController* controller);
 
-        GameState(Server* server, StateController* controller)
-            : State(server, controller) {}
-
-        void init(int selectedMap);
+        void init(clientId exe, int selectedMap, Map* currentMap);
 
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
-
-        Map* mapPtr() const { return map_; }
-        int mapId() const { return mapId_; }
 
         bool endRound(int ending, bool achiv);
         bool checkState();
@@ -36,10 +56,6 @@ namespace DisasterServer
         void sendTimeSync();
         void checkStart();
         void bigRing(BringState state);
-
-        int mapId_     = 0;
-        Map* map_       = nullptr;
-        int syncAccum_ = 0;
     };
 }
 
