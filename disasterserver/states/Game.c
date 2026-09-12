@@ -1024,6 +1024,12 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				break;
 			}
 
+			if (v->server->game.bring_state != BS_ACTIVATED)
+			{
+				Warn("%s (id %d) this bro escaped before ring activated", v->nickname.value, v->id);
+				AssertOrDisconnect(v->server, false);
+			}
+
 			if (v->plr.flags & PLAYER_DEAD || v->plr.flags & PLAYER_DEMONIZED)
 				break;
 
