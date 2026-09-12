@@ -46,6 +46,7 @@ SERVER_API Config g_config =
         .anticheat = true,
         .pride = true,
         .random_mode = false,
+		.no_char_limit = false,
     },
     .maps =
     {
@@ -211,6 +212,7 @@ bool config_init(void)
         g_config.gameplay.anticheat = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "anticheat"));
         g_config.gameplay.pride = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "pride"));
         g_config.gameplay.random_mode = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "random_mode"));
+		g_config.gameplay.no_char_limit = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(gameplay, "no_char_limit"));
     }
 
     cJSON *message = cJSON_GetObjectItemCaseSensitive(json, "message");
@@ -266,6 +268,7 @@ SERVER_API bool config_save(void)
     cJSON_AddItemToObject(gameplay, "anticheat", cJSON_CreateBool(g_config.gameplay.anticheat));
     cJSON_AddItemToObject(gameplay, "pride", cJSON_CreateBool(g_config.gameplay.pride));
     cJSON_AddItemToObject(gameplay, "random_mode", cJSON_CreateBool(g_config.gameplay.random_mode));
+	cJSON_AddItemToObject(gameplay, "no_char_limit", cJSON_CreateBool(g_config.gameplay.no_char_limit));
     cJSON_AddItemToObject(json, "gameplay", gameplay);
 
     cJSON *message = cJSON_CreateObject();

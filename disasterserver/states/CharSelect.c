@@ -21,8 +21,28 @@ bool charselect_check_state(Server *server)
 			should = false;
 	}
 
-	if (should)
+	if (should) {
+		if (g_config.gameplay.no_char_limit)
+			for (size_t i = 0; i < server->peers.capacity; i++)
+			{
+				PeerData* peer = (PeerData*)server->peers.ptr[i];
+				if (!peer)
+					continue;
+
+				if (!peer->in_game)
+					continue;
+
+				if (peer->id == server->lobby.exe)
+					continue;
+
+				Packet pack;
+				PacketCreate(&pack, SERVER_LOBBY_CHARACTER_CHANGE);
+				PacketWrite(&pack, packet_write16, peer->id);
+				PacketWrite(&pack, packet_write8, peer->surv_char + 1);
+				server_broadcast(server, &pack, true);
+			}
 		return game_init(server->lobby.exe, server->lobby.map, server);
+	}
 
 	return true;
 }
@@ -142,11 +162,8 @@ bool charselect_state_handle(PeerData *v, Packet *packet)
 		PacketRead(id, packet, packet_read8, uint8_t);
 		id--; // id - 1
 
-		AssertOrDisconnect(v->server, id >= 0);
-		AssertOrDisconnect(v->server, id <= CH_SALLY);
-
 		uint8_t avail = v->server->lobby.avail[id];
-		if (avail)
+		if (avail && !g_config.gameplay.no_char_limit)
 			v->server->lobby.avail[id] = 0;
 
 		PacketCreate(&pack, SERVER_LOBBY_CHARACTER_RESPONSE);
@@ -154,25 +171,28 @@ bool charselect_state_handle(PeerData *v, Packet *packet)
 		PacketWrite(&pack, packet_write8, avail);
 		RAssert(packet_send(v->peer, &pack, true));
 
-		if (avail)
+		if (avail || g_config.gameplay.no_char_limit)
 		{
 			v->surv_char = id;
+		}
 
+		if (!g_config.gameplay.no_char_limit) {
 			PacketCreate(&pack, SERVER_LOBBY_CHARACTER_CHANGE);
 			PacketWrite(&pack, packet_write16, v->id);
 			PacketWrite(&pack, packet_write8, id + 1);
 			server_broadcast(v->server, &pack, true);
 		}
 
-		const char *survs[] = {
+		const char* survs[] = {
 			"Tails",
 			"Knuckles",
 			"Eggman",
 			"Amy",
 			"Cream",
-			"Sally"};
+			"Sally"
+		};
 
-		Info("%s " LOG_RST "(id %d) choses [" LOG_GRN "%s" LOG_RST "]!", v->nickname.value, v->id, survs[id]);
+		Info("%s " LOG_RST "(id %d) choses [" LOG_GRN "%s" LOG_RST "]!", v->nickname.value, v->id, id >= 0 && id <= EX_EXELLER ? survs[id] : "Placeholder");
 		return charselect_check_state(v->server) || lobby_init(v->server);
 	}
 

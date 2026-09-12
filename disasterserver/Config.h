@@ -47,6 +47,7 @@ typedef struct
     bool anticheat;
     bool pride;
     bool random_mode;
+    bool no_char_limit;
 } GameplayConfig;
 
 typedef struct

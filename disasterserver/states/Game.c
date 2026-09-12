@@ -134,7 +134,7 @@ bool game_init(int exe, int8_t map, Server* server)
 		return false;
 	Debug("Entity list created.");
 
-	if (!dylist_create(&server->game.left, 7))
+	if (!dylist_create(&server->game.left, PLAYER_LIMIT))
 		return false;
 	Debug("Left players list created.");
 
@@ -679,7 +679,7 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			AssertOrDisconnect(v->server, game_find(v->server, NULL, "tproj", 10) <= 2);
 
 			int cooldown_id = v->plr.flags & PLAYER_DEMONIZED ? ETAILS_RECHARGE : TAILS_RECHARGE;
-			if(v->server->game.cooldowns[cooldown_id] > 0)
+			if (!g_config.gameplay.no_char_limit && v->server->game.cooldowns[cooldown_id] > 0)
 			{
 				char msg[256];
 				snprintf(msg, 256, "is_exe: %d, cool_id: %s, remaining_cooldown: %f", v->plr.flags & PLAYER_DEMONIZED, cooldown_id == TAILS_RECHARGE ? "TAILS_RECHARGE" : "ETAILS_RECHARGE", v->server->game.cooldowns[cooldown_id]);
@@ -731,7 +731,8 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				break;
 
 			RAssert(game_spawn(v->server, (Entity*)&(MakeTailsProj(x, y, v->id, dir, v->plr.flags & PLAYER_DEMONIZED, chg, dmg)), sizeof(TProjectile), NULL));
-			v->server->game.cooldowns[cooldown_id] = 10 * TICKSPERSEC;
+			if (!g_config.gameplay.no_char_limit)
+				v->server->game.cooldowns[cooldown_id] = 10 * TICKSPERSEC;
 			break;
 		}
 
@@ -784,7 +785,8 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			AssertOrDisconnect(v->server, v->in_game);
 			AssertOrDisconnect(v->server, v->id != v->server->game.exe);
 			AssertOrDisconnect(v->server, v->surv_char == CH_CREAM);
-			AssertOrDisconnect(v->server, v->server->game.cooldowns[CREAM_RING_SPAWN] <= 0);
+			if (!g_config.gameplay.no_char_limit)
+				AssertOrDisconnect(v->server, v->server->game.cooldowns[CREAM_RING_SPAWN] <= 0);
 
 			if (v->mod_tool)
 			{
@@ -846,7 +848,8 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 				}
 			}
 
-			v->server->game.cooldowns[CREAM_RING_SPAWN] = 25 * TICKSPERSEC;
+			if (!g_config.gameplay.no_char_limit)
+				v->server->game.cooldowns[CREAM_RING_SPAWN] = 25 * TICKSPERSEC;
 			break;
 		}
 
@@ -855,13 +858,15 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			AssertOrDisconnect(v->server, v->in_game);
 			AssertOrDisconnect(v->server, v->id != v->server->game.exe);
 			AssertOrDisconnect(v->server, v->surv_char == CH_EGGMAN);
-			AssertOrDisconnect(v->server, v->server->game.cooldowns[EGGTRACK_RECHARGE] <= 0);
-			
+			if (!g_config.gameplay.no_char_limit)
+				AssertOrDisconnect(v->server, v->server->game.cooldowns[EGGTRACK_RECHARGE] <= 0);
+
 			PacketRead(x, packet, packet_read16, uint16_t);
 			PacketRead(y, packet, packet_read16, uint16_t);
 			
 			game_spawn(v->server, (Entity*)&(MakeEggTrack(x, y)), sizeof(EggTracker), NULL);
-			v->server->game.cooldowns[EGGTRACK_RECHARGE] = 10 * TICKSPERSEC; 
+			if (!g_config.gameplay.no_char_limit)
+				v->server->game.cooldowns[EGGTRACK_RECHARGE] = 10 * TICKSPERSEC;
 			break;
 		}
 
@@ -1021,6 +1026,12 @@ bool game_state_handletcp(PeerData* v, Packet* packet)
 			if (v->mod_tool)
 			{
 				RAssert(server_disconnect(v->server, v->peer, DR_SERVERTIMEOUT, NULL));
+				break;
+			}
+
+			if (v->server->game.bring_state != BS_ACTIVATED)
+			{
+				server_disconnect(v->server, v->peer, DR_OTHER, "bro escaped before ring activated");
 				break;
 			}
 

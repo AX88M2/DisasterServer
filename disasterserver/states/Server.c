@@ -42,7 +42,7 @@ bool peer_identity_process(PeerData *v, const char *addr, bool is_banned, uint64
 		return false;
 	}
 
-	if (v->server->peers.noitems >= 7)
+	if (v->server->peers.noitems >= PLAYER_LIMIT)
 	{
 		v->should_timeout = false;
 		server_disconnect(v->server, v->peer, DR_LOBBYFULL, NULL);
@@ -194,7 +194,7 @@ bool peer_identity(PeerData *v, Packet *packet)
 		v->in_game = (v->server->state == ST_LOBBY);
 		v->exe_chance = 1 + rand() % 4;
 
-		if (v->server->peers.noitems >= 7)
+		if (v->server->peers.noitems >= PLAYER_LIMIT)
 		{
 			for (int i = 0; i < disaster_count(); i++)
 			{
@@ -202,7 +202,7 @@ bool peer_identity(PeerData *v, Packet *packet)
 				if (!server)
 					continue;
 
-				if (server->peers.noitems >= 7)
+				if (server->peers.noitems >= PLAYER_LIMIT)
 					continue;
 
 				Packet pack;
