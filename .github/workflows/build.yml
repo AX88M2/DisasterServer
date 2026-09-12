@@ -29,9 +29,6 @@ jobs:
         ui: [true, false]
         include:
           - os: windows-latest
-            c_compiler: cl.exe
-            cpp_compiler: cl.exe
-          - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
