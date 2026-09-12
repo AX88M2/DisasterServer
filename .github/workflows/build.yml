@@ -49,11 +49,11 @@ jobs:
             c_compiler: cl
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
 
-    - name: Deploy
+    - name: Install dependencies (Only Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get install build-essential -y
