@@ -22,10 +22,7 @@ namespace DisasterServer
 
         virtual ~Map() = default;
 
-        void setServer(Server* s) { server = s; }
-        Server* getServer() const { return server; }
-
-        virtual void init(int mapId) = 0;
+        virtual void init() = 0;
         virtual void tick() = 0;
         virtual void handle(Client& client, Packet& packet) = 0;
         virtual void left(Client& client) = 0;

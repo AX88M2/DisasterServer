@@ -6,11 +6,12 @@
 #include "Core/Constansts.hpp"
 #include "Core/Map.hpp"
 #include "Util/Countdown.hpp"
-#include "Core/Packet.hpp"
+#include "Util/Packet.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer
 {
+
 class StateController;
 
 class CharSelectState : public State {
@@ -22,7 +23,7 @@ class CharSelectState : public State {
     std::unordered_map<SurvCharacters, bool> avail;
 public:
     CharSelectState(Server* server, StateController* controller);
-    ~CharSelectState() = default;
+    ~CharSelectState() override = default;
 
     void init(Map* map, uint8_t id);
 

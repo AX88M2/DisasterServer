@@ -17,6 +17,8 @@ set(COMPILER_OPTIONS
             -Wpedantic
             -finput-charset=UTF-8
             -fexec-charset=UTF-8
+            -Wcomment
+            -Wunused-parameter
         >
         $<$<CXX_COMPILER_ID:GNU>:
             -Wall
@@ -24,11 +26,19 @@ set(COMPILER_OPTIONS
             -Wpedantic
             -finput-charset=UTF-8
             -fexec-charset=UTF-8
+            -Wgnu-zero-variadic-macro-arguments
         >
 )
 
 set(DEFINES
         $<$<CONFIG:Debug>:SERVER_DEBUG>
+)
+
+set(LIBS
+        cJSON
+        enet
+        Boost::bind
+        Boost::algorithm
 )
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -41,17 +51,17 @@ if(ANDROID)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
     target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
-    target_link_libraries(DisasterServerCXX PRIVATE cJSON log enet m Threads::Threads)
+    target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} log m Threads::Threads)
 else()
     if(DYLIB) # Build .dll or .so
         add_library(DisasterServerCXX SHARED ${SOURCES})
 
         if (WIN32)
-            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
+            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp)
         else() # UNIX
             set(THREADS_PREFER_PTHREAD_FLAG ON)
             find_package(Threads REQUIRED)
-            target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
+            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
         endif()
 
         target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
@@ -116,11 +126,11 @@ else()
             )
 
             if (WIN32)
-                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet ws2_32 winmm dbghelp)
+                target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp)
             else() # UNIX
                 set(THREADS_PREFER_PTHREAD_FLAG ON)
                 find_package(Threads REQUIRED)
-                target_link_libraries(DisasterServerCXX PRIVATE cJSON enet m Threads::Threads)
+                target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
             endif()
 
             target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})

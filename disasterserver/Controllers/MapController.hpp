@@ -9,8 +9,6 @@
 #include <unordered_map>
 
 #include "Core/Log.hpp"
-
-
 #include "Core/Map.hpp"
 
 namespace DisasterServer
@@ -50,7 +48,7 @@ namespace DisasterServer
         }
 
         void setLatestMap(Map *map) { latestMap = map; }
-        Map *getLatestMap() { return latestMap; }
+        Map *getLatestMap() const { return latestMap; }
 
         int16_t getMapWeight(Map *map) { return map_weights[map]; }
         void setMapWeight(Map *map, int16_t w) { map_weights[map] = w; }

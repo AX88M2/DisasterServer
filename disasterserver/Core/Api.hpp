@@ -1,5 +1,4 @@
-#ifndef API_HPP
-#define API_HPP
+#pragma once
 
 #ifdef _WIN32
     #define SERVER_API __declspec(dllexport)
@@ -7,5 +6,4 @@
     #define SERVER_API
 #endif
 
-
-#endif //API_HPP
+#define unused(x) (void)x

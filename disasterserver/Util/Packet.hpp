@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-#include "Log.hpp"
+#include "Core/Log.hpp"
 #include "enet/enet.h"
 
 enum class PacketType : uint8_t

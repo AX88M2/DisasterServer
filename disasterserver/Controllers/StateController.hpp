@@ -1,8 +1,9 @@
 ﻿#ifndef DISASTERSERVER_STATEMACHINE_HPP
 #define DISASTERSERVER_STATEMACHINE_HPP
 
-#include "Core/Packet.hpp"
+#include "Util/Packet.hpp"
 #include "States/State.hpp"
+#include "Core/Constansts.hpp"
 
 namespace DisasterServer
 {
@@ -35,7 +36,7 @@ namespace DisasterServer
         ~StateController();
 
         template <std::derived_from<State> T, typename... Args>
-        requires requires (T& s, Args&&... args) { s.init(std::forward<Args>(args)...); }
+        requires requires (T& state, Args&&... args) { state.init(std::forward<Args>(args)...); }
         void changeTo(Args&&... args) {
             auto next = std::make_unique<T>(server, this);
             next->init(std::forward<Args>(args)...);

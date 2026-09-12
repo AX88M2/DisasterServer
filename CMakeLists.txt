@@ -66,4 +66,7 @@ add_subdirectory(thirdparty/enet)
 add_subdirectory(thirdparty/cjson)
 
 add_subdirectory(disasterserver_c/)
+
+find_package(Boost REQUIRED COMPONENTS bind algorithm)
+
 add_subdirectory(disasterserver)

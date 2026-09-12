@@ -4,7 +4,7 @@
 
 #include "Server.hpp"
 #include "Core/Log.hpp"
-#include "Core/Packet.hpp"
+#include "Util/Packet.hpp"
 #include "States/GameState.hpp"
 #include "States/LobbyState.hpp"
 
@@ -29,30 +29,60 @@ bool Client::identity(Packet &packet) {
     bool isBanned = false;
     uint64_t timeout = 0;
 
-    uint16_t build_version = packet.read<uint16_t>();
-    int32_t server_index = packet.read<int32_t>();
-    std::string nickname = packet.readString();
-    std::string udid = packet.readString();
-    uint8_t lobby_icon = packet.read<uint8_t>();
-    int8_t pet = packet.read<int8_t>();
+    const uint16_t buildVersion = packet.read<uint16_t>();
+    const int32_t serverIndex = packet.read<int32_t>();
+    const std::string nickname = packet.readString();
+    const std::string udid = packet.readString();
+    const uint8_t lobbyIcon = packet.read<uint8_t>();
+    const int8_t pet = packet.read<int8_t>();
 
-    should_timeout = true;
-    mod_tool = false;
-    is_mobile = false;
-    this->nickname = nickname;
+    shouldTimeout = true;
+    isModifiedClient = false;
+    this->nickname = std::format("{}~", nickname);
     this->udid = udid;
-    this->lobby_icon = lobby_icon;
+    this->lobbyIcon = lobbyIcon;
     this->pet = pet;
+    
+    uint64_t rawKeyA = packet.read<uint64_t>();
+    uint64_t rawKeyB = packet.read<uint64_t>();
+
+    /* Verify auth */
+    uint64_t keyA = rawKeyA - auth.type;
+    uint64_t keyB = rawKeyB - auth.type;
+    
+    if ((auth.type >> 9) & 1) {
+        if (keyA != 0x2f09cdda)
+            isModifiedClient = true;
+
+        if (keyB != 0xf1006056)
+            isModifiedClient = true;
+    }
+    else if ((auth.type & 0x80000000) != 0) {
+        if (keyA != 0x947)
+            isModifiedClient = true;
+
+        if (keyB != 0xb43)
+            isModifiedClient = true;
+    }
+    else if ((auth.type >> 26) & 1) {
+        if (keyA != 0xdcd)
+            isModifiedClient = true;
+
+        if (keyB != 0xc15)
+            isModifiedClient = true;
+    } else {
+        isModifiedClient = true;
+    }
 
     this->in_game = server->getStateController().isState<LobbyState>();
-    this->exe_chance = 1 + rand() % 4;
+    this->exeChance = 1 + rand() % 4;
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);
         return false;
     }
 
-    if (build_version != BUILD_VERSION) {
+    if (buildVersion != BUILD_VERSION) {
         this->disconnect(DisconnectReason::VERMISMATCH);
         return false;
     }
@@ -67,22 +97,21 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    if (!identity_process(ip, isBanned, timeout, server_index == -1)) {
+    if (!identityProcess(ip, isBanned, timeout, serverIndex == -1)) {
         return false;
     }
 
-    Info("{} (id {}) joined.", nickname, id);
+    Info("{} (id {}) joined.", this->nickname, id);
     Info("	IP: {}", ip);
-    Info("	UID: {}", udid);
-    Info("	Modified: {}", BoolStringify(mod_tool));
-    Info("	Mobile: {}", BoolStringify(is_mobile));
+    Info("	UID: {}", this->udid);
+    Info("	Modified: {}", BoolStringify(isModifiedClient));
 
     this->verified = true;
 
     return true;
 }
 
-bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout) {
+bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout) {
     if (is_banned) {
         Info("{} banned by host (id {}, ip {})", nickname, id, addr);
         this->disconnect(DisconnectReason::BANNEDBYHOST);
@@ -105,7 +134,7 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
     }
 
     if (!this->server->getStateController().playerJoined(*this)) {
-        should_timeout = false;
+        shouldTimeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
     }
@@ -131,11 +160,11 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
 
             if (server->getStateController().isState<GameState>() && client->in_game) {
 
-                pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id */ );
-                pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
+                pack.write<uint8_t>( 1 /* server->game.exe == peer->id */ );
+                pack.write<uint8_t>( 1 /* server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
 
             } else {
-                pack.write<uint8_t>(lobby_icon);
+                pack.write<uint8_t>(lobbyIcon);
             }
 
             pack.send(*this, true);
@@ -146,17 +175,17 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
         pack.write<uint8_t>(0);
         pack.write<clientId>(id);
         pack.writeString(nickname);
-        pack.write<uint8_t>(lobby_icon);
-        this->server->broadcast_ex(pack, true, id);
+        pack.write<uint8_t>(lobbyIcon);
+        this->server->broadcastEx(pack, true, id);
 
-        this->server->send_message(*this, "|build from &{} @{}~", __DATE__, __TIME__);
-        this->server->send_message(*this, "|type .help for command list~");
+        this->server->sendMessage(*this, "|build from &{} @{}~", __DATE__, __TIME__);
+        this->server->sendMessage(*this, "|type .help for command list~");
     }
 
     return true;
 }
 
-bool Client::message_received(Packet &packet) {
+bool Client::messageReceived(Packet &packet) {
     if (id == 0) {
         return false;
     }
@@ -171,7 +200,7 @@ void Client::disconnect(DisconnectReason reason, const std::string &message) {
 
     if (reason == DisconnectReason::OTHER && !message.empty()) {
         Packet packet(PacketType::SERVER_PLAYER_FORCE_DISCONNECT);
-        packet.write<uint8_t>(static_cast<uint8_t>(reason));
+        packet.write<DisconnectReason>(reason);
         packet.writeString(message);
         packet.send(*this, true);
         enet_peer_disconnect_later(peer, static_cast<uint32_t>(reason));

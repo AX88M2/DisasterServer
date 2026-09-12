@@ -2,16 +2,15 @@
 #define DISASTERSERVER_SERVER_HPP
 
 #include "Client.hpp"
-#include "MapController.hpp"
-#include "StateController.hpp"
-#include "Core/Constansts.hpp"
+#include "Controllers/MapController.hpp"
+#include "Controllers/StateController.hpp"
 
 namespace DisasterServer
 {
     class StateController;
 
     class Server {
-        uint16_t id = 0;
+        int id = 0;
         bool running = false;
         double delta = 0;
         ENetHost *host = nullptr;
@@ -20,26 +19,27 @@ namespace DisasterServer
         StateController stateController;
         MapController mapController;
     public:
-        Server(uint16_t n = 0);
+        Server(int id = 0);
         ~Server();
+
         void initialize();
 
-        void disconnect_by_id(clientId client_id, DisconnectReason reason, const std::string& message = "");
+        void disconnectById(clientId client_id, DisconnectReason reason, const std::string& message = "") const;
 
-        void send_message(Client &client, std::string message);
-        void send_broadcast_message(clientId sender, std::string message);
+        void sendMessage(Client &client, std::string message);
+        void sendBroadcastMessage(clientId sender, std::string message);
 
         template <typename... Args>
-        void send_message(Client &client, std::format_string<Args...> fmt, Args&&... args) {
-            send_message(client, std::format(fmt, std::forward<Args>(args)...));
+        void sendMessage(Client &client, std::format_string<Args...> fmt, Args&&... args) {
+            sendMessage(client, std::format(fmt, std::forward<Args>(args)...));
         }
 
         template <typename... Args>
-        void send_broadcast_message(clientId sender, std::format_string<Args...> fmt, Args&&... args) {
-            send_broadcast_message(sender, std::format(fmt, std::forward<Args>(args)...));
+        void sendBroadcastMessage(clientId sender, std::format_string<Args...> fmt, Args&&... args) {
+            sendBroadcastMessage(sender, std::format(fmt, std::forward<Args>(args)...));
         }
 
-        void broadcast_ex(Packet &packet, bool reliable, clientId ignore);
+        void broadcastEx(Packet &packet, bool reliable, clientId ignore);
 
         size_t getClientCount();
         size_t getInGameCount();
@@ -48,7 +48,7 @@ namespace DisasterServer
         StateController &getStateController() { return stateController; }
         MapController &getMapController() { return mapController; }
 
-        double getDelta() { return delta; }
+        double getDelta() const { return delta; }
     };
 }
 

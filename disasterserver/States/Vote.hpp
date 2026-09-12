@@ -30,7 +30,7 @@ namespace DisasterServer {
         bool ongoing = false;
 
         std::unordered_set<clientId> votes;
-        size_t votedTotal;
+        size_t votedTotal = 0;
         double countdown = 0;
     public:
         Vote(Server *server);
@@ -42,10 +42,10 @@ namespace DisasterServer {
         bool check();
 
         void setOnGoing(bool flag) { ongoing = flag; }
-        bool isOnGoing() { return ongoing; }
-        VoteType getCurrentVoteType() { return type; }
-        size_t getVoteTotal() { return votedTotal; }
-        size_t getVoteCount() { return votes.size(); }
+        bool isOnGoing() const { return ongoing; }
+        VoteType getCurrentVoteType() const { return type; }
+        size_t getVoteTotal() const { return votedTotal; }
+        size_t getVoteCount() const { return votes.size(); }
     };
 }
 

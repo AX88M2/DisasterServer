@@ -1,24 +1,32 @@
-#ifndef DISASTERSERVER_EXCEPTIONS_HPP
-#define DISASTERSERVER_EXCEPTIONS_HPP
+#pragma once
 
 namespace DisasterServer
 {
-    class PacketError : public std::exception {
+    class ServerException : public std::exception {
     public:
-        explicit PacketError(std::string message) : message(std::move(message)) {}
+        explicit ServerException(std::string message) : message(std::move(message)) {}
 
         const char* what() const noexcept override {
             return message.c_str();
         }
 
         template <typename... Args>
-        static PacketError format(std::format_string<Args...> fmt, Args&&... args) {
-            return PacketError(std::format(fmt, std::forward<Args>(args)...));
+        static ServerException format(std::format_string<Args...> fmt, Args&&... args) {
+            return ServerException(std::format(fmt, std::forward<Args>(args)...));
         }
 
     private:
         std::string message;
     };
-}
 
-#endif //DISASTERSERVER_EXCEPTIONS_HPP
+    class PacketError : public ServerException {
+    public:
+        explicit PacketError(std::string message) : ServerException(message) {
+        }
+
+        template <typename... Args>
+        static PacketError format(std::format_string<Args...> fmt, Args&&... args) {
+            return PacketError(std::format(fmt, std::forward<Args>(args)...));
+        }
+    };
+}

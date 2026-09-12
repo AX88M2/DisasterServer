@@ -1,17 +1,18 @@
-#include "Server.hpp"
-#include "Config.hpp"
-#include <algorithm>
-#include "Core/Packet.hpp"
+#include <boost/algorithm/string.hpp>
+
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
-#include "StateController.hpp"
+#include "Server.hpp"
+#include "Config.hpp"
+#include "Util/Packet.hpp"
+#include "Controllers/StateController.hpp"
 
 using namespace DisasterServer;
 
-Server::Server(const uint16_t n) : id(n), stateController(this), mapController(this) {
+Server::Server(const int id) : id(id), stateController(this), mapController(this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
-    addr.port = static_cast<enet_uint16>(g_config.port + n);
+    addr.port = static_cast<enet_uint16>(g_config.port + id);
     host = enet_host_create(&addr, 50, 2, 0, 0);
 
     Info("Listening on port {}", addr.port);
@@ -89,7 +90,7 @@ void Server::initialize() {
                     pack.write<uint16_t>(0);
                     pack.write<uint16_t>(1);
                     pack.write<uint8_t>(auth.one);
-                    pack.write<uint8_t>((uint8_t) rand() % 2);
+                    pack.write<uint8_t>(static_cast<uint8_t>(rand()) % 2);
                     pack.write<uint8_t>(auth.two);
 
                     const uint8_t key[6] = { 0x00, 0x00, 0xFF, 0x1F, 0x80, 0x14 };
@@ -112,7 +113,7 @@ void Server::initialize() {
 
                     Info("{} (id {}) left.", client->getNickname(), client->getId());
 
-                    if (client->isOpped() && client->isShouldTimeout()) {
+                    if (client->isOperator() && client->isShouldTimeout()) {
 
                     }
 
@@ -155,7 +156,7 @@ void Server::initialize() {
                             Debug("Identity failed for id {}", client->getId());
                         }
                     } else {
-                        client->message_received(packet);
+                        client->messageReceived(packet);
                     }
                     break;
                 }
@@ -176,7 +177,7 @@ void Server::initialize() {
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
-                    //Debug("Heartbeat done.");
+                    Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -187,7 +188,7 @@ void Server::initialize() {
     }
 }
 
-void Server::disconnect_by_id(const clientId client_id, DisconnectReason reason, const std::string &message) {
+void Server::disconnectById(const clientId client_id, DisconnectReason reason, const std::string &message) const {
     for (auto &client : peers) {
         if (client->getId() == client_id) {
             return client->disconnect(reason, message);
@@ -195,7 +196,7 @@ void Server::disconnect_by_id(const clientId client_id, DisconnectReason reason,
     }
 }
 
-void Server::broadcast_ex(Packet &packet, bool reliable, clientId ignore) {
+void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
     Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
@@ -208,15 +209,15 @@ size_t Server::getInGameCount() {
     return std::ranges::count_if(peers, [](const auto& cl) { return cl->isInGame(); });
 }
 
-void Server::send_message(Client &client, std::string message) {
-    std::ranges::transform(message, message.begin(), [](const unsigned char c){ return std::tolower(c); });
+void Server::sendMessage(Client &client, std::string message) {
+    boost::algorithm::to_lower(message);
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
     packet.write<clientId>(0);
     packet.writeString(message);
     packet.send(client, true);
 }
 
-void Server::send_broadcast_message(clientId sender, std::string message) {
+void Server::sendBroadcastMessage(clientId sender, std::string message) {
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
     packet.write<clientId>(sender);
     packet.writeString(message);

@@ -10,7 +10,7 @@ namespace DisasterServer::Maps
     public:
         explicit HideAndSeekAct2(Server* server);
 
-        void init(int mapId) override;
+        void init() override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;

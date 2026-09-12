@@ -4,7 +4,7 @@
 
 #include "CharSelect.hpp"
 #include "LobbyState.hpp"
-#include "StateController.hpp"
+#include "Controllers/StateController.hpp"
 #include "Server.hpp"
 
 using namespace DisasterServer;
@@ -80,8 +80,8 @@ void MapVoteState::init() {
     sync.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
     sync.sendBroadcast(*server);
 
-    Info("Server is now in Map Vote");
-    Info("Maps: [{}] [{}] [{}]", listMaps.at(maps[0]).get()->getName(), listMaps.at(maps[1]).get()->getName(), listMaps.at(maps[2]).get()->getName());
+    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Map Vote", CLRCODE_RST);
+    Info("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, listMaps.at(maps[0]).get()->getName(), CLRCODE_RST, CLRCODE_BLU, listMaps.at(maps[1]).get()->getName(), CLRCODE_RST, CLRCODE_YLW, listMaps.at(maps[2]).get()->getName(), CLRCODE_RST);
 }
 
 bool MapVoteState::joined(Client &client) {
@@ -138,19 +138,19 @@ void MapVoteState::tick() {
             controller.setMapWeight(wonMap, weight);
 
             Debug("Pickrates:");
-            for (int8_t i =0; i < controller.getMaps().size(); i++) {
+            for (int8_t i = 0; i < controller.getMaps().size(); i++) {
                 Map* map = controller.getMaps().at(i).get();
                 Debug("{}: {}", i, controller.getMapWeight(map));
                 if (i == wonId) {
                     continue;
                 }
 
-                int16_t weight = controller.getMapWeight(map);
-                weight += 25;
-                if (weight > 255) {
-                    weight = 255;
+                int16_t weigh = controller.getMapWeight(map);
+                weigh += 25;
+                if (weigh > 255) {
+                    weigh = 255;
                 }
-                controller.setMapWeight(map, weight);
+                controller.setMapWeight(map, weigh);
             }
 
             stateController->changeTo<CharSelectState>(wonMap, wonId);
@@ -194,7 +194,7 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            const clientId pid = packet.read<clientId>();
+            [[maybe_unused]] const clientId pid = packet.read<clientId>();
             const std::string message = packet.readString();
 
             if (message.size() > 40) {
@@ -209,7 +209,7 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
-                server->send_broadcast_message(client.getId(), message);
+                server->sendBroadcastMessage(client.getId(), message);
             }
 
             break;
