@@ -40,7 +40,7 @@ bool allocate_server(uint16_t base_port, uint16_t n)
 
 	// Init lobby
 	MutexCreate(server->state_lock);
-	RAssert(dylist_create(&server->peers, 7));
+	RAssert(dylist_create(&server->peers, PLAYER_LIMIT));
 	
 	ENetAddress addr;
 	addr.host = ENET_HOST_ANY;
@@ -74,7 +74,7 @@ bool disaster_init(void)
 	Info(LOG_RED "Disaster" LOG_BLU "Server " LOG_RST "v" STRINGIFY(BUILD_VERSION));
 	Info("Build from " LOG_PUR __DATE__ " " LOG_GRN __TIME__);
 	Info("(c) 2024 Team Exe Empire");
-	Info("Edited by /MilesGlitch");
+	Info("Edited by " CLRCODE_BLU "Miles" CLRCODE_PUR "Glitch");
 	Info("--------------------------------");
 	Info("");
 
