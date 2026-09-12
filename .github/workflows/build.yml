@@ -113,6 +113,6 @@ jobs:
         name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
         path: |
           ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer
-          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer.exe
+          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/Release/DisasterServer.exe
         if-no-files-found: error
         retention-days: 7
