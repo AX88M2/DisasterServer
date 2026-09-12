@@ -17,16 +17,8 @@ bool charselect_check_state(Server *server)
 		if (!peer->in_game)
 			continue;
 
-		if (g_config.gameplay.only_surv)
-		{
-			if (peer->surv_char == CH_NONE)
-				should = false;
-		}
-		else
-		{
-			if (peer->exe_char == CH_NONE && peer->surv_char == EX_NONE)
-				should = false;
-		}
+		if (peer->exe_char == CH_NONE && peer->surv_char == EX_NONE)
+			should = false;
 	}
 
 	if (should)
@@ -54,16 +46,7 @@ bool charselect_choose_exe(Server *server, uint16_t *id)
 		peer->exe_char = EX_NONE;
 		peer->surv_char = CH_NONE;
 
-		if (g_config.gameplay.only_surv)
-			continue;
-
 		weight += peer->exe_chance;
-	}
-
-	if (g_config.gameplay.only_surv)
-	{
-		*id = (uint16_t)-1;
-		return true;
 	}
 
 	if (weight == 0)
@@ -98,7 +81,7 @@ bool charselect_choose_exe(Server *server, uint16_t *id)
 		rnd -= peer->exe_chance;
 	}
 
-	*id = (uint16_t)-1;
+	*id = -1;
 	return false;
 }
 
@@ -115,9 +98,6 @@ bool charselect_state_handle(PeerData *v, Packet *packet)
 	case CLIENT_REQUEST_EXECHARACTER:
 	{
 		if (!v->in_game)
-			break;
-
-		if (g_config.gameplay.only_surv)
 			break;
 
 		// Sanity check
@@ -236,16 +216,8 @@ bool charselect_state_tick(Server *server)
 				if (!peer->in_game)
 					continue;
 
-				if (g_config.gameplay.only_surv)
-				{
-					if (peer->surv_char == CH_NONE)
-						server_disconnect(server, peer->peer, DR_AFKTIMEOUT, NULL);
-				}
-				else
-				{
-					if (peer->exe_char == EX_NONE && peer->surv_char == CH_NONE)
-						server_disconnect(server, peer->peer, DR_AFKTIMEOUT, NULL);
-				}
+				if (peer->exe_char == EX_NONE && peer->surv_char == CH_NONE)
+					server_disconnect(server, peer->peer, DR_AFKTIMEOUT, NULL);
 			}
 		}
 
@@ -265,7 +237,7 @@ bool charselect_init(int8_t map, Server *server)
 	RAssert(server);
 	RAssert(charselect_choose_exe(server, &server->lobby.exe));
 
-	if (!g_config.gameplay.only_surv && server->lobby.exe == -1)
+	if (server->lobby.exe == -1)
 	{
 		Err("Failed to pick exe for some reason!");
 		return lobby_init(server);
@@ -317,8 +289,7 @@ bool charselect_state_left(PeerData *v)
 	if (v->surv_char != CH_NONE)
 		v->server->lobby.avail[v->surv_char] = true;
 
-	if (server_ingame(v->server) <= 1 ||
-	    (!g_config.gameplay.only_surv && v->id == v->server->lobby.exe))
+	if (server_ingame(v->server) <= 1 || v->id == v->server->lobby.exe)
 		return lobby_init(v->server);
 
 	return charselect_check_state(v->server) || lobby_init(v->server);
