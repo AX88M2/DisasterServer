@@ -67,10 +67,97 @@
         }
       }
     },
+
+    {
+      "inherits": "base",
+      "name": "windows-ui-release",
+      "displayName": "Windows UI (Release)",
+      "binaryDir": "${sourceDir}/build/windows-ui-release",
+      "installDir": "${sourceDir}/build/windows-ui-release/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "BUILD_UI": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows-ui-debug",
+      "displayName": "Windows UI (Debug)",
+      "binaryDir": "${sourceDir}/build/windows-ui-debug",
+      "installDir": "${sourceDir}/build/windows-ui-debug/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "BUILD_UI": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+
+    {
+      "inherits": "base",
+      "name": "windows-dylib-release",
+      "displayName": "Windows DynamicLib (Release)",
+      "binaryDir": "${sourceDir}/build/windows-dylib-release",
+      "installDir": "${sourceDir}/build/windows-dylib-release/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "DYLIB": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows-dylib-debug",
+      "displayName": "Windows DynamicLib (Debug)",
+      "binaryDir": "${sourceDir}/build/windows-dylib-debug",
+      "installDir": "${sourceDir}/build/windows-dylib-debug/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "DYLIB": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+
     {
       "inherits": "base",
       "name": "windows-clang-release",
-      "displayName": "Windows Clang (Release)",
+      "displayName": "Windows (Release) Clang",
       "binaryDir": "${sourceDir}/build/windows-clang-release",
       "installDir": "${sourceDir}/build/windows-clang-release/install",
       "cacheVariables": {
@@ -90,7 +177,7 @@
     {
       "inherits": "base",
       "name": "windows-clang-debug",
-      "displayName": "Windows Clang (Debug)",
+      "displayName": "Windows (Debug) Clang",
       "binaryDir": "${sourceDir}/build/windows-clang-debug",
       "installDir": "${sourceDir}/build/windows-clang-debug/install",
       "cacheVariables": {
@@ -106,6 +193,95 @@
           ]
         }
       }
+    },
+
+    {
+      "inherits": "base",
+      "name": "windows-ui-clang-release",
+      "displayName": "Windows UI (Release) Clang",
+      "binaryDir": "${sourceDir}/build/windows-ui-clang-release",
+      "installDir": "${sourceDir}/build/windows-ui-clang-release/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang++.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "BUILD_UI": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows-ui-clang-debug",
+      "displayName": "Windows UI (Debug) Clang",
+      "binaryDir": "${sourceDir}/build/windows-ui-clang-debug",
+      "installDir": "${sourceDir}/build/windows-ui-clang-debug/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang++.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "BUILD_UI": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+
+    {
+      "inherits": "base",
+      "name": "windows-dylib-clang-release",
+      "displayName": "Windows DynamicLib (Release) Clang",
+      "binaryDir": "${sourceDir}/build/windows-dylib-clang-release",
+      "installDir": "${sourceDir}/build/windows-dylib-clang-release/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang++.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "DYLIB": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows-dylib-clang-debug",
+      "displayName": "Windows DynamicLib (Debug) Clang",
+      "binaryDir": "${sourceDir}/build/windows-dylib-clang-debug",
+      "installDir": "${sourceDir}/build/windows-dylib-clang-debug/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang++.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "DYLIB": true
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
     }
+
+
+
   ]
 }
