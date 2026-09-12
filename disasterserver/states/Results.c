@@ -178,9 +178,9 @@ bool results_state_handle(PeerData* v, Packet* packet)
 	{
 		case CLIENT_RESULTS_REQUEST:
 		{
-			PeerData* sort[7];
+			PeerData* sort[PLAYER_LIMIT];
 			int len = 0;
-			memset(sort, 0, sizeof(PeerData*) * 7);
+			memset(sort, 0, sizeof(PeerData*) * PLAYER_LIMIT);
 
 			for (size_t i = 0; i < v->server->peers.capacity; i++)
 			{
