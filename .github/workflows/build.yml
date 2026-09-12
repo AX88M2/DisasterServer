@@ -100,6 +100,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -G Ninja
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
@@ -109,3 +110,13 @@ jobs:
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
+        path: |
+          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer
+          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer.exe
+        if-no-files-found: error
+        retention-days: 7
