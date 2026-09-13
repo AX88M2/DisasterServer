@@ -5,6 +5,7 @@
 #include "CharSelect.hpp"
 #include "MapVoteState.hpp"
 #include "Server.hpp"
+#include "Config.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Constansts.hpp"
 
