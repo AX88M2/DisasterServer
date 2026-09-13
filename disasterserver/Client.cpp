@@ -5,6 +5,8 @@
 #include "Server.hpp"
 #include "Core/Log.hpp"
 #include "Core/Packet.hpp"
+#include "States/GameState.hpp"
+#include "States/LobbyState.hpp"
 
 using namespace DisasterServer;
 
@@ -123,11 +125,11 @@ bool Client::identity_process(const std::string &addr, bool is_banned, uint64_t 
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(server->getStateController().getCurrentState() == States::GAME && client->in_game);
+            pack.write<uint8_t>(server->getStateController().isState<GameState>() && client->in_game);
             pack.write<clientId>(client->getId());
             pack.writeString(nickname);
 
-            if (server->getStateController().getCurrentState() == States::GAME && client->in_game) {
+            if (server->getStateController().isState<GameState>() && client->in_game) {
 
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id */ );
                 pack.write<uint8_t>( 0 /* v->server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);

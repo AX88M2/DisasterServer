@@ -25,7 +25,7 @@ int main(int argc, char** argv[]) {
     try {
         enet_initialize();
 
-        Info("- DisasterServerCXX v{}", DisasterServer::BUILD_VERSION);
+        Info("- DisasterServerCXX v{}", BUILD_VERSION);
         Info("- Build from {} {}", __DATE__, __TIME__);
 
         std::vector<std::unique_ptr<DisasterServer::Server>> servers;
@@ -39,7 +39,7 @@ int main(int argc, char** argv[]) {
 
             servers.push_back(std::move(server));
 
-            threads.emplace_back([serverPtr]() {
+            threads.emplace_back([serverPtr] {
                 serverPtr->initialize();
             });
         }

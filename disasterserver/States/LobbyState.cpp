@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "CharSelect.hpp"
+#include "MapVoteState.hpp"
 #include "Server.hpp"
 #include "StateController.hpp"
 #include "Core/Colors.hpp"
@@ -12,6 +14,7 @@ LobbyState::LobbyState(Server *server, StateController *controller) : State(serv
 }
 
 void LobbyState::init() {
+    Debug("Attepting to enter ST_LOBBY...");
     for (auto &peer : server->getClients()) {
         peer->setReady(false);
         peer->setVoted(false);
@@ -39,8 +42,7 @@ void LobbyState::init() {
         }
     }
 
-    countdown = TICKSPERSEC;
-    countdownSec = NO_COUNTDOWN;
+    countdown.stop();
     pracCountdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
@@ -49,8 +51,8 @@ void LobbyState::init() {
 
 bool LobbyState::sendCountdown() {
     Packet pack(PacketType::SERVER_LOBBY_COUNTDOWN);
-    pack.write<uint8_t>(this->countdownSec < NO_COUNTDOWN);
-    pack.write<uint8_t>(countdownSec);
+    pack.write<uint8_t>(countdown.active());
+    pack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
     pack.sendBroadcast(*server, true);
     return true;
 }
@@ -72,14 +74,12 @@ bool LobbyState::checkCountdown() {
     Debug("Players isReady {}/{}", ready, players->size());
 
     if (ready == players->size() && players->size() > 1) {
-        countdown = TICKSPERSEC;
-        countdownSec = START_COUNTDOWN;
+        countdown.start(START_COUNTDOWN);
         return sendCountdown();
     }
 
-    if (countdownSec != NO_COUNTDOWN) {
-        countdown = TICKSPERSEC;
-        countdownSec = NO_COUNTDOWN;
+    if (countdown.active()) {
+        countdown.stop();
         return sendCountdown();
     }
 
@@ -161,7 +161,9 @@ void LobbyState::tick() {
     if (pracCountdown > 0) {
         pracCountdown -= server->getDelta();
         if (pracCountdown <= 0) {
-            controller->changeTo<CharSelectState>(20);
+            auto &controller = server->getMapController();
+            auto map = controller.getMaps().at(0).get();
+            stateController->changeTo<CharSelectState>(map, 0); //Fart Zone
             return;
         }
     }
@@ -170,19 +172,16 @@ void LobbyState::tick() {
         checkVote();
     }
 
-    if (countdownSec <= START_COUNTDOWN) {
-        if (countdown <= 0) {
-            countdown += TICKSPERSEC;
-
-            if (--countdownSec == 0) {
-                controller->changeTo<CharSelectState>(1); //Map vote
-                return;
-            }
-
-            sendCountdown();
+    switch (countdown.tick(server->getDelta())) {
+        case Countdown::TickResult::Finished: {
+            stateController->changeTo<MapVoteState>();
+            break;
         }
-
-        countdown -= server->getDelta();
+        case Countdown::TickResult::Second: {
+            sendCountdown();
+            break;
+        }
+        default: break;
     }
 }
 
@@ -228,7 +227,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = controller->cmdParse(message);
+            commandHash hash = stateController->cmdParse(message);
             bool isCommand = cmdHandle(client, pid, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
@@ -327,13 +326,14 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
         default: {
-            if (!controller->cmdHandle(client, hash, message)) {
+            if (!stateController->cmdHandle(client, hash, message)) {
                 return false;
             }
             break;
         }
 
         case CMD_MAP: {
+            auto &controller = server->getMapController();
 #if !defined(SERVER_DEBUG)
             if (!client.isOpped()) {
                 this->server->send_message(client, "{}you aren't an operator", CLRCODE_RED);
@@ -341,18 +341,20 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             }
 #endif
             int ind;
-            if (sscanf(message.c_str(), ".map %d", &ind) <= 0) {
+            if (sscanf(message.c_str(), ".map %d", &ind) < 0) {
                 this->server->send_message(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }
 
             ind--;
-            if (ind < 0 || ind >= MAP_COUNT+1) {
-                this->server->send_message(client, "{}map should be between 1 and {}", CLRCODE_RED, MAP_COUNT+1);
+            if (ind < 0 || ind > controller.getMaps().size()) {
+                this->server->send_message(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMaps().size());
                 break;
             }
 
-            controller->changeTo<CharSelectState>(ind);
+            auto map = controller.getMaps().at(ind).get();
+
+            stateController->changeTo<CharSelectState>(map, ind);
             break;
         }
 

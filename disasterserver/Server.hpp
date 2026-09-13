@@ -4,48 +4,22 @@
 #include "Client.hpp"
 #include "MapController.hpp"
 #include "StateController.hpp"
-
-constexpr int TICKSPERSEC = 60;
+#include "Core/Constansts.hpp"
 
 namespace DisasterServer
 {
     class StateController;
 
-    constexpr int MAX_PLAYERS = 7;
-    constexpr int MAP_COUNT = 20;
-    constexpr int BUILD_VERSION = 1101;
-
-    enum BringState : uint8_t {
-        BS_NONE        = 0,
-        BS_ACTIVATED   = 1,
-        BS_DEACTIVATED = 2,
-    };
-
-    struct GameData {
-        int        mapId         = 0;
-        clientId   exe           = 0;
-
-        uint16_t   timeSec       = 0;
-        int        ringCoff      = 1;
-        BringState bringState    = BS_NONE;
-        uint8_t    bringLoc      = 0;
-
-        bool       started       = false;
-        double     startTimeout  = 0;
-        double     elapsed       = 0;
-        double     timeAccum     = 0;
-
-        double     end           = 0;
-        int        ending        = 0;
-        bool       suddenDeath   = false;
-        double     deathTimer    = 0;
-    };
-
     class Server {
-    public:
-        GameData game;
-        MapController mapController;
+        uint16_t id = 0;
+        bool running = false;
+        double delta = 0;
+        ENetHost *host = nullptr;
 
+        std::vector<std::unique_ptr<Client>> peers;
+        StateController stateController;
+        MapController mapController;
+    public:
         Server(uint16_t n = 0);
         ~Server();
         void initialize();
@@ -71,17 +45,10 @@ namespace DisasterServer
         size_t getInGameCount();
 
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
-        StateController &getStateController();
+        StateController &getStateController() { return stateController; }
+        MapController &getMapController() { return mapController; }
 
         double getDelta() { return delta; }
-
-    private:
-        uint16_t id = 0;
-        bool running = false;
-        ENetHost *host = nullptr;
-        std::vector<std::unique_ptr<Client>> peers;
-        StateController stateController;
-        double delta = 0;
     };
 }
 

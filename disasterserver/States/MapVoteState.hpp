@@ -3,22 +3,22 @@
 
 #include "Client.hpp"
 #include "State.hpp"
+#include "Core/Constansts.hpp"
 #include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
-    class Server;
+    class Map;
     class StateController;
 
     class MapVoteState : public State {
-        Countdown countdown;
+        Countdown countdown = Countdown(TICKSPERSEC);
 
         std::array<uint8_t, 3> maps = {};
         std::array<uint8_t, 3> votes = {};
     public:
         MapVoteState(Server *server, StateController *controller);
         ~MapVoteState() override = default;
-        static constexpr States STATE_ID = States::MAPVOTE;
 
         void init();
         bool joined(Client& client) override;

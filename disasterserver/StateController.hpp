@@ -3,8 +3,6 @@
 
 #include "Core/Packet.hpp"
 #include "States/State.hpp"
-#include "States/LobbyState.hpp"
-#include "States/CharSelect.hpp"
 
 namespace DisasterServer
 {
@@ -30,7 +28,6 @@ namespace DisasterServer
 
     class StateController {
         Server *server = nullptr;
-        States state = States::LOBBY;
 
         std::unique_ptr<State> current;
     public:
@@ -43,7 +40,6 @@ namespace DisasterServer
             auto next = std::make_unique<T>(server, this);
             next->init(std::forward<Args>(args)...);
             current = std::move(next);
-            state   = T::STATE_ID;
         }
 
         template <std::derived_from<State> T>
@@ -58,9 +54,6 @@ namespace DisasterServer
 
         commandHash cmdParse(std::string string);
         bool cmdHandle(Client& client, commandHash hash, const std::string& message);
-
-        States getCurrentState() const { return state; }
-        void setState(States state) { this->state = state; }
     };
 }
 
