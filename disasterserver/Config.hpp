@@ -4,8 +4,9 @@
 #include <string>
 
 struct Config {
-    uint32_t port = 8606;
-    uint32_t lobby_count = 1;
+    uint32_t    port = 8606;
+    uint32_t    lobby_count = 1;
+    std::string motd = "test";
 
     bool load(const std::string& filename);
 };

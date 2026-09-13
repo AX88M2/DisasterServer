@@ -229,12 +229,23 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_HELP: {
-            this->server->sendMessage(client, "~-----~ {}command list:{} ~-----~", CLRCODE_GRN, CLRCODE_RST);
+        case CMD_HELP: {            
+            char lobby_msg[128];
+            std::snprintf(lobby_msg, sizeof(lobby_msg), "|- .lobby~ - change lobby (1-%u)",g_config.lobby_count);
+
             this->server->sendMessage(client, "|- .info~ - information about server");
             this->server->sendMessage(client, "|- .vk~ - vote kick");
             this->server->sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server->sendMessage(client, "|- .lobby~ - change lobby");
+            this->server->sendMessage(client, lobby_msg);
+
+            if(client.isOperator())
+            {
+                this->server->sendMessage(client, "|- .map~ - force map (1-21)");
+                this->server->sendMessage(client, "|- .kick~ - kick someone");
+                this->server->sendMessage(client, "|- .ban~ - ban someone (wip)");
+                this->server->sendMessage(client, "|- .op~ - op someone (wip)");
+                break;
+            }
             break;
         }
 

@@ -10,7 +10,6 @@ Config g_config;
 bool Config::load(const std::string& filename)
 {
     std::ifstream file(filename);
-
     if (!file.is_open()) {
         std::ofstream new_file(filename);
 
@@ -21,7 +20,8 @@ bool Config::load(const std::string& filename)
         new_file << R"({
             "server": {
                 "port": 8606,
-                "lobby_count": 1
+                "lobby_count": 1,
+                "motd": "test"
             }
         })";
 
@@ -29,6 +29,7 @@ bool Config::load(const std::string& filename)
 
         port = 8606;
         lobby_count = 1;
+        motd = "motd text";
 
         return true;
     }
@@ -52,15 +53,18 @@ bool Config::load(const std::string& filename)
     }
 
     cJSON* port_json = cJSON_GetObjectItemCaseSensitive(server, "port");
-
     if (port_json && cJSON_IsNumber(port_json)) {
         port = static_cast<uint32_t>(port_json->valueint);
     }
 
     cJSON* lobby_json = cJSON_GetObjectItemCaseSensitive(server, "lobby_count");
-
     if (lobby_json && cJSON_IsNumber(lobby_json)) {
         lobby_count = static_cast<uint32_t>(lobby_json->valueint);
+    }
+
+    cJSON* motd_json = cJSON_GetObjectItemCaseSensitive(server, "motd");
+    if (motd_json && cJSON_IsString(motd_json) && motd_json->valuestring) {
+        motd = motd_json->valuestring;
     }
 
     cJSON_Delete(root);

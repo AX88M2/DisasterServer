@@ -213,6 +213,11 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             server->sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
             server->sendMessage(client, "|type .help for command list~");
+            if (g_config.motd[0] != '\0') {
+                char buf[512];
+                std::snprintf(buf, sizeof(buf), "%s", g_config.motd);
+                this->server->sendMessage(client, buf);
+            }
 
             break;
         }
