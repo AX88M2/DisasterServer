@@ -31,12 +31,15 @@ jobs:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
+            vcpkg_triplet: x64-windows-release
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
+            vcpkg_triplet: x64-linux-release
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
+            vcpkg_triplet: x64-linux-release
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -98,7 +101,7 @@ jobs:
       uses: johnwason/vcpkg-action@v8
       with:
         manifest-dir: ${{ github.workspace }} # Set to directory containing vcpkg.json
-        triplet: x64-windows-release
+        triplet: ${{ matrix.vcpkg_triplet }}
         token: ${{ github.token }}
     
     - name: Configure CMake
@@ -106,6 +109,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
