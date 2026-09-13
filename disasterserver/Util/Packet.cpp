@@ -1,13 +1,9 @@
 #include "Packet.hpp"
 
-#include <utility>
-
-#include "Log.hpp"
+#include "Core/Log.hpp"
+#include "Core/Exceptions.hpp"
 #include "Client.hpp"
 #include "Server.hpp"
-#include "Exceptions.hpp"
-
-
 
 using namespace DisasterServer;
 
@@ -31,14 +27,14 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	}
 
 	read<uint8_t>();
-	type = static_cast<PacketType>(read<uint8_t>());
+	type = read<PacketType>();
 
 	Debug("Packet received {}", getPacketTypeName(type));
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
-	write<uint8_t>(static_cast<uint8_t>(type));
+	write<PacketType>(type);
 	if (type != PacketType::SERVER_HEARTBEAT) {
 		Debug("Packet created {}", getPacketTypeName(type));
 	}

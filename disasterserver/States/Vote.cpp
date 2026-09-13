@@ -7,7 +7,8 @@
 
 using namespace DisasterServer;
 
-Vote::Vote(Server *server) : server(server) {}
+Vote::Vote(Server *server) : server(server) {
+}
 
 Vote::~Vote() = default;
 

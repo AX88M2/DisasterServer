@@ -1,7 +1,8 @@
 #ifndef DISASTERSERVER_PEER_HPP
 #define DISASTERSERVER_PEER_HPP
 
-#include "Core/Packet.hpp"
+#include "Player.hpp"
+#include "Util/Packet.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer
@@ -46,7 +47,7 @@ namespace DisasterServer
         "Sally"
     };
 
-    enum class DisconnectReason
+    enum class DisconnectReason : uint8_t
     {
         FAILEDTOCONNECT,
         KICKEDBYHOST,
@@ -92,18 +93,17 @@ namespace DisasterServer
         ENetPeer *peer;
 
         /* General info */
-        //Player plr;
+        Player player;
         std::string nickname = "<unknown>";
         std::string udid;
-        uint8_t lobby_icon = 0;
+        uint8_t lobbyIcon = 0;
         int8_t pet = -1;
 
         bool verified = false;
         bool in_game = false;
         bool op = false;
         bool ready = false;
-        bool mod_tool = false;
-        bool is_mobile = false;
+        bool isModifiedClient = false;
         bool can_vote = false;
         bool voted = false;
         bool disconnecting = false;
@@ -120,12 +120,12 @@ namespace DisasterServer
         SurvCharacters survChar = SurvCharacters::NONE;
         ExesCharacters exeChar = ExesCharacters::NONE;
 
-        bool should_timeout = false;
+        bool shouldTimeout = false;
 
         /* State info */
-        uint8_t exe_chance = 0;
+        uint8_t exeChance = 0;
         double timeout = 0;
-        double vote_cooldown = 0;
+        double voteCooldown = 0;
 
         Server *server = nullptr;
     public:
@@ -134,51 +134,51 @@ namespace DisasterServer
 
         clientId getId() const { return id; }
         std::string getIp() const { return ip; }
-        ENetPeer * getPeer() { return peer; }
+        ENetPeer *getPeer() const { return peer; }
         std::string getNickname() { return nickname; }
         std::string getUdid() { return udid; }
-        uint8_t getLobbyIcon() { return lobby_icon; }
-        int8_t getPet() { return pet; }
+        uint8_t getLobbyIcon() const { return lobbyIcon; }
+        int8_t getPet() const { return pet; }
         AuthPeer &getAuthPeer() { return auth; }
-        void setExeChance(uint8_t chance) { exe_chance = chance; }
-        uint8_t getExeChance() { return exe_chance; }
+        void setExeChance(const uint8_t chance) { exeChance = chance; }
+        uint8_t getExeChance() const { return exeChance; }
 
         SurvCharacters getSurvCharacter() const { return survChar; }
         void setSurvCharacter(SurvCharacters character) { survChar = character; }
         ExesCharacters getExeCharacter() const { return exeChar; }
         void setExeCharacter(ExesCharacters character) { exeChar = character; }
 
-        void setTimeout(double value) { timeout = value; }
+        void setTimeout(const double value) { timeout = value; }
         double getTimeout() const { return timeout; }
-        bool isShouldTimeout() { return should_timeout; }
-        bool isDisconnecting() { return disconnecting; }
-        void setVoteCooldown(double value) { vote_cooldown = value; }
-        double getVoteCooldown() { return vote_cooldown; }
-        void setInGame(bool flag) { in_game = flag; }
-        bool isInGame() { return in_game; }
-        void setCanVote(bool flag) { can_vote = flag; }
-        bool isCanVote() { return can_vote; }
-        void setOperator(bool flag) { op = flag; }
-        bool isOpped() { return op; }
-        bool isDead() {return dead; }
-        void setDead(bool flag) { dead = flag; }
-        bool isEscaped() { return escaped; }
-        void setEscaped(bool flag) { escaped = flag; }
+        bool isShouldTimeout() const { return shouldTimeout; }
+        bool isDisconnecting() const { return disconnecting; }
+        void setVoteCooldown(const double value) { voteCooldown = value; }
+        double getVoteCooldown() const { return voteCooldown; }
+        void setInGame(const bool flag) { in_game = flag; }
+        bool isInGame() const { return in_game; }
+        void setCanVote(const bool flag) { can_vote = flag; }
+        bool isCanVote() const { return can_vote; }
+        void setOperator(const bool flag) { op = flag; }
+        bool isOperator() const { return op; }
+        bool isDead() const {return dead; }
+        void setDead(const bool flag) { dead = flag; }
+        bool isEscaped() const { return escaped; }
+        void setEscaped(const bool flag) { escaped = flag; }
 
-        bool isVerified() { return verified; }
-        bool isModified() { return mod_tool; }
-        void setReady(bool flag) { ready = flag; }
-        bool isReady() { return ready; }
-        void setVoted(bool flag) { voted = flag; }
-        bool isVoted() { return voted; }
+        bool isVerified() const { return verified; }
+        bool isModified() const { return isModifiedClient; }
+        void setReady(const bool flag) { ready = flag; }
+        bool isReady() const { return ready; }
+        void setVoted(const bool flag) { voted = flag; }
+        bool isVoted() const { return voted; }
 
         bool identity(Packet &packet);
-        bool identity_process(const std::string & addr, bool is_banned, uint64_t timeout, bool do_timeout);
-        bool message_received(Packet &packet);
+        bool identityProcess(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout);
+        bool messageReceived(Packet &packet);
         void disconnect(DisconnectReason reason, const std::string& message = "");
 
         template <typename... Args>
-        void disconnect(DisconnectReason reason, std::format_string<Args...> fmt, Args&&... args) {
+        void disconnect(const DisconnectReason reason, std::format_string<Args...> fmt, Args&&... args) {
             disconnect(reason, std::format(fmt, std::forward<Args>(args)...));
         }
     };

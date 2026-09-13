@@ -1,17 +1,26 @@
 #include "GameState.hpp"
 
 #include "Server.hpp"
-#include "StateController.hpp"
+#include "Controllers/StateController.hpp"
 #include "Client.hpp"
 #include "LobbyState.hpp"
-#include "Core/Colors.hpp"
+#include "Core/Constansts.hpp"
 
 using namespace DisasterServer;
 
 GameState::GameState(Server *server, StateController *controller) : State(server, controller) {}
 
-void GameState::init(clientId exe, int selectedMap, Map* currentMap)
-{
+void GameState::init(clientId exe, int mapId, Map* map) {
+    if (!map) {
+        Err("GameState::init: map {} is null", mapId);
+        stateController->changeTo<LobbyState>();
+        return;
+    }
+
+    this->currentMapId = mapId;
+    this->currentMap = map;
+    this->exe = exe;
+
     /*const int totalMaps = static_cast<int>(server->mapController.count());
 
     if (selectedMap < 0 || selectedMap >= totalMaps) {
@@ -22,15 +31,6 @@ void GameState::init(clientId exe, int selectedMap, Map* currentMap)
 
     if (totalMaps == 0) {
         Err("GameState::init: no maps registered");
-        controller->changeTo<LobbyState>();
-        return;
-    }
-
-    mapId_ = selectedMap;
-    currentMap   = server->mapController.get(selectedMap);
-
-    if (!currentMap) {
-        Err("GameState::init: map {} is null", selectedMap);
         controller->changeTo<LobbyState>();
         return;
     }
@@ -51,51 +51,49 @@ void GameState::init(clientId exe, int selectedMap, Map* currentMap)
     g.ending        = 0;
     g.suddenDeath   = false;*/
 
-    /*for (auto& peer : server->getClients()) {
+    /**/
+
+    for (auto& peer : server->getClients()) {
         if (!peer || !peer->isInGame()) continue;
         peer->setReady(false);
         peer->setTimeout(0);
     }
 
     Packet pack(PacketType::SERVER_LOBBY_GAME_START);
-    pack.sendBroadcast(*server, true);*/
-    Info("{}Round waiting for players on map [{}{}{}]", CLRCODE_YLW, CLRCODE_PUR, currentMap->getName(), CLRCODE_YLW);
+    pack.sendBroadcast(*server, true);
+    Info("Round waiting for players on map [{}{}{}]", CLRCODE_PUR, map->getName(), CLRCODE_RST);
 }
 
-bool GameState::joined(Client& /*client*/)
-{
+bool GameState::joined(Client& client) {
     return true;
 }
 
-bool GameState::leaved(Client& client)
-{
-    if (currentMap) currentMap->left(client);
+bool GameState::leaved(Client& client) {
+    currentMap->left(client);
 
     if (server->getInGameCount() <= 1) {
-        endRound(/*ending=*/0, /*achiv=*/false);
+        endRound(0, false);
     }
     return true;
 }
 
-void GameState::tick()
-{
-    /*if (!currentMap) { controller->changeTo<LobbyState>(); return; }
+void GameState::tick() {
+    if (!started) {
+        start_timeout -= server->getDelta();
+        if (start_timeout <= 0) {
+            Warn("Waiting for players took too long, kicking out inactive players!");
 
-    auto& g = server->game;
-    if (!g.started) {
-        tickStartWait();
-        return;
-    }
+            for (auto &client : server->getClients()) {
+                if (!client->isInGame()) {
+                    continue;
+                }
 
-    if (g.end > 0) {
-        g.end -= server->getDelta();
-        if (g.end <= 0) {
-            controller->changeTo<LobbyState>();
+            }
         }
-        return;
     }
 
-    tickPlaying();*/
+    currentMap->tick();
+
 }
 
 void GameState::tickStartWait()
@@ -167,7 +165,7 @@ void GameState::tickPlaying()
 
 bool GameState::checkState()
 {
-    if (end > 0) return true;
+    /*if (end > 0) return true;
 
     size_t escaped = 0, dead = 0, exes = 0, total = 0;
     for (auto& peer : server->getClients()) {
@@ -191,7 +189,7 @@ bool GameState::checkState()
             endRound(2, true);
         else
             endRound(1, true);
-    }
+    }*/
 
     return true;
 }
@@ -200,7 +198,7 @@ bool GameState::handle(Client& client, Packet& packet)
 {
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            packet.read<clientId>();
+            [[maybe_unused]] const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
             if (message.size() > 40) {
                 client.disconnect(DisconnectReason::OTHER, "Chat message too long");
@@ -211,9 +209,11 @@ bool GameState::handle(Client& client, Packet& packet)
             commandHash hash = stateController->cmdParse(message);
             bool isCommand   = stateController->cmdHandle(client, hash, message);
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
-            if (!isCommand)
-                server->send_broadcast_message(client.getId(), message);
-            return true;
+            if (!isCommand) {
+                server->sendBroadcastMessage(client.getId(), message);
+            }
+
+            break;
         }
 
         case PacketType::CLIENT_PLAYER_DEATH_STATE: {
@@ -224,7 +224,7 @@ bool GameState::handle(Client& client, Packet& packet)
             pack.write<uint8_t>(dead);
             pack.sendBroadcast(*server, true);
             checkState();
-            return true;
+            break;
         }
 
         case PacketType::CLIENT_PLAYER_ESCAPED: {
@@ -233,21 +233,44 @@ bool GameState::handle(Client& client, Packet& packet)
             pack.write<clientId>(client.getId());
             pack.sendBroadcast(*server, true);
             checkState();
-            return true;
+            break;
         }
 
         case PacketType::CLIENT_PLAYER_DATA: {
-            if (!started && !client.isReady()) {
-                client.setReady(true);
+            if (!started) {
+                break;
             }
-            return true;
+
+            const uint16_t x = packet.read<uint16_t>();
+            const uint16_t y = packet.read<uint16_t>();
+            const uint16_t _xspd = packet.read<uint16_t>();
+            const uint16_t _yspd = packet.read<uint16_t>();
+
+            const uint8_t state = packet.read<uint8_t>();
+            const int16_t _angle = packet.read<int16_t>();
+            const uint8_t _index = packet.read<uint8_t>();
+            const int8_t _xscale = packet.read<int8_t>();
+
+            if (this->exe != client.getId()) {
+                const int8_t hp = packet.read<int8_t>();
+                const uint8_t revival = packet.read<uint8_t>();
+                const int16_t rings = packet.read<int16_t>();
+                const uint8_t flags = packet.read<uint8_t>();
+
+            } else {
+                const uint8_t flags = packet.read<uint8_t>();
+            }
+
+            Vector2 newPos = { static_cast<float>(x), static_cast<float>(y) };
+
+            break;
         }
 
-        default:
-            break;
+        default: break;
     }
 
-    if (currentMap) currentMap->handle(client, packet);
+    currentMap->handle(client, packet);
+
     return true;
 }
 
@@ -293,7 +316,7 @@ void GameState::sendTimeSync()
     pack.sendBroadcast(*server, true);*/
 }
 
-void GameState::bigRing(BringState state)
+void GameState::bigRing(BigRingState state)
 {
     /*auto& g = server->game;
     if (g.bringState == state) return;

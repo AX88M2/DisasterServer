@@ -68,8 +68,8 @@ namespace DisasterServer
 
     private:
         double ticksPerSecond_;
-        double ticks_{};
-        int seconds_{};
+        double ticks_ = 0;
+        int seconds_ = 0;
     };
 }
 

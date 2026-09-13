@@ -156,12 +156,15 @@ void log_fmt(const char* fmt, const char* type, const char* file, int line, ...)
 
 #include "Log.hpp"
 
+#include <boost/algorithm/string.hpp>
 #include <iomanip>
 #include <sstream>
 
+#include "Constansts.hpp"
+
 using namespace DisasterServer;
 
-void Logger::write(const LogLevel level, std::string_view message, std::source_location &location) {
+void Logger::write(LogLevel level, std::string message, std::source_location &location) {
 	using namespace std::chrono;
 
 	std::stringstream ss;
@@ -188,6 +191,16 @@ void Logger::write(const LogLevel level, std::string_view message, std::source_l
 	ss << " ";
 	ss << std::format("({}:{})", location.file_name(), location.line()); ss << TerminalColors::reset;
 	ss << " ";
-	ss << message;
+
+	boost::algorithm::replace_all(message, CLRCODE_RED, TerminalColors::red);
+	boost::algorithm::replace_all(message, CLRCODE_GRN, TerminalColors::green);
+	boost::algorithm::replace_all(message, CLRCODE_PUR, TerminalColors::light_magenta);
+	boost::algorithm::replace_all(message, CLRCODE_BLU, TerminalColors::light_blue);
+	boost::algorithm::replace_all(message, CLRCODE_GRA, TerminalColors::light_gray);
+	boost::algorithm::replace_all(message, CLRCODE_YLW, TerminalColors::yellow);
+	boost::algorithm::replace_all(message, CLRCODE_ORG, TerminalColors::light_yellow);
+	boost::algorithm::replace_all(message, CLRCODE_RST, TerminalColors::reset);
+
+	ss << message << TerminalColors::reset;
 	std::cout << ss.str() << std::endl;
 }

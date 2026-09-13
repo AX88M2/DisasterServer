@@ -1,5 +1,4 @@
-#ifndef LOG_HPP
-#define LOG_HPP
+#pragma once
 
 #include <iostream>
 #include <source_location>
@@ -78,7 +77,7 @@ namespace DisasterServer
     };
 
     class Logger {
-        static void write(LogLevel level, std::string_view message, std::source_location &location);
+        static void write(LogLevel level, std::string message, std::source_location &location);
 
         template <typename... Args>
         static void log(LogLevel level, std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
@@ -89,7 +88,7 @@ namespace DisasterServer
 
         template <typename... Args>
         static void debug(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
-#ifdef _DEBUG
+#if defined(SERVER_DEBUG)
             log(LogLevel::Debug, location, fmt, std::forward<Args>(args)...);
 #endif
         }
@@ -118,9 +117,7 @@ namespace DisasterServer
 #define RAssert(x) if (!(x)) { Err("RAssert({}) failed!", #x); return false; }
 #define RAssertEx(x) if (!(x)) { Err("RAssert({}) failed!", #x); }
 
-#define Info(fmt, ...) DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Warn(fmt, ...) DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Err(fmt, ...) DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Debug(fmt, ...) DisasterServer::Logger::debug(std::source_location::current(), fmt, ##__VA_ARGS__)
-
-#endif //LOG_HPP
+#define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Err(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Debug(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt, ##__VA_ARGS__)

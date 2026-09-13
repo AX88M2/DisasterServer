@@ -1,9 +1,6 @@
-#ifndef DISASTERSERVER_TYPES_HPP
-#define DISASTERSERVER_TYPES_HPP
+#pragma once
 
 #include <cstdint>
 
 using clientId = uint16_t;
 using commandHash = unsigned long;
-
-#endif //DISASTERSERVER_TYPES_HPP

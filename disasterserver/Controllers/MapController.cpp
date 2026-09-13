@@ -1,7 +1,5 @@
 #include "MapController.hpp"
 
-
-
 #include "Maps/HideAndSeekAct2.hpp"
 
 using namespace DisasterServer;

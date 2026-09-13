@@ -2,45 +2,48 @@
 #define DISASTERSERVER_GAMESTATE_HPP
 
 #include "State.hpp"
+#include "Core/Constansts.hpp"
 #include "Core/Map.hpp"
 
 namespace DisasterServer
 {
     class StateController;
 
-    enum class BringState : uint8_t {
-        BS_NONE,
-        BS_ACTIVATED,
-        BS_DEACTIVATED,
+    enum class BigRingState {
+        NONE,
+        ACTIVATED,
+        DEACTIVATED,
+    };
+
+    enum class Ending : uint8_t {
+        EXEWIN,
+        SURVWIN,
+        TIMEOVER
     };
 
     class GameState : public State
     {
-        int mapId_     = 0;
-        Map* currentMap       = nullptr;
-        int syncAccum_ = 0;
+        int currentMapId = 0;
+        Map* currentMap = nullptr;
+        clientId exe = 0;
+        bool started = false;
+        bool suddenDeath = false;
 
-        int        mapId         = 0;
-        clientId   exe           = 0;
+        double start_timeout = 15.0 * TICKSPERSEC;
+        double time = TICKSPERSEC;
+        double elapsed = 0;
+        uint16_t time_sec;
+        double end = 0;
+        Ending ending;
 
-        uint16_t   timeSec       = 0;
-        int        ringCoff      = 1;
-        BringState bringState    = BringState::BS_NONE;
-        uint8_t    bringLoc      = 0;
+        BigRingState bringState = BigRingState::NONE;
+        uint8_t bringLocation = static_cast<uint8_t>(rand());
 
-        bool       started       = false;
-        double     startTimeout  = 0;
-        double     elapsed       = 0;
-        double     timeAccum     = 0;
-
-        double     end           = 0;
-        int        ending        = 0;
-        bool       suddenDeath   = false;
-        double     deathTimer    = 0;
     public:
         GameState(Server* server, StateController* controller);
+        ~GameState() override = default;
 
-        void init(clientId exe, int selectedMap, Map* currentMap);
+        void init(clientId exe, int mapId, Map* map);
 
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
@@ -55,7 +58,7 @@ namespace DisasterServer
         void tickPlaying();
         void sendTimeSync();
         void checkStart();
-        void bigRing(BringState state);
+        void bigRing(BigRingState state);
     };
 }
 

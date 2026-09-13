@@ -4,10 +4,10 @@
 
 #include "Server.hpp"
 #include "Client.hpp"
-#include "StateController.hpp"
+#include "Controllers/StateController.hpp"
 #include "GameState.hpp"
 #include "LobbyState.hpp"
-#include "Core/Colors.hpp"
+#include "Core/Constansts.hpp"
 
 using namespace DisasterServer;
 
@@ -53,8 +53,7 @@ void CharSelectState::init(Map* map, uint8_t id) {
     timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
     timePack.sendBroadcast(*server);
 
-    Info("{}Server is now in {}Character Select{}", CLRCODE_YLW, CLRCODE_PUR, CLRCODE_RST);
-
+    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Character Select", CLRCODE_RST);
     this->map = map;
     this->mapId = id;
 }
@@ -92,7 +91,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             change.write<uint8_t>(id);
             change.sendBroadcast(*server, true);
 
-            Info("{} {} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
+            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
@@ -142,12 +141,12 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 change.sendBroadcast(*server, true);
             }
 
-            Info("{} {} (id {}) choses [{}{}{}]!", client.getNickname(), CLRCODE_RST, client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
+            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
             return checkState();
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            packet.read<clientId>();
+            [[maybe_unused]] const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
 
             if (message.size() > 40) {
@@ -162,7 +161,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
-                server->send_broadcast_message(client.getId(), message);
+                server->sendBroadcastMessage(client.getId(), message);
             }
             break;
         }
