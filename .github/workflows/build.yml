@@ -99,7 +99,7 @@ jobs:
       id: vcpkg
       uses: johnwason/vcpkg-action@v8
       with:
-        manifest-dir: ${{ github.workspace }} # Set to directory containing vcpkg.json
+        manifest-dir: ${{ github.workspace }}
         triplet: ${{ matrix.vcpkg_triplet }}
         token: ${{ github.token }}
     
@@ -119,12 +119,11 @@ jobs:
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
-        path: |
-          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer
-          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/Release/DisasterServer.exe
-        if-no-files-found: error
-        retention-days: 7
+    #- name: Upload
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
+    #    path: |
+    #      ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer
+    #      ${{ steps.strings.outputs.build-output-dir }}/disasterserver/Release/DisasterServer.exe
+    #    retention-days: 7
