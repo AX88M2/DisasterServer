@@ -230,13 +230,10 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         }
 
         case CMD_HELP: {            
-            char lobby_msg[128];
-            std::snprintf(lobby_msg, sizeof(lobby_msg), "|- .lobby~ - change lobby (1-%u)",g_config.lobby_count);
-
             this->server->sendMessage(client, "|- .info~ - information about server");
             this->server->sendMessage(client, "|- .vk~ - vote kick");
             this->server->sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server->sendMessage(client, lobby_msg);
+            this->server->sendMessage(client, "|- .lobby~ - change lobby (1-{})", g_config.lobby_count);
 
             if(client.isOperator())
             {
