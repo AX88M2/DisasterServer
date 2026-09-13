@@ -22,7 +22,6 @@ Server::~Server() {
 }
 
 void Server::initialize() {
-
     mapController.initialize();
 
     TimeStamp ticker;
@@ -222,8 +221,4 @@ void Server::send_broadcast_message(clientId sender, std::string message) {
     packet.write<clientId>(sender);
     packet.writeString(message);
     packet.sendBroadcast(*this, true);
-}
-
-StateController &Server::getStateController() {
-    return stateController;
 }
