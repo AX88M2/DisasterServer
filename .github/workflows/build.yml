@@ -97,7 +97,6 @@ jobs:
 
     - name: vcpkg build
       id: vcpkg
-      if: matrix.os == 'windows-latest'
       uses: johnwason/vcpkg-action@v8
       with:
         manifest-dir: ${{ github.workspace }} # Set to directory containing vcpkg.json
