@@ -1,5 +1,5 @@
 #include "Server.hpp"
-#include "Config.hpp"
+#include "ConfigManager.hpp"
 #include "Application.hpp"
 #include "Core/Log.hpp"
 
@@ -18,11 +18,6 @@ int main(int argc, char** argv) {
 #endif
 
     enet_initialize();
-
-    if (!g_config.load("config.json")) {
-        Error("Failed to load config.json");
-        return 1;
-    }
 
     try {
         auto &app = DisasterServer::Application::getInstance();

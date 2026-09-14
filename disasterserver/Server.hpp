@@ -1,6 +1,7 @@
 #ifndef DISASTERSERVER_SERVER_HPP
 #define DISASTERSERVER_SERVER_HPP
 
+#include "Application.hpp"
 #include "Client.hpp"
 #include "Controllers/MapController.hpp"
 #include "Controllers/StateController.hpp"
@@ -16,7 +17,7 @@ namespace DisasterServer
         bool running = false;
         double delta = 0;
         ENetHost *host = nullptr;
-
+        Application &application = Application::getInstance();
         std::vector<std::unique_ptr<Client>> peers;
         StateController stateController;
         MapController mapController;
@@ -48,6 +49,7 @@ namespace DisasterServer
 
         std::optional<Client*> findClient(clientId clientId);
 
+        Application &getApplication() { return application; }
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         StateController &getStateController() { return stateController; }
         MapController &getMapController() { return mapController; }
