@@ -5,6 +5,7 @@
 #include "CharSelect.hpp"
 #include "MapVoteState.hpp"
 #include "Server.hpp"
+#include "Config.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Constansts.hpp"
 
@@ -14,7 +15,8 @@ LobbyState::LobbyState(Server *server, StateController *controller) : State(serv
 }
 
 void LobbyState::init() {
-    Debug("Attepting to enter ST_LOBBY...");
+    Debug("Attepting to enter DisasterServer::LobbyState...");
+
     for (auto &peer : server->getClients()) {
         peer->setReady(false);
         peer->setVoted(false);
@@ -36,13 +38,14 @@ void LobbyState::init() {
                 v->exe_chance += 2 + rand() % 5;
             */
 
+
             Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
             pack.write<uint8_t>(peer->getExeChance());
             pack.send(*peer, true);
         }
     }
 
-    countdown.stop();
+    countdown.start(0);
     pracCountdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
@@ -71,8 +74,6 @@ bool LobbyState::checkCountdown() {
             return peer->isReady();
         }
     );
-
-    Debug("Players isReady {}/{}", ready, players->size());
 
     if (ready == players->size() && players->size() > 1) {
         countdown.start(START_COUNTDOWN);
@@ -163,8 +164,14 @@ void LobbyState::tick() {
         pracCountdown -= server->getDelta();
         if (pracCountdown <= 0) {
             auto &controller = server->getMapController();
-            auto map = controller.getMaps().at(0).get();
-            stateController->changeTo<CharSelectState>(map, 0); //Fart Zone
+            auto map = controller.getMap(0);
+
+            if (!map.has_value()) {
+                Error("Map with ID 0 was not found!");
+                return;
+            }
+
+            stateController->changeTo<CharSelectState>(*map, 0); //Fart Zone
             return;
         }
     }
@@ -348,14 +355,19 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             }
 
             ind--;
-            if (ind < 0 || ind > controller.getMaps().size()) {
-                this->server->sendMessage(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMaps().size());
+            if (ind < 0 || ind > controller.getMapCount()) {
+                this->server->sendMessage(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMapCount());
                 break;
             }
 
-            auto map = controller.getMaps().at(ind).get();
+            auto map = controller.getMap(ind);
 
-            stateController->changeTo<CharSelectState>(map, ind);
+            if (!map.has_value()) {
+                this->server->sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, ind);
+                break;
+            }
+
+            stateController->changeTo<CharSelectState>(*map, ind);
             break;
         }
 

@@ -33,10 +33,10 @@ bool CharSelectState::leaved(Client& client) {
 }
 
 void CharSelectState::init(Map* map, uint8_t id) {
-    Debug("Attempting to enter ST_CHARSELECT...");
+    Debug("Attempting to enter DisasterServer::CharSelectState...");
 
     if (!chooseExe()) {
-        Err("Failed to pick exe for some reason!");
+        Error("Failed to pick exe for some reason!");
 
         stateController->changeTo<LobbyState>();
         return;

@@ -192,15 +192,19 @@ void Logger::write(LogLevel level, std::string message, std::source_location &lo
 	ss << std::format("({}:{})", location.file_name(), location.line()); ss << TerminalColors::reset;
 	ss << " ";
 
-	boost::algorithm::replace_all(message, CLRCODE_RED, TerminalColors::red);
-	boost::algorithm::replace_all(message, CLRCODE_GRN, TerminalColors::green);
-	boost::algorithm::replace_all(message, CLRCODE_PUR, TerminalColors::light_magenta);
-	boost::algorithm::replace_all(message, CLRCODE_BLU, TerminalColors::light_blue);
-	boost::algorithm::replace_all(message, CLRCODE_GRA, TerminalColors::light_gray);
-	boost::algorithm::replace_all(message, CLRCODE_YLW, TerminalColors::yellow);
-	boost::algorithm::replace_all(message, CLRCODE_ORG, TerminalColors::light_yellow);
-	boost::algorithm::replace_all(message, CLRCODE_RST, TerminalColors::reset);
+	replaceColor(message);
 
 	ss << message << TerminalColors::reset;
 	std::cout << ss.str() << std::endl;
+}
+
+void Logger::replaceColor(std::string &msg) {
+	boost::algorithm::replace_all(msg, CLRCODE_RED, TerminalColors::red);
+	boost::algorithm::replace_all(msg, CLRCODE_GRN, TerminalColors::green);
+	boost::algorithm::replace_all(msg, CLRCODE_PUR, TerminalColors::light_magenta);
+	boost::algorithm::replace_all(msg, CLRCODE_BLU, TerminalColors::light_blue);
+	boost::algorithm::replace_all(msg, CLRCODE_GRA, TerminalColors::light_gray);
+	boost::algorithm::replace_all(msg, CLRCODE_YLW, TerminalColors::yellow);
+	boost::algorithm::replace_all(msg, CLRCODE_ORG, TerminalColors::light_yellow);
+	boost::algorithm::replace_all(msg, CLRCODE_RST, TerminalColors::reset);
 }

@@ -25,12 +25,12 @@ Server::~Server() {
 void Server::initialize() {
     mapController.initialize();
 
-    TimeStamp ticker;
-    time_start(&ticker);
+    const auto start = Clock::now();
 
-    double next_tick = time_end(&ticker);
+    auto next_tick = start;
+    constexpr auto TICK_INTERVAL = std::chrono::milliseconds(1000 / 60);
+
     double heartbeat = 0.0;
-    constexpr double TARGET_FPS = 1000.0 / 60;
 
     while (!running) {
         ENetEvent ev;
@@ -165,14 +165,14 @@ void Server::initialize() {
             }
         }
 
-        double now = time_end(&ticker);
+        const auto now = Clock::now();
         while (next_tick < now) {
-            next_tick += TARGET_FPS;
+            next_tick += TICK_INTERVAL;
 
             stateController.tick();
 
             // Heartbeat
-            if (peers.size() > 0) {
+            if (!peers.empty()) {
                 Packet pack(PacketType::SERVER_HEARTBEAT);
                 if (heartbeat >= (TICKSPERSEC * 2))
                 {
@@ -207,6 +207,18 @@ size_t Server::getClientCount() {
 
 size_t Server::getInGameCount() {
     return std::ranges::count_if(peers, [](const auto& cl) { return cl->isInGame(); });
+}
+
+std::optional<Client*> Server::findClient(clientId clientId) {
+    const auto it = std::ranges::find_if(peers.begin(), peers.end(), [&](const auto& client) {
+        return client->getId() == clientId;
+    });
+
+    if (it != peers.end()) {
+        return it->get();
+    }
+
+    return std::nullopt;
 }
 
 void Server::sendMessage(Client &client, std::string message) {

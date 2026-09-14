@@ -26,21 +26,55 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 		throw PacketError::format("Packet is too small");
 	}
 
-	read<uint8_t>();
+	[[maybe_unused]]
+	const uint8_t isPasstrough = read<uint8_t>();
 	type = read<PacketType>();
 
-	Debug("Packet received {}", getPacketTypeName(type));
+	//Debug("Packet received {}", getPacketTypeName(type));
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
 	write<PacketType>(type);
 	if (type != PacketType::SERVER_HEARTBEAT) {
-		Debug("Packet created {}", getPacketTypeName(type));
+		//Debug("Packet created {}", getPacketTypeName(type));
 	}
 }
 
 Packet::~Packet() = default;
+
+void Packet::seek(const size_t offset) {
+	if (offset > this->len) {
+		throw std::runtime_error("Invalid packet offset");
+	}
+
+	const size_t amount = this->len - offset;
+
+	if (amount > buffer.size() - position) {
+		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+		throw std::runtime_error("Packet overflow");
+	}
+
+	position = offset;
+}
+
+void Packet::append(const Packet &other, size_t offset) {
+	if (offset > other.len) {
+		throw std::runtime_error("Invalid packet offset");
+	}
+
+	const size_t amount = other.len - offset;
+
+	if (amount > buffer.size() - position) {
+		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+		throw std::runtime_error("Packet overflow");
+	}
+
+	std::memcpy(buffer.data() + position, other.buffer.data() + offset, amount);
+
+	position += amount;
+	len = std::max(len, position);
+}
 
 std::string Packet::readString() {
 	std::string result;
@@ -78,7 +112,7 @@ bool Packet::send(Client &client, bool reliable) {
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 
 	if (!pack) {
-		Err("Failed to create ENet packet");
+		Error("Failed to create ENet packet");
 		return false;
 	}
 

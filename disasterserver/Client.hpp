@@ -18,6 +18,7 @@ namespace DisasterServer
         AMY,
         CREAM,
         SALLY,
+        SONIC,
         COUNT
     };
 
@@ -31,20 +32,21 @@ namespace DisasterServer
         COUNT
     };
 
-    constexpr std::array<std::string_view, 4> EXE_NAMES = {
+    static std::vector<std::string_view> EXE_NAMES = {
         "Classic Exe",
         "Chaos",
         "Exetior",
         "Exeller"
     };
 
-    constexpr std::array<std::string_view, 6> SURV_NAMES = {
+    static std::vector<std::string_view> SURV_NAMES = {
         "Tails",
         "Knuckles",
         "Eggman",
         "Amy",
         "Cream",
-        "Sally"
+        "Sally",
+        "Sonic"
     };
 
     enum class DisconnectReason : uint8_t
@@ -93,7 +95,7 @@ namespace DisasterServer
         ENetPeer *peer;
 
         /* General info */
-        Player player;
+        Player player = {};
         std::string nickname = "<unknown>";
         std::string udid;
         uint8_t lobbyIcon = 0;
@@ -107,8 +109,6 @@ namespace DisasterServer
         bool can_vote = false;
         bool voted = false;
         bool disconnecting = false;
-        bool dead = false;
-        bool escaped = false;
 
         struct AuthPeer {
             uint32_t type = 0;
@@ -135,6 +135,7 @@ namespace DisasterServer
         clientId getId() const { return id; }
         std::string getIp() const { return ip; }
         ENetPeer *getPeer() const { return peer; }
+        Player &getPlayer() { return player; }
         std::string getNickname() { return nickname; }
         std::string getUdid() { return udid; }
         uint8_t getLobbyIcon() const { return lobbyIcon; }
@@ -160,10 +161,6 @@ namespace DisasterServer
         bool isCanVote() const { return can_vote; }
         void setOperator(const bool flag) { op = flag; }
         bool isOperator() const { return op; }
-        bool isDead() const {return dead; }
-        void setDead(const bool flag) { dead = flag; }
-        bool isEscaped() const { return escaped; }
-        void setEscaped(const bool flag) { escaped = flag; }
 
         bool isVerified() const { return verified; }
         bool isModified() const { return isModifiedClient; }

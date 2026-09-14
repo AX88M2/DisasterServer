@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 #include <array>
+#include <optional>
 #include <unordered_map>
 
 #include "Core/Log.hpp"
@@ -42,6 +43,9 @@ namespace DisasterServer
         }
 
         void initialize();
+
+        std::optional<Map*> getMap(int id);
+        size_t getMapCount() const { return maps.size(); }
 
         std::vector<std::unique_ptr<Map>> &getMaps() {
             return maps;
