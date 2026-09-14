@@ -33,32 +33,34 @@ namespace DisasterServer
         Countdown gameTime = Countdown(TICKSPERSEC);
         Countdown startTimeout = Countdown(TICKSPERSEC);
         double start_timeout = 15.0 * TICKSPERSEC;
-        double time = TICKSPERSEC;
-        double elapsed = 0;
-        uint16_t time_sec;
-        double end = 0;
-        Ending ending;
+        double time = 0.0;
+        double elapsed = 0.0;
+        uint16_t time_sec = 0;
+        int ringCoff = 0;
+        double end = 0.0;
+        Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;
         uint8_t bringLocation = static_cast<uint8_t>(rand());
 
         std::vector<clientId> leftClients = {};
+
     public:
         GameState(Server* server, StateController* controller);
         ~GameState() override = default;
 
         void init(clientId exe, int mapId, Map* map);
 
-
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
+
     private:
         void uninit(bool show_results);
 
-        void tickStartWait();
-        void tickPlaying();
+        void tickPlayers();
+        void tickEntities();
         void sendTimeSync();
 
         bool checkState();

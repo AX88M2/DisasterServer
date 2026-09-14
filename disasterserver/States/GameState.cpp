@@ -1,6 +1,8 @@
 #include "GameState.hpp"
 
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 #include "Server.hpp"
 #include "Controllers/StateController.hpp"
@@ -12,7 +14,6 @@
 using namespace DisasterServer;
 
 GameState::GameState(Server *server, StateController *controller) : State(server, controller) {}
-
 void GameState::init(clientId exe, int mapId, Map* map) {
     Debug("Attepting to enter ST_GAME...");
 
@@ -23,10 +24,22 @@ void GameState::init(clientId exe, int mapId, Map* map) {
     }
 
     this->currentMapId = mapId;
-    this->currentMap = map;
-    this->exe = exe;
+    this->currentMap   = map;
+    this->exe          = exe;
 
-    startTimeout.start(15);
+    this->started = false;
+    this->end = 0.0f;
+    this->ending = Ending::EXEWIN;
+    this->elapsed = 0.0f;
+    this->time = 0.0f;
+    this->time_sec = 180;
+    this->ringCoff = 15;
+    this->suddenDeath = false;
+    this->bringState = BigRingState::NONE;
+    this->bringLocation = static_cast<uint8_t>(std::rand());
+    this->leftClients.clear();
+
+    this->startTimeout.start(15);
 
     for (auto &client: server->getClients()) {
         if (!client->isInGame()) {
@@ -52,7 +65,7 @@ void GameState::init(clientId exe, int mapId, Map* map) {
             continue;
         }
 
-        for (auto &er : server->getClients()) {
+        for (auto &er: server->getClients()) {
             if (er->getId() == client->getId()) {
                 continue;
             }
@@ -81,19 +94,18 @@ void GameState::init(clientId exe, int mapId, Map* map) {
 void GameState::uninit(bool show_results) {
     if (show_results) {
         stateController->changeTo<ResultsState>();
-        return;
     } else {
         stateController->changeTo<LobbyState>();
     }
 }
 
-
 bool GameState::joined(Client& client) {
+    (void)client;
     return true;
 }
 
 bool GameState::leaved(Client& client) {
-    if (end > 0) {
+    if (end > 0.0f) {
         return true;
     }
 
@@ -113,8 +125,7 @@ bool GameState::leaved(Client& client) {
             this->uninit(false);
             return true;
         }
-
-        return checkState();
+        return checkStart();
     }
 
     auto &player = client.getPlayer();
@@ -123,7 +134,8 @@ bool GameState::leaved(Client& client) {
     leftClients.push_back(client.getId());
 
     if (client.getId() == this->exe) {
-        this->endingRound(Ending::EXEWIN, elapsed >= TICKSPERSEC * TICKSPERSEC);
+        this->endingRound(Ending::EXEWIN,
+                          elapsed >= static_cast<float>(TICKSPERSEC * TICKSPERSEC));
         return true;
     }
 
@@ -136,14 +148,11 @@ void GameState::tick() {
         auto result = this->startTimeout.tick(server->getDelta());
         if (result == Countdown::TickResult::Finished) {
             Warn("Waiting for players took too long, kicking out inactive players!");
-
             for (auto &client : server->getClients()) {
                 if (!client->isInGame()) {
                     continue;
                 }
-
                 auto player = client->getPlayer();
-
                 if (!player.isReady()) {
                     client->disconnect(DisconnectReason::PACKETSNOTRECV);
                     break;
@@ -153,106 +162,134 @@ void GameState::tick() {
         return;
     }
 
-    /*Packet packet(PacketType::SERVER_GAME_TIME_SYNC);
-    packet.write<uint16_t>(time_sec * TICKSPERSEC);
-    packet.sendBroadcast(*server, false);
-    packet.sendBroadcast(*server, true);*/
-
-    currentMap->tick();
-}
-
-void GameState::tickStartWait()
-{
-    /*auto& g = server->game;
-
-    g.startTimeout -= server->getDelta();
-    if (g.startTimeout <= 0) {
-        Warn("Waiting for players took too long, kicking out inactive players!");
-        for (auto& peer : server->getClients()) {
-            if (!peer || !peer->isInGame())
-                continue;
-            if (!peer->isReady()) {
-                peer->disconnect(DisconnectReason::PACKETSNOTRECV);
-                break;
-            }
+    if (end > 0.0f) {
+        end -= server->getDelta();
+        if (end <= 0.0f) {
+            end = 0.0f;
+            uninit(true);
         }
         return;
     }
 
-    size_t ready = 0, total = 0;
-    for (auto& peer : server->getClients()) {
-        if (!peer || !peer->isInGame()) continue;
-        total++;
-        if (peer->isReady()) ready++;
-    }
+    const float delta = server->getDelta();
 
-    if (total > 0 && ready >= total) {
-        Packet pack(PacketType::SERVER_GAME_PLAYERS_READY);
-        pack.sendBroadcast(*server, true);
+    elapsed += delta;
+    time += delta;
 
-        std::srand(static_cast<unsigned int>(std::time(nullptr)));
-        currentMap->init(mapId_);
+    // Отсчёт целых секунд
+    while (time >= static_cast<float>(TICKSPERSEC)) {
+        time -= static_cast<float>(TICKSPERSEC);
 
-        g.started = true;
-        Info("{}Game started! {}(Time {}s)",
-             CLRCODE_YLW, CLRCODE_RST, g.timeSec);
-    }*/
-}
+        if (time_sec > 0) {
+            time_sec--;
+        }
 
-void GameState::tickPlaying()
-{
-    /*auto& g = server->game;
-
-    g.elapsed += server->getDelta();
-
-    g.timeAccum += server->getDelta();
-    while (g.timeAccum >= TICKSPERSEC) {
-        g.timeAccum -= TICKSPERSEC;
-
-        if (g.timeSec > 0)
-            g.timeSec--;
-
-        if (g.ringCoff > 0 && g.timeSec % g.ringCoff == 0) {
-            // game_spawn(MakeRing())
+        if (ringCoff > 0 && time_sec > 0 && (time_sec % ringCoff) == 0) {
+            // currentMap->spawnRing();
         }
 
         sendTimeSync();
 
-        if (g.timeSec == 0) {
-            endRound(3 0, true);
+        if (time_sec <= 0) {
+            endingRound(Ending::TIMEOVER, true);
             return;
         }
     }
 
+    tickPlayers();
+    tickEntities();
     currentMap->tick();
-    checkState();*/
 }
 
-bool GameState::checkState()
-{
-    if (end > 0) return true;
+void GameState::tickPlayers() {
+    if (!suddenDeath && time_sec <= 2) {
+        suddenDeath = true;
+
+        std::vector<Client*> dead;
+        for (auto &client : server->getClients()) {
+            if (!client->isInGame()) continue;
+            auto &p = client->getPlayer();
+            if (p.isFlag(Player::Flags::PLAYER_DEAD)) {
+                dead.push_back(client.get());
+            }
+        }
+
+        std::sort(dead.begin(), dead.end(), [](Client *a, Client *b) {
+            return a->getPlayer().getDeathTimerSec() > b->getPlayer().getDeathTimerSec();
+        });
+
+        for (auto *c : dead) {
+            demonize(*c);
+        }
+    }
+
+    for (auto &client : server->getClients()) {
+        if (!client->isInGame()) continue;
+
+        auto &player = client->getPlayer();
+
+        if (player.isFlag(Player::Flags::PLAYER_CANTREVIVE))
+            continue;
+
+        if (!player.isFlag(Player::Flags::PLAYER_DEAD)) 
+            continue;
+
+        if (player.getDeathTimerSec() <= 0)
+            continue;
+
+        bool exeNear = false;
+        auto exeOpt = server->findClient(this->exe);
+        if (exeOpt.has_value()) {
+            const float d = player.getPosition().distance(exeOpt.value()->getPlayer().getPosition());
+            exeNear = d <= 240.0f;
+        }
+
+        if (time_sec < 2) {
+            demonize(*client);
+            continue;
+        }
+
+        if (!exeNear) {
+            player.setDeathTimerSec(player.getDeathTimerSec() - 1);
+            if (player.getDeathTimerSec() <= 0) {
+                demonize(*client);
+                continue;
+            }
+        }
+
+        Packet dt(PacketType::SERVER_GAME_DEATHTIMER_TICK);
+        dt.write<uint8_t>(exeNear ? 1 : 0);
+        dt.write<clientId>(client->getId());
+        dt.write<uint8_t>(player.getDeathTimerSec());
+        dt.sendBroadcast(*server, true);
+    }
+}
+
+void GameState::tickEntities() {
+    (void)0;
+}
+
+bool GameState::checkState() {
+    if (end > 0.0f) return true;
 
     const auto clients = &server->getClients();
 
-    const auto escaped = std::ranges::count_if(*clients,[](const auto& client) {
+    const auto escaped = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
         return !client->isInGame() && player.isFlag(Player::Flags::PLAYER_ESCAPED);
     });
 
-    const auto dead = std::ranges::count_if(*clients,[](const auto& client) {
+    const auto dead = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
         return !client->isInGame() && (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED));
     });
 
-    const auto exes = std::ranges::count_if(*clients,[&](const auto& client) {
-        auto player = client->getPlayer();
+    const auto exes = std::ranges::count_if(*clients, [&](const auto& client) {
         return !client->isInGame() && (client->getId() == this->exe);
     });
 
-    int total = 0;
-
-    total = this->server->getInGameCount();
-    total -= (exes + dead + escaped);
+    int total = this->server->getInGameCount();
+    total -= (static_cast<int>(exes + dead + escaped));
 
     if (total <= 0) {
         if (escaped > 0) {
@@ -266,13 +303,11 @@ bool GameState::checkState()
 }
 
 bool GameState::checkStart() {
-    if (started) {
-        return true;
-    }
+    if (started) return true;
 
     const auto clients = &server->getClients();
 
-    const auto cnt = std::ranges::count_if(*clients,[](const auto& client) {
+    const auto cnt = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
         return client->isInGame() && player.isReady();
     });
@@ -281,10 +316,12 @@ bool GameState::checkStart() {
         Packet pack(PacketType::SERVER_GAME_PLAYERS_READY);
         pack.sendBroadcast(*server);
 
-        srand(static_cast<unsigned int>(std::time(nullptr)));
-
+        std::srand(static_cast<unsigned int>(std::time(nullptr)));
         currentMap->init();
-        gameTime.start(time_sec);
+
+        elapsed    = 0.0f;
+        time  = 0.0f;
+        end        = 0.0f;
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, time_sec);
         started = true;
@@ -293,8 +330,7 @@ bool GameState::checkStart() {
     return true;
 }
 
-bool GameState::handle(Client& client, Packet& packet)
-{
+bool GameState::handle(Client& client, Packet& packet) {
     switch (packet.getPacketType()) {
 
         case PacketType::CLIENT_PLAYER_POTATER:
@@ -315,9 +351,7 @@ bool GameState::handle(Client& client, Packet& packet)
         }
 
         case PacketType::CLIENT_CHAT_MESSAGE: {
-            if (client.isInGame()) {
-                break;
-            }
+            if (client.isInGame()) break;
 
             [[maybe_unused]] const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
@@ -341,9 +375,7 @@ bool GameState::handle(Client& client, Packet& packet)
         }
 
         case PacketType::CLIENT_PING: {
-            if (!started) {
-                break;
-            }
+            if (!started) break;
 
             auto &player = client.getPlayer();
 
@@ -365,12 +397,12 @@ bool GameState::handle(Client& client, Packet& packet)
             gamePing.write<clientId>(client.getId());
             gamePing.write<uint16_t>(roundTripTime);
             gamePing.sendBroadcast(*server, false);
+            break;
         }
 
         case PacketType::CLIENT_PLAYER_DEATH_STATE: {
-            if (gameTime.active()) {
+            if (end > 0.0f)
                 break;
-            }
 
             auto &player = client.getPlayer();
 
@@ -393,13 +425,14 @@ bool GameState::handle(Client& client, Packet& packet)
             revivalStatus.sendBroadcast(*server);
 
             if (dead) {
-                if (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_ESCAPED)) {
+                if (player.isFlag(Player::Flags::PLAYER_DEAD) ||
+                    player.isFlag(Player::Flags::PLAYER_ESCAPED)) {
                     break;
                 }
 
                 player.setFlag(Player::Flags::PLAYER_DEAD);
 
-                if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->time_sec < TICKSPERSEC * 2) {
+                if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->time_sec < 2) {
                     this->demonize(client);
                 } else {
                     auto clientExeOpt = this->server->findClient(this->exe);
@@ -409,7 +442,8 @@ bool GameState::handle(Client& client, Packet& packet)
                         player.setDeathTimerSec(30);
 
                         Packet deathTimerTick(PacketType::SERVER_GAME_DEATHTIMER_TICK);
-                        deathTimerTick.write<uint8_t>(player.getPosition().distance(playerExe.getPosition()) <= 240);
+                        deathTimerTick.write<uint8_t>(
+                            player.getPosition().distance(playerExe.getPosition()) <= 240);
                         deathTimerTick.write<clientId>(client.getId());
                         deathTimerTick.write<uint8_t>(player.getDeathTimerSec());
                         deathTimerTick.sendBroadcast(*server);
@@ -435,7 +469,8 @@ bool GameState::handle(Client& client, Packet& packet)
 
             auto &player = client.getPlayer();
 
-            if (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+            if (player.isFlag(Player::Flags::PLAYER_DEAD) ||
+                player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
                 break;
             }
 
@@ -457,9 +492,7 @@ bool GameState::handle(Client& client, Packet& packet)
         }
 
         case PacketType::CLIENT_PLAYER_DATA: {
-            if (!started) {
-                break;
-            }
+            if (!started) break;
 
             auto &player = client.getPlayer();
 
@@ -478,39 +511,26 @@ bool GameState::handle(Client& client, Packet& packet)
             int duration = 2000;
 
             if (this->exe != client.getId()) {
-                const int8_t hp = packet.read<int8_t>();
+                const int8_t  hp = packet.read<int8_t>();
                 const uint8_t revival = packet.read<uint8_t>();
                 const int16_t rings = packet.read<int16_t>();
                 const uint8_t flags = packet.read<uint8_t>();
 
-                if (!player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                if (!player.isFlag(Player::Flags::PLAYER_DEAD) &&
+                    !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
                     if (client.getId() != this->exe) {
                         player.setRings(rings);
-
-                        /*if (revival < 2) {
-                            if (rings < 0 || this->currentMapId != 20 && rings >= 120) {
-                                client.disconnect(DisconnectReason::OTHER, "So where did you get all those rings?");
-                                return true;
-                            }
-
-                            if (hp > 100) {
-                                client.disconnect(DisconnectReason::OTHER, "Hey, hey, hey—were you trying to turn me into the Terminator or something?");
-                                return true;
-                            }
-                        }*/
                     }
 
                     player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
 
                     switch (client.getSurvCharacter()) {
-                        case SurvCharacters::EGGMAN: {
+                        case SurvCharacters::EGGMAN:
                             duration = 3000;
                             break;
-                        }
                         default: break;
                     }
                 }
-
             } else {
                 const uint8_t flags = packet.read<uint8_t>();
                 player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
@@ -520,7 +540,8 @@ bool GameState::handle(Client& client, Packet& packet)
             player.setTimeout(0);
 
             const auto now = Clock::now();
-            if (player.getState() != state || now - player.getLastPacket() >= std::chrono::duration<double, std::milli>(15 * 2.9)) {
+            if (player.getState() != state ||
+                now - player.getLastPacket() >= std::chrono::duration<double, std::milli>(15 * 2.9)) {
                 player.setState(state);
                 player.setLastPacket(now);
 
@@ -548,12 +569,11 @@ bool GameState::handle(Client& client, Packet& packet)
     }
 
     currentMap->handle(client, packet);
-
     return true;
 }
 
 bool GameState::endingRound(const Ending endtype, bool achiv) {
-    if (end > 0) {
+    if (end > 0.0f) {
         return true;
     }
 
@@ -583,8 +603,7 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
         }
     }
 
-
-    this->end = 5 * TICKSPERSEC;
+    this->end = 5.0f * TICKSPERSEC;
     this->ending = endtype;
 
     return true;
@@ -597,12 +616,14 @@ void GameState::demonize(Client &client) {
 
     const auto clients = &server->getClients();
 
-    const auto demonized = std::ranges::count_if(*clients,[&](const auto& cli) {
+    const auto demonized = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
-        return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
+        return cli->isInGame() &&
+               cli->getId() != this->exe &&
+               plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
     });
 
-    const auto players = std::ranges::count_if(*clients,[&](const auto& cli) {
+    const auto players = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
         return cli->isInGame() && cli->getId() != this->exe;
     });
@@ -614,35 +635,31 @@ void GameState::demonize(Client &client) {
         player.getStats().clearRings();
 
         switch (client.getSurvCharacter()) {
-            case SurvCharacters::TAILS: {
+            case SurvCharacters::TAILS:
+                // cooldowns[TAILS_RECHARGE]  = 0.0f;
+                // cooldowns[ETAILS_RECHARGE] = 0.0f;
                 break;
-            }
-
-            case SurvCharacters::EGGMAN: {
+            case SurvCharacters::EGGMAN:
+                // cooldowns[EGGTRACK_RECHARGE] = 0.0f;
                 break;
-            }
-
-            case SurvCharacters::CREAM: {
+            case SurvCharacters::CREAM:
+                // cooldowns[CREAM_RING_SPAWN] = 0.0f;
                 break;
-            }
-
             default: break;
         }
 
-        Info("%s (id %d) was {}demonized!", client.getNickname(), client.getId(), CLRCODE_RED);
+        Info("{} (id {}) was {}demonized!", client.getNickname(), client.getId(), CLRCODE_RED);
         pack.write<uint8_t>(1);
     } else {
         player.setFlag(Player::Flags::PLAYER_CANTREVIVE);
-
-        Info("%s (id %d) {}died!", client.getNickname(), client.getId(), CLRCODE_RED);
+        Info("{} (id {}) {}died!", client.getNickname(), client.getId(), CLRCODE_RED);
         pack.write<uint8_t>(0);
     }
 
     pack.send(client);
 }
 
-void GameState::bigRing(BigRingState state)
-{
+void GameState::bigRing(BigRingState state) {
     if (bringState == state) return;
 
     Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
@@ -653,10 +670,8 @@ void GameState::bigRing(BigRingState state)
     bringState = state;
 }
 
-void GameState::sendTimeSync()
-{
+void GameState::sendTimeSync() {
     Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
     pack.write<uint16_t>(static_cast<uint16_t>(time_sec * TICKSPERSEC));
     pack.sendBroadcast(*server, true);
 }
-

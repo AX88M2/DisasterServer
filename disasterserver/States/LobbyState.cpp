@@ -5,7 +5,7 @@
 #include "CharSelect.hpp"
 #include "MapVoteState.hpp"
 #include "Server.hpp"
-#include "Config.hpp"
+#include "ConfigManager.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Constansts.hpp"
 
@@ -220,7 +220,10 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             server->sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
             server->sendMessage(client, "|type .help for command list~");
-
+            const auto motd = this->server->getApplication().getConfigManager().getConfig().getMotd();
+            if (!motd.empty()) {
+                this->server->sendMessage(client, motd);
+            }
             break;
         }
 

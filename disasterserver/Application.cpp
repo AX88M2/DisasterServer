@@ -1,5 +1,7 @@
 #include "Application.hpp"
-//#include "Config.hpp"
+
+#include "Server.hpp"
+#include "Core/Constansts.hpp"
 #include "Core/Log.hpp"
 
 namespace DisasterServer
@@ -11,6 +13,8 @@ namespace DisasterServer
     void Application::initialize() {
         Info("- DisasterServerCXX v{}", BUILD_VERSION);
         Info("- Build from {} {}", __DATE__, __TIME__);
+
+        config.load();
 
         // TODO: Сделать это по нормальному
         /*for (uint32_t i = 0; i < g_config.lobby_count; ++i) {
