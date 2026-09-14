@@ -26,7 +26,7 @@ set(COMPILER_OPTIONS
             -Wpedantic
             -finput-charset=UTF-8
             -fexec-charset=UTF-8
-            -Wgnu-zero-variadic-macro-arguments
+#            -Wgnu-zero-variadic-macro-arguments
         >
 )
 
