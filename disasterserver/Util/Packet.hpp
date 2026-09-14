@@ -357,24 +357,24 @@ namespace DisasterServer {
 			static_assert(std::is_trivially_copyable_v<T>, "Packet::read requires trivially copyable type");
 
 			if (position > len || sizeof(T) > len - position) {
-				Err("Packet underflow: trying to read {} bytes at position {} from {} byte packet ({})", sizeof(T), position, len, getPacketTypeName(type));
+				Error("Packet underflow: trying to read {} bytes at position {} from {} byte packet ({})", sizeof(T), position, len, getPacketTypeName(type));
 				throw std::runtime_error("Packet underflow");
 			}
 
 			T value {};
 
+			std::memcpy(&value, buffer.data() + position, sizeof(T));
+			position += sizeof(T);
+
 #ifdef SYS_BIG_ENDIAN
-			if (sizeof(T) == sizeof(uint16_t)) {
+			if constexpr (sizeof(T) == sizeof(uint16_t)) {
 				value = BYTESWAP_16(value);
-			} else if (sizeof(T) == sizeof(uint32_t)) {
+			} else if constexpr (sizeof(T) == sizeof(uint32_t)) {
 				value = BYTESWAP_32(value);
-			} else if (sizeof(T) == sizeof(uint64_t)) {
+			} else if constexpr (sizeof(T) == sizeof(uint64_t)) {
 				value = BYTESWAP_64(value);
 			}
 #endif
-
-			std::memcpy(&value, buffer.data() + position, sizeof(T));
-			position += sizeof(T);
 
 			return value;
 		}
@@ -384,16 +384,16 @@ namespace DisasterServer {
 			static_assert(std::is_trivially_copyable_v<T>, "Packet::write requires trivially copyable type");
 
 			if (position > buffer.size() || sizeof(T) > buffer.size() - position) {
-				Err("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+				Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
 				throw std::runtime_error("Packet overflow");
 			}
 
 #ifdef SYS_BIG_ENDIAN
-			if (sizeof(T) == sizeof(uint16_t)) {
+			if constexpr (sizeof(T) == sizeof(uint16_t)) {
 				value = BYTESWAP_16(value);
-			} else if (sizeof(T) == sizeof(uint32_t)) {
+			} else if constexpr (sizeof(T) == sizeof(uint32_t)) {
 				value = BYTESWAP_32(value);
-			} else if (sizeof(T) == sizeof(uint64_t)) {
+			} else constexpr if (sizeof(T) == sizeof(uint64_t)) {
 				value = BYTESWAP_64(value);
 			}
 #endif
@@ -403,6 +403,12 @@ namespace DisasterServer {
 
 			len = std::max(len, position);
 		}
+
+		void seek(size_t offset);
+		void append(const Packet& other, size_t offset);
+
+		size_t getPosition() { return position; }
+		size_t getLength() { return len; }
 
 		std::string readString();
 		void writeString(const std::string &value);

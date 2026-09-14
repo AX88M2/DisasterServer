@@ -9,6 +9,8 @@ namespace DisasterServer
 {
     class StateController;
 
+
+
     class Server {
         int id = 0;
         bool running = false;
@@ -43,6 +45,8 @@ namespace DisasterServer
 
         size_t getClientCount();
         size_t getInGameCount();
+
+        std::optional<Client*> findClient(clientId clientId);
 
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         StateController &getStateController() { return stateController; }

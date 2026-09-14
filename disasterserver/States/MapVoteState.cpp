@@ -13,7 +13,7 @@ MapVoteState::MapVoteState(Server *server, StateController *controller) : State(
 }
 
 void MapVoteState::init() {
-    Debug("Attepting to enter ST_MAPVOTE...");
+    Debug("Attepting to enter DisasterServer::MapVoteState...");
 
     auto &mapController = server->getMapController();
 
@@ -22,13 +22,11 @@ void MapVoteState::init() {
     Debug("Mapvote seed: {}", seed);
     srand(static_cast<unsigned int>(seed));
 
-    auto &listMaps = mapController.getMaps();
-
     countdown.start(30);
 
     // TODO: Сделать список разрешённых карт
-    if (listMaps.size() <= 3) {
-        for (int i = 0; i < listMaps.size(); i++) {
+    if (mapController.getMapCount() <= 3) {
+        for (int i = 0; i < mapController.getMapCount(); i++) {
             for (int j = 0; j < 3; j++) {
                 maps[j] = static_cast<uint8_t>(i);
             }
@@ -38,14 +36,20 @@ void MapVoteState::init() {
         int attempts = 0;
 
         while (count < 3 && attempts++ < 1000) {
-            int8_t mapid = static_cast<size_t>(rand()) % listMaps.size();
+            int8_t mapid = static_cast<size_t>(rand()) % mapController.getMapCount();
 
-            Map* map = listMaps[mapid].get();
+            auto map = mapController.getMap(mapid);
 
-            if (map == mapController.getLatestMap())
+            if (!map.has_value()) {
+                Error("Map with id {} was not found!", mapid);
+                stateController->changeTo<LobbyState>();
+                return;
+            }
+
+            if (*map == mapController.getLatestMap())
                 continue;
 
-            const int16_t weight = mapController.getMapWeight(map);
+            const int16_t weight = mapController.getMapWeight(*map);
 
             const int num = rand() % 255;
 
@@ -81,7 +85,12 @@ void MapVoteState::init() {
     sync.sendBroadcast(*server);
 
     Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Map Vote", CLRCODE_RST);
-    Info("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, listMaps.at(maps[0]).get()->getName(), CLRCODE_RST, CLRCODE_BLU, listMaps.at(maps[1]).get()->getName(), CLRCODE_RST, CLRCODE_YLW, listMaps.at(maps[2]).get()->getName(), CLRCODE_RST);
+
+    const auto map1 = *mapController.getMap(maps[0]);
+    const auto map2 = *mapController.getMap(maps[1]);
+    const auto map3 = *mapController.getMap(maps[2]);
+
+    Info("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, map1->getName(), CLRCODE_RST, CLRCODE_BLU, map2->getName(), CLRCODE_RST, CLRCODE_YLW, map3->getName(), CLRCODE_RST);
 }
 
 bool MapVoteState::joined(Client &client) {
@@ -122,38 +131,50 @@ void MapVoteState::tick() {
                 }
             }
 
-            auto &listMaps = controller.getMaps();
-
             // Find winner
             int8_t wonId = indeces[rand() % count];
-            auto wonMap = listMaps.at(wonId).get();
-            controller.setLatestMap(wonMap);
+            auto wonMap = controller.getMap(wonId);
 
-            int16_t weight = controller.getMapWeight(wonMap);
+            if (!wonMap.has_value()) {
+                Error("Map with id {} was not found!", wonId);
+                stateController->changeTo<LobbyState>();
+                return;
+            }
+
+            controller.setLatestMap(*wonMap);
+
+            int16_t weight = controller.getMapWeight(*wonMap);
 
             weight -= 255;
             if (weight < 0)
                 weight = 0;
 
-            controller.setMapWeight(wonMap, weight);
+            controller.setMapWeight(*wonMap, weight);
 
             Debug("Pickrates:");
-            for (int8_t i = 0; i < controller.getMaps().size(); i++) {
-                Map* map = controller.getMaps().at(i).get();
-                Debug("{}: {}", i, controller.getMapWeight(map));
+            for (int8_t i = 0; i < controller.getMapCount(); i++) {
+                auto map = controller.getMap(i);
+
+                if (!map.has_value()) {
+                    Error("Map with id {} was not found!", i);
+                    stateController->changeTo<LobbyState>();
+                    return;
+                }
+
+                Debug("{}: {}", i, controller.getMapWeight(*map));
                 if (i == wonId) {
                     continue;
                 }
 
-                int16_t weigh = controller.getMapWeight(map);
+                int16_t weigh = controller.getMapWeight(*map);
                 weigh += 25;
                 if (weigh > 255) {
                     weigh = 255;
                 }
-                controller.setMapWeight(map, weigh);
+                controller.setMapWeight(*map, weigh);
             }
 
-            stateController->changeTo<CharSelectState>(wonMap, wonId);
+            stateController->changeTo<CharSelectState>(*wonMap, wonId);
 
             break;
         }

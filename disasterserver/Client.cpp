@@ -104,6 +104,7 @@ bool Client::identity(Packet &packet) {
     Info("{} (id {}) joined.", this->nickname, id);
     Info("	IP: {}", ip);
     Info("	UID: {}", this->udid);
+    Info("	BuildVersion: {}", buildVersion);
     Info("	Modified: {}", BoolStringify(isModifiedClient));
 
     this->verified = true;

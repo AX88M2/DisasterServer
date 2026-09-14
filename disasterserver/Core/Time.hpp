@@ -1,10 +1,5 @@
 #pragma once
+#include <chrono>
 
-#if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#endif
-
-typedef double TimeStamp;
-void	time_start	(TimeStamp* timer);
-double	time_end	(TimeStamp* timer);
+using Clock = std::chrono::steady_clock;
+using TimeStamp = std::chrono::time_point<Clock>;

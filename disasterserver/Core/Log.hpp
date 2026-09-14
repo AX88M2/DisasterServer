@@ -85,7 +85,7 @@ namespace DisasterServer
         }
 
     public:
-
+        static void replaceColor(std::string &msg);
         template <typename... Args>
         static void debug(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
 #if defined(SERVER_DEBUG)
@@ -114,10 +114,10 @@ namespace DisasterServer
     }
 }
 
-#define RAssert(x) if (!(x)) { Err("RAssert({}) failed!", #x); return false; }
-#define RAssertEx(x) if (!(x)) { Err("RAssert({}) failed!", #x); }
+#define RAssert(x) if (!(x)) { Error("RAssert({}) failed!", #x); return false; }
+#define RAssertEx(x) if (!(x)) { Error("RAssert({}) failed!", #x); }
 
 #define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
 #define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Err(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Error(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
 #define Debug(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt, ##__VA_ARGS__)

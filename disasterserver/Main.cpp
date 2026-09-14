@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     enet_initialize();
 
     if (!g_config.load("config.json")) {
-        Err("Failed to load config.json");
+        Error("Failed to load config.json");
         return 1;
     }
 
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
         auto &app = DisasterServer::Application::getInstance();
         app.initialize();
     } catch (const std::exception& e) {
-        Err("Exception: {}", e.what());
+        Error("Exception: {}", e.what());
     }
 
     enet_deinitialize();

@@ -4,6 +4,7 @@
 #include "State.hpp"
 #include "Core/Constansts.hpp"
 #include "Core/Map.hpp"
+#include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
@@ -29,6 +30,8 @@ namespace DisasterServer
         bool started = false;
         bool suddenDeath = false;
 
+        Countdown gameTime = Countdown(TICKSPERSEC);
+        Countdown startTimeout = Countdown(TICKSPERSEC);
         double start_timeout = 15.0 * TICKSPERSEC;
         double time = TICKSPERSEC;
         double elapsed = 0;
@@ -39,26 +42,31 @@ namespace DisasterServer
         BigRingState bringState = BigRingState::NONE;
         uint8_t bringLocation = static_cast<uint8_t>(rand());
 
+        std::vector<clientId> leftClients = {};
     public:
         GameState(Server* server, StateController* controller);
         ~GameState() override = default;
 
         void init(clientId exe, int mapId, Map* map);
 
+
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
-
-        bool endRound(int ending, bool achiv);
-        bool checkState();
-
     private:
+        void uninit(bool show_results);
+
         void tickStartWait();
         void tickPlaying();
         void sendTimeSync();
-        void checkStart();
+
+        bool checkState();
+        bool checkStart();
+
         void bigRing(BigRingState state);
+        bool endingRound(Ending ending, bool achiv);
+        void demonize(Client& client);
     };
 }
 
