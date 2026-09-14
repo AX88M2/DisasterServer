@@ -3,7 +3,7 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 #include "Server.hpp"
-#include "Config.hpp"
+#include "ConfigManager.hpp"
 #include "Util/Packet.hpp"
 #include "Controllers/StateController.hpp"
 
@@ -12,7 +12,7 @@ using namespace DisasterServer;
 Server::Server(const int id) : id(id), stateController(this), mapController(this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
-    addr.port = static_cast<enet_uint16>(g_config.port + id);
+    addr.port = static_cast<uint16_t>(application.getConfigManager().getConfig().getServerPort() + id);
     host = enet_host_create(&addr, 50, 2, 0, 0);
 
     Info("Listening on port {}", addr.port);

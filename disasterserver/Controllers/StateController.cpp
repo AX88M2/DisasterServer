@@ -1,6 +1,6 @@
 #include "StateController.hpp"
 #include "Server.hpp"
-#include "Config.hpp"
+#include "ConfigManager.hpp"
 #include "Core/Constansts.hpp"
 #include "States/LobbyState.hpp"
 
@@ -206,20 +206,21 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         }
 
         case CMD_LOBBY: {
-
             int ind;
             if (sscanf(message.c_str(), ".lobby %d", &ind) != 1) {
                 this->server->sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
                 break;
             }
 
-            if (ind < 1 || ind > static_cast<int>(g_config.lobby_count)) {
-                this->server->sendMessage(client, std::string(CLRCODE_RED) + "lobby should be between 1 and " + std::to_string(g_config.lobby_count));
+            auto config = this->server->getApplication().getConfigManager().getConfig();
+
+            if (ind < 1 || ind > config.getLobbyCount()) {
+                this->server->sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());
                 break;
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CHANGELOBBY);
-            uint32_t port = g_config.port + static_cast<uint32_t>(ind - 1);
+            uint32_t port = config.getServerPort() + (ind - 1);
             pack.write<uint32_t>(port);
 
             if (!pack.send(client, true)) {
@@ -233,7 +234,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             this->server->sendMessage(client, "|- .info~ - information about server");
             this->server->sendMessage(client, "|- .vk~ - vote kick");
             this->server->sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server->sendMessage(client, "|- .lobby~ - change lobby (1-{})", g_config.lobby_count);
+            this->server->sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server->getApplication().getConfigManager().getConfig().getLobbyCount());
 
             if(client.isOperator())
             {

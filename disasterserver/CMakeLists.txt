@@ -35,10 +35,10 @@ set(DEFINES
 )
 
 set(LIBS
-        cJSON
         enet
         Boost::bind
         Boost::algorithm
+        toml11
 )
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)

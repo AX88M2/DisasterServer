@@ -26,6 +26,7 @@ void GameState::init(clientId exe, int mapId, Map* map) {
     this->currentMapId = mapId;
     this->currentMap   = map;
     this->exe          = exe;
+
     this->started = false;
     this->end = 0.0f;
     this->ending = Ending::EXEWIN;
@@ -172,7 +173,7 @@ void GameState::tick() {
 
     const float delta = server->getDelta();
 
-    elapsed   += delta;
+    elapsed += delta;
     time += delta;
 
     // Отсчёт целых секунд
@@ -259,7 +260,7 @@ void GameState::tickPlayers() {
         Packet dt(PacketType::SERVER_GAME_DEATHTIMER_TICK);
         dt.write<uint8_t>(exeNear ? 1 : 0);
         dt.write<clientId>(client->getId());
-        dt.write<uint8_t>(static_cast<uint8_t>(player.getDeathTimerSec()));
+        dt.write<uint8_t>(player.getDeathTimerSec());
         dt.sendBroadcast(*server, true);
     }
 }

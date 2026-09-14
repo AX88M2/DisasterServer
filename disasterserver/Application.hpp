@@ -1,18 +1,19 @@
 #pragma once
 
-#include "Server.hpp"
+#include "ConfigManager.hpp"
 #include "Core/Singleton.hpp"
 
 namespace DisasterServer
 {
     class Application : public Singleton<Application> {
         friend class Singleton;
-        std::vector<std::unique_ptr<Server>> servers;
-        std::vector<std::thread> threads;
+        ConfigManager config = {};
     protected:
         Application();
         ~Application();
     public:
         void initialize();
+
+        ConfigManager& getConfigManager() { return config; }
     };
 }
