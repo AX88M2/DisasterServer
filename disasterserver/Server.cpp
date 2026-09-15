@@ -9,7 +9,7 @@
 
 using namespace DisasterServer;
 
-Server::Server(const int id) : id(id), stateController(this), mapController(this) {
+Server::Server(const int id) : id(id), stateController(*this), mapController(*this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
     addr.port = static_cast<uint16_t>(application.getConfigManager().getConfig().getServerPort() + id);
@@ -42,7 +42,7 @@ void Server::initialize() {
 
                     const clientId id = ev.peer->incomingPeerID + 1;
 
-                    auto client = std::make_unique<Client>(this, ev.peer, id, buf);
+                    auto client = std::make_unique<Client>(this, stateController, ev.peer, id, buf);
                     Client *rawClient = client.get();
                     ev.peer->data = rawClient;
                     peers.push_back(std::move(client));
@@ -188,9 +188,9 @@ void Server::initialize() {
     }
 }
 
-void Server::disconnectById(const clientId client_id, DisconnectReason reason, const std::string &message) const {
+void Server::disconnectById(const clientId id, DisconnectReason reason, const std::string &message) const {
     for (auto &client : peers) {
-        if (client->getId() == client_id) {
+        if (client->getId() == id) {
             return client->disconnect(reason, message);
         }
     }

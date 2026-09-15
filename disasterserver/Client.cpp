@@ -10,11 +10,12 @@
 
 using namespace DisasterServer;
 
-Client::Client(Server *server, ENetPeer *peer, clientId incomingPeerID, std::string ip) :
+Client::Client(Server *server, StateController &stateController, ENetPeer *peer, clientId incomingPeerID, std::string ip) :
     id(incomingPeerID),
     ip(std::move(ip)),
     peer(peer),
-    server(server) {}
+    server(server),
+    stateController(stateController) {}
 
 Client::~Client() = default;
 
@@ -74,7 +75,7 @@ bool Client::identity(Packet &packet) {
         isModifiedClient = true;
     }
 
-    this->in_game = server->getStateController().isState<LobbyState>();
+    this->in_game = stateController.isState<LobbyState>();
     this->exeChance = 1 + rand() % 4;
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
@@ -105,7 +106,7 @@ bool Client::identity(Packet &packet) {
     Info("	IP: {}", ip);
     Info("	UID: {}", this->udid);
     Info("	BuildVersion: {}", buildVersion);
-    Info("	Modified: {}", BoolStringify(isModifiedClient));
+    Info("	Modified: {}", isModifiedClient);
 
     this->verified = true;
 
@@ -134,14 +135,14 @@ bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t t
         }
     }
 
-    if (!this->server->getStateController().playerJoined(*this)) {
+    if (!this->stateController.playerJoined(*this)) {
         shouldTimeout = false;
         this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
         return false;
     }
 
     Packet packet(PacketType::SERVER_IDENTITY_RESPONSE);
-    packet.write<uint8_t>(server->getStateController().isState<LobbyState>());
+    packet.write<uint8_t>(stateController.isState<LobbyState>());
     packet.write<clientId>(id);
     packet.send(*this, true);
 
@@ -155,11 +156,11 @@ bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t t
             }
 
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
-            pack.write<uint8_t>(server->getStateController().isState<GameState>() && client->in_game);
+            pack.write<uint8_t>(stateController.isState<GameState>() && client->in_game);
             pack.write<clientId>(client->getId());
             pack.writeString(nickname);
 
-            if (server->getStateController().isState<GameState>() && client->in_game) {
+            if (stateController.isState<GameState>() && client->in_game) {
 
                 pack.write<uint8_t>( 1 /* server->game.exe == peer->id */ );
                 pack.write<uint8_t>( 1 /* server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
@@ -195,7 +196,7 @@ bool Client::messageReceived(Packet &packet) {
         return false;
     }
 
-    return this->server->getStateController().handle(*this, packet);
+    return this->stateController.handle(*this, packet);
 }
 
 void Client::disconnect(DisconnectReason reason, const std::string &message) {

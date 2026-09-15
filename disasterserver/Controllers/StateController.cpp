@@ -6,8 +6,8 @@
 
 using namespace DisasterServer;
 
-StateController::StateController(Server *server): server(server) {
-    this->current = std::make_unique<LobbyState>(server, this);
+StateController::StateController(Server &server): server(server) {
+    this->current = std::make_unique<LobbyState>(server, *this);
 }
 
 StateController::~StateController() = default;
@@ -22,7 +22,7 @@ bool StateController::playerJoined(Client &peer) {
     playerJoined.writeString(peer.getNickname());
     playerJoined.write<uint8_t>(peer.getLobbyIcon());
     playerJoined.write<uint8_t>(peer.getPet());
-    this->server->broadcastEx(playerJoined, true, peer.getId());
+    this->server.broadcastEx(playerJoined, true, peer.getId());
 
     if (current) {
         current->joined(peer);
@@ -34,7 +34,7 @@ bool StateController::playerJoined(Client &peer) {
 void StateController::playerLeft(Client &peer) {
     Packet packet(PacketType::SERVER_PLAYER_LEFT);
     packet.write<clientId>(peer.getId());
-    packet.sendBroadcast(*server, true);
+    packet.sendBroadcast(server, true);
 
     if (current) {
         current->leaved(peer);
@@ -56,7 +56,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getClients()) {
+            for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add ban logic
                     c->disconnect(DisconnectReason::BANNEDBYHOST);
@@ -72,7 +72,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getClients()) {
+            for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add kick logic
                     c->disconnect(DisconnectReason::KICKEDBYHOST);
@@ -88,10 +88,10 @@ bool StateController::handle(Client &peer, Packet &packet) {
 
             clientId pid = packet.read<clientId>();
 
-            for (auto &c : server->getClients()) {
+            for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add operator logic
-                    server->sendMessage(peer, "{}you're an operator now", CLRCODE_GRN);
+                    server.sendMessage(peer, "{}you're an operator now", CLRCODE_GRN);
                 }
             }
 
@@ -150,12 +150,12 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
     switch (hash) {
         case CMD_BAN: {
             if (!client.isOperator()) {
-                this->server->sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
             }
 
-            if (this->server->getInGameCount() <= 1) {
-                this->server->sendMessage(client, "{}dude are you gonna ban yourself?", CLRCODE_RED);
+            if (this->server.getInGameCount() <= 1) {
+                this->server.sendMessage(client, "{}dude are you gonna ban yourself?", CLRCODE_RED);
                 break;
             }
 
@@ -169,12 +169,12 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
         case CMD_KICK: {
             if (!client.isOperator()) {
-                this->server->sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
             }
 
-            if (this->server->getInGameCount() <= 1) {
-                this->server->sendMessage(client, "{}dude are you gonna kick yourself?", CLRCODE_RED);
+            if (this->server.getInGameCount() <= 1) {
+                this->server.sendMessage(client, "{}dude are you gonna kick yourself?", CLRCODE_RED);
                 break;
             }
 
@@ -188,12 +188,12 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
         case CMD_OP: {
             if (!client.isOperator()) {
-                this->server->sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
             }
 
-            if (this->server->getInGameCount() <= 1) {
-                this->server->sendMessage(client, "{}you're already an operator tho??", CLRCODE_RED);
+            if (this->server.getInGameCount() <= 1) {
+                this->server.sendMessage(client, "{}you're already an operator tho??", CLRCODE_RED);
                 break;
             }
 
@@ -208,14 +208,14 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         case CMD_LOBBY: {
             int ind;
             if (sscanf(message.c_str(), ".lobby %d", &ind) != 1) {
-                this->server->sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
+                this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
                 break;
             }
 
-            auto config = this->server->getApplication().getConfigManager().getConfig();
+            auto config = this->server.getApplication().getConfigManager().getConfig();
 
             if (ind < 1 || ind > config.getLobbyCount()) {
-                this->server->sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());
+                this->server.sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());
                 break;
             }
 
@@ -231,39 +231,39 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         }
 
         case CMD_HELP: {            
-            this->server->sendMessage(client, "|- .info~ - information about server");
-            this->server->sendMessage(client, "|- .vk~ - vote kick");
-            this->server->sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server->sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server->getApplication().getConfigManager().getConfig().getLobbyCount());
+            this->server.sendMessage(client, "|- .info~ - information about server");
+            this->server.sendMessage(client, "|- .vk~ - vote kick");
+            this->server.sendMessage(client, "|- .vp~ - vote practice mode (wip)");
+            this->server.sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server.getApplication().getConfigManager().getConfig().getLobbyCount());
 
             if(client.isOperator())
             {
-                this->server->sendMessage(client, "|- .map~ - force map (1-21)");
-                this->server->sendMessage(client, "|- .kick~ - kick someone");
-                this->server->sendMessage(client, "|- .ban~ - ban someone (wip)");
-                this->server->sendMessage(client, "|- .op~ - op someone (wip)");
+                this->server.sendMessage(client, "|- .map~ - force map (1-21)");
+                this->server.sendMessage(client, "|- .kick~ - kick someone");
+                this->server.sendMessage(client, "|- .ban~ - ban someone (wip)");
+                this->server.sendMessage(client, "|- .op~ - op someone (wip)");
                 break;
             }
             break;
         }
 
         case CMD_INFO: {
-            this->server->sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
-            this->server->sendMessage(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
-            this->server->sendMessage(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
-            this->server->sendMessage(client, "{}faker{}null{}0{} - help with code", CLRCODE_GRA, CLRCODE_RED, CLRCODE_GRN, CLRCODE_RST);
+            this->server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
+            this->server.sendMessage(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
+            this->server.sendMessage(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
+            this->server.sendMessage(client, "{}faker{}null{}0{} - help with code", CLRCODE_GRA, CLRCODE_RED, CLRCODE_GRN, CLRCODE_RST);
             break;
         }
 
 #if defined(SERVER_DEBUG)
         case CMD_SELFOP: {
             client.setOperator(true);
-            this->server->sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
+            this->server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
             break;
         }
         case CMD_DEBUG: {
             if (!client.isOperator()) {
-                this->server->sendMessage(client, "{}иди нахуй :3", CLRCODE_PUR);
+                this->server.sendMessage(client, "{}иди нахуй :3", CLRCODE_PUR);
                 break;
             }
             break;

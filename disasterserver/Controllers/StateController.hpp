@@ -1,9 +1,10 @@
-﻿#ifndef DISASTERSERVER_STATEMACHINE_HPP
-#define DISASTERSERVER_STATEMACHINE_HPP
+﻿#pragma once
 
 #include "Util/Packet.hpp"
 #include "States/State.hpp"
 #include "Core/Constansts.hpp"
+#include "Core/Assert.hpp"
+#include "Core/Types.hpp"
 
 namespace DisasterServer
 {
@@ -28,24 +29,29 @@ namespace DisasterServer
     constexpr commandHash CMD_DEBUG = 1412399845; //Only debugging
 
     class StateController {
-        Server *server = nullptr;
+        Server &server;
 
         std::unique_ptr<State> current;
     public:
-        explicit StateController(Server* server);
+        explicit StateController(Server &server);
         ~StateController();
 
         template <std::derived_from<State> T, typename... Args>
-        requires requires (T& state, Args&&... args) { state.init(std::forward<Args>(args)...); }
         void changeTo(Args&&... args) {
-            auto next = std::make_unique<T>(server, this);
-            next->init(std::forward<Args>(args)...);
+            auto next = std::make_unique<T>(server, *this, std::forward<Args>(args)...);
+
+            next->enter();
+
+            if (current) {
+                current->exit();
+            }
+
             current = std::move(next);
         }
 
         template <std::derived_from<State> T>
         bool isState() const {
-            return dynamic_cast<T*>(current.get()) != nullptr;
+            return current && dynamic_cast<T*>(current.get()) != nullptr;
         }
 
         bool playerJoined(Client& peer);
@@ -57,11 +63,4 @@ namespace DisasterServer
         bool cmdHandle(Client& client, commandHash hash, const std::string& message);
     };
 }
-
-#define AssertOrDisconnect(client, x) \
-if(!(x)) { \
-    client.disconnect(DisconnectReason::OTHER, "AssertOrDisconnect({}) failed!", #x); return false; \
-}
-
-#endif //DISASTERSERVER_STATEMACHINE_HPP
 

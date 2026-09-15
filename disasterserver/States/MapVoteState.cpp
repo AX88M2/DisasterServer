@@ -9,13 +9,13 @@
 
 using namespace DisasterServer;
 
-MapVoteState::MapVoteState(Server *server, StateController *controller) : State(server, controller) {
+MapVoteState::MapVoteState(Server &server, StateController &stateController) : State(server, stateController) {
 }
 
-void MapVoteState::init() {
+void MapVoteState::enter() {
     Debug("Attepting to enter DisasterServer::MapVoteState...");
 
-    auto &mapController = server->getMapController();
+    auto &mapController = server.getMapController();
 
     // randomize
     time_t seed = time(nullptr);
@@ -42,7 +42,7 @@ void MapVoteState::init() {
 
             if (!map.has_value()) {
                 Error("Map with id {} was not found!", mapid);
-                stateController->changeTo<LobbyState>();
+                stateController.changeTo<LobbyState>();
                 return;
             }
 
@@ -78,11 +78,11 @@ void MapVoteState::init() {
     for (int i = 0; i < 3; i++) {
         voteMaps.write<uint8_t>(maps[i]);
     }
-    voteMaps.sendBroadcast(*server);
+    voteMaps.sendBroadcast(server);
 
     Packet sync(PacketType::SERVER_VOTE_TIME_SYNC);
     sync.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
-    sync.sendBroadcast(*server);
+    sync.sendBroadcast(server);
 
     Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Map Vote", CLRCODE_RST);
 
@@ -93,22 +93,26 @@ void MapVoteState::init() {
     Info("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, map1->getName(), CLRCODE_RST, CLRCODE_BLU, map2->getName(), CLRCODE_RST, CLRCODE_YLW, map3->getName(), CLRCODE_RST);
 }
 
+void MapVoteState::exit() {
+    
+}
+
 bool MapVoteState::joined(Client &client) {
     return true;
 }
 
 bool MapVoteState::leaved(Client &client) {
-    if (this->server->getInGameCount() <= 1) {
-        stateController->changeTo<LobbyState>();
+    if (this->server.getInGameCount() <= 1) {
+        stateController.changeTo<LobbyState>();
         return true;
     }
     return true;
 }
 
 void MapVoteState::tick() {
-    switch (countdown.tick(server->getDelta())) {
+    switch (countdown.tick(server.getDelta())) {
         case Countdown::TickResult::Finished: {
-            auto &controller = server->getMapController();
+            auto &controller = server.getMapController();
 
             //choose the map
             int8_t indeces[3] = { -1, -1, -1 };
@@ -137,7 +141,7 @@ void MapVoteState::tick() {
 
             if (!wonMap.has_value()) {
                 Error("Map with id {} was not found!", wonId);
-                stateController->changeTo<LobbyState>();
+                stateController.changeTo<LobbyState>();
                 return;
             }
 
@@ -157,7 +161,7 @@ void MapVoteState::tick() {
 
                 if (!map.has_value()) {
                     Error("Map with id {} was not found!", i);
-                    stateController->changeTo<LobbyState>();
+                    stateController.changeTo<LobbyState>();
                     return;
                 }
 
@@ -174,14 +178,14 @@ void MapVoteState::tick() {
                 controller.setMapWeight(*map, weigh);
             }
 
-            stateController->changeTo<CharSelectState>(*wonMap, wonId);
+            stateController.changeTo<CharSelectState>(*wonMap, wonId);
 
             break;
         }
         case Countdown::TickResult::Second: {
             Packet pack(PacketType::SERVER_VOTE_TIME_SYNC);
             pack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
-            pack.sendBroadcast(*server);
+            pack.sendBroadcast(server);
             break;
         }
         default: break;
@@ -208,8 +212,8 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
             for (int i = 0; i < 3; i++) {
                 pack.write<uint8_t>(votes[i]);
             }
-            Info("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), server->getMapController().getMaps().at(maps[map])->getName());
-            pack.sendBroadcast(*server);
+            Info("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), server.getMapController().getMaps().at(maps[map])->getName());
+            pack.sendBroadcast(server);
             checkState();
             break;
         }
@@ -225,12 +229,12 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController->cmdParse(message);
-            bool isCommand = stateController->cmdHandle(client, hash, message);
+            commandHash hash = stateController.cmdParse(message);
+            bool isCommand = stateController.cmdHandle(client, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
-                server->sendBroadcastMessage(client.getId(), message);
+                server.sendBroadcastMessage(client.getId(), message);
             }
 
             break;
@@ -243,7 +247,7 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
 }
 
 void MapVoteState::checkState() {
-    const auto players = &server->getClients();
+    const auto players = &server.getClients();
     const auto count = std::ranges::count_if(
         *players,
         [](const auto& peer) {
@@ -251,7 +255,7 @@ void MapVoteState::checkState() {
         }
     );
 
-    if (count >= this->server->getInGameCount()) {
+    if (count >= this->server.getInGameCount()) {
         if (countdown.remaining() > 3) {
             countdown.setRemaining(4);
         }

@@ -4,7 +4,7 @@
 
 using namespace DisasterServer;
 
-MapController::MapController(Server* server) : server(server) {
+MapController::MapController(Server &server) : server(server) {
     //meow
 }
 

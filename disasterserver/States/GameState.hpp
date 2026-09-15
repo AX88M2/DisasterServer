@@ -1,9 +1,12 @@
 #ifndef DISASTERSERVER_GAMESTATE_HPP
 #define DISASTERSERVER_GAMESTATE_HPP
 
+#include <vector>
+
 #include "State.hpp"
 #include "Core/Constansts.hpp"
-#include "Core/Map.hpp"
+#include "Maps/Map.hpp"
+#include "Core/Types.hpp"
 #include "Util/Countdown.hpp"
 
 namespace DisasterServer
@@ -24,7 +27,7 @@ namespace DisasterServer
 
     class GameState : public State
     {
-        int currentMapId = 0;
+        mapId currentMapId = 0;
         Map* currentMap = nullptr;
         clientId exe = 0;
         bool started = false;
@@ -46,11 +49,11 @@ namespace DisasterServer
         std::vector<clientId> leftClients = {};
 
     public:
-        GameState(Server* server, StateController* controller);
+        GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);
         ~GameState() override = default;
 
-        void init(clientId exe, int mapId, Map* map);
-
+        void enter() override;
+        void exit() override;
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;

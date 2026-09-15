@@ -24,7 +24,7 @@ namespace DisasterServer {
     };
 
     class Vote {
-        Server *server = nullptr;
+        Server &server;
 
         VoteType type = VoteType::KICK;
         bool ongoing = false;
@@ -33,7 +33,7 @@ namespace DisasterServer {
         size_t votedTotal = 0;
         double countdown = 0;
     public:
-        Vote(Server *server);
+        Vote(Server &server);
         ~Vote();
 
         bool init(VoteType type, clientId id);

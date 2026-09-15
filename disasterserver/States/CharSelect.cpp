@@ -11,7 +11,35 @@
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server* server, StateController* controller) : State(server, controller) {
+CharSelectState::CharSelectState(Server &server, StateController &stateController, Map* map, mapId id) : State(server, stateController), map(map), mapid(id) {
+}
+
+void CharSelectState::enter() {
+    Debug("Attempting to enter DisasterServer::CharSelectState...");
+
+    if (!chooseExe()) {
+        Error("Failed to pick exe for some reason!");
+
+        stateController.changeTo<LobbyState>();
+        return;
+    }
+
+    countdown.start(30);
+
+    Packet pack(PacketType::SERVER_LOBBY_EXE);
+    pack.write<clientId>(exe);
+    pack.write<mapId>(mapid);
+    pack.sendBroadcast(server, true);
+
+    Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
+    timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
+    timePack.sendBroadcast(server);
+
+    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Character Select", CLRCODE_RST);
+}
+
+void CharSelectState::exit() {
+
 }
 
 bool CharSelectState::joined(Client& client) {
@@ -24,38 +52,37 @@ bool CharSelectState::leaved(Client& client) {
         avail[character] = false;
     }
 
-    if (this->server->getInGameCount() < 1 || client.getId() == exe) {
-        stateController->changeTo<LobbyState>();
+    if (this->server.getInGameCount() < 1 || client.getId() == exe) {
+        stateController.changeTo<LobbyState>();
         return true;
     }
 
     return checkState();
 }
 
-void CharSelectState::init(Map* map, uint8_t id) {
-    Debug("Attempting to enter DisasterServer::CharSelectState...");
+void CharSelectState::tick() {
+    switch (countdown.tick(server.getDelta())) {
+        case Countdown::TickResult::Finished: {
+            for (auto& client : server.getClients()) {
+                if (!client || !client->isInGame())
+                    continue;
 
-    if (!chooseExe()) {
-        Error("Failed to pick exe for some reason!");
+                if (client->getExeCharacter() == ExesCharacters::NONE && client->getSurvCharacter() == SurvCharacters::NONE) {
 
-        stateController->changeTo<LobbyState>();
-        return;
+                    client->disconnect(DisconnectReason::AFKTIMEOUT);
+                }
+            }
+            break;
+        }
+
+        case Countdown::TickResult::Second: {
+            Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
+            timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
+            timePack.sendBroadcast(server);
+            break;
+        }
+        default: break;
     }
-
-    countdown.start(30);
-
-    Packet pack(PacketType::SERVER_LOBBY_EXE);
-    pack.write<clientId>(exe);
-    pack.write<uint16_t>(id);
-    pack.sendBroadcast(*server, true);
-
-    Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
-    timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
-    timePack.sendBroadcast(*server);
-
-    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Character Select", CLRCODE_RST);
-    this->map = map;
-    this->mapId = id;
 }
 
 bool CharSelectState::handle(Client& client, Packet& packet) {
@@ -89,7 +116,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
             change.write<clientId>(client.getId());
             change.write<uint8_t>(id);
-            change.sendBroadcast(*server, true);
+            change.sendBroadcast(server, true);
 
             Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
             return checkState();
@@ -138,7 +165,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
                 change.write<clientId>(client.getId());
                 change.write<uint8_t>(id + 1);
-                change.sendBroadcast(*server, true);
+                change.sendBroadcast(server, true);
             }
 
             Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
@@ -156,12 +183,12 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController->cmdParse(message);
-            bool isCommand = stateController->cmdHandle(client, hash, message);
+            commandHash hash = stateController.cmdParse(message);
+            bool isCommand = stateController.cmdHandle(client, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
-                server->sendBroadcastMessage(client.getId(), message);
+                server.sendBroadcastMessage(client.getId(), message);
             }
             break;
         }
@@ -172,83 +199,15 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
     return true;
 }
 
-void CharSelectState::tick() {
-    switch (countdown.tick(server->getDelta())) {
-        case Countdown::TickResult::Finished: {
-            for (auto& peer : server->getClients()) {
-                if (!peer || !peer->isInGame())
-                    continue;
-
-                if (peer->getExeCharacter() == ExesCharacters::NONE && peer->getSurvCharacter() == SurvCharacters::NONE) {
-
-                    peer->disconnect(DisconnectReason::AFKTIMEOUT);
-                }
-            }
-            break;
-        }
-
-        case Countdown::TickResult::Second: {
-            Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
-            timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
-            timePack.sendBroadcast(*server);
-            break;
-        }
-        default: break;
-    }
-}
-
-bool CharSelectState::chooseExe() {
-    uint32_t weight = 0;
-
-    for (auto& peer : server->getClients()) {
-        if (!peer || !peer->isInGame())
-            continue;
-
-        peer->setExeCharacter(ExesCharacters::NONE);
-        peer->setSurvCharacter(SurvCharacters::NONE);
-
-        weight += peer->getExeChance();
-    }
-
-    if (weight == 0)
-        weight++;
-
-    uint32_t rnd = static_cast<uint32_t>(std::rand()) % weight;
-
-    for (auto& peer : server->getClients()) {
-        if (!peer || !peer->isInGame())
-            continue;
-
-        if (peer->getExeChance() >= 100) {
-            exe = peer->getId();
-            return true;
-        }
-
-        if (rnd < peer->getExeChance() && !peer->isModified()) {
-            Info("{} (id {}, c {}) is exe!", peer->getNickname(), peer->getId(), peer->getExeChance());
-
-            peer->setExeChance(1 + std::rand() % 1);
-
-            exe = peer->getId();
-            return true;
-        }
-
-        rnd -= peer->getExeChance();
-    }
-
-    exe = static_cast<clientId>(-1);
-    return false;
-}
-
 bool CharSelectState::checkState() {
     bool shouldStart = true;
 
-    for (auto& peer : server->getClients()) {
-        if (!peer->isInGame())
+    for (auto& client : server.getClients()) {
+        if (!client->isInGame())
             continue;
 
-        if (peer->getExeCharacter() == ExesCharacters::NONE &&
-            peer->getSurvCharacter() == SurvCharacters::NONE) {
+        if (client->getExeCharacter() == ExesCharacters::NONE &&
+            client->getSurvCharacter() == SurvCharacters::NONE) {
 
             shouldStart = false;
             break;
@@ -256,9 +215,52 @@ bool CharSelectState::checkState() {
     }
 
     if (shouldStart) {
-        stateController->changeTo<GameState>(exe, mapId, map);
+        stateController.changeTo<GameState>(exe, mapid, map);
         return true;
     }
 
     return true;
+}
+
+bool CharSelectState::chooseExe() {
+    uint32_t weight = 0;
+
+    for (auto& client : server.getClients()) {
+        if (!client || !client->isInGame())
+            continue;
+
+        client->setExeCharacter(ExesCharacters::NONE);
+        client->setSurvCharacter(SurvCharacters::NONE);
+
+        weight += client->getExeChance();
+    }
+
+    if (weight == 0)
+        weight++;
+
+    uint32_t rnd = static_cast<uint32_t>(std::rand()) % weight;
+
+    for (auto& client : server.getClients()) {
+        if (!client || !client->isInGame())
+            continue;
+
+        if (client->getExeChance() >= 100) {
+            exe = client->getId();
+            return true;
+        }
+
+        if (rnd < client->getExeChance() && !client->isModified()) {
+            Info("{} (id {}, c {}) is exe!", client->getNickname(), client->getId(), client->getExeChance());
+
+            client->setExeChance(1 + std::rand() % 1);
+
+            exe = client->getId();
+            return true;
+        }
+
+        rnd -= client->getExeChance();
+    }
+
+    exe = static_cast<clientId>(-1);
+    return false;
 }

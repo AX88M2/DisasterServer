@@ -19,13 +19,13 @@ namespace DisasterServer
         Countdown countdown { TICKSPERSEC };
         double pracCountdown = 0;
         Vote vote;
-        clientId kick_target = 0;
+        clientId kickTarget = 0;
     public:
-        LobbyState(Server *server, StateController *controller);
+        LobbyState(Server &server, StateController &stateController);
         ~LobbyState() override = default;
 
-        void init();
-
+        void enter() override;
+        void exit() override;
         bool joined(Client &peer) override;
         bool leaved(Client &peer) override;
         void tick() override;

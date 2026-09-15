@@ -1,12 +1,17 @@
 #include "ResultsState.hpp"
 
+#include "LobbyState.hpp"
+
 using namespace DisasterServer;
 
-ResultsState::ResultsState(Server *server, StateController *controller) : State(server, controller) {
+ResultsState::ResultsState(Server &server, StateController &stateController) : State(server, stateController) {
 }
 
 void ResultsState::init() {
+    Debug("Attepting to enter DisasterServer::ResultsState...");
 
+
+    Info("Server is now in {}Results", CLRCODE_PUR);
 }
 
 bool ResultsState::joined(Client &client) {

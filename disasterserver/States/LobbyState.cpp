@@ -11,13 +11,13 @@
 
 using namespace DisasterServer;
 
-LobbyState::LobbyState(Server *server, StateController *controller) : State(server, controller), vote(server) {
+LobbyState::LobbyState(Server &server, StateController &stateController) : State(server, stateController), vote(server) {
 }
 
-void LobbyState::init() {
+void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
 
-    for (auto &peer : server->getClients()) {
+    for (auto &peer : server.getClients()) {
         peer->setReady(false);
         peer->setVoted(false);
         peer->setTimeout(0);
@@ -30,11 +30,10 @@ void LobbyState::init() {
             pack.write<clientId>(peer->getId());
             if (!pack.send(*peer, true)) {
                 peer->disconnect(DisconnectReason::SERVERTIMEOUT);
-                continue;
             }
         } else {
             /*
-            if (v->id != server->game.exe)
+            if (v->id != server.game.exe)
                 v->exe_chance += 2 + rand() % 5;
             */
 
@@ -49,33 +48,34 @@ void LobbyState::init() {
     pracCountdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
-    pack.sendBroadcast(*server, true);
+    pack.sendBroadcast(server);
     Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Lobby", CLRCODE_RST);
+}
+
+void LobbyState::exit() {
+    
 }
 
 bool LobbyState::sendCountdown() {
     Packet pack(PacketType::SERVER_LOBBY_COUNTDOWN);
     pack.write<uint8_t>(countdown.active());
     pack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
-    pack.sendBroadcast(*server, true);
+    pack.sendBroadcast(server, true);
     return true;
 }
 
 bool LobbyState::checkCountdown() {
-    const auto players = &server->getClients();
+    const auto clients = &server.getClients();
 
-    if (players->size() <= 1) {
+    if (clients->size() <= 1) {
         return true;
     }
 
-    const auto ready = std::ranges::count_if(
-        *players,
-        [](const auto& peer) {
-            return peer->isReady();
-        }
-    );
+    const auto clientsIsReady = std::ranges::count_if(*clients, [](const auto& peer) {
+        return peer->isReady();
+    });
 
-    if (ready == players->size() && players->size() > 1) {
+    if (clientsIsReady == clients->size() && clients->size() > 1) {
         countdown.start(START_COUNTDOWN);
         return sendCountdown();
     }
@@ -92,13 +92,13 @@ void LobbyState::checkVote() {
     if (vote.check()) {
         switch (vote.getCurrentVoteType()) {
             case VoteType::KICK: {
-                this->server->sendBroadcastMessage(0, "vote kick @succeeded~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
-                this->server->disconnectById(kick_target, DisconnectReason::KICKEDBYHOST);
+                this->server.sendBroadcastMessage(0, "vote kick @succeeded~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.disconnectById(kickTarget, DisconnectReason::KICKEDBYHOST);
                 break;
             }
 
             case VoteType::PRACTICE: {
-                this->server->sendBroadcastMessage(0, "vote practice succeeded~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote practice succeeded~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
                 pracCountdown = 2 * TICKSPERSEC;
                 break;
             }
@@ -108,12 +108,12 @@ void LobbyState::checkVote() {
     } else {
         switch (vote.getCurrentVoteType()) {
             case VoteType::KICK: {
-                this->server->sendBroadcastMessage(0, "vote kick \\failed~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote kick \\failed~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
                 break;
             }
 
             case VoteType::PRACTICE: {
-                this->server->sendBroadcastMessage(0, "vote practice \\failed~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote practice \\failed~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
                 break;
             }
 
@@ -125,7 +125,7 @@ void LobbyState::checkVote() {
     vote.setOnGoing(false);
 }
 
-bool LobbyState::joined(Client &peer) {
+bool LobbyState::joined(Client &) {
     checkCountdown();
     return true;
 }
@@ -140,14 +140,14 @@ bool LobbyState::leaved(Client &peer) {
 }
 
 void LobbyState::tick() {
-    for (auto &peer : server->getClients()) {
+    for (auto &peer : server.getClients()) {
         if (peer->getVoteCooldown() > 0) {
-            peer->setVoteCooldown(peer->getVoteCooldown() - server->getDelta());
+            peer->setVoteCooldown(peer->getVoteCooldown() - server.getDelta());
         }
 
         if (!peer->isReady()) {
 #if !defined(SERVER_DEBUG)
-            peer->setTimeout(peer->getTimeout() + server->getDelta());
+            peer->setTimeout(peer->getTimeout() + server.getDelta());
             if (std::fmod(peer->getTimeout(), 60) == 0) {
                 Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
             }
@@ -161,9 +161,9 @@ void LobbyState::tick() {
     }
 
     if (pracCountdown > 0) {
-        pracCountdown -= server->getDelta();
+        pracCountdown -= server.getDelta();
         if (pracCountdown <= 0) {
-            auto &controller = server->getMapController();
+            auto &controller = server.getMapController();
             auto map = controller.getMap(0);
 
             if (!map.has_value()) {
@@ -171,7 +171,7 @@ void LobbyState::tick() {
                 return;
             }
 
-            stateController->changeTo<CharSelectState>(*map, 0); //Fart Zone
+            stateController.changeTo<CharSelectState>(*map, 0); //Fart Zone
             return;
         }
     }
@@ -180,9 +180,9 @@ void LobbyState::tick() {
         checkVote();
     }
 
-    switch (countdown.tick(server->getDelta())) {
+    switch (countdown.tick(server.getDelta())) {
         case Countdown::TickResult::Finished: {
-            stateController->changeTo<MapVoteState>();
+            stateController.changeTo<MapVoteState>();
             break;
         }
         case Countdown::TickResult::Second: {
@@ -194,11 +194,9 @@ void LobbyState::tick() {
 }
 
 bool LobbyState::handle(Client &client, Packet &packet) {
-    bool result = true;
-
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: {
-            for (auto &c : server->getClients()) {
+            for (auto &c : server.getClients()) {
                 if (client.getId() == c->getId()) {
                     continue;
                 }
@@ -210,19 +208,22 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 pack.write<uint8_t>(c->getLobbyIcon());
                 pack.write<uint8_t>(c->getPet());
                 if (!pack.send(client, true)) {
-                    result = false;
-                    break;
+                    Error("Failed to send SERVER_LOBBY_PLAYER to {}", client.getId());
+                    return false;
                 }
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CORRECT);
-            pack.send(client, true);
+            if (!pack.send(client, true)) {
+                Error("Failed to send SERVER_LOBBY_CORRECT to {}", client.getId());
+                return false;
+            }
 
-            server->sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
-            server->sendMessage(client, "|type .help for command list~");
-            const auto motd = this->server->getApplication().getConfigManager().getConfig().getMotd();
+            server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
+            server.sendMessage(client, "|type .help for command list~");
+            const auto motd = this->server.getApplication().getConfigManager().getConfig().getMotd();
             if (!motd.empty()) {
-                this->server->sendMessage(client, motd);
+                this->server.sendMessage(client, motd);
             }
             break;
         }
@@ -238,12 +239,12 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController->cmdParse(message);
+            commandHash hash = stateController.cmdParse(message);
             bool isCommand = cmdHandle(client, pid, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {
-                server->sendBroadcastMessage(client.getId(), message);
+                server.sendBroadcastMessage(client.getId(), message);
             }
 
             break;
@@ -255,7 +256,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             Packet pack(PacketType::SERVER_LOBBY_READY_STATE);
             pack.write<clientId>(client.getId());
             pack.write<uint8_t>(state);
-            pack.sendBroadcast(*this->server, true);
+            pack.sendBroadcast(server, true);
 
             checkCountdown();
             break;
@@ -266,38 +267,38 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             if (vote.isOnGoing()) {
                 if (!client.isCanVote()) {
-                    this->server->sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
+                    this->server.sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
                     break;
                 }
 
-                if (pid == kick_target) {
+                if (pid == kickTarget) {
                     switch (vote.add(client)) {
                         case VoteState::SUCCESS: {
-                            this->server->sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
+                            this->server.sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
                             break;
                         }
                         case VoteState::ALREADY_VOTED: {
-                            this->server->sendMessage(client, "{}you have already voted.", CLRCODE_RED);
+                            this->server.sendMessage(client, "{}you have already voted.", CLRCODE_RED);
                             break;
                         }
                         case VoteState::FULL: { checkVote(); break; }
                         default: break;
                     }
                 } else {
-                    this->server->sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
+                    this->server.sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
                 }
 
                 break;
             } else {
                 bool found = false;
-                for (auto &c : this->server->getClients()) {
+                for (auto &c : this->server.getClients()) {
                     if (c->getId() == pid) {
                         if (!c->isOperator()) {
-                            this->server->sendMessage(client, "you're permissionless");
+                            this->server.sendMessage(client, "you're permissionless");
                             return true;
                         }
 
-                        kick_target = c->getId();
+                        kickTarget = c->getId();
                         found = true;
                         break;
                     }
@@ -305,23 +306,23 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
                 if (found) {
                     if (client.getVoteCooldown() > 0) {
-                        this->server->sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                        this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
                         break;
                     }
 
-                    if (!vote.init(VoteType::KICK, kick_target)) {
-                        this->server->sendMessage(client, "{}not enough participants.", CLRCODE_RED);
+                    if (!vote.init(VoteType::KICK, kickTarget)) {
+                        this->server.sendMessage(client, "{}not enough participants.", CLRCODE_RED);
                         break;
                     }
 
-                    this->server->sendBroadcastMessage(0, "{}~ `started kick vote.~", client.getNickname());
-                    this->server->sendBroadcastMessage(0, "type @.yes~ or ignore");
-                    this->server->sendBroadcastMessage(0, "results will be summarized in @20~ sec");
+                    this->server.sendBroadcastMessage(0, "{}~ `started kick vote.~", client.getNickname());
+                    this->server.sendBroadcastMessage(0, "type @.yes~ or ignore");
+                    this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
 
                     vote.add(client);
                     client.setVoteCooldown(30 * TICKSPERSEC);
                 } else {
-                    this->server->sendBroadcastMessage(0, "{}specified player not found.", CLRCODE_RED);
+                    this->server.sendBroadcastMessage(0, "{}specified player not found.", CLRCODE_RED);
                 }
             }
 
@@ -331,46 +332,46 @@ bool LobbyState::handle(Client &client, Packet &packet) {
         default: break;
     }
 
-    return result;
+    return true;
 }
 
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
         default: {
-            if (!stateController->cmdHandle(client, hash, message)) {
+            if (!stateController.cmdHandle(client, hash, message)) {
                 return false;
             }
             break;
         }
 
         case CMD_MAP: {
-            auto &controller = server->getMapController();
+            auto &controller = server.getMapController();
 #if !defined(SERVER_DEBUG)
             if (!client.isOperator()) {
-                this->server->sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
+                this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
                 break;
             }
 #endif
             int ind;
             if (sscanf(message.c_str(), ".map %d", &ind) < 0) {
-                this->server->sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
+                this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }
 
             ind--;
             if (ind < 0 || ind > controller.getMapCount()) {
-                this->server->sendMessage(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMapCount());
+                this->server.sendMessage(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMapCount());
                 break;
             }
 
             auto map = controller.getMap(ind);
 
             if (!map.has_value()) {
-                this->server->sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, ind);
+                this->server.sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, ind);
                 break;
             }
 
-            stateController->changeTo<CharSelectState>(*map, ind);
+            stateController.changeTo<CharSelectState>(*map, static_cast<mapId>(ind));
             break;
         }
 
@@ -381,24 +382,24 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             }
 
             if (!client.isCanVote()) {
-                this->server->sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
                 break;
             }
 
-            if (vote.getCurrentVoteType() == VoteType::KICK && kick_target == client.getId()) {
-                this->server->sendMessage(client, "{}why are you kicking yourself ???", CLRCODE_RED);
+            if (vote.getCurrentVoteType() == VoteType::KICK && kickTarget == client.getId()) {
+                this->server.sendMessage(client, "{}why are you kicking yourself ???", CLRCODE_RED);
                 break;
             }
 
             switch (vote.add(client)) {
 
                 case VoteState::SUCCESS: {
-                    this->server->sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
+                    this->server.sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
                     break;
                 }
 
                 case VoteState::ALREADY_VOTED: {
-                    this->server->sendMessage(client, "{}you have already voted.", CLRCODE_RED);
+                    this->server.sendMessage(client, "{}you have already voted.", CLRCODE_RED);
                     break;
                 }
 
@@ -417,42 +418,42 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
         case CMD_VP: {
             if (vote.isOnGoing()) {
                 if (!client.isCanVote()) {
-                    this->server->sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
+                    this->server.sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
                     break;
                 }
 
-                if (pid == kick_target) {
+                if (pid == kickTarget) {
                     switch (vote.add(client)) {
                         case VoteState::SUCCESS: {
-                            this->server->sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
+                            this->server.sendBroadcastMessage(0, "{}~ {}voted~.", client.getNickname(), CLRCODE_GRN);
                             break;
                         }
                         case VoteState::ALREADY_VOTED: {
-                            this->server->sendMessage(client, "{}you have already voted.", CLRCODE_RED);
+                            this->server.sendMessage(client, "{}you have already voted.", CLRCODE_RED);
                             break;
                         }
                         case VoteState::FULL: { checkVote(); break; }
                         default: break;
                     }
                 } else {
-                    this->server->sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
+                    this->server.sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
                 }
                 break;
             }
 
             if (client.getVoteCooldown() > 0) {
-                this->server->sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
                 break;
             }
 
             if (!vote.init(VoteType::PRACTICE, 0)) {
-                this->server->sendMessage(client, "{}not enough participants.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}not enough participants.", CLRCODE_RED);
                 break;
             }
 
-            this->server->sendBroadcastMessage(0, "{}~ `started practice vote.~", client.getNickname());
-            this->server->sendBroadcastMessage(0, "type @.yes~ or ignore");
-            this->server->sendBroadcastMessage(0, "results will be summarized in @20~ sec");
+            this->server.sendBroadcastMessage(0, "{}~ `started practice vote.~", client.getNickname());
+            this->server.sendBroadcastMessage(0, "type @.yes~ or ignore");
+            this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
 
             vote.add(client);
             client.setVoteCooldown(30 * TICKSPERSEC);
@@ -461,22 +462,22 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
 
         case CMD_VK: {
             if (vote.isOnGoing()) {
-                this->server->sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
                 break;
             }
 
             if (client.getVoteCooldown() > 0) {
-                this->server->sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
                 break;
             }
 
-            size_t ingame = this->server->getInGameCount();
+            size_t ingame = this->server.getInGameCount();
 
             if (ingame > 2) {
                 Packet pack(PacketType::SERVER_LOBBY_CHOOSEVOTEKICK);
                 pack.send(client, true);
             } else {
-                this->server->sendMessage(client, "{}not enough participants.", CLRCODE_RED);
+                this->server.sendMessage(client, "{}not enough participants.", CLRCODE_RED);
             }
 
             break;

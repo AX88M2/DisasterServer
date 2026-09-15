@@ -2,30 +2,28 @@
 
 #include <algorithm>
 #include <ctime>
-#include <cstdlib>
 
 #include "Server.hpp"
 #include "Controllers/StateController.hpp"
 #include "Client.hpp"
 #include "LobbyState.hpp"
 #include "ResultsState.hpp"
+#include "Core/Defines.hpp"
 #include "Core/Constansts.hpp"
 
 using namespace DisasterServer;
 
-GameState::GameState(Server *server, StateController *controller) : State(server, controller) {}
-void GameState::init(clientId exe, int mapId, Map* map) {
+GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController),
+        currentMapId(mapid), currentMap(map), exe(exe) {}
+
+void GameState::enter() {
     Debug("Attepting to enter ST_GAME...");
 
-    if (!map) {
-        Error("GameState::init: map {} is null", mapId);
-        stateController->changeTo<LobbyState>();
+    if (!currentMap) {
+        Error("GameState::init: map {} is null", currentMapId);
+        stateController.changeTo<LobbyState>();
         return;
     }
-
-    this->currentMapId = mapId;
-    this->currentMap   = map;
-    this->exe          = exe;
 
     this->started = false;
     this->end = 0.0f;
@@ -41,7 +39,7 @@ void GameState::init(clientId exe, int mapId, Map* map) {
 
     this->startTimeout.start(15);
 
-    for (auto &client: server->getClients()) {
+    for (auto &client: server.getClients()) {
         if (!client->isInGame()) {
             continue;
         }
@@ -58,14 +56,14 @@ void GameState::init(clientId exe, int mapId, Map* map) {
     }
 
     Packet packet(PacketType::SERVER_LOBBY_GAME_START);
-    packet.sendBroadcast(*server);
+    packet.sendBroadcast(server);
 
-    for (auto &client: server->getClients()) {
+    for (auto &client: server.getClients()) {
         if (client->isInGame()) {
             continue;
         }
 
-        for (auto &er: server->getClients()) {
+        for (auto &er: server.getClients()) {
             if (er->getId() == client->getId()) {
                 continue;
             }
@@ -91,16 +89,22 @@ void GameState::init(clientId exe, int mapId, Map* map) {
     Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Game", CLRCODE_RST);
 }
 
+void GameState::exit() {
+
+}
+
 void GameState::uninit(bool show_results) {
-    if (show_results) {
-        stateController->changeTo<ResultsState>();
+    /*if (show_results) {
+        stateController.changeTo<ResultsState>();
     } else {
-        stateController->changeTo<LobbyState>();
-    }
+        stateController.changeTo<LobbyState>();
+    }*/
+
+    stateController.changeTo<LobbyState>();
 }
 
 bool GameState::joined(Client& client) {
-    (void)client;
+    unusedArg(client);
     return true;
 }
 
@@ -115,7 +119,7 @@ bool GameState::leaved(Client& client) {
 
     currentMap->left(client);
 
-    if (this->server->getInGameCount() <= 1) {
+    if (this->server.getInGameCount() <= 1) {
         this->uninit(false);
         return true;
     }
@@ -134,8 +138,7 @@ bool GameState::leaved(Client& client) {
     leftClients.push_back(client.getId());
 
     if (client.getId() == this->exe) {
-        this->endingRound(Ending::EXEWIN,
-                          elapsed >= static_cast<float>(TICKSPERSEC * TICKSPERSEC));
+        this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKSPERSEC * TICKSPERSEC));
         return true;
     }
 
@@ -145,10 +148,10 @@ bool GameState::leaved(Client& client) {
 
 void GameState::tick() {
     if (!started) {
-        auto result = this->startTimeout.tick(server->getDelta());
+        auto result = this->startTimeout.tick(server.getDelta());
         if (result == Countdown::TickResult::Finished) {
             Warn("Waiting for players took too long, kicking out inactive players!");
-            for (auto &client : server->getClients()) {
+            for (auto &client : server.getClients()) {
                 if (!client->isInGame()) {
                     continue;
                 }
@@ -163,7 +166,7 @@ void GameState::tick() {
     }
 
     if (end > 0.0f) {
-        end -= server->getDelta();
+        end -= server.getDelta();
         if (end <= 0.0f) {
             end = 0.0f;
             uninit(true);
@@ -171,14 +174,14 @@ void GameState::tick() {
         return;
     }
 
-    const float delta = server->getDelta();
+    const double delta = server.getDelta();
 
     elapsed += delta;
     time += delta;
 
     // Отсчёт целых секунд
-    while (time >= static_cast<float>(TICKSPERSEC)) {
-        time -= static_cast<float>(TICKSPERSEC);
+    while (time >= TICKSPERSEC) {
+        time -= TICKSPERSEC;
 
         if (time_sec > 0) {
             time_sec--;
@@ -206,7 +209,7 @@ void GameState::tickPlayers() {
         suddenDeath = true;
 
         std::vector<Client*> dead;
-        for (auto &client : server->getClients()) {
+        for (auto &client : server.getClients()) {
             if (!client->isInGame()) continue;
             auto &p = client->getPlayer();
             if (p.isFlag(Player::Flags::PLAYER_DEAD)) {
@@ -223,7 +226,7 @@ void GameState::tickPlayers() {
         }
     }
 
-    for (auto &client : server->getClients()) {
+    for (auto &client : server.getClients()) {
         if (!client->isInGame()) continue;
 
         auto &player = client->getPlayer();
@@ -238,7 +241,7 @@ void GameState::tickPlayers() {
             continue;
 
         bool exeNear = false;
-        auto exeOpt = server->findClient(this->exe);
+        auto exeOpt = server.findClient(this->exe);
         if (exeOpt.has_value()) {
             const float d = player.getPosition().distance(exeOpt.value()->getPlayer().getPosition());
             exeNear = d <= 240.0f;
@@ -261,18 +264,18 @@ void GameState::tickPlayers() {
         dt.write<uint8_t>(exeNear ? 1 : 0);
         dt.write<clientId>(client->getId());
         dt.write<uint8_t>(player.getDeathTimerSec());
-        dt.sendBroadcast(*server, true);
+        dt.sendBroadcast(server, true);
     }
 }
 
 void GameState::tickEntities() {
-    (void)0;
+    unused();
 }
 
 bool GameState::checkState() {
     if (end > 0.0f) return true;
 
-    const auto clients = &server->getClients();
+    const auto clients = &server.getClients();
 
     const auto escaped = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
@@ -288,7 +291,7 @@ bool GameState::checkState() {
         return !client->isInGame() && (client->getId() == this->exe);
     });
 
-    int total = this->server->getInGameCount();
+    int total = this->server.getInGameCount();
     total -= (static_cast<int>(exes + dead + escaped));
 
     if (total <= 0) {
@@ -305,23 +308,23 @@ bool GameState::checkState() {
 bool GameState::checkStart() {
     if (started) return true;
 
-    const auto clients = &server->getClients();
+    const auto clients = &server.getClients();
 
     const auto cnt = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
         return client->isInGame() && player.isReady();
     });
 
-    if (cnt >= this->server->getInGameCount()) {
+    if (cnt >= this->server.getInGameCount()) {
         Packet pack(PacketType::SERVER_GAME_PLAYERS_READY);
-        pack.sendBroadcast(*server);
+        pack.sendBroadcast(server);
 
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
         currentMap->init();
 
-        elapsed    = 0.0f;
-        time  = 0.0f;
-        end        = 0.0f;
+        elapsed = 0.0f;
+        time = 0.0f;
+        end = 0.0f;
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, time_sec);
         started = true;
@@ -341,12 +344,12 @@ bool GameState::handle(Client& client, Packet& packet) {
         case PacketType::CLIENT_MERCOIN_BONUS:
         case PacketType::CLIENT_RING_BROKE: {
             AssertOrDisconnect(client, client.isInGame())
-            this->server->broadcastEx(packet, true, client.getId());
+            this->server.broadcastEx(packet, true, client.getId());
             break;
         }
 
         case PacketType::CLIENT_PLAYER_PALETTE: {
-            this->server->broadcastEx(packet, true, client.getId());
+            this->server.broadcastEx(packet, true, client.getId());
             break;
         }
 
@@ -363,13 +366,13 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController->cmdParse(message);
-            bool isCommand   = stateController->cmdHandle(client, hash, message);
+            commandHash hash = stateController.cmdParse(message);
+            bool isCommand = stateController.cmdHandle(client, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
 
             if (!isCommand) {
-                server->sendBroadcastMessage(client.getId(), message);
+                server.sendBroadcastMessage(client.getId(), message);
             }
             break;
         }
@@ -385,7 +388,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 }
             }
 
-            uint32_t roundTripTime = client.getPeer()->roundTripTime;
+            uint16_t roundTripTime = static_cast<uint16_t>(client.getPeer()->roundTripTime);
 
             Packet ping(PacketType::SERVER_PONG);
             ping.write<uint16_t>(roundTripTime);
@@ -396,7 +399,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             Packet gamePing(PacketType::SERVER_GAME_PING);
             gamePing.write<clientId>(client.getId());
             gamePing.write<uint16_t>(roundTripTime);
-            gamePing.sendBroadcast(*server, false);
+            gamePing.sendBroadcast(server, false);
             break;
         }
 
@@ -417,12 +420,12 @@ bool GameState::handle(Client& client, Packet& packet) {
             playerDeadState.write<clientId>(client.getId());
             playerDeadState.write<uint8_t>(dead);
             playerDeadState.write<uint8_t>(rtimes);
-            playerDeadState.sendBroadcast(*server, true);
+            playerDeadState.sendBroadcast(server, true);
 
             Packet revivalStatus(PacketType::SERVER_REVIVAL_STATUS);
             revivalStatus.write<uint8_t>(false);
             revivalStatus.write<clientId>(client.getId());
-            revivalStatus.sendBroadcast(*server);
+            revivalStatus.sendBroadcast(server);
 
             if (dead) {
                 if (player.isFlag(Player::Flags::PLAYER_DEAD) ||
@@ -435,7 +438,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->time_sec < 2) {
                     this->demonize(client);
                 } else {
-                    auto clientExeOpt = this->server->findClient(this->exe);
+                    auto clientExeOpt = this->server.findClient(this->exe);
                     if (clientExeOpt.has_value()) {
                         auto playerExe = clientExeOpt.value()->getPlayer();
 
@@ -446,7 +449,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                             player.getPosition().distance(playerExe.getPosition()) <= 240);
                         deathTimerTick.write<clientId>(client.getId());
                         deathTimerTick.write<uint8_t>(player.getDeathTimerSec());
-                        deathTimerTick.sendBroadcast(*server);
+                        deathTimerTick.sendBroadcast(server);
                     }
                 }
             } else {
@@ -469,8 +472,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             auto &player = client.getPlayer();
 
-            if (player.isFlag(Player::Flags::PLAYER_DEAD) ||
-                player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+            if (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
                 break;
             }
 
@@ -485,7 +487,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             Packet pack2(PacketType::SERVER_GAME_PLAYER_ESCAPED);
             pack2.write<clientId>(client.getId());
-            pack2.sendBroadcast(*server);
+            pack2.sendBroadcast(server);
 
             RAssert(checkState());
             break;
@@ -548,7 +550,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 Packet pack(PacketType::CLIENT_PLAYER_DATA);
                 pack.write<clientId>(client.getId());
                 pack.append(packet, 2);
-                pack.sendBroadcast(*server, false);
+                pack.sendBroadcast(server, false);
             }
 
             break;
@@ -581,7 +583,7 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
         case Ending::EXEWIN: {
             Packet pack(PacketType::SERVER_GAME_EXE_WINS);
             pack.write<uint8_t>(achiv);
-            pack.sendBroadcast(*server);
+            pack.sendBroadcast(server);
             Info("Ending is Ending::EXEWIN");
             break;
         }
@@ -589,7 +591,7 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
         case Ending::SURVWIN: {
             Packet pack(PacketType::SERVER_GAME_SURVIVOR_WIN);
             pack.write<uint8_t>(achiv);
-            pack.sendBroadcast(*server);
+            pack.sendBroadcast(server);
             Info("Ending is Ending::SURVWIN");
             break;
         }
@@ -597,7 +599,7 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
         case Ending::TIMEOVER: {
             Packet pack(PacketType::SERVER_GAME_TIME_OVER);
             pack.write<uint8_t>(achiv);
-            pack.sendBroadcast(*server);
+            pack.sendBroadcast(server);
             Info("Ending is Ending::TIMEOVER");
             break;
         }
@@ -614,7 +616,7 @@ void GameState::demonize(Client &client) {
 
     auto &player = client.getPlayer();
 
-    const auto clients = &server->getClients();
+    const auto clients = &server.getClients();
 
     const auto demonized = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
@@ -665,7 +667,7 @@ void GameState::bigRing(BigRingState state) {
     Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
     pack.write<uint8_t>(state == BigRingState::ACTIVATED ? 1 : 0);
     pack.write<uint8_t>(bringLocation);
-    pack.sendBroadcast(*server);
+    pack.sendBroadcast(server);
 
     bringState = state;
 }
@@ -673,5 +675,5 @@ void GameState::bigRing(BigRingState state) {
 void GameState::sendTimeSync() {
     Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
     pack.write<uint16_t>(static_cast<uint16_t>(time_sec * TICKSPERSEC));
-    pack.sendBroadcast(*server, true);
+    pack.sendBroadcast(server, true);
 }

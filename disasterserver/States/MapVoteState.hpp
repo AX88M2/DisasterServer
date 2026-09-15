@@ -14,13 +14,14 @@ namespace DisasterServer
     class MapVoteState : public State {
         Countdown countdown = Countdown(TICKSPERSEC);
 
-        std::array<uint8_t, 3> maps = {};
+        std::array<mapId, 3> maps = {};
         std::array<uint8_t, 3> votes = {};
     public:
-        MapVoteState(Server *server, StateController *controller);
+        MapVoteState(Server &server, StateController &stateController);
         ~MapVoteState() override = default;
 
-        void init();
+        void enter() override;
+        void exit() override;
         bool joined(Client& client) override;
         bool leaved(Client& client) override;
         void tick() override;

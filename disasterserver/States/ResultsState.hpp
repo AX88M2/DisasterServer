@@ -7,7 +7,7 @@ namespace DisasterServer
 {
     class ResultsState : public State {
     public:
-        ResultsState(Server *server, StateController *controller);
+        ResultsState(Server &server, StateController &stateController);
         ~ResultsState() override = default;
 
         void init();

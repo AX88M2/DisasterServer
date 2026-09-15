@@ -10,14 +10,14 @@ namespace DisasterServer
 {
     class StateController;
 
-
-
     class Server {
         int id = 0;
         bool running = false;
         double delta = 0;
         ENetHost *host = nullptr;
+
         Application &application = Application::getInstance();
+
         std::vector<std::unique_ptr<Client>> peers;
         StateController stateController;
         MapController mapController;
@@ -27,7 +27,7 @@ namespace DisasterServer
 
         void initialize();
 
-        void disconnectById(clientId client_id, DisconnectReason reason, const std::string& message = "") const;
+        void disconnectById(clientId id, DisconnectReason reason, const std::string& message = "") const;
 
         void sendMessage(Client &client, std::string message);
         void sendBroadcastMessage(clientId sender, std::string message);
@@ -51,7 +51,6 @@ namespace DisasterServer
 
         Application &getApplication() { return application; }
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
-        StateController &getStateController() { return stateController; }
         MapController &getMapController() { return mapController; }
 
         double getDelta() const { return delta; }

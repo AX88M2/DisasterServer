@@ -108,14 +108,7 @@ namespace DisasterServer
             log(LogLevel::Error, location, fmt, std::forward<Args>(args)...);
         }
     };
-
-    constexpr std::string_view BoolStringify(bool value) {
-        return value ? "true" : "false";
-    }
 }
-
-#define RAssert(x) if (!(x)) { Error("RAssert({}) failed!", #x); return false; }
-#define RAssertEx(x) if (!(x)) { Error("RAssert({}) failed!", #x); }
 
 #define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
 #define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)

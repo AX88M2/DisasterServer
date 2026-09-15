@@ -7,7 +7,7 @@
 
 using namespace DisasterServer;
 
-Vote::Vote(Server *server) : server(server) {
+Vote::Vote(Server &server) : server(server) {
 }
 
 Vote::~Vote() = default;
@@ -15,10 +15,10 @@ Vote::~Vote() = default;
 bool Vote::init(VoteType type, clientId id) {
     ongoing = false;
     votes.clear();
-    auto &players = server->getClients();
+    auto &players = server.getClients();
     this->type = type;
 
-    for (auto &c: server->getClients()) {
+    for (auto &c: server.getClients()) {
         c->setCanVote(c->getId() != id);
     }
     this->votedTotal = std::ranges::count_if(players, [](const auto& peer) { return peer->isCanVote(); });
@@ -51,7 +51,7 @@ bool Vote::tick() {
         return false;
     }
 
-    countdown -= server->getDelta();
+    countdown -= server.getDelta();
 
     if (countdown <= 0) {
         return false;

@@ -2,6 +2,7 @@
 #define DISASTERSERVER_PEER_HPP
 
 #include "Player.hpp"
+#include "Controllers/StateController.hpp"
 #include "Util/Packet.hpp"
 #include "Core/Types.hpp"
 
@@ -128,8 +129,9 @@ namespace DisasterServer
         double voteCooldown = 0;
 
         Server *server = nullptr;
+        StateController &stateController;
     public:
-        Client(Server *server, ENetPeer *peer, clientId incomingPeerID, std::string ip);
+        Client(Server *server, StateController &stateController, ENetPeer *peer, clientId incomingPeerID, std::string ip);
         ~Client();
 
         clientId getId() const { return id; }

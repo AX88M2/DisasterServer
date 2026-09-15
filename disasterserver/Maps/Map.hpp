@@ -12,13 +12,14 @@ namespace DisasterServer
 
     class Map {
     protected:
-        Server* server = nullptr;
+        Server &server;
         std::string name;
 
         uint8_t spawnRedRings;
         uint8_t ringCount;
     public:
-        Map(Server* server, std::string name, int spawn_red_rings, int ring_count) : server(server), name(std::move(name)), spawnRedRings(static_cast<uint8_t>(spawn_red_rings)), ringCount(static_cast<uint8_t>(ring_count)) {}
+        Map(Server &server, std::string name, int spawn_red_rings, int ring_count) : server(server), name(std::move(name)),
+            spawnRedRings(static_cast<uint8_t>(spawn_red_rings)), ringCount(static_cast<uint8_t>(ring_count)) {}
 
         virtual ~Map() = default;
 

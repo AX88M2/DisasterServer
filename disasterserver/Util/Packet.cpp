@@ -29,15 +29,14 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	[[maybe_unused]]
 	const uint8_t isPasstrough = read<uint8_t>();
 	type = read<PacketType>();
-
-	//Debug("Packet received {}", getPacketTypeName(type));
+	Debug("Packet received {}", getPacketTypeName(type));
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
 	write<PacketType>(type);
 	if (type != PacketType::SERVER_HEARTBEAT) {
-		//Debug("Packet created {}", getPacketTypeName(type));
+		Debug("Packet created {}", getPacketTypeName(type));
 	}
 }
 
