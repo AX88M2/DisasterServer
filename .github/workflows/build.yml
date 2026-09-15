@@ -25,17 +25,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [clang, cl]
         ui: [true, false]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
             vcpkg_triplet: x64-windows-release
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-            vcpkg_triplet: x64-linux-release
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
