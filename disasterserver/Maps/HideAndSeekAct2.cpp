@@ -18,9 +18,11 @@ void HideAndSeekAct2::init()
 void HideAndSeekAct2::tick() {
 
 }
+
 void HideAndSeekAct2::handle(Client&, Packet&) {
 
 }
+
 void HideAndSeekAct2::left(Client&) {
 
 }

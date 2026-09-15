@@ -408,9 +408,6 @@ namespace DisasterServer {
 		void seek(size_t offset);
 		void append(const Packet& other, size_t offset);
 
-		size_t getPosition() { return position; }
-		size_t getLength() { return len; }
-
 		std::string readString();
 		void writeString(const std::string &value);
 

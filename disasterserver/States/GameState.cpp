@@ -17,7 +17,7 @@ GameState::GameState(Server &server, StateController &stateController, clientId 
         currentMapId(mapid), currentMap(map), exe(exe) {}
 
 void GameState::enter() {
-    Debug("Attepting to enter ST_GAME...");
+    Debug("Attepting to enter DisasterServer::GameState...");
 
     if (!currentMap) {
         Error("GameState::init: map {} is null", currentMapId);
@@ -103,12 +103,12 @@ void GameState::uninit(bool show_results) {
     stateController.changeTo<LobbyState>();
 }
 
-bool GameState::joined(Client& client) {
+bool GameState::playerJoined(Client& client) {
     unusedArg(client);
     return true;
 }
 
-bool GameState::leaved(Client& client) {
+bool GameState::playerLeaved(Client& client) {
     if (end > 0.0f) {
         return true;
     }

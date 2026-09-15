@@ -125,12 +125,12 @@ void LobbyState::checkVote() {
     vote.setOnGoing(false);
 }
 
-bool LobbyState::joined(Client &) {
+bool LobbyState::playerJoined(Client &) {
     checkCountdown();
     return true;
 }
 
-bool LobbyState::leaved(Client &peer) {
+bool LobbyState::playerLeaved(Client &peer) {
     if (!peer.isInGame()) {
         return true;
     }

@@ -18,8 +18,8 @@ namespace DisasterServer
 
         virtual void enter() = 0;
         virtual void exit() = 0;
-        virtual bool joined(Client& client) { return true; }
-        virtual bool leaved(Client& client) { return true; }
+        virtual bool playerJoined(Client& client) { return true; }
+        virtual bool playerLeaved(Client& client) { return true; }
         virtual void tick() {}
         virtual bool handle(Client& client, Packet& packet) { return true; }
     };

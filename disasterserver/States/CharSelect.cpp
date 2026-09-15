@@ -42,11 +42,11 @@ void CharSelectState::exit() {
 
 }
 
-bool CharSelectState::joined(Client& client) {
+bool CharSelectState::playerJoined(Client& client) {
     return true;
 }
 
-bool CharSelectState::leaved(Client& client) {
+bool CharSelectState::playerLeaved(Client& client) {
     if (client.getSurvCharacter() != SurvCharacters::NONE) {
         const auto character = client.getSurvCharacter();
         avail[character] = false;

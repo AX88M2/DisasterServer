@@ -12,32 +12,32 @@ StateController::StateController(Server &server): server(server) {
 
 StateController::~StateController() = default;
 
-bool StateController::playerJoined(Client &peer) {
+bool StateController::playerJoined(Client &client) {
     Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
-    packet.write<uint8_t>(peer.getExeChance());
-    packet.send(peer, true);
+    packet.write<uint8_t>(client.getExeChance());
+    packet.send(client, true);
 
     Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
-    playerJoined.write<clientId>(peer.getId());
-    playerJoined.writeString(peer.getNickname());
-    playerJoined.write<uint8_t>(peer.getLobbyIcon());
-    playerJoined.write<uint8_t>(peer.getPet());
-    this->server.broadcastEx(playerJoined, true, peer.getId());
+    playerJoined.write<clientId>(client.getId());
+    playerJoined.writeString(client.getNickname());
+    playerJoined.write<uint8_t>(client.getLobbyIcon());
+    playerJoined.write<uint8_t>(client.getPet());
+    this->server.broadcastEx(playerJoined, true, client.getId());
 
     if (current) {
-        current->joined(peer);
+        current->playerJoined(client);
     }
 
     return true;
 }
 
-void StateController::playerLeft(Client &peer) {
+void StateController::playerLeft(Client &client) {
     Packet packet(PacketType::SERVER_PLAYER_LEFT);
-    packet.write<clientId>(peer.getId());
+    packet.write<clientId>(client.getId());
     packet.sendBroadcast(server, true);
 
     if (current) {
-        current->leaved(peer);
+        current->playerLeaved(client);
     }
 }
 
@@ -47,10 +47,10 @@ void StateController::tick() {
     }
 }
 
-bool StateController::handle(Client &peer, Packet &packet) {
+bool StateController::handle(Client &client, Packet &packet) {
     switch (packet.getPacketType()) {
         case PacketType::CLIENT_LOBBY_CHOOSEBAN: {
-            if (!peer.isOperator()) {
+            if (!client.isOperator()) {
                 break;
             }
 
@@ -66,7 +66,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
             break;
         }
         case PacketType::CLIENT_LOBBY_CHOOSEKICK: {
-            if (!peer.isOperator()) {
+            if (!client.isOperator()) {
                 break;
             }
 
@@ -82,7 +82,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
             break;
         }
         case PacketType::CLIENT_LOBBY_CHOOSEOP: {
-            if (!peer.isOperator()) {
+            if (!client.isOperator()) {
                 break;
             }
 
@@ -91,7 +91,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
                     //TODO: add operator logic
-                    server.sendMessage(peer, "{}you're an operator now", CLRCODE_GRN);
+                    server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
                 }
             }
 
@@ -101,7 +101,7 @@ bool StateController::handle(Client &peer, Packet &packet) {
     }
 
     if (current) {
-        current->handle(peer, packet);
+        return current->handle(client, packet);
     }
 
     return true;

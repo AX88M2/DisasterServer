@@ -97,11 +97,11 @@ void MapVoteState::exit() {
     
 }
 
-bool MapVoteState::joined(Client &client) {
+bool MapVoteState::playerJoined(Client &client) {
     return true;
 }
 
-bool MapVoteState::leaved(Client &client) {
+bool MapVoteState::playerLeaved(Client &client) {
     if (this->server.getInGameCount() <= 1) {
         stateController.changeTo<LobbyState>();
         return true;

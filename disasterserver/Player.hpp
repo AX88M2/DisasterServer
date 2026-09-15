@@ -10,28 +10,87 @@
 namespace DisasterServer
 {
     class GameState;
-    using PlayerFlags = uint8_t;
 
     class PlayerStats {
-        double		survive_time = 0;
-        double		danger_time = 0;
-        double		camp_time = 0.0;
+        double survive_time = 0;
+        double danger_time = 0;
+        double camp_time = 0.0;
 
-        double		braindead_time = 0.0;
-        bool		brain_damage = false;
+        double braindead_time = 0.0;
+        bool brain_damage = false;
 
-        uint16_t	stun_time = 0;
-        uint16_t	stuns = 0;
-        uint16_t	hp_restored = 0;
-        uint16_t	rings = 0;
-        uint16_t	damage = 0;
-        uint16_t	damage_taken = 0;
-        uint16_t	kills = 0;
+        uint16_t stun_time = 0;
+        uint16_t stuns = 0;
+        uint16_t hp_restored = 0;
+        uint16_t rings = 0;
+        uint16_t damage = 0;
+        uint16_t damage_taken = 0;
+        uint16_t kills = 0;
     public:
         PlayerStats() = default;
         ~PlayerStats() = default;
 
-        void clearRings() { this->rings = 0; }
+        void addSurviveTime() { survive_time++; }
+        double getSurviveTime() const { return this->survive_time; }
+        void setSurviveTime(double value) { this->survive_time = value; }
+
+        void addDangerTime() { danger_time++; }
+        double getDangerTime() const { return this->danger_time; }
+        void setDangerTime(double value) { this->danger_time = value; }
+
+        void addCampTime() { camp_time++; }
+        double getCampTime() const { return this->camp_time; }
+        void setCampTime(double value) { this->camp_time = value; }
+
+        void addBraindeadTime() { braindead_time++; }
+        double getBraindeadTime() const { return this->braindead_time; }
+        void setBraindeadTime(double value) { this->braindead_time = value; }
+
+        void setBrainDamage(bool flag) { this->brain_damage = flag; }
+        bool getBrainDamage() const { return this->brain_damage; }
+
+        void addStunTime() { stun_time++; }
+        uint16_t getStunTime() const { return this->stun_time; }
+        void setStunTime(double time) { this->stun_time = time; }
+
+        void addStun() { stuns++; }
+        uint16_t getStuns() const { return this->stuns; }
+        void setStuns(uint16_t value) { this->stuns = value; }
+
+        void addHpRestored() { hp_restored++; }
+        uint16_t getHpRestored() const { return this->hp_restored; }
+        void setHpRestored(uint16_t value) { this->hp_restored = value; }
+
+        void addRing() { rings++; }
+        uint16_t getRings() const { return rings; }
+        void clearRings() { rings = 0; }
+
+        void addDamage() { damage++; }
+        uint16_t getDamage() const { return this->damage; }
+        void setDamage(uint16_t value) { this->damage = value; }
+
+        void addDamageTaken() { damage_taken++; }
+        uint16_t getDamageTaken() const { return this->damage_taken; }
+        void setDamageTaken(uint16_t value) { this->damage_taken = value; }
+
+        void addKill() { kills++; }
+        uint16_t getKills() const { return this->kills; }
+        void setKills(uint16_t value) { this->kills = value; }
+
+        void reset() {
+            this->survive_time = 0;
+            this->danger_time = 0;
+            this->camp_time = 0.0;
+            this->braindead_time = 0;
+            this->brain_damage = false;
+            this->stun_time = 0;
+            this->stuns = 0;
+            this->hp_restored = 0;
+            this->rings = 0;
+            this->damage = 0;
+            this->damage_taken = 0;
+            this->kills = 0;
+        }
     };
 
     class Player {
@@ -69,7 +128,7 @@ namespace DisasterServer
         } userdata = {};
 
         Vector2 startPos = {};
-        Vector2 pos = {};
+        Vector2 position = {};
 
         PlayerStats stats = {};
 
@@ -128,7 +187,6 @@ namespace DisasterServer
         uint16_t getLastPing() const { return this->pingLast; }
         void setLastPing(const uint16_t value) { this->pingLast = value; }
 
-
         uint16_t getRings() const { return rings; }
         void setRings(uint16_t ring) { this->rings = ring; }
 
@@ -141,12 +199,10 @@ namespace DisasterServer
         Vector2 getStartPosition() const { return this->startPos; }
         void setStartPosition(Vector2 vec2) { this->startPos = vec2;  }
 
-        Vector2 getPosition() const { return this->pos; }
-        void setPosition(Vector2 vec2) { pos = vec2; }
+        Vector2 getPosition() const { return this->position; }
+        void setPosition(Vector2 vec2) { position = vec2; }
 
         PlayerStats getStats() const { return this->stats; }
-
-
     };
 }
 

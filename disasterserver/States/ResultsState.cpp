@@ -14,12 +14,12 @@ void ResultsState::init() {
     Info("Server is now in {}Results", CLRCODE_PUR);
 }
 
-bool ResultsState::joined(Client &client) {
-    return State::joined(client);
+bool ResultsState::playerJoined(Client &client) {
+    return State::playerJoined(client);
 }
 
-bool ResultsState::leaved(Client &client) {
-    return State::leaved(client);
+bool ResultsState::playerLeaved(Client &client) {
+    return State::playerLeaved(client);
 }
 
 void ResultsState::tick() {

@@ -22,8 +22,8 @@ namespace DisasterServer
 
         void enter() override;
         void exit() override;
-        bool joined(Client& client) override;
-        bool leaved(Client& client) override;
+        bool playerJoined(Client& client) override;
+        bool playerLeaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
 

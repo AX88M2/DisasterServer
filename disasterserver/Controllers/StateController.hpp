@@ -36,6 +36,12 @@ namespace DisasterServer
         explicit StateController(Server &server);
         ~StateController();
 
+        /**
+         * \warning Данный метод не стоит сразу вызывать в @memberof State::enter,
+         * и за этого может быть странное по видения.
+         * @tparam T Класс наследований от @interface State <States\State.hpp>
+         * @param args Дополнительные параметры для стадии
+         */
         template <std::derived_from<State> T, typename... Args>
         void changeTo(Args&&... args) {
             auto next = std::make_unique<T>(server, *this, std::forward<Args>(args)...);
@@ -54,10 +60,10 @@ namespace DisasterServer
             return current && dynamic_cast<T*>(current.get()) != nullptr;
         }
 
-        bool playerJoined(Client& peer);
-        void playerLeft(Client& peer);
+        bool playerJoined(Client& client);
+        void playerLeft(Client& client);
         void tick();
-        bool handle(Client& peer, Packet& packet);
+        bool handle(Client& client, Packet& packet);
 
         commandHash cmdParse(std::string string);
         bool cmdHandle(Client& client, commandHash hash, const std::string& message);
