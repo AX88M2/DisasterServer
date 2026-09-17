@@ -8,8 +8,7 @@
 
 using namespace DisasterServer;
 
-std::string ConfigManager::defaultConfig =R"(
-[server]
+std::string ConfigManager::defaultConfig =R"([server]
 port = 8606
 lobby-count = 1
 motd = "Hello from DisasterServerCXX"
@@ -22,7 +21,7 @@ ConfigManager::~ConfigManager() = default;
 
 void ConfigManager::load() {
     if (!std::filesystem::exists(filename)) {
-        Warn("{} not found, creating default config", filename);
+        Info("{} not found, creating default config", filename);
         std::ofstream file {filename};
         file << defaultConfig;
         file.close();

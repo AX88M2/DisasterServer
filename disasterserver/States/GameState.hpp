@@ -29,18 +29,20 @@ namespace DisasterServer
     {
         mapId currentMapId = 0;
         Map* currentMap = nullptr;
+
         clientId exe = 0;
+
         bool started = false;
         bool suddenDeath = false;
 
-        Countdown gameTime = Countdown(TICKSPERSEC);
-        Countdown startTimeout = Countdown(TICKSPERSEC);
-        double start_timeout = 15.0 * TICKSPERSEC;
+        Countdown gameTime { TICKSPERSEC };
+        Countdown startTimeout { TICKSPERSEC };
+        Countdown endTime { TICKSPERSEC };
+
         double time = 0.0;
         double elapsed = 0.0;
         uint16_t time_sec = 0;
         int ringCoff = 0;
-        double end = 0.0;
         Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;

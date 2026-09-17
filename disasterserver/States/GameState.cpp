@@ -26,7 +26,6 @@ void GameState::enter() {
     }
 
     this->started = false;
-    this->end = 0.0f;
     this->ending = Ending::EXEWIN;
     this->elapsed = 0.0f;
     this->time = 0.0f;
@@ -95,7 +94,7 @@ void GameState::exit() {
 
 void GameState::uninit(bool show_results) {
     if (show_results) {
-        stateController.changeTo<ResultsState>(currentMapId);
+        stateController.changeTo<ResultsState>(currentMapId, leftClients);
     } else {
         stateController.changeTo<LobbyState>();
     }
@@ -107,7 +106,7 @@ bool GameState::playerJoined(Client& client) {
 }
 
 bool GameState::playerLeaved(Client& client) {
-    if (end > 0.0f) {
+    if (endTime.active()) {
         return true;
     }
 
@@ -163,13 +162,9 @@ void GameState::tick() {
         return;
     }
 
-    if (end > 0.0f) {
-        end -= server.getDelta();
-        if (end <= 0.0f) {
-            end = 0.0f;
-            uninit(true);
-        }
-        return;
+    auto resultEnd = endTime.tick(server.getDelta());
+    if (resultEnd == Countdown::TickResult::Finished) {
+        uninit(true);
     }
 
     const double delta = server.getDelta();
@@ -271,7 +266,7 @@ void GameState::tickEntities() {
 }
 
 bool GameState::checkState() {
-    if (end > 0.0f) return true;
+    if (endTime.active()) return true;
 
     const auto clients = &server.getClients();
 
@@ -322,7 +317,7 @@ bool GameState::checkStart() {
 
         elapsed = 0.0f;
         time = 0.0f;
-        end = 0.0f;
+        endTime.stop();
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, time_sec);
         started = true;
@@ -401,7 +396,7 @@ bool GameState::handle(Client& client, Packet& packet) {
         }
 
         case PacketType::CLIENT_PLAYER_DEATH_STATE: {
-            if (end > 0.0f)
+            if (endTime.active())
                 break;
 
             auto &player = client.getPlayer();
@@ -510,13 +505,12 @@ bool GameState::handle(Client& client, Packet& packet) {
             int duration = 2000;
 
             if (this->exe != client.getId()) {
-                const int8_t  hp = packet.read<int8_t>();
+                const int8_t hp = packet.read<int8_t>();
                 const uint8_t revival = packet.read<uint8_t>();
                 const int16_t rings = packet.read<int16_t>();
                 const uint8_t flags = packet.read<uint8_t>();
 
-                if (!player.isFlag(Player::Flags::PLAYER_DEAD) &&
-                    !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                if (!player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
                     if (client.getId() != this->exe) {
                         player.setRings(rings);
                     }
@@ -572,7 +566,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 }
 
 bool GameState::endingRound(const Ending endtype, bool achiv) {
-    if (end > 0.0f) {
+    if (endTime.active()) {
         return true;
     }
 
@@ -602,7 +596,7 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
         }
     }
 
-    this->end = 5.0f * TICKSPERSEC;
+    this->endTime.start(5);
     this->ending = endtype;
 
     return true;

@@ -5,8 +5,8 @@
 
 using namespace DisasterServer;
 
-ResultsState::ResultsState(Server &server, StateController &stateController, mapId id) : State(server, stateController), id(id) {
-}
+ResultsState::ResultsState(Server &server, StateController &stateController, mapId id, std::vector<clientId> &leftPlayers) : State(server, stateController),
+    id(id), leftClients(leftPlayers) {}
 
 void ResultsState::enter() {
     Debug("Attepting to enter DisasterServer::ResultsState...");
