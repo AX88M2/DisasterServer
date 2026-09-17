@@ -349,7 +349,7 @@ namespace DisasterServer {
 		explicit Packet(PacketType type);
 		~Packet();
 
-		PacketType getPacketType() {
+		PacketType getType() {
 			return type;
 		}
 

@@ -81,7 +81,7 @@ void GameState::enter() {
             }
 
             if (!pack.send(*client)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client->getNickname(), client->getId());
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client->getNickname(), client->getId());
             }
         }
     }
@@ -94,13 +94,11 @@ void GameState::exit() {
 }
 
 void GameState::uninit(bool show_results) {
-    /*if (show_results) {
-        stateController.changeTo<ResultsState>();
+    if (show_results) {
+        stateController.changeTo<ResultsState>(currentMapId);
     } else {
         stateController.changeTo<LobbyState>();
-    }*/
-
-    stateController.changeTo<LobbyState>();
+    }
 }
 
 bool GameState::playerJoined(Client& client) {
@@ -241,10 +239,10 @@ void GameState::tickPlayers() {
             continue;
 
         bool exeNear = false;
-        auto exeOpt = server.findClient(this->exe);
-        if (exeOpt.has_value()) {
-            const float d = player.getPosition().distance(exeOpt.value()->getPlayer().getPosition());
-            exeNear = d <= 240.0f;
+        auto clientExe = server.findClient(this->exe);
+        if (clientExe.has_value()) {
+            const float distance = player.getPosition().distance(clientExe.value()->getPlayer().getPosition());
+            exeNear = distance <= 240.0f;
         }
 
         if (time_sec < 2) {
@@ -334,8 +332,7 @@ bool GameState::checkStart() {
 }
 
 bool GameState::handle(Client& client, Packet& packet) {
-    switch (packet.getPacketType()) {
-
+    switch (packet.getType()) {
         case PacketType::CLIENT_PLAYER_POTATER:
         case PacketType::CLIENT_SOUND_EMIT:
         case PacketType::CLIENT_SPAWN_EFFECT:

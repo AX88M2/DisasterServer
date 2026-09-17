@@ -22,7 +22,7 @@ Client::~Client() = default;
 bool Client::identity(Packet &packet) {
     RAssert(id > 0);
 
-    if (packet.getPacketType() != PacketType::IDENTITY) {
+    if (packet.getType() != PacketType::IDENTITY) {
         this->disconnect(DisconnectReason::OTHER, "type != IDENTITY?");
         return false;
     }

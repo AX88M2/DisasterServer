@@ -86,7 +86,7 @@ void CharSelectState::tick() {
 }
 
 bool CharSelectState::handle(Client& client, Packet& packet) {
-    switch (packet.getPacketType()) {
+    switch (packet.getType()) {
         case PacketType::CLIENT_REQUEST_EXECHARACTER: {
             if (!client.isInGame())
                 break;
@@ -109,7 +109,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             Packet pack(PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE);
             pack.write<uint8_t>(id);
             if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
 

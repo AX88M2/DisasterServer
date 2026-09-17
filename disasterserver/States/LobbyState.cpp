@@ -194,7 +194,7 @@ void LobbyState::tick() {
 }
 
 bool LobbyState::handle(Client &client, Packet &packet) {
-    switch (packet.getPacketType()) {
+    switch (packet.getType()) {
         case PacketType::CLIENT_LOBBY_PLAYERS_REQUEST: {
             for (auto &c : server.getClients()) {
                 if (client.getId() == c->getId()) {

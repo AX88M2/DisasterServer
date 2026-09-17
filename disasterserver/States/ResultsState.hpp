@@ -2,15 +2,23 @@
 #define DISASTERSERVER_RESULTSSTATE_HPP
 
 #include "State.hpp"
+#include "Core/Constansts.hpp"
+#include "Core/Types.hpp"
+#include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
     class ResultsState : public State {
+        Countdown countdown = Countdown(TICKSPERSEC);
+
+        mapId id;
+
     public:
-        ResultsState(Server &server, StateController &stateController);
+        ResultsState(Server &server, StateController &stateController, mapId id);
         ~ResultsState() override = default;
 
-        void init();
+        void enter() override;
+        void exit() override;
         bool playerJoined(Client& client) override;
         bool playerLeaved(Client& client) override;
         void tick() override;

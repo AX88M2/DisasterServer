@@ -194,7 +194,7 @@ void MapVoteState::tick() {
 }
 
 bool MapVoteState::handle(Client &client, Packet &packet) {
-    switch (packet.getPacketType()) {
+    switch (packet.getType()) {
         case PacketType::CLIENT_VOTE_REQUEST: {
             if (!client.isInGame()) {
                 break;

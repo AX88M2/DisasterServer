@@ -151,7 +151,7 @@ void Server::initialize() {
 
                     Packet packet(ev.packet);
 
-                    if (packet.getPacketType() == PacketType::IDENTITY) {
+                    if (packet.getType() == PacketType::IDENTITY) {
                         if (!client->identity(packet)) {
                             Debug("Identity failed for id {}", client->getId());
                         }
@@ -197,7 +197,7 @@ void Server::disconnectById(const clientId id, DisconnectReason reason, const st
 }
 
 void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
-    Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getPacketType()), ignore);
+    Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getType()), ignore);
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 

@@ -48,7 +48,7 @@ void StateController::tick() {
 }
 
 bool StateController::handle(Client &client, Packet &packet) {
-    switch (packet.getPacketType()) {
+    switch (packet.getType()) {
         case PacketType::CLIENT_LOBBY_CHOOSEBAN: {
             if (!client.isOperator()) {
                 break;
@@ -161,7 +161,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
             Packet pack(PacketType::CLIENT_LOBBY_CHOOSEBAN);
             if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
             break;
@@ -180,7 +180,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEKICK);
             if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
             break;
@@ -199,7 +199,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
             Packet pack(PacketType::SERVER_LOBBY_CHOOSEOP);
             if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getPacketType()), client.getNickname(), client.getId());
+                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
             break;
@@ -266,6 +266,8 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 this->server.sendMessage(client, "{}иди нахуй :3", CLRCODE_PUR);
                 break;
             }
+
+            client.disconnect(DisconnectReason::KICKEDBYHOST, "testing!");
             break;
         }
 #endif
