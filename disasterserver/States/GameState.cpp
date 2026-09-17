@@ -165,6 +165,7 @@ void GameState::tick() {
     auto resultEnd = endTime.tick(server.getDelta());
     if (resultEnd == Countdown::TickResult::Finished) {
         uninit(true);
+        return;
     }
 
     const double delta = server.getDelta();
