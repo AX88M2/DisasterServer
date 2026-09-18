@@ -44,14 +44,14 @@ Packet::~Packet() = default;
 
 void Packet::seek(const size_t offset) {
 	if (offset > this->len) {
-		throw std::runtime_error("Invalid packet offset");
+		throw PacketError::format("Invalid packet offset");
 	}
 
 	const size_t amount = this->len - offset;
 
 	if (amount > buffer.size() - position) {
 		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
-		throw std::runtime_error("Packet overflow");
+		throw PacketError::format("Packet overflow");
 	}
 
 	position = offset;
@@ -59,14 +59,14 @@ void Packet::seek(const size_t offset) {
 
 void Packet::append(const Packet &other, size_t offset) {
 	if (offset > other.len) {
-		throw std::runtime_error("Invalid packet offset");
+		throw PacketError::format("Invalid packet offset");
 	}
 
 	const size_t amount = other.len - offset;
 
 	if (amount > buffer.size() - position) {
 		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
-		throw std::runtime_error("Packet overflow");
+		throw PacketError::format("Packet overflow");
 	}
 
 	std::memcpy(buffer.data() + position, other.buffer.data() + offset, amount);

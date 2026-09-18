@@ -11,13 +11,20 @@
 
 namespace DisasterServer
 {
+    enum class Ending : uint8_t;
+
     class ResultsState : public State {
-        Countdown countdown = Countdown(TICKSPERSEC);
+        Countdown countdown { TICKSPERSEC };
 
         mapId id;
-        std::vector<clientId> leftClients;
+        uint16_t mapTimeSec;
+        clientId exe;
+        Ending ending;
+        std::vector<Client> leftClients;
     public:
-        ResultsState(Server &server, StateController &stateController, mapId id, std::vector<clientId> &leftClients);
+        ResultsState(Server &server, StateController &stateController, clientId exe, Ending ending, mapId id,
+            uint16_t mapTimeSec, std::vector<Client> &leftClients
+        );
         ~ResultsState() override = default;
 
         void enter() override;
@@ -26,6 +33,9 @@ namespace DisasterServer
         bool playerLeaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
+    private:
+
+        bool sendResult(Client& client, Client& data, bool hasQuit);
     };
 }
 

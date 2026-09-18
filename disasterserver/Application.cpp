@@ -11,7 +11,7 @@ namespace DisasterServer
     Application::~Application() = default;
 
     void Application::initialize() {
-        Info("- DisasterServerCXX v{}", BUILD_VERSION);
+        Info("- DisasterServerCXX for game v{}", BUILD_VERSION);
         Info("- Build from {} {}", __DATE__, __TIME__);
 
         config.load();
@@ -30,7 +30,7 @@ namespace DisasterServer
             thread.join();
         }*/
 
-        auto ptr = std::make_unique<Server>();
+        auto ptr = std::make_unique<Server>(config.getConfig().getServerPort());
         ptr->initialize();
     }
 

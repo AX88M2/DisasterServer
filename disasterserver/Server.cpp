@@ -9,13 +9,13 @@
 
 using namespace DisasterServer;
 
-Server::Server(const int id) : id(id), stateController(*this), mapController(*this) {
+Server::Server(const int port) : port(port), stateController(*this), mapController(*this) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
-    addr.port = static_cast<uint16_t>(application.getConfigManager().getConfig().getServerPort() + id);
+    addr.port = port;
     host = enet_host_create(&addr, 50, 2, 0, 0);
 
-    Info("Listening on port {}", addr.port);
+    Info("Listening on port {}", port);
 }
 
 Server::~Server() {
@@ -123,12 +123,9 @@ void Server::initialize() {
 
                     ev.peer->data = nullptr;
 
-                    auto it = std::find_if(
-                            peers.begin(),
-                            peers.end(),
-                            [client](const auto& p) {
-                                return p.get() == client;
-                            });
+                    auto it = std::ranges::find_if(peers, [client](const auto& p) {
+                        return p.get() == client;
+                    });
 
                     if (it != peers.end()) {
                         peers.erase(it);

@@ -11,7 +11,7 @@ namespace DisasterServer
     class StateController;
 
     class Server {
-        int id = 0;
+        int port = 0;
         bool running = false;
         double delta = 0;
         ENetHost *host = nullptr;
@@ -22,7 +22,7 @@ namespace DisasterServer
         StateController stateController;
         MapController mapController;
     public:
-        Server(int id = 0);
+        explicit Server(int port = 8606);
         ~Server();
 
         void initialize();

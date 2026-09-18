@@ -94,7 +94,7 @@ void GameState::exit() {
 
 void GameState::uninit(bool show_results) {
     if (show_results) {
-        stateController.changeTo<ResultsState>(currentMapId, leftClients);
+        stateController.changeTo<ResultsState>(exe, ending, currentMapId, time_sec, leftClients);
     } else {
         stateController.changeTo<LobbyState>();
     }
@@ -132,7 +132,7 @@ bool GameState::playerLeaved(Client& client) {
     auto &player = client.getPlayer();
 
     player.setFlag(Player::Flags::PLAYER_LEFT);
-    leftClients.push_back(client.getId());
+    leftClients.push_back(client);
 
     if (client.getId() == this->exe) {
         this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKSPERSEC * TICKSPERSEC));

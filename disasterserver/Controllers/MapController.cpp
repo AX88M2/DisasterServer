@@ -9,6 +9,7 @@ MapController::MapController(Server &server) : server(server) {
 }
 
 void MapController::initialize() {
+    Info("MapController initialize...");
     this->registerMap<Maps::HideAndSeekAct2>();
 }
 

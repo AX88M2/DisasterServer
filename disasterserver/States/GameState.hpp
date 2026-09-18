@@ -48,7 +48,7 @@ namespace DisasterServer
         BigRingState bringState = BigRingState::NONE;
         uint8_t bringLocation = static_cast<uint8_t>(rand());
 
-        std::vector<clientId> leftClients = {};
+        std::vector<Client> leftClients = {};
 
     public:
         GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);

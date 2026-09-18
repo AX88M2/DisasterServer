@@ -83,7 +83,7 @@ namespace DisasterServer
             case DisconnectReason::RATELIMITED: return "RATE LIMITED";
             case DisconnectReason::SHUTDOWN: return "SHUTDOWN";
             case DisconnectReason::IPINUSE: return "IP IN USE";
-            case DisconnectReason::DONTREPORT: return "DONT REPORT";
+            case DisconnectReason::DONTREPORT: return "DON'T REPORT";
             case DisconnectReason::OTHER: return "OTHER";
             default: return "<unknown>";
         }

@@ -20,6 +20,8 @@ ConfigManager::~ConfigManager() = default;
 
 
 void ConfigManager::load() {
+    Info("ConfigManager initialized...");
+
     if (!std::filesystem::exists(filename)) {
         Info("{} not found, creating default config", filename);
         std::ofstream file {filename};
@@ -28,6 +30,7 @@ void ConfigManager::load() {
     }
 
     try {
+        Info("Loading config...");
         toml = toml::parse(filename, toml::spec::v(1,1,0));
         config = Config(toml);
     } catch (const toml::syntax_error& err) {
