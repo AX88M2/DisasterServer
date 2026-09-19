@@ -443,8 +443,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                         player.setDeathTimerSec(30);
 
                         Packet deathTimerTick(PacketType::SERVER_GAME_DEATHTIMER_TICK);
-                        deathTimerTick.write<uint8_t>(
-                            player.getPosition().distance(playerExe.getPosition()) <= 240);
+                        deathTimerTick.write<uint8_t>(player.getPosition().distance(playerExe.getPosition()) <= 240);
                         deathTimerTick.write<clientId>(client.getId());
                         deathTimerTick.write<uint8_t>(player.getDeathTimerSec());
                         deathTimerTick.sendBroadcast(server);
