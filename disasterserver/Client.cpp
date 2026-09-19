@@ -17,8 +17,6 @@ Client::Client(Server *server, StateController &stateController, ENetPeer *peer,
     server(server),
     stateController(stateController) {}
 
-Client::~Client() = default;
-
 bool Client::identity(Packet &packet) {
     RAssert(id > 0);
 

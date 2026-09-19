@@ -19,6 +19,10 @@ set(COMPILER_OPTIONS
             -fexec-charset=UTF-8
             -Wcomment
             -Wunused-parameter
+            $<$<CONFIG:Release>:
+                -O2
+                -ffast-math
+            >
         >
         $<$<CXX_COMPILER_ID:GNU>:
             -Wall
@@ -26,7 +30,6 @@ set(COMPILER_OPTIONS
             -Wpedantic
             -finput-charset=UTF-8
             -fexec-charset=UTF-8
-#            -Wgnu-zero-variadic-macro-arguments
         >
 )
 
@@ -49,7 +52,6 @@ if(ANDROID)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
     target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
     target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} log m Threads::Threads)
 else()
@@ -64,7 +66,6 @@ else()
             target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
         endif()
 
-        target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
         target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -133,7 +134,6 @@ else()
                 target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
             endif()
 
-            target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
             target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

@@ -171,11 +171,7 @@ enum class PacketType : uint8_t
 	SERVER_PREIDENTITY,
 	SERVER_FELLA,
 
-	CLIENT_PLAYER_POTATER,
-
-#if defined(SERVER_DEBUG)
-	CLIENT_SET_TIME
-#endif
+	CLIENT_PLAYER_POTATER
 };
 
 inline std::string getPacketTypeName(PacketType type) {

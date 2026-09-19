@@ -51,7 +51,7 @@ namespace DisasterServer
         BigRingState bringState = BigRingState::NONE;
         uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать класс для рандома
 
-        std::vector<Client> leftClients = {};
+        std::vector<std::unique_ptr<Client>> leftClients = {};
 
         std::vector<bool> ringSlots;
 

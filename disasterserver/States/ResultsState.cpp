@@ -16,9 +16,9 @@ ResultsState::ResultsState(Server &server, StateController &stateController,
         Ending ending,
         mapId id,
         uint16_t mapTimeSec,
-        std::vector<Client> &leftPlayers
+        std::vector<std::unique_ptr<Client>> leftClients
     ) : State(server, stateController),
-id(id), mapTimeSec(mapTimeSec), exe(exe), ending(ending), leftClients(leftPlayers) {}
+id(id), mapTimeSec(mapTimeSec), exe(exe), ending(ending), leftClients(std::move(leftClients)) {}
 
 void ResultsState::enter() {
     Debug("Attepting to enter DisasterServer::ResultsState...");
@@ -65,12 +65,12 @@ bool ResultsState::handle(Client &client, Packet &packet) {
                 results.push_back(*c);
             }
 
-            for (auto c : leftClients) {
-                if (!c.isInGame()) {
+            for (auto &c : leftClients) {
+                if (!c->isInGame()) {
                     continue;
                 }
 
-                results.push_back(c);
+                results.push_back(*c);
             }
 
             //TODO: Add sort

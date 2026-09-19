@@ -2,7 +2,7 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "base",
+      "name": "base-windows",
       "hidden": true,
       "generator": "Ninja",
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
@@ -28,7 +28,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-release",
       "displayName": "Windows (Release)",
       "binaryDir": "${sourceDir}/build/windows-release",
@@ -48,7 +48,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-debug",
       "displayName": "Windows (Debug)",
       "binaryDir": "${sourceDir}/build/windows-debug",
@@ -69,7 +69,7 @@
     },
 
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-ui-release",
       "displayName": "Windows UI (Release)",
       "binaryDir": "${sourceDir}/build/windows-ui-release",
@@ -90,7 +90,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-ui-debug",
       "displayName": "Windows UI (Debug)",
       "binaryDir": "${sourceDir}/build/windows-ui-debug",
@@ -112,7 +112,7 @@
     },
 
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-dylib-release",
       "displayName": "Windows DynamicLib (Release)",
       "binaryDir": "${sourceDir}/build/windows-dylib-release",
@@ -133,7 +133,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-dylib-debug",
       "displayName": "Windows DynamicLib (Debug)",
       "binaryDir": "${sourceDir}/build/windows-dylib-debug",
@@ -155,7 +155,7 @@
     },
 
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-clang-release",
       "displayName": "Windows (Release) Clang",
       "binaryDir": "${sourceDir}/build/windows-clang-release",
@@ -175,7 +175,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-clang-debug",
       "displayName": "Windows (Debug) Clang",
       "binaryDir": "${sourceDir}/build/windows-clang-debug",
@@ -196,7 +196,7 @@
     },
 
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-ui-clang-release",
       "displayName": "Windows UI (Release) Clang",
       "binaryDir": "${sourceDir}/build/windows-ui-clang-release",
@@ -217,7 +217,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-ui-clang-debug",
       "displayName": "Windows UI (Debug) Clang",
       "binaryDir": "${sourceDir}/build/windows-ui-clang-debug",
@@ -239,7 +239,7 @@
     },
 
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-dylib-clang-release",
       "displayName": "Windows DynamicLib (Release) Clang",
       "binaryDir": "${sourceDir}/build/windows-dylib-clang-release",
@@ -260,7 +260,7 @@
       }
     },
     {
-      "inherits": "base",
+      "inherits": "base-windows",
       "name": "windows-dylib-clang-debug",
       "displayName": "Windows DynamicLib (Debug) Clang",
       "binaryDir": "${sourceDir}/build/windows-dylib-clang-debug",

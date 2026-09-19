@@ -132,7 +132,8 @@ namespace DisasterServer
         StateController &stateController;
     public:
         Client(Server *server, StateController &stateController, ENetPeer *peer, clientId incomingPeerID, std::string ip);
-        ~Client();
+        Client(Client const&) = default;
+        ~Client() = default;
 
         clientId getId() const { return id; }
         std::string getIp() const { return ip; }

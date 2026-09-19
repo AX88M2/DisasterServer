@@ -77,7 +77,7 @@ namespace DisasterServer
     };
 
     class Logger {
-        static void write(LogLevel level, std::string message, std::source_location &location);
+        static void write(LogLevel level, std::string message, std::source_location location);
 
         template <typename... Args>
         static void log(LogLevel level, std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
@@ -86,11 +86,10 @@ namespace DisasterServer
 
     public:
         static void replaceColor(std::string &msg);
+
         template <typename... Args>
         static void debug(std::source_location location, std::format_string<Args...> fmt, Args&&... args) {
-#if defined(SERVER_DEBUG)
             log(LogLevel::Debug, location, fmt, std::forward<Args>(args)...);
-#endif
         }
 
         template <typename... Args>
@@ -110,7 +109,11 @@ namespace DisasterServer
     };
 }
 
-#define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Error(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt, ##__VA_ARGS__)
-#define Debug(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt, ##__VA_ARGS__)
+#define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define Error(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#if defined(SERVER_DEBUG)
+#define Debug(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#else
+#define Debug(fmt, ...) (void)0
+#endif

@@ -33,7 +33,6 @@ void GameState::enter() {
     this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->leftClients.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
 
     this->startTimeout.start(15);
@@ -96,7 +95,7 @@ void GameState::uninit(bool show_results) {
     ringSlots.clear();
 
     if (show_results) {
-        stateController.changeTo<ResultsState>(exe, ending, currentMapId, static_cast<uint16_t>(gameTime.remaining()), leftClients);
+        stateController.changeTo<ResultsState>(exe, ending, currentMapId, static_cast<uint16_t>(gameTime.remaining()), std::move(leftClients));
     } else {
         stateController.changeTo<LobbyState>();
     }
@@ -136,7 +135,7 @@ bool GameState::playerLeaved(Client& client) {
     auto &player = client.getPlayer();
 
     player.setFlag(Player::Flags::PLAYER_LEFT);
-    leftClients.push_back(client);
+    leftClients.push_back(std::make_unique<Client>(Client(client)));
 
     if (client.getId() == this->exe) {
         this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKS_PER_SEC * TICKS_PER_SEC));
@@ -589,13 +588,6 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             break;
         }
-#if defined(SERVER_DEBUG)
-        case PacketType::CLIENT_SET_TIME: {
-            uint16_t time = packet.read<uint16_t>();
-            gameTime.setRemaining(time);
-            break;
-        }
-#endif
         default: break;
     }
 

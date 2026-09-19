@@ -164,7 +164,7 @@ void log_fmt(const char* fmt, const char* type, const char* file, int line, ...)
 
 using namespace DisasterServer;
 
-void Logger::write(LogLevel level, std::string message, std::source_location &location) {
+void Logger::write(LogLevel level, std::string message, std::source_location location) {
 	using namespace std::chrono;
 
 	std::stringstream ss;
