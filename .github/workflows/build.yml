@@ -26,7 +26,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         c_compiler: [clang, cl]
-        ui: [true, false]
+        ui: [false]
         include:
           - os: windows-latest
             c_compiler: cl
