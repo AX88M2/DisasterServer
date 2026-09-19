@@ -36,9 +36,9 @@ set(DEFINES
 
 set(LIBS
         enet
-        Boost::bind
         Boost::algorithm
         toml11
+        sqlite_orm::sqlite_orm
 )
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)

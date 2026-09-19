@@ -29,7 +29,7 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	[[maybe_unused]]
 	const uint8_t isPasstrough = read<uint8_t>();
 	type = read<PacketType>();
-	Debug("Packet received {}", getPacketTypeName(type));
+	Debug("Packet received {} (length {})", getPacketTypeName(type), len);
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {

@@ -173,7 +173,7 @@ void GameState::tick() {
     }
 
     // Отсчёт целых секунд
-    switch (gameTime.tick(server.getDelta(), 2.5)) {
+    switch (gameTime.tick(server.getDelta())) {
         case Countdown::TickResult::Finished: {
             endingRound(Ending::TIMEOVER, true);
             break;
@@ -589,7 +589,13 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             break;
         }
-
+#if defined(SERVER_DEBUG)
+        case PacketType::CLIENT_SET_TIME: {
+            uint16_t time = packet.read<uint16_t>();
+            gameTime.setRemaining(time);
+            break;
+        }
+#endif
         default: break;
     }
 

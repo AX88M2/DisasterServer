@@ -14,6 +14,27 @@ namespace DisasterServer
 {
     class Client;
 
+    enum class Commands : commandHash {
+        HELP = 45680751,
+        MAP = 1478254,
+        STINK = 1426706039,
+        VK = 47971,
+        VP = 47976,
+        BAN = 1467681,
+        KICK = 45773684,
+        OP = 47759,
+        YES = 1489913,
+        Y = 1547,
+        NO = 47727,
+        N = 1536,
+        INFO = 45719004,
+        LOBBY = 1420085352,
+#if defined(SERVER_DEBUG)
+        SELFOP = 1264443355,
+        DEBUG = 1412399845,
+#endif
+    };
+
     constexpr commandHash CMD_HELP = 45680751;
     constexpr commandHash CMD_MAP = 1478254;
     constexpr commandHash CMD_STINK = 1426706039;
