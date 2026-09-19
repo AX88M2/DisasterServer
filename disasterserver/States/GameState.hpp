@@ -20,8 +20,8 @@ namespace DisasterServer
 
     enum class BigRingState {
         NONE,
-        ACTIVATED,
         DEACTIVATED,
+        ACTIVATED,
     };
 
     enum class Ending : uint8_t {
@@ -44,9 +44,7 @@ namespace DisasterServer
         Countdown startTimeout { TICKSPERSEC };
         Countdown endTime { TICKSPERSEC };
 
-        double time = 0.0;
         double elapsed = 0.0;
-        uint16_t time_sec = 0;
         int ringCoff = 0;
         Ending ending = Ending::EXEWIN;
 
@@ -117,7 +115,6 @@ namespace DisasterServer
 
         void tickPlayers();
         void tickEntities();
-        void sendTimeSync();
 
         bool checkState();
         bool checkStart();

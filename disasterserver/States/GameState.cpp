@@ -39,7 +39,7 @@ void GameState::enter() {
     this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->bringLocation = static_cast<uint8_t>(std::rand());
+    this->bringLocation = (uint8_t)rand(); //TODO: Сделать класс для рандома
     this->leftClients.clear();
     this->entities.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
@@ -106,7 +106,7 @@ void GameState::uninit(bool show_results) {
     ringSlots.clear();
 
     if (show_results) {
-        stateController.changeTo<ResultsState>(exe, ending, currentMapId, time_sec, leftClients);
+        stateController.changeTo<ResultsState>(exe, ending, currentMapId, gameTime.remaining(), leftClients);
     } else {
         stateController.changeTo<LobbyState>();
     }
@@ -180,11 +180,6 @@ void GameState::tick() {
         return;
     }
 
-    const double delta = server.getDelta();
-
-    elapsed += delta;
-    time += delta;
-
     while (time >= TICKSPERSEC) {
         time -= TICKSPERSEC;
 
@@ -202,15 +197,25 @@ void GameState::tick() {
             endingRound(Ending::TIMEOVER, true);
             return;
         }
+        default: break;
     }
 
     tickPlayers();
     tickEntities();
+
+    if (gameTime.remaining() <= TICKSPERSEC && bringState < BigRingState::DEACTIVATED) {
+        bigRing(BigRingState::DEACTIVATED);
+    }
+
+    if (gameTime.remaining() <= TICKSPERSEC - 10 && bringState < BigRingState::ACTIVATED) {
+        bigRing(BigRingState::ACTIVATED);
+    }
+
     currentMap->tick();
 }
 
 void GameState::tickPlayers() {
-    if (!suddenDeath && time_sec <= 2) {
+    if (!suddenDeath && gameTime.remaining() <= 2) {
         suddenDeath = true;
 
         std::vector<Client*> dead;
@@ -239,7 +244,7 @@ void GameState::tickPlayers() {
         if (player.isFlag(Player::Flags::PLAYER_CANTREVIVE))
             continue;
 
-        if (!player.isFlag(Player::Flags::PLAYER_DEAD)) 
+        if (!player.isFlag(Player::Flags::PLAYER_DEAD))
             continue;
 
         if (player.getDeathTimerSec() <= 0)
@@ -252,7 +257,7 @@ void GameState::tickPlayers() {
             exeNear = distance <= 240.0f;
         }
 
-        if (time_sec < 2) {
+        if (gameTime.remaining() < 2) {
             demonize(*client);
             continue;
         }
@@ -328,10 +333,12 @@ bool GameState::checkStart() {
         currentMap->init();
 
         elapsed = 0.0f;
-        time = 0.0f;
+        gameTime.stop();
         endTime.stop();
 
-        Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, time_sec);
+        this->gameTime.start(180);
+
+        Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
         started = true;
     }
 
@@ -415,7 +422,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             auto &player = client.getPlayer();
 
             if (client.isModified()) {
-                if (time_sec <= TICKSPERSEC * 2 + 5) {
+                if (gameTime.remaining() <= TICKSPERSEC * 2 + 5) {
                     break;
                 }
             }
@@ -467,7 +474,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
                 player.setFlag(Player::Flags::PLAYER_DEAD);
 
-                if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->time_sec < 2) {
+                if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->gameTime.remaining() < 2) {
                     this->demonize(client);
                 } else {
                     auto clientExeOpt = this->server.findClient(this->exe);
@@ -477,8 +484,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                         player.setDeathTimerSec(30);
 
                         Packet deathTimerTick(PacketType::SERVER_GAME_DEATHTIMER_TICK);
-                        deathTimerTick.write<uint8_t>(
-                            player.getPosition().distance(playerExe.getPosition()) <= 240);
+                        deathTimerTick.write<uint8_t>(player.getPosition().distance(playerExe.getPosition()) <= 240);
                         deathTimerTick.write<clientId>(client.getId());
                         deathTimerTick.write<uint8_t>(player.getDeathTimerSec());
                         deathTimerTick.sendBroadcast(server);
@@ -532,21 +538,21 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             const uint16_t x = packet.read<uint16_t>();
             const uint16_t y = packet.read<uint16_t>();
-            const uint16_t _xspd = packet.read<uint16_t>();
-            const uint16_t _yspd = packet.read<uint16_t>();
+            [[maybe_unused]] const uint16_t _xspd = packet.read<uint16_t>();
+            [[maybe_unused]] const uint16_t _yspd = packet.read<uint16_t>();
 
             const uint8_t state = packet.read<uint8_t>();
-            const int16_t _angle = packet.read<int16_t>();
-            const uint8_t _index = packet.read<uint8_t>();
-            const int8_t _xscale = packet.read<int8_t>();
+            [[maybe_unused]] const int16_t _angle = packet.read<int16_t>();
+            [[maybe_unused]] const uint8_t _index = packet.read<uint8_t>();
+            [[maybe_unused]] const int8_t _xscale = packet.read<int8_t>();
 
             Vector2 newPos = { static_cast<float>(x), static_cast<float>(y) };
 
-            int duration = 2000;
+            [[maybe_unused]] int duration = 2000;
 
             if (this->exe != client.getId()) {
-                const int8_t hp = packet.read<int8_t>();
-                const uint8_t revival = packet.read<uint8_t>();
+                [[maybe_unused]] const int8_t hp = packet.read<int8_t>();
+                [[maybe_unused]] const uint8_t revival = packet.read<uint8_t>();
                 const int16_t rings = packet.read<int16_t>();
                 const uint8_t flags = packet.read<uint8_t>();
 
@@ -573,8 +579,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             player.setTimeout(0);
 
             const auto now = Clock::now();
-            if (player.getState() != state ||
-                now - player.getLastPacket() >= std::chrono::duration<double, std::milli>(15 * 2.9)) {
+            if (player.getState() != state || now - player.getLastPacket() >= std::chrono::duration<double, std::milli>(15 * 2.9)) {
                 player.setState(state);
                 player.setLastPacket(now);
 
@@ -662,6 +667,7 @@ void GameState::demonize(Client &client) {
     const auto demonized = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
         return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
+        return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
     });
 
     const auto players = std::ranges::count_if(*clients, [&](const auto& cli) {
@@ -677,7 +683,7 @@ void GameState::demonize(Client &client) {
 
         switch (client.getSurvCharacter()) {
             case SurvCharacters::TAILS:
-                // cooldowns[TAILS_RECHARGE]  = 0.0f;
+                // cooldowns[TAILS_RECHARGE] = 0.0f;
                 // cooldowns[ETAILS_RECHARGE] = 0.0f;
                 break;
             case SurvCharacters::EGGMAN:
@@ -703,16 +709,28 @@ void GameState::demonize(Client &client) {
 void GameState::bigRing(BigRingState state) {
     if (bringState == state) return;
 
-    Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
-    pack.write<uint8_t>(state == BigRingState::ACTIVATED ? 1 : 0);
-    pack.write<uint8_t>(bringLocation);
-    pack.sendBroadcast(server);
+    switch (state) {
+        case BigRingState::DEACTIVATED: {
+            Info("Big ring is deactivated!");
+
+            Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
+            pack.write<uint8_t>(0);
+            pack.write<uint8_t>(bringLocation);
+            pack.sendBroadcast(server);
+            break;
+        }
+
+        case BigRingState::ACTIVATED: {
+            Info("Big ring is activated!");
+
+            Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
+            pack.write<uint8_t>(1);
+            pack.write<uint8_t>(bringLocation);
+            pack.sendBroadcast(server);
+        }
+
+        default: break;
+    }
 
     bringState = state;
-}
-
-void GameState::sendTimeSync() {
-    Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
-    pack.write<uint16_t>(static_cast<uint16_t>(time_sec * TICKSPERSEC));
-    pack.sendBroadcast(server, true);
 }
