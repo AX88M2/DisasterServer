@@ -64,7 +64,6 @@ namespace DisasterServer
 
         void tickPlayers();
         void tickEntities();
-        void sendTimeSync();
 
         bool checkState();
         bool checkStart();

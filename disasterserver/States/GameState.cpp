@@ -231,7 +231,7 @@ void GameState::tickPlayers() {
         if (player.isFlag(Player::Flags::PLAYER_CANTREVIVE))
             continue;
 
-        if (!player.isFlag(Player::Flags::PLAYER_DEAD)) 
+        if (!player.isFlag(Player::Flags::PLAYER_DEAD))
             continue;
 
         if (player.getDeathTimerSec() <= 0)
@@ -615,9 +615,7 @@ void GameState::demonize(Client &client) {
 
     const auto demonized = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
-        return cli->isInGame() &&
-               cli->getId() != this->exe &&
-               plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
+        return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
     });
 
     const auto players = std::ranges::count_if(*clients, [&](const auto& cli) {
@@ -633,7 +631,7 @@ void GameState::demonize(Client &client) {
 
         switch (client.getSurvCharacter()) {
             case SurvCharacters::TAILS:
-                // cooldowns[TAILS_RECHARGE]  = 0.0f;
+                // cooldowns[TAILS_RECHARGE] = 0.0f;
                 // cooldowns[ETAILS_RECHARGE] = 0.0f;
                 break;
             case SurvCharacters::EGGMAN:
@@ -683,10 +681,4 @@ void GameState::bigRing(BigRingState state) {
     }
 
     bringState = state;
-}
-
-void GameState::sendTimeSync() {
-    Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
-    pack.write<uint16_t>(static_cast<uint16_t>(gameTime.remaining() * TICKSPERSEC));
-    pack.sendBroadcast(server, true);
 }
