@@ -175,6 +175,9 @@ namespace DisasterServer
         TimeStamp getLastPacket() const { return this->lastPacket; }
         void setLastPacket(const TimeStamp value) { this->lastPacket = value; }
 
+        TimeStamp getLastRings() const { return this->lastRings; }
+        void setLastRings(const TimeStamp value) { this->lastRings = value; }
+
         bool isAttacking() const { return this->isAttack; }
         void setAttacking(const bool value) { this->isAttack = value; }
 

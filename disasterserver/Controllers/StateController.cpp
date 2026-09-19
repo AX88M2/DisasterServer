@@ -3,6 +3,7 @@
 #include "ConfigManager.hpp"
 #include "Core/Constansts.hpp"
 #include "States/LobbyState.hpp"
+#include "States/GameState.hpp"
 
 using namespace DisasterServer;
 
@@ -276,4 +277,8 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
     }
 
     return true;
+}
+
+GameState* StateController::getGameState() {
+    return dynamic_cast<GameState*>(current.get());
 }

@@ -5,9 +5,11 @@
 #include "Core/Constansts.hpp"
 #include "Core/Assert.hpp"
 #include "Core/Types.hpp"
+#include "States/GameState.hpp"
 
 namespace DisasterServer
 {
+    class GameState;
     class Client;
 
     constexpr commandHash CMD_HELP = 45680751;
@@ -65,6 +67,7 @@ namespace DisasterServer
         void tick();
         bool handle(Client& client, Packet& packet);
 
+        GameState* getGameState();
         commandHash cmdParse(std::string string);
         bool cmdHandle(Client& client, commandHash hash, const std::string& message);
     };
