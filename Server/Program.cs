@@ -19,6 +19,12 @@ internal class Program
 	public static bool enabledAntiAfkSystem = true;
 
 
+
+
+
+
+
+	
 	private static void Main(string[] args)
 	{
 		if (args.Length != 0)
