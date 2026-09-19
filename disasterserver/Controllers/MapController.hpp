@@ -35,7 +35,7 @@ namespace DisasterServer
                 return;
             }
 
-            auto map = std::make_unique<T>(server);
+            auto map = std::make_unique<T>();
             map_weights.try_emplace(map.get(), 255);
             std::string name = typeid(T).name();
             maps.push_back(std::move(map));

@@ -17,19 +17,19 @@ LobbyState::LobbyState(Server &server, StateController &stateController) : State
 void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
 
-    for (auto &peer : server.getClients()) {
-        peer->setReady(false);
-        peer->setVoted(false);
-        peer->setTimeout(0);
+    for (auto &c : server.getClients()) {
+        c->setReady(false);
+        c->setVoted(false);
+        c->setTimeout(0);
 
-        if (!peer->isInGame()) {
-            peer->setInGame(true);
+        if (!c->isInGame()) {
+            c->setInGame(true);
 
             Packet pack(PacketType::SERVER_IDENTITY_RESPONSE);
             pack.write<uint8_t>(1);
-            pack.write<clientId>(peer->getId());
-            if (!pack.send(*peer, true)) {
-                peer->disconnect(DisconnectReason::SERVERTIMEOUT);
+            pack.write<clientId>(c->getId());
+            if (!pack.send(*c, true)) {
+                c->disconnect(DisconnectReason::SERVERTIMEOUT);
             }
         } else {
             /*
@@ -39,8 +39,8 @@ void LobbyState::enter() {
 
 
             Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
-            pack.write<uint8_t>(peer->getExeChance());
-            pack.send(*peer, true);
+            pack.write<uint8_t>(c->getExeChance());
+            pack.send(*c, true);
         }
     }
 

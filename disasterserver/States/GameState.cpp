@@ -21,7 +21,7 @@ void GameState::enter() {
 
     if (!currentMap) {
         Error("GameState::init: map {} is null", currentMapId);
-        stateController.changeTo<LobbyState>();
+        stateController.changeTo<LobbyState>(); //Пиздец
         return;
     }
 
@@ -211,7 +211,7 @@ void GameState::tickPlayers() {
             }
         }
 
-        std::sort(dead.begin(), dead.end(), [](Client *a, Client *b) {
+        std::ranges::sort(dead, [](Client *a, Client *b) {
             return a->getPlayer().getDeathTimerSec() > b->getPlayer().getDeathTimerSec();
         });
 

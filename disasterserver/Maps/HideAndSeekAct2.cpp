@@ -7,12 +7,10 @@
 
 using namespace DisasterServer::Maps;
 
-HideAndSeekAct2::HideAndSeekAct2(Server &server) : Map(server, "Hide And Seek 2", 1, 30) {}
+HideAndSeekAct2::HideAndSeekAct2() : Map("Hide And Seek 2", 1, 30) {}
 
 void HideAndSeekAct2::init()
 {
-    //map_time(*server, 3 * TICKSPERSEC, 20);
-    //map_ring(*server, 5);
 }
 
 void HideAndSeekAct2::tick() {
