@@ -27,6 +27,9 @@ namespace DisasterServer
         virtual void left(Client& client) = 0;
 
         const std::string& getName() const { return name; }
+
+        int getSpawnRedRings() const { return spawnRedRings; }
+        int getRingCount()     const { return ringCount; }
     };
 }
 

@@ -248,12 +248,9 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
 
 void MapVoteState::checkState() {
     const auto players = &server.getClients();
-    const auto count = std::ranges::count_if(
-        *players,
-        [](const auto& peer) {
-            return peer->isInGame() && peer->isVoted();
-        }
-    );
+    const auto count = std::ranges::count_if(*players, [](const auto& peer) {
+        return peer->isInGame() && peer->isVoted();
+    });
 
     if (count >= this->server.getInGameCount()) {
         if (countdown.remaining() > 3) {

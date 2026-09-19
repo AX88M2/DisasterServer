@@ -51,7 +51,7 @@ namespace DisasterServer
 
         void addStunTime() { stun_time++; }
         uint16_t getStunTime() const { return this->stun_time; }
-        void setStunTime(double time) { this->stun_time = time; }
+        void setStunTime(uint16_t time) { this->stun_time = time; }
 
         void addStun() { stuns++; }
         uint16_t getStuns() const { return this->stuns; }
@@ -174,6 +174,9 @@ namespace DisasterServer
 
         TimeStamp getLastPacket() const { return this->lastPacket; }
         void setLastPacket(const TimeStamp value) { this->lastPacket = value; }
+
+        TimeStamp getLastRings() const { return this->lastRings; }
+        void setLastRings(const TimeStamp value) { this->lastRings = value; }
 
         bool isAttacking() const { return this->isAttack; }
         void setAttacking(const bool value) { this->isAttack = value; }

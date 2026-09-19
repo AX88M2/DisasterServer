@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#include <concepts>
+#include <memory>
+#include <ranges>
+
 #include "Util/Packet.hpp"
 #include "States/State.hpp"
 #include "Core/Constansts.hpp"
@@ -59,6 +63,12 @@ namespace DisasterServer
         bool isState() const {
             return current && dynamic_cast<T*>(current.get()) != nullptr;
         }
+
+        template <std::derived_from<State> T>
+        T* getState() const {
+            return dynamic_cast<T*>(current.get());
+        }
+
 
         bool playerJoined(Client& client);
         void playerLeft(Client& client);

@@ -3,6 +3,7 @@
 #include "ConfigManager.hpp"
 #include "Core/Constansts.hpp"
 #include "States/LobbyState.hpp"
+#include "States/GameState.hpp"
 
 using namespace DisasterServer;
 

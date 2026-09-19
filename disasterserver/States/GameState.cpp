@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <cstdlib>
 
 #include "Server.hpp"
 #include "Controllers/StateController.hpp"
@@ -10,28 +11,34 @@
 #include "ResultsState.hpp"
 #include "Core/Defines.hpp"
 #include "Core/Constansts.hpp"
+#include "Entities/Ring.hpp"
+#include "Server.hpp"
+#include "States/GameState.hpp"
+#include "Util/Packet.hpp"
+#include "Core/Defines.hpp"
 
 using namespace DisasterServer;
 
 GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController),
-        currentMapId(mapid), currentMap(map), exe(exe) {}
+        currentMapId(mapid), currentMap(map), exe(exe), entityController(server, stateController) {}
 
 void GameState::enter() {
     Debug("Attepting to enter DisasterServer::GameState...");
 
     if (!currentMap) {
         Error("GameState::init: map {} is null", currentMapId);
-        stateController.changeTo<LobbyState>(); //Пиздец
+        stateController.changeTo<LobbyState>(); //Пиздец полный, действительно :sob:
         return;
     }
 
     this->started = false;
     this->ending = Ending::EXEWIN;
-    this->ringCoff = 15;
+    this->elapsed = 0.0f;
+    this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->bringLocation = (uint8_t)rand(); //TODO: Сделать класс для рандома
     this->leftClients.clear();
+    this->ringSlots.assign(currentMap->getRingCount(), false);
 
     this->startTimeout.start(15);
 
@@ -90,6 +97,8 @@ void GameState::exit() {
 }
 
 void GameState::uninit(bool show_results) {
+    ringSlots.clear();
+
     if (show_results) {
         stateController.changeTo<ResultsState>(exe, ending, currentMapId, gameTime.remaining(), leftClients);
     } else {
@@ -165,6 +174,7 @@ void GameState::tick() {
         return;
     }
 
+
     // Отсчёт целых секунд
     switch (gameTime.tick(server.getDelta())) {
         case Countdown::TickResult::Finished: {
@@ -175,7 +185,7 @@ void GameState::tick() {
         case Countdown::TickResult::Second: {
 
             if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
-                Debug("Spawn anal ring");
+                spawnRing();
             }
 
             Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
@@ -348,6 +358,34 @@ bool GameState::handle(Client& client, Packet& packet) {
 
         case PacketType::CLIENT_PLAYER_PALETTE: {
             this->server.broadcastEx(packet, true, client.getId());
+            break;
+        }
+
+        case PacketType::CLIENT_RING_COLLECTED: {
+            AssertOrDisconnect(client, client.isInGame());
+
+            const uint8_t id  = packet.read<uint8_t>();
+            const uint16_t eid = packet.read<uint16_t>();
+
+            auto* ent = entityController.findEntity<Ring>(eid);
+            if (!ent) break;
+
+            const bool isRed = ent->red;
+            entityController.despawnEntity(eid);
+
+            auto& player = client.getPlayer();
+            if (!isRed) {
+                player.setLastRings(Clock::now());
+                player.setRings(player.getRings() + 1);
+                player.getStats().addRing();
+            }
+
+            Packet pack(PacketType::SERVER_RING_COLLECTED);
+            pack.write<uint8_t>(id);
+            pack.write<uint16_t>(eid);
+            pack.write<uint8_t>(isRed);
+            pack.write<uint8_t>(player.getRings() > 0);
+            pack.send(client);
             break;
         }
 
@@ -566,6 +604,16 @@ bool GameState::handle(Client& client, Packet& packet) {
     }
 
     currentMap->handle(client, packet);
+    return true;
+}
+
+bool GameState::spawnRing() {
+    if (!currentMap) return false;
+
+    if (!entityController.spawnEntity<Ring>()) {
+        Debug("Not enough space for rings");
+        return false;
+    }
     return true;
 }
 

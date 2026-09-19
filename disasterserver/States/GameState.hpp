@@ -2,12 +2,17 @@
 #define DISASTERSERVER_GAMESTATE_HPP
 
 #include <vector>
+#include <memory>
+#include <cstdint>
 
 #include "State.hpp"
 #include "Core/Constansts.hpp"
 #include "Maps/Map.hpp"
 #include "Core/Types.hpp"
 #include "Util/Countdown.hpp"
+
+// NEW: базовый класс сущностей
+#include "Controllers/EntityController.hpp"
 
 namespace DisasterServer
 {
@@ -44,10 +49,13 @@ namespace DisasterServer
         Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;
-        uint8_t bringLocation = static_cast<uint8_t>(rand());
+        uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать класс для рандома
 
         std::vector<Client> leftClients = {};
 
+        std::vector<bool> ringSlots;
+
+        EntityController entityController;
     public:
         GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);
         ~GameState() override = default;
@@ -58,6 +66,18 @@ namespace DisasterServer
         bool playerLeaved(Client& client) override;
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
+
+        Map* getCurrentMap() const { return currentMap; }
+
+        bool isRingSlotUsed(int i) const {
+            return i >= 0 && i < static_cast<int>(ringSlots.size()) && ringSlots[i];
+        }
+        void setRingSlot(int i, bool used) {
+            if (i >= 0 && i < static_cast<int>(ringSlots.size()))
+                ringSlots[i] = used;
+        }
+
+        bool spawnRing();
 
     private:
         void uninit(bool show_results);
