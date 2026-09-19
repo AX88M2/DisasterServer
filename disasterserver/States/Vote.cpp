@@ -28,7 +28,7 @@ bool Vote::init(VoteType type, clientId id) {
     }
 
     this->ongoing = true;
-    this->countdown = 20 * TICKSPERSEC;
+    this->countdown = 20 * TICKS_PER_SEC;
     return true;
 }
 

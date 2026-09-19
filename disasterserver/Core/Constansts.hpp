@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-constexpr int TICKSPERSEC = 60;
+constexpr int TICKS_PER_SEC = 60;
 constexpr int MAX_PLAYERS = 7;
 constexpr int BUILD_VERSION = 1101;
 

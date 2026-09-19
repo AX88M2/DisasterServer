@@ -12,7 +12,7 @@ namespace DisasterServer
     class StateController;
 
     class MapVoteState : public State {
-        Countdown countdown { TICKSPERSEC };
+        Countdown countdown { TICKS_PER_SEC };
 
         std::array<mapId, 3> maps = {};
         std::array<uint8_t, 3> votes = {};

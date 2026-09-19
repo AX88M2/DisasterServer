@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <ctime>
-#include <cstdlib>
 
 #include "Server.hpp"
 #include "Controllers/StateController.hpp"
@@ -12,10 +11,7 @@
 #include "Core/Defines.hpp"
 #include "Core/Constansts.hpp"
 #include "Entities/Ring.hpp"
-#include "Server.hpp"
-#include "States/GameState.hpp"
 #include "Util/Packet.hpp"
-#include "Core/Defines.hpp"
 
 using namespace DisasterServer;
 
@@ -100,7 +96,7 @@ void GameState::uninit(bool show_results) {
     ringSlots.clear();
 
     if (show_results) {
-        stateController.changeTo<ResultsState>(exe, ending, currentMapId, gameTime.remaining(), leftClients);
+        stateController.changeTo<ResultsState>(exe, ending, currentMapId, static_cast<uint16_t>(gameTime.remaining()), leftClients);
     } else {
         stateController.changeTo<LobbyState>();
     }
@@ -132,7 +128,9 @@ bool GameState::playerLeaved(Client& client) {
             this->uninit(false);
             return true;
         }
-        return checkStart();
+
+        checkStart();
+        return true;
     }
 
     auto &player = client.getPlayer();
@@ -141,11 +139,11 @@ bool GameState::playerLeaved(Client& client) {
     leftClients.push_back(client);
 
     if (client.getId() == this->exe) {
-        this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKSPERSEC * TICKSPERSEC));
+        this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKS_PER_SEC * TICKS_PER_SEC));
         return true;
     }
 
-    RAssert(checkState());
+    checkState();
     return true;
 }
 
@@ -174,9 +172,8 @@ void GameState::tick() {
         return;
     }
 
-
     // Отсчёт целых секунд
-    switch (gameTime.tick(server.getDelta())) {
+    switch (gameTime.tick(server.getDelta(), 2.5)) {
         case Countdown::TickResult::Finished: {
             endingRound(Ending::TIMEOVER, true);
             break;
@@ -189,7 +186,7 @@ void GameState::tick() {
             }
 
             Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
-            pack.write<uint16_t>(static_cast<uint16_t>((gameTime.remaining() - 1) * TICKSPERSEC));
+            pack.write<uint16_t>(static_cast<uint16_t>((gameTime.remaining() - 1) * TICKS_PER_SEC));
             pack.sendBroadcast(server, true);
 
             break;
@@ -200,11 +197,11 @@ void GameState::tick() {
     tickPlayers();
     tickEntities();
 
-    if (gameTime.remaining() <= TICKSPERSEC && bringState < BigRingState::DEACTIVATED) {
+    if (gameTime.remaining() <= TICKS_PER_SEC && bringState < BigRingState::DEACTIVATED) {
         bigRing(BigRingState::DEACTIVATED);
     }
 
-    if (gameTime.remaining() <= TICKSPERSEC - 10 && bringState < BigRingState::ACTIVATED) {
+    if (gameTime.remaining() <= TICKS_PER_SEC - 10 && bringState < BigRingState::ACTIVATED) {
         bigRing(BigRingState::ACTIVATED);
     }
 
@@ -217,9 +214,11 @@ void GameState::tickPlayers() {
 
         std::vector<Client*> dead;
         for (auto &client : server.getClients()) {
+
             if (!client->isInGame()) continue;
-            auto &p = client->getPlayer();
-            if (p.isFlag(Player::Flags::PLAYER_DEAD)) {
+
+            auto &player = client->getPlayer();
+            if (player.isFlag(Player::Flags::PLAYER_DEAD)) {
                 dead.push_back(client.get());
             }
         }
@@ -280,32 +279,34 @@ void GameState::tickEntities() {
 }
 
 bool GameState::checkState() {
-    if (endTime.active()) return true;
+    if (endTime.active()) {
+        return true;
+    }
 
     const auto clients = &server.getClients();
 
     const auto escaped = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
-        return !client->isInGame() && player.isFlag(Player::Flags::PLAYER_ESCAPED);
+        return client->isInGame() && player.isFlag(Player::Flags::PLAYER_ESCAPED);
     });
 
     const auto dead = std::ranges::count_if(*clients, [](const auto& client) {
         auto player = client->getPlayer();
-        return !client->isInGame() && (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED));
+        return client->isInGame() && (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED));
     });
 
     const auto exes = std::ranges::count_if(*clients, [&](const auto& client) {
-        return !client->isInGame() && (client->getId() == this->exe);
+        return client->isInGame() && client->getId() == this->exe;
     });
 
     int total = this->server.getInGameCount();
-    total -= (static_cast<int>(exes + dead + escaped));
+    total -= static_cast<int>(exes + dead + escaped);
 
     if (total <= 0) {
         if (escaped > 0) {
-            RAssert(this->endingRound(Ending::SURVWIN, true));
+            this->endingRound(Ending::SURVWIN, true);
         } else {
-            RAssert(this->endingRound(Ending::EXEWIN, true));
+            this->endingRound(Ending::EXEWIN, true);
         }
     }
 
@@ -419,7 +420,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             auto &player = client.getPlayer();
 
             if (client.isModified()) {
-                if (gameTime.remaining() <= TICKSPERSEC * 2 + 5) {
+                if (gameTime.remaining() <= TICKS_PER_SEC * 2 + 5) {
                     break;
                 }
             }

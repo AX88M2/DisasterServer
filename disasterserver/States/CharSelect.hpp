@@ -16,7 +16,7 @@ namespace DisasterServer
 class StateController;
 
 class CharSelectState : public State {
-    Countdown countdown { TICKSPERSEC };
+    Countdown countdown { TICKS_PER_SEC };
 
     Map *map = nullptr;
     mapId mapid = 0;

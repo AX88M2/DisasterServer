@@ -267,8 +267,6 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 this->server.sendMessage(client, "{}иди нахуй :3", CLRCODE_PUR);
                 break;
             }
-
-            client.disconnect(DisconnectReason::KICKEDBYHOST, "testing!");
             break;
         }
 #endif

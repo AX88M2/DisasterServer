@@ -16,7 +16,7 @@ namespace DisasterServer
     class StateController;
 
     class LobbyState : public State {
-        Countdown countdown { TICKSPERSEC };
+        Countdown countdown { TICKS_PER_SEC };
         double pracCountdown = 0;
         Vote vote;
         clientId kickTarget = 0;

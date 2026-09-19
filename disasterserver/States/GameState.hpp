@@ -40,9 +40,9 @@ namespace DisasterServer
         bool started = false;
         bool suddenDeath = false;
 
-        Countdown gameTime { TICKSPERSEC };
-        Countdown startTimeout { TICKSPERSEC };
-        Countdown endTime { TICKSPERSEC };
+        Countdown gameTime { TICKS_PER_SEC };
+        Countdown startTimeout { TICKS_PER_SEC };
+        Countdown endTime { TICKS_PER_SEC };
 
         double elapsed = 0.0;
         int ringCoff = 0;

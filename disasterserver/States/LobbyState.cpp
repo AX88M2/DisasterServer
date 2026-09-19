@@ -99,7 +99,7 @@ void LobbyState::checkVote() {
 
             case VoteType::PRACTICE: {
                 this->server.sendBroadcastMessage(0, "vote practice succeeded~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
-                pracCountdown = 2 * TICKSPERSEC;
+                pracCountdown = 2 * TICKS_PER_SEC;
                 break;
             }
 
@@ -140,23 +140,23 @@ bool LobbyState::playerLeaved(Client &peer) {
 }
 
 void LobbyState::tick() {
-    for (auto &peer : server.getClients()) {
-        if (peer->getVoteCooldown() > 0) {
-            peer->setVoteCooldown(peer->getVoteCooldown() - server.getDelta());
+    for (auto &cl : server.getClients()) {
+        if (cl->getVoteCooldown() > 0) {
+            cl->setVoteCooldown(cl->getVoteCooldown() - server.getDelta());
         }
 
-        if (!peer->isReady()) {
+        if (!cl->isReady()) {
 #if !defined(SERVER_DEBUG)
-            peer->setTimeout(peer->getTimeout() + server.getDelta());
-            if (std::fmod(peer->getTimeout(), 60) == 0) {
-                Debug("tick for {}: {}", peer->getNickname(), peer->getTimeout() / 60.0f);
+            cl->setTimeout(cl->getTimeout() + server.getDelta());
+            if (std::fmod(cl->getTimeout(), 60) == 0) {
+                Debug("tick for {}: {}", cl->getNickname(), cl->getTimeout() / 60.0f);
             }
 #endif
-            if (peer->getTimeout() >= 25 * TICKSPERSEC) {
-                peer->disconnect(DisconnectReason::AFKTIMEOUT);
+            if (cl->getTimeout() >= 25 * TICKS_PER_SEC) {
+                cl->disconnect(DisconnectReason::AFKTIMEOUT);
             }
         } else {
-            peer->setTimeout(0);
+            cl->setTimeout(0);
         }
     }
 
@@ -306,7 +306,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
                 if (found) {
                     if (client.getVoteCooldown() > 0) {
-                        this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                        this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKS_PER_SEC));
                         break;
                     }
 
@@ -320,7 +320,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                     this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
 
                     vote.add(client);
-                    client.setVoteCooldown(30 * TICKSPERSEC);
+                    client.setVoteCooldown(30 * TICKS_PER_SEC);
                 } else {
                     this->server.sendBroadcastMessage(0, "{}specified player not found.", CLRCODE_RED);
                 }
@@ -442,7 +442,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             }
 
             if (client.getVoteCooldown() > 0) {
-                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKS_PER_SEC));
                 break;
             }
 
@@ -456,7 +456,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
 
             vote.add(client);
-            client.setVoteCooldown(30 * TICKSPERSEC);
+            client.setVoteCooldown(30 * TICKS_PER_SEC);
             break;
         }
 
@@ -467,7 +467,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             }
 
             if (client.getVoteCooldown() > 0) {
-                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKSPERSEC));
+                this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKS_PER_SEC));
                 break;
             }
 

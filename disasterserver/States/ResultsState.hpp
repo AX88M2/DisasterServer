@@ -14,7 +14,7 @@ namespace DisasterServer
     enum class Ending : uint8_t;
 
     class ResultsState : public State {
-        Countdown countdown { TICKSPERSEC };
+        Countdown countdown { TICKS_PER_SEC };
 
         mapId id;
         uint16_t mapTimeSec;

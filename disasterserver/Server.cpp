@@ -171,7 +171,7 @@ void Server::initialize() {
             // Heartbeat
             if (!peers.empty()) {
                 Packet pack(PacketType::SERVER_HEARTBEAT);
-                if (heartbeat >= (TICKSPERSEC * 2))
+                if (heartbeat >= (TICKS_PER_SEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
                     Debug("Heartbeat done.");
