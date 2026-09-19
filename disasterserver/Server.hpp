@@ -52,7 +52,6 @@ namespace DisasterServer
         Application &getApplication() { return application; }
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         MapController &getMapController() { return mapController; }
-        StateController &getStateController() { return stateController; }
 
         double getDelta() const { return delta; }
     };

@@ -51,7 +51,7 @@ namespace DisasterServer
 
         void addStunTime() { stun_time++; }
         uint16_t getStunTime() const { return this->stun_time; }
-        void setStunTime(double time) { this->stun_time = time; }
+        void setStunTime(uint16_t time) { this->stun_time = time; }
 
         void addStun() { stuns++; }
         uint16_t getStuns() const { return this->stuns; }

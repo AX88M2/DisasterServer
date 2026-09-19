@@ -1,15 +1,17 @@
 ﻿#pragma once
 
+#include <concepts>
+#include <memory>
+#include <ranges>
+
 #include "Util/Packet.hpp"
 #include "States/State.hpp"
 #include "Core/Constansts.hpp"
 #include "Core/Assert.hpp"
 #include "Core/Types.hpp"
-#include "States/GameState.hpp"
 
 namespace DisasterServer
 {
-    class GameState;
     class Client;
 
     constexpr commandHash CMD_HELP = 45680751;
@@ -62,12 +64,17 @@ namespace DisasterServer
             return current && dynamic_cast<T*>(current.get()) != nullptr;
         }
 
+        template <std::derived_from<State> T>
+        T* getState() const {
+            return dynamic_cast<T*>(current.get());
+        }
+
+
         bool playerJoined(Client& client);
         void playerLeft(Client& client);
         void tick();
         bool handle(Client& client, Packet& packet);
 
-        GameState* getGameState();
         commandHash cmdParse(std::string string);
         bool cmdHandle(Client& client, commandHash hash, const std::string& message);
     };

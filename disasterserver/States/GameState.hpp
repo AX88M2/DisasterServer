@@ -12,7 +12,7 @@
 #include "Util/Countdown.hpp"
 
 // NEW: базовый класс сущностей
-#include "Entities/Entity.hpp"
+#include "Controllers/EntityController.hpp"
 
 namespace DisasterServer
 {
@@ -49,14 +49,13 @@ namespace DisasterServer
         Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;
-        uint8_t bringLocation = static_cast<uint8_t>(rand());
+        uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать класс для рандома
 
         std::vector<Client> leftClients = {};
 
-        std::vector<std::unique_ptr<Entity>> entities;
         std::vector<bool> ringSlots;
-        uint16_t entityIdCounter = 0;
 
+        EntityController entityController;
     public:
         GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);
         ~GameState() override = default;
@@ -76,36 +75,6 @@ namespace DisasterServer
         void setRingSlot(int i, bool used) {
             if (i >= 0 && i < static_cast<int>(ringSlots.size()))
                 ringSlots[i] = used;
-        }
-
-        template <typename T, typename... Args>
-        T* spawnEntity(Args&&... args) {
-            auto ent = std::make_unique<T>(std::forward<Args>(args)...);
-            ent->id = ++entityIdCounter;
-
-            if (!ent->init(this->server))
-                return nullptr;
-
-            T* raw = ent.get();
-            entities.emplace_back(std::move(ent));
-            return raw;
-        }
-
-        Entity* findEntity(uint16_t id) {
-            for (auto& e : entities)
-                if (e->id == id) return e.get();
-            return nullptr;
-        }
-
-        bool despawnEntity(uint16_t id) {
-            for (auto it = entities.begin(); it != entities.end(); ++it) {
-                if ((*it)->id == id) {
-                    (*it)->uninit(this->server);
-                    entities.erase(it);
-                    return true;
-                }
-            }
-            return false;
         }
 
         bool spawnRing();

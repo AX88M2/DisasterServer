@@ -20,7 +20,7 @@
 using namespace DisasterServer;
 
 GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController),
-        currentMapId(mapid), currentMap(map), exe(exe) {}
+        currentMapId(mapid), currentMap(map), exe(exe), entityController(server, stateController) {}
 
 void GameState::enter() {
     Debug("Attepting to enter DisasterServer::GameState...");
@@ -34,16 +34,11 @@ void GameState::enter() {
     this->started = false;
     this->ending = Ending::EXEWIN;
     this->elapsed = 0.0f;
-    this->time = 0.0f;
-    this->time_sec = 180;
     this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->bringLocation = (uint8_t)rand(); //TODO: Сделать класс для рандома
     this->leftClients.clear();
-    this->entities.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
-    this->entityIdCounter = 0;
 
     this->startTimeout.start(15);
 
@@ -102,7 +97,6 @@ void GameState::exit() {
 }
 
 void GameState::uninit(bool show_results) {
-    entities.clear();
     ringSlots.clear();
 
     if (show_results) {
@@ -180,22 +174,25 @@ void GameState::tick() {
         return;
     }
 
-    while (time >= TICKSPERSEC) {
-        time -= TICKSPERSEC;
 
-        if (time_sec > 0) {
-            time_sec--;
-        }
-
-        if (ringCoff > 0 && time_sec > 0 && (time_sec % ringCoff) == 0) {
-            spawnRing();
-        }
-
-        sendTimeSync();
-
-        if (time_sec <= 0) {
+    // Отсчёт целых секунд
+    switch (gameTime.tick(server.getDelta())) {
+        case Countdown::TickResult::Finished: {
             endingRound(Ending::TIMEOVER, true);
-            return;
+            break;
+        }
+
+        case Countdown::TickResult::Second: {
+
+            if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
+                spawnRing();
+            }
+
+            Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
+            pack.write<uint16_t>(static_cast<uint16_t>((gameTime.remaining() - 1) * TICKSPERSEC));
+            pack.sendBroadcast(server, true);
+
+            break;
         }
         default: break;
     }
@@ -367,14 +364,14 @@ bool GameState::handle(Client& client, Packet& packet) {
         case PacketType::CLIENT_RING_COLLECTED: {
             AssertOrDisconnect(client, client.isInGame());
 
-            const uint8_t  id  = packet.read<uint8_t>();
+            const uint8_t id  = packet.read<uint8_t>();
             const uint16_t eid = packet.read<uint16_t>();
 
-            auto* ent = dynamic_cast<Ring*>(findEntity(eid));
+            auto* ent = entityController.findEntity<Ring>(eid);
             if (!ent) break;
 
             const bool isRed = ent->red;
-            despawnEntity(eid);
+            entityController.despawnEntity(eid);
 
             auto& player = client.getPlayer();
             if (!isRed) {
@@ -613,7 +610,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 bool GameState::spawnRing() {
     if (!currentMap) return false;
 
-    if (!spawnEntity<Ring>()) {
+    if (!entityController.spawnEntity<Ring>()) {
         Debug("Not enough space for rings");
         return false;
     }
@@ -666,7 +663,6 @@ void GameState::demonize(Client &client) {
 
     const auto demonized = std::ranges::count_if(*clients, [&](const auto& cli) {
         auto plr = cli->getPlayer();
-        return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
         return cli->isInGame() && cli->getId() != this->exe && plr.isFlag(Player::Flags::PLAYER_DEMONIZED);
     });
 

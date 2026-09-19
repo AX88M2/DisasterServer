@@ -1,25 +1,27 @@
-#include <cstdlib>
-
 #include "Server.hpp"
+#include "Controllers/StateController.hpp"
 #include "States/GameState.hpp"
 #include "Util/Packet.hpp"
-#include "Core/Defines.hpp"
 #include "Ring.hpp"
 
-namespace DisasterServer {
+using namespace DisasterServer;
 
-bool Ring::init(Server& server) {
-    auto* game = server.getStateController().getGameState();
-    if (!game) return false;
+Ring::Ring(uint16_t id, Server &server, StateController &stateController) : Entity(id, server, stateController, "ring") {}
 
-    auto* map = game->getCurrentMap();
+bool Ring::init() {
+    auto *state = stateController.getState<GameState>();
+
+    if (!state) return false;
+
+    Map* map = state->getCurrentMap();
+
     if (!map) return false;
 
     const int ringCount = map->getRingCount();
 
     int active = 0;
     for (int i = 0; i < ringCount; ++i)
-        if (game->isRingSlotUsed(i)) ++active;
+        if (state->isRingSlotUsed(i)) ++active;
 
     if (active >= ringCount)
         return false;
@@ -27,9 +29,9 @@ bool Ring::init(Server& server) {
     int slot;
     do {
         slot = std::rand() % ringCount;
-    } while (game->isRingSlotUsed(slot));
+    } while (state->isRingSlotUsed(slot));
 
-    game->setRingSlot(slot, true);
+    state->setRingSlot(slot, true);
     rid = static_cast<uint8_t>(slot);
     red = map->getSpawnRedRings() && (std::rand() % 100 <= 10);
 
@@ -43,10 +45,10 @@ bool Ring::init(Server& server) {
     return true;
 }
 
-bool Ring::uninit(Server& server) {
-    auto* game = server.getStateController().getGameState();
-    if (game) {
-        game->setRingSlot(rid, false);
+bool Ring::uninit() {
+    auto *state = stateController.getState<GameState>();
+    if (state) {
+        state->setRingSlot(rid, false);
     }
 
     Packet pack(PacketType::SERVER_RING_STATE);
@@ -57,5 +59,3 @@ bool Ring::uninit(Server& server) {
 
     return true;
 }
-
-} // namespace DisasterServer

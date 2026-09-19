@@ -8,10 +8,10 @@ class Server;
 
 class Ring : public Entity {
 public:
-    Ring() : Entity("ring") {}
+    Ring(uint16_t id, Server &server, StateController &stateController);
 
-    bool init(Server& server) override;
-    bool uninit(Server& server) override;
+    bool init() override;
+    bool uninit() override;
 
     uint8_t rid = 0;
     uint8_t red = 0;
