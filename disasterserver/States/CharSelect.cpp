@@ -15,7 +15,7 @@ CharSelectState::CharSelectState(Server &server, StateController &stateControlle
 }
 
 void CharSelectState::enter() {
-    Debug("Attempting to enter DisasterServer::CharSelectState..."); //Expected expression
+    Debug("Attempting to enter DisasterServer::CharSelectState...");
 
     if (!chooseExe()) {
         Error("Failed to pick exe for some reason!");
