@@ -24,7 +24,7 @@ class CharSelectState : public State {
     std::unordered_map<SurvCharacters, bool> avail;
 public:
     CharSelectState(Server &server, StateController &stateController, Map* map, mapId id);
-    ~CharSelectState() override = default;
+    ~CharSelectState() override;
 
     void enter() override;
     void exit() override;

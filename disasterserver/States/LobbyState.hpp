@@ -22,7 +22,7 @@ namespace DisasterServer
         clientId kickTarget = 0;
     public:
         LobbyState(Server &server, StateController &stateController);
-        ~LobbyState() override = default;
+        ~LobbyState() override;
 
         void enter() override;
         void exit() override;

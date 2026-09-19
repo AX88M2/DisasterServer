@@ -14,6 +14,8 @@ using namespace DisasterServer;
 LobbyState::LobbyState(Server &server, StateController &stateController) : State(server, stateController), vote(server) {
 }
 
+LobbyState::~LobbyState() = default;
+
 void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
 

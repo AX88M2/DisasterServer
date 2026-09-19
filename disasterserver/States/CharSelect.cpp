@@ -14,6 +14,8 @@ using namespace DisasterServer;
 CharSelectState::CharSelectState(Server &server, StateController &stateController, Map* map, mapId id) : State(server, stateController), map(map), mapid(id) {
 }
 
+CharSelectState::~CharSelectState() = default;
+
 void CharSelectState::enter() {
     Debug("Attempting to enter DisasterServer::CharSelectState...");
 

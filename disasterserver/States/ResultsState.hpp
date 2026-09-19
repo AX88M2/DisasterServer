@@ -25,7 +25,7 @@ namespace DisasterServer
         ResultsState(Server &server, StateController &stateController, clientId exe, Ending ending, mapId id,
             uint16_t mapTimeSec,std::vector<std::unique_ptr<Client>> leftClients
         );
-        ~ResultsState() override = default;
+        ~ResultsState() override;
 
         void enter() override;
         void exit() override;

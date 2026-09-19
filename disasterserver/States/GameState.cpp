@@ -18,6 +18,8 @@ using namespace DisasterServer;
 GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController),
         currentMapId(mapid), currentMap(map), exe(exe), entityController(server, stateController) {}
 
+GameState::~GameState() = default;
+
 void GameState::enter() {
     Debug("Attepting to enter DisasterServer::GameState...");
 

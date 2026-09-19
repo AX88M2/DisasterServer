@@ -12,6 +12,8 @@ using namespace DisasterServer;
 MapVoteState::MapVoteState(Server &server, StateController &stateController) : State(server, stateController) {
 }
 
+MapVoteState::~MapVoteState() = default;
+
 void MapVoteState::enter() {
     Debug("Attepting to enter DisasterServer::MapVoteState...");
 

@@ -20,6 +20,8 @@ ResultsState::ResultsState(Server &server, StateController &stateController,
     ) : State(server, stateController),
 id(id), mapTimeSec(mapTimeSec), exe(exe), ending(ending), leftClients(std::move(leftClients)) {}
 
+ResultsState::~ResultsState() = default;
+
 void ResultsState::enter() {
     Debug("Attepting to enter DisasterServer::ResultsState...");
 
