@@ -338,6 +338,13 @@ bool LobbyState::handle(Client &client, Packet &packet) {
     return true;
 }
 
+static std::vector<mapId> convertMapIds = {
+    0,   // 1. Hide And Seek Act 2
+    3,   // 2. Desert Town
+    13,  // 3. Majin Forest
+    14   // 4. Hide And Seek
+};
+
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
         default: {
