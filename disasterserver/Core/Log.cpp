@@ -179,22 +179,20 @@ void Logger::write(LogLevel level, std::string message, std::source_location loc
 #endif
 
 	ss << std::put_time(&local, "%d.%m.%Y %T");
-	ss << " ";
+	ss << " " << TerminalColors::light_gray << "[" << std::this_thread::get_id() << "]" << TerminalColors::reset << " ";
+
 	switch (level) {
-		case LogLevel::Debug: ss << TerminalColors::cyan; ss << "[Debug]"; ss << TerminalColors::reset; break;
-		case LogLevel::Info: ss << TerminalColors::green; ss << "[Info]"; ss << TerminalColors::reset; break;
-		case LogLevel::Warning: ss << TerminalColors::yellow; ss << "[Warn]"; ss << TerminalColors::reset; break;
-		case LogLevel::Error: ss << TerminalColors::light_red; ss << "[Error]"; ss << TerminalColors::reset; break;
+		case LogLevel::Debug: ss << TerminalColors::cyan << "[Debug]" << TerminalColors::reset; break;
+		case LogLevel::Info: ss << TerminalColors::green << "[Info]" << TerminalColors::reset; break;
+		case LogLevel::Warning: ss << TerminalColors::yellow << "[Warn]" << TerminalColors::reset; break;
+		case LogLevel::Error: ss << TerminalColors::light_red << "[Error]" << TerminalColors::reset; break;
 	}
-	ss << " ";
-	ss << TerminalColors::light_gray; ss << "["<< std::this_thread::get_id() << "]";
-	ss << " ";
-	ss << std::format("({}:{})", location.file_name(), location.line()); ss << TerminalColors::reset;
-	ss << " ";
+	ss << " " << TerminalColors::light_gray << std::format("({}:{})", location.file_name(), location.line()) << TerminalColors::reset;
 
 	replaceColor(message);
 
-	ss << message << TerminalColors::reset;
+	ss << " " << message << TerminalColors::reset;
+
 	std::cout << ss.str() << std::endl;
 }
 

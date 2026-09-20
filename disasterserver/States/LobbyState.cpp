@@ -222,7 +222,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
             server.sendMessage(client, "|type .help for command list~");
-            const auto motd = this->server.getApplication().getConfigManager().getConfig().getMotd();
+            const auto motd = this->server.getApplication().getConfigManager().config().getMotd();
             if (!motd.empty()) {
                 this->server.sendMessage(client, motd);
             }
@@ -349,7 +349,6 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
     switch (hash) {
         default: {
             return stateController.cmdHandle(client, hash, message);
-            break;
         }
 
         case CMD_MAP: {
@@ -364,7 +363,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
 
             int requested;
 
-            if (sscanf(message.c_str(), ".map %d", &requested) != 1) {
+            if (sscanf_s(message.c_str(), ".map %d", &requested) != 1) {
                 this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }

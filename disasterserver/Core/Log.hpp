@@ -35,6 +35,8 @@
     #define LOG_RST
 #endif
 
+#define LOGGER_SHOW_MORE 1
+
 namespace DisasterServer
 {
     namespace TerminalColors {

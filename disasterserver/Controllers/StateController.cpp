@@ -213,7 +213,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 break;
             }
 
-            auto config = this->server.getApplication().getConfigManager().getConfig();
+            auto config = this->server.getApplication().getConfigManager().config();
 
             if (ind < 1 || ind > config.getLobbyCount()) {
                 this->server.sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());
@@ -235,7 +235,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             this->server.sendMessage(client, "|- .info~ - information about server");
             this->server.sendMessage(client, "|- .vk~ - vote kick");
             this->server.sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server.sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server.getApplication().getConfigManager().getConfig().getLobbyCount());
+            this->server.sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server.getApplication().getConfigManager().config().getLobbyCount());
 
             if(client.isOperator())
             {

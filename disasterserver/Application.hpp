@@ -8,8 +8,8 @@ namespace DisasterServer
 {
     class Application : public Singleton<Application> {
         friend class Singleton;
-        ConfigManager config = {};
-        Storage storage = {};
+        ConfigManager config;
+        Storage storage;
     protected:
         Application();
         ~Application();

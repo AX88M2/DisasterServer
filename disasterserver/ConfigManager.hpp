@@ -29,14 +29,14 @@ namespace DisasterServer
         std::string filename = "config.toml";
         toml::basic_value<toml::type_config> toml;
 
-        Config config;
+        Config config_;
     public:
-        ConfigManager();
+        explicit ConfigManager();
         ~ConfigManager();
 
         void load();
         void save();
 
-        Config &getConfig() { return config; };
+        Config &config() { return config_; }
     };
 }

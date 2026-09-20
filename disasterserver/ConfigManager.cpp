@@ -14,25 +14,23 @@ lobby-count = 1
 motd = "Hello from DisasterServerCXX"
 )";
 
-ConfigManager::ConfigManager() = default;
+ConfigManager::ConfigManager() {
+    Info("ConfigManager initialized...");
+}
 
 ConfigManager::~ConfigManager() = default;
 
-
 void ConfigManager::load() {
-    Info("ConfigManager initialized...");
-
     if (!std::filesystem::exists(filename)) {
-        Info("{} not found, creating default config", filename);
         std::ofstream file {filename};
         file << defaultConfig;
         file.close();
     }
 
     try {
-        Info("Loading config...");
+        Info("Loading configuration file...");
         toml = toml::parse(filename, toml::spec::v(1,1,0));
-        config = Config(toml);
+        config_ = Config(toml);
     } catch (const toml::syntax_error& err) {
         Error("Failed parse config file: {}", err.what());
         throw;

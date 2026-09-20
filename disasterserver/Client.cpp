@@ -180,7 +180,7 @@ bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t t
 
         this->server->sendMessage(*this, "|build from &{} @{}~", __DATE__, __TIME__);
         this->server->sendMessage(*this, "|type .help for command list~");
-        const auto motd = this->server->getApplication().getConfigManager().getConfig().getMotd();
+        const auto motd = this->server->getApplication().getConfigManager().config().getMotd();
         if (!motd.empty()) {
             this->server->sendMessage(*this, motd);
         }

@@ -22,7 +22,7 @@ namespace DisasterServer
         std::unique_ptr<Impl> impl;
         std::mutex mutex;
     public:
-        Storage();
+        explicit Storage();
         ~Storage();
 
         void addBan(Client &client);

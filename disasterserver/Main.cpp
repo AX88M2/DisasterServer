@@ -19,6 +19,9 @@ int main(int argc, char** argv) {
 
     enet_initialize();
 
+    Info("- DisasterServerCXX for game v{}", BUILD_VERSION);
+    Info("- Build from {} {}", __DATE__, __TIME__);
+
     try {
         auto &app = DisasterServer::Application::getInstance();
         app.initialize();

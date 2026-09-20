@@ -8,11 +8,11 @@
 using namespace DisasterServer;
 
 MapController::MapController(Server &server) : server(server) {
+    Info("MapController initialize...");
     //meow (2)
 }
 
 void MapController::initialize() {
-    Info("MapController initialize...");
     this->registerMap<Maps::HideAndSeekAct2>();
     this->registerMap<Maps::DesertTown>();
     this->registerMap<Maps::MajinForest>();
