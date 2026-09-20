@@ -394,13 +394,14 @@ bool GameState::handle(Client& client, Packet& packet) {
             auto &player = client.getPlayer();
             player.setHealRings(player.getRings());
 
-            if (rings > 10) {
+            if (rings < 10) {
                 client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
                 return true;
             }
 
             if (rings >= 140 && currentMapId != 20) {
                 client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+                return true;
             }
 
             this->server.broadcastEx(packet, true, client.getId());
@@ -414,13 +415,14 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             auto &player = client.getPlayer();
 
-            if (rings > 10) {
+            if (rings < 10) {
                 client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
                 return true;
             }
 
             if (rings >= 140 && currentMapId != 20) {
                 client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+                return true;
             }
 
             if (client.isModified()) {
