@@ -59,7 +59,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    //TODO: add ban logic
+                    server.getApplication().getStorage().addBan(*c);
                     c->disconnect(DisconnectReason::BANNEDBYHOST);
                 }
             }
@@ -160,7 +160,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 break;
             }
 
-            Packet pack(PacketType::CLIENT_LOBBY_CHOOSEBAN);
+            Packet pack(PacketType::SERVER_LOBBY_CHOOSEBAN);
             if (!pack.send(client, true)) {
                 Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;

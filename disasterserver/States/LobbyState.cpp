@@ -348,9 +348,7 @@ static std::vector<mapId> convertMapIds = {
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
         default: {
-            if (!stateController.cmdHandle(client, hash, message)) {
-                return false;
-            }
+            return stateController.cmdHandle(client, hash, message);
             break;
         }
 
