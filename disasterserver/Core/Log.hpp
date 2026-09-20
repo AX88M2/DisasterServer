@@ -3,6 +3,9 @@
 #include <iostream>
 #include <source_location>
 #include <thread>
+#include <format>
+#include <source_location>
+#include <utility>
 
 #ifdef true //SYS_USE_SDL2
     #define DEBUG_TYPE "DBG "

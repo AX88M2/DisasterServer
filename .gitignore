@@ -5,3 +5,4 @@
 build/
 build_android/
 /.cache/clangd/index
+cmake/*
