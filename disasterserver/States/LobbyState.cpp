@@ -39,7 +39,6 @@ void LobbyState::enter() {
                 v->exe_chance += 2 + rand() % 5;
             */
 
-
             Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
             pack.write<uint8_t>(c->getExeChance());
             pack.send(*c, true);
@@ -227,6 +226,8 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             if (!motd.empty()) {
                 this->server.sendMessage(client, motd);
             }
+            if (client.isModified())
+                this->server.sendMessage(client, "{}your client is disallowed on this server", CLRCODE_RED);
             break;
         }
 
@@ -348,32 +349,46 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
 
         case CMD_MAP: {
             auto &controller = server.getMapController();
+
 #if !defined(SERVER_DEBUG)
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
                 break;
             }
 #endif
-            int ind;
-            if (sscanf(message.c_str(), ".map %d", &ind) < 0) {
+
+            int requested;
+
+            if (sscanf(message.c_str(), ".map %d", &requested) != 1) {
                 this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }
 
-            ind--;
-            if (ind < 0 || ind > controller.getMapCount()) {
-                this->server.sendMessage(client, "{}map should be between 0 and {}", CLRCODE_RED, controller.getMapCount());
+            if (requested < 1 ||
+                static_cast<size_t>(requested) > controller.getMapCount()) {
+                this->server.sendMessage(client, "{}map should be between 1 and {}", CLRCODE_RED, controller.getMapCount());
                 break;
             }
 
-            auto map = controller.getMap(ind);
+            const int index = requested - 1;
+
+            auto map = controller.getMap(index);
 
             if (!map.has_value()) {
-                this->server.sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, ind);
+                this->server.sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, requested);
                 break;
             }
 
-            stateController.changeTo<CharSelectState>(*map, static_cast<mapId>(ind));
+            static constexpr std::array<mapId, 4> clientMapIds = {
+                0,   // 1. Hide And Seek Act 2
+                3,   // 2. Desert Town
+                13,  // 3. Majin Forest
+                14   // 4. Hide And Seek
+            };
+
+            const mapId clientMapId = clientMapIds[index];
+            stateController.changeTo<CharSelectState>(*map, clientMapId);
+
             break;
         }
 

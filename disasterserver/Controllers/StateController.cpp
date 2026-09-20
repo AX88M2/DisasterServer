@@ -264,7 +264,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
         }
         case CMD_DEBUG: {
             if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}иди нахуй :3", CLRCODE_PUR);
+                this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
                 break;
             }
             break;

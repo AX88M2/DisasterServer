@@ -44,7 +44,7 @@ set(LIBS
         sqlite_orm::sqlite_orm
 )
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 if(ANDROID)
     add_library(DisasterServerCXX SHARED "Android.cpp" ${SOURCES})

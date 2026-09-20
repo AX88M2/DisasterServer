@@ -36,10 +36,11 @@ namespace DisasterServer
             }
 
             auto map = std::make_unique<T>();
+
+            Info("Registered Map {}", map->getName());
+
             map_weights.try_emplace(map.get(), 255);
-            std::string name = typeid(T).name();
             maps.push_back(std::move(map));
-            Info("Registered Map {}", name.substr(6, name.length() - 6));
         }
 
         void initialize();
