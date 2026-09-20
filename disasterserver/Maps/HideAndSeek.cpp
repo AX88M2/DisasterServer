@@ -24,3 +24,7 @@ void HideAndSeek::handle(Client&, Packet&) {
 void HideAndSeek::left(Client&) {
 
 }
+
+DisasterServer::MapProperties HideAndSeek::getMapTime() const {
+    return MapProperties();
+}

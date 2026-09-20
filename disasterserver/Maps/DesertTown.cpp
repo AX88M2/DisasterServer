@@ -24,3 +24,7 @@ void DesertTown::handle(Client&, Packet&) {
 void DesertTown::left(Client&) {
 
 }
+
+DisasterServer::MapProperties DesertTown::getMapTime() const {
+    return MapProperties();
+}

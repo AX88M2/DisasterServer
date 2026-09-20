@@ -335,7 +335,9 @@ bool GameState::checkStart() {
         gameTime.stop();
         endTime.stop();
 
-        this->gameTime.start(180);
+        auto [time, mul, mapRingCoff] = currentMap->getMapTime();
+        this->ringCoff = mapRingCoff;
+        this->gameTime.start((time + (((this->server.getInGameCount() - 1) * mul))));
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
         started = true;

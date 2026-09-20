@@ -379,14 +379,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            static constexpr std::array<mapId, 4> clientMapIds = {
-                0,   // 1. Hide And Seek Act 2
-                3,   // 2. Desert Town
-                13,  // 3. Majin Forest
-                14   // 4. Hide And Seek
-            };
-
-            const mapId clientMapId = clientMapIds[index];
+            const mapId clientMapId = convertMapIds[index];
             stateController.changeTo<CharSelectState>(*map, clientMapId);
 
             break;

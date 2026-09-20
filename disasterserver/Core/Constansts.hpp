@@ -2,6 +2,8 @@
 
 #include <string_view>
 
+#include "Types.hpp"
+
 constexpr int TICKS_PER_SEC = 60;
 constexpr int MAX_PLAYERS = 7;
 constexpr int BUILD_VERSION = 1101;
@@ -17,3 +19,10 @@ constexpr std::string_view CLRCODE_RST = "~";
 
 #define CLRLIST  { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST }
 constexpr int CLRLIST_LEN = 8;
+
+static std::vector<mapId> convertMapIds = {
+    0,   // 1. Hide And Seek Act 2
+    3,   // 2. Desert Town
+    13,  // 3. Majin Forest
+    14   // 4. Hide And Seek
+};

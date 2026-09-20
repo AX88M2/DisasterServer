@@ -14,6 +14,8 @@ namespace DisasterServer::Maps
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;
+
+        MapProperties getMapTime() const override;
     };
 }
 
