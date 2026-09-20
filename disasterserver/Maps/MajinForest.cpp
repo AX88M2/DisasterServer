@@ -25,5 +25,5 @@ void MajinForest::left(Client&)
 }
 
 DisasterServer::MapProperties MajinForest::getMapTime() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 10);
+    return MapProperties(2.585 * TICKS_PER_SEC, 10, 3);
 }

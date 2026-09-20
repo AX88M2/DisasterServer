@@ -26,5 +26,5 @@ void HideAndSeekAct2::left(Client&) {
 }
 
 DisasterServer::MapProperties HideAndSeekAct2::getMapTime() const {
-    return MapProperties(3.42 * TICKS_PER_SEC, 20);
+    return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
 }
