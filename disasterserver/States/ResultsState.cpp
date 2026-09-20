@@ -35,6 +35,14 @@ void ResultsState::enter() {
 }
 
 void ResultsState::exit() {
+    for (auto &client : server.getClients()) {
+        if (!client->isInGame()) {
+            continue;
+        }
+
+        client->setSurvCharacter(SurvCharacters::NONE);
+        client->setExeCharacter(ExesCharacters::NONE);
+    }
 }
 
 bool ResultsState::playerJoined(Client &client) {

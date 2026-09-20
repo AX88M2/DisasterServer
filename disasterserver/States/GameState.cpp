@@ -44,7 +44,7 @@ void GameState::enter() {
             continue;
         }
 
-        auto player = client->getPlayer();
+        auto &player = client->getPlayer();
 
         player.reset();
 
@@ -157,7 +157,8 @@ void GameState::tick() {
                 if (!client->isInGame()) {
                     continue;
                 }
-                auto player = client->getPlayer();
+
+                auto &player = client->getPlayer();
                 if (!player.isReady()) {
                     client->disconnect(DisconnectReason::PACKETSNOTRECV);
                     break;
@@ -210,6 +211,8 @@ void GameState::tick() {
 }
 
 void GameState::tickPlayers() {
+
+    // Start demonization
     if (!suddenDeath && gameTime.remaining() <= 2) {
         suddenDeath = true;
 
@@ -241,17 +244,28 @@ void GameState::tickPlayers() {
         if (player.isFlag(Player::Flags::PLAYER_CANTREVIVE))
             continue;
 
-        if (!player.isFlag(Player::Flags::PLAYER_DEAD))
-            continue;
-
-        if (player.getDeathTimerSec() <= 0)
-            continue;
-
         bool exeNear = false;
-        auto clientExe = server.findClient(this->exe);
-        if (clientExe.has_value()) {
-            const float distance = player.getPosition().distance(clientExe.value()->getPlayer().getPosition());
-            exeNear = distance <= 240.0f;
+        bool demonized_near = false;
+
+        // check if exe is nearby
+        for (auto &check : server.getClients()) {
+            if (!check->isInGame()) continue;
+
+            auto checkPlayer = check->getPlayer();
+
+            if (check->getId() != this->exe && !checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                continue;
+            }
+
+            if (player.getPosition().distance(checkPlayer.getPosition()) <= 240) {
+                if (checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                    demonized_near = true;
+                } else {
+                    demonized_near = false;
+                    exeNear = true;
+                    break;
+                }
+            }
         }
 
         if (gameTime.remaining() < 2) {
@@ -259,19 +273,25 @@ void GameState::tickPlayers() {
             continue;
         }
 
-        if (!exeNear) {
-            player.setDeathTimerSec(player.getDeathTimerSec() - 1);
-            if (player.getDeathTimerSec() <= 0) {
-                demonize(*client);
-                continue;
+        if (player.getDeathTimer() >= TICKS_PER_SEC) {
+            if (!exeNear) {
+                player.setDeathTimerSec(player.getDeathTimerSec() - 1);
+                if (player.getDeathTimerSec() <= 0) {
+                    demonize(*client);
+                    continue;
+                }
             }
+
+            Packet pack(PacketType::SERVER_GAME_DEATHTIMER_TICK);
+            pack.write<uint8_t>(exeNear);
+            pack.write<clientId>(client->getId());
+            pack.write<uint8_t>(player.getDeathTimerSec());
+            pack.sendBroadcast(server, true);
+
+            player.setDeathTimer(0);
         }
 
-        Packet dt(PacketType::SERVER_GAME_DEATHTIMER_TICK);
-        dt.write<uint8_t>(exeNear ? 1 : 0);
-        dt.write<clientId>(client->getId());
-        dt.write<uint8_t>(player.getDeathTimerSec());
-        dt.sendBroadcast(server, true);
+        player.setDeathTimerSec(player.getDeathTimerSec() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
     }
 }
 
@@ -287,12 +307,12 @@ bool GameState::checkState() {
     const auto clients = &server.getClients();
 
     const auto escaped = std::ranges::count_if(*clients, [](const auto& client) {
-        auto player = client->getPlayer();
+        auto &player = client->getPlayer();
         return client->isInGame() && player.isFlag(Player::Flags::PLAYER_ESCAPED);
     });
 
     const auto dead = std::ranges::count_if(*clients, [](const auto& client) {
-        auto player = client->getPlayer();
+        auto &player = client->getPlayer();
         return client->isInGame() && (player.isFlag(Player::Flags::PLAYER_DEAD) || player.isFlag(Player::Flags::PLAYER_DEMONIZED));
     });
 
@@ -320,7 +340,7 @@ bool GameState::checkStart() {
     const auto clients = &server.getClients();
 
     const auto cnt = std::ranges::count_if(*clients, [](const auto& client) {
-        auto player = client->getPlayer();
+        auto &player = client->getPlayer();
         return client->isInGame() && player.isReady();
     });
 
@@ -355,12 +375,130 @@ bool GameState::handle(Client& client, Packet& packet) {
         case PacketType::CLIENT_SPRING_USE:
         case PacketType::CLIENT_MERCOIN_BONUS:
         case PacketType::CLIENT_RING_BROKE: {
-            AssertOrDisconnect(client, client.isInGame())
+            AssertOrDisconnect(client, client.isInGame());
             this->server.broadcastEx(packet, true, client.getId());
             break;
         }
 
         case PacketType::CLIENT_PLAYER_PALETTE: {
+            this->server.broadcastEx(packet, true, client.getId());
+            break;
+        }
+
+        case PacketType::CLIENT_PLAYER_HEAL_PART: {
+            AssertOrDisconnect(client, client.isInGame());
+            const uint16_t x = packet.read<uint16_t>();
+            const uint16_t y = packet.read<uint16_t>();
+            const uint16_t rings = packet.read<uint16_t>();
+
+            auto &player = client.getPlayer();
+            player.setHealRings(player.getRings());
+
+            if (rings > 10) {
+                client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
+                return true;
+            }
+
+            if (rings >= 140 && currentMapId != 20) {
+                client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+            }
+
+            this->server.broadcastEx(packet, true, client.getId());
+            break;
+        }
+
+        case PacketType::CLIENT_PLAYER_HEAL: {
+            AssertOrDisconnect(client, client.isInGame());
+            const clientId id = packet.read<clientId>();
+            const uint16_t rings = packet.read<uint16_t>();
+
+            auto &player = client.getPlayer();
+
+            if (rings > 10) {
+                client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
+                return true;
+            }
+
+            if (rings >= 140 && currentMapId != 20) {
+                client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+            }
+
+            if (client.isModified()) {
+                Packet pack(PacketType::SERVER_RING_COLLECTED);
+                pack.write<uint8_t>(0);
+                pack.write<uint16_t>(0);
+                pack.write<uint8_t>(true);
+                pack.write<uint8_t>(false);
+                pack.send(client, true);
+            }
+
+            player.setHealRings(0);
+            player.getStats().addHpRestored();
+            this->server.broadcastEx(packet, true, client.getId());
+            break;
+        }
+        case PacketType::CLIENT_STATS_REPORT: {
+            AssertOrDisconnect(client, client.isInGame());
+            const uint8_t type = packet.read<uint8_t>();
+
+            auto &player = client.getPlayer();
+
+            switch (type) {
+
+                case 0: {
+                    player.getStats().addHpRestored();
+                }
+
+                case 1: {
+                    const uint16_t recv = packet.read<uint16_t>();
+                    const uint16_t dmgr = packet.read<uint16_t>();
+                    const uint8_t sec = packet.read<uint8_t>();
+
+                    std::optional<Client*> rec = this->server.findClient(recv);
+                    std::optional<Client*> damager = this->server.findClient(dmgr);
+
+                    if (!rec.has_value() || !damager.has_value()) break;
+
+                    auto recPlayer = (*rec)->getPlayer();
+                    auto damagerPlayer = (*damager)->getPlayer();
+                    recPlayer.getStats().setStunTime(recPlayer.getStats().getStunTime() + sec);
+                    damagerPlayer.getStats().addStun();
+                    break;
+                }
+
+                case 2: {
+                    const uint16_t id = packet.read<uint16_t>();
+                    const uint16_t dmg = packet.read<uint16_t>();
+                    const uint16_t hp = packet.read<uint16_t>();
+
+                    std::optional<Client*> data = this->server.findClient(id);
+                    if (!data.has_value()) break;
+
+                    auto dataPlayer = (*data)->getPlayer();
+
+                    if (hp <= 0) {
+                        dataPlayer.getStats().addKill();
+                    }
+
+                    dataPlayer.getStats().setDamage(dataPlayer.getStats().getDamage() + dmg / 20);
+
+                    break;
+                }
+
+                case 3: {
+                    const uint8_t dmg = packet.read<uint8_t>();
+                    player.getStats().setDamage(player.getStats().getDamage() + dmg / 20);
+                    break;
+                }
+
+                default: break;
+            }
+
+            break;
+        }
+
+        case PacketType::CLIENT_PLAYER_HURT: {
+            AssertOrDisconnect(client, client.isInGame());
             this->server.broadcastEx(packet, true, client.getId());
             break;
         }
@@ -389,7 +527,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             pack.write<uint16_t>(eid);
             pack.write<uint8_t>(isRed);
             pack.write<uint8_t>(player.getRings() > 0);
-            pack.send(client);
+            pack.send(client, true);
             break;
         }
 
@@ -451,7 +589,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             AssertOrDisconnect(client, client.isInGame());
             AssertOrDisconnect(client, client.getId() != this->exe);
-            AssertOrDisconnect(client, player.isFlag(Player::Flags::PLAYER_DEMONIZED));
+            AssertOrDisconnect(client, !player.isFlag(Player::Flags::PLAYER_DEMONIZED));
 
             uint8_t dead = packet.read<uint8_t>();
             uint8_t rtimes = packet.read<uint8_t>();

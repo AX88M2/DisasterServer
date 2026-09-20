@@ -178,6 +178,9 @@ namespace DisasterServer
         TimeStamp getLastRings() const { return this->lastRings; }
         void setLastRings(const TimeStamp value) { this->lastRings = value; }
 
+        uint16_t getHealRings() const { return this->healRings; }
+        void setHealRings(const uint16_t value) { this->healRings = value; }
+
         bool isAttacking() const { return this->isAttack; }
         void setAttacking(const bool value) { this->isAttack = value; }
 
@@ -199,13 +202,16 @@ namespace DisasterServer
         uint8_t getDeathTimerSec() const { return this->deathTimerSec; }
         void setDeathTimerSec(const uint8_t value) { this->deathTimerSec = value; }
 
+        double getDeathTimer() const { return this->deathTimer; }
+        void setDeathTimer(const double value) { this->deathTimer = value; }
+
         Vector2 getStartPosition() const { return this->startPos; }
         void setStartPosition(Vector2 vec2) { this->startPos = vec2;  }
 
         Vector2 getPosition() const { return this->position; }
         void setPosition(Vector2 vec2) { position = vec2; }
 
-        PlayerStats getStats() const { return this->stats; }
+        PlayerStats &getStats() { return this->stats; }
     };
 }
 
