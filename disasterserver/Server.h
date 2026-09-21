@@ -164,6 +164,13 @@ typedef struct Results
 	double countdown;
 } Results;
 
+typedef struct
+{
+	int exe_wins;
+	int surv_wins;
+	int timeovers;
+} ServerStats;
+
 typedef struct Server
 {
 	uint16_t id;
@@ -190,6 +197,7 @@ typedef struct Server
 	double delta;
 	DyList peers;
 	ENetHost *host;
+	ServerStats stats;
 } Server;
 
 bool				server_state_joined (PeerData* v);

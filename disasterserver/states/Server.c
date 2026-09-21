@@ -856,6 +856,29 @@ bool server_cmd_handle(Server *server, unsigned long hash, PeerData *v, String *
 		RAssert(server_broadcast_msg(v->server, 0, format));
 		break;
 	}
+
+	case CMD_STATS:
+	{
+		int exe_wins = v->server->stats.exe_wins;
+		int surv_wins = v->server->stats.surv_wins;
+		int timeovers = v->server->stats.timeovers;
+		int total = exe_wins + surv_wins + timeovers;
+		int exe_rate = total ? (exe_wins * 100 / total) : 0;
+		int surv_rate = total ? (surv_wins * 100 / total) : 0;
+
+		char buf[256];
+
+		server_send_msg(v->server, v->peer, "------- statistics of the server: -------");
+		snprintf(buf, sizeof(buf), CLRCODE_RED "exe wins: %d" CLRCODE_RST " - " CLRCODE_GRN "survivor wins: %d", exe_wins, surv_wins);
+		server_send_msg(v->server, v->peer, buf);
+		snprintf(buf, sizeof(buf), CLRCODE_GRA "timeover: %d", timeovers);
+		server_send_msg(v->server, v->peer, buf);
+		snprintf(buf, sizeof(buf), CLRCODE_ORG "total rounds played: %d", total);
+		server_send_msg(v->server, v->peer, buf);
+		snprintf(buf, sizeof(buf), CLRCODE_RED "exe winrate: %d%%" CLRCODE_RST "-" CLRCODE_GRN "survivor winrate: %d%%", exe_rate, surv_rate);
+		server_send_msg(v->server, v->peer, buf);
+		break;
+	}
 	}
 
 	return true;
