@@ -242,8 +242,8 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             {
                 this->server.sendMessage(client, "|- .map~ - force map (1-21)");
                 this->server.sendMessage(client, "|- .kick~ - kick someone");
-                this->server.sendMessage(client, "|- .ban~ - ban someone (wip)");
-                this->server.sendMessage(client, "|- .op~ - op someone (wip)");
+                this->server.sendMessage(client, "|- .ban~ - ban someone");
+                this->server.sendMessage(client, "|- .op~ - op someone");
                 break;
             }
             break;
