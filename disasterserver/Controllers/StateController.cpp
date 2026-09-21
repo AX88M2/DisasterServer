@@ -258,6 +258,10 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
 
 #if defined(SERVER_DEBUG)
         case CMD_SELFOP: {
+            if (client.getIp() != "127.0.0.1") {
+                break;
+            }
+
             client.setOperator(true);
             this->server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
             break;
@@ -267,6 +271,9 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
                 break;
             }
+
+            this->server.getApplication().getStorage().addBan(client);
+
             break;
         }
 #endif

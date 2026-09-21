@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "toml.hpp"
 #include <string>
 
@@ -28,6 +30,7 @@ namespace DisasterServer
         static std::string defaultConfig;
         std::string filename = "config.toml";
         toml::basic_value<toml::type_config> toml;
+        std::mutex mutex;
 
         Config config_;
     public:

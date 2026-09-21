@@ -25,7 +25,6 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    bool isBanned = false;
     uint64_t timeout = 0;
 
     const uint16_t buildVersion = packet.read<uint16_t>();
@@ -96,7 +95,7 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    if (!identityProcess(ip, isBanned, timeout, serverIndex == -1)) {
+    if (!identityProcess(ip, server->getApplication().getStorage().isBanned(*this), timeout, serverIndex == -1)) {
         return false;
     }
 
@@ -159,10 +158,9 @@ bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t t
             pack.writeString(nickname);
 
             if (stateController.isState<GameState>() && client->in_game) {
-
-                pack.write<uint8_t>( 1 /* server->game.exe == peer->id */ );
-                pack.write<uint8_t>( 1 /* server->game.exe == peer->id ? peer->exe_char : peer->surv_char */);
-
+                auto state = stateController.getState<GameState>();
+                pack.write<uint8_t>(state->getExe() == client->getId());
+                pack.write<uint8_t>(state->getExe() == client->getId() ? static_cast<uint8_t>(client->getExeCharacter()) : static_cast<uint8_t>(client->getSurvCharacter()));
             } else {
                 pack.write<uint8_t>(lobbyIcon);
             }
@@ -180,6 +178,7 @@ bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t t
 
         this->server->sendMessage(*this, "|build from &{} @{}~", __DATE__, __TIME__);
         this->server->sendMessage(*this, "|type .help for command list~");
+
         const auto motd = this->server->getApplication().getConfigManager().config().getMotd();
         if (!motd.empty()) {
             this->server->sendMessage(*this, motd);

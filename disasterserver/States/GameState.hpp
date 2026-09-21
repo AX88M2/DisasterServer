@@ -67,8 +67,6 @@ namespace DisasterServer
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
 
-        Map* getCurrentMap() const { return currentMap; }
-
         bool isRingSlotUsed(int i) const {
             return i >= 0 && i < static_cast<int>(ringSlots.size()) && ringSlots[i];
         }
@@ -79,6 +77,8 @@ namespace DisasterServer
 
         bool spawnRing();
 
+        clientId getExe() const { return exe; }
+        Map* getCurrentMap() const { return currentMap; }
     private:
         void uninit(bool show_results);
 

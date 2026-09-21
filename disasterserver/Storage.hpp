@@ -14,7 +14,9 @@ namespace DisasterServer
         std::string uid;
         std::string username;
 
-        explicit ClientBan(const std::string &ip, const std::string &uid, const std::string &username) : ip(ip), uid(uid), username(username) {}
+        std::string reason;
+
+        explicit ClientBan(const std::string &ip, const std::string &uid, const std::string &username, const std::string &reason) : ip(ip), uid(uid), username(username), reason(reason) {}
     };
 
     class Storage {
@@ -25,6 +27,7 @@ namespace DisasterServer
         explicit Storage();
         ~Storage();
 
-        void addBan(Client &client);
+        void addBan(Client &client, const std::string &reason = "");
+        bool isBanned(Client &client);
     };
 }

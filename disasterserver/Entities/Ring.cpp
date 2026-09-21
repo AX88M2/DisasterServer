@@ -27,6 +27,7 @@ bool Ring::init() {
         return false;
 
     int slot;
+
     do {
         slot = std::rand() % ringCount;
     } while (state->isRingSlotUsed(slot));
