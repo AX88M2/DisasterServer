@@ -29,6 +29,7 @@ bool game_end(Server* server, Ending ending, bool achiv)
 			PacketCreate(&packet, SERVER_GAME_EXE_WINS);
 			PacketWrite(&packet, packet_write8, achiv);
 			Info("Ending is ED_EXEWIN");
+			server->stats.exe_wins++;
 			break;
 		}
 
@@ -37,6 +38,7 @@ bool game_end(Server* server, Ending ending, bool achiv)
 			PacketCreate(&packet, SERVER_GAME_SURVIVOR_WIN);
 			PacketWrite(&packet, packet_write8, achiv);
 			Info("Ending is ED_SURVWIN");
+			server->stats.surv_wins++;
 			break;
 		}
 
@@ -45,6 +47,7 @@ bool game_end(Server* server, Ending ending, bool achiv)
 			PacketCreate(&packet, SERVER_GAME_TIME_OVER);
 			PacketWrite(&packet, packet_write8, achiv);
 			Info("Ending is ED_TIMEOVER");
+			server->stats.timeovers++;
 			break;
 		}
 	}
