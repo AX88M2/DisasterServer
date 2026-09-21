@@ -1,31 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <AssemblyName>DisasterServer</AssemblyName>
-    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp7.0</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup>
-    <LangVersion>11.0</LangVersion>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>app.ico</ApplicationIcon>
-    <StartupObject>Server.Program</StartupObject>
-    <NoWin32Manifest>true</NoWin32Manifest>
-    <Nullable>disable</Nullable>
-    <SignAssembly>False</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Reference Include="NetCoreServer">
-      <HintPath>libs/NetCoreServer.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<PropertyGroup>
+		<AssemblyName>DisasterServer</AssemblyName>
+		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ApplicationIcon>app.ico</ApplicationIcon>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="NetCoreServer" Version="8.0.7" />
+	</ItemGroup>
 </Project>

@@ -25,7 +25,7 @@ public class Server : TcpServer
 
 	public const int BUILD_VER = 206;
 
-	public static readonly string[] MAPS = new string[3] { "Hide and Seek Act 2", "Ravine Mist", "..." };
+	public static readonly string[] MAPS = new string[3] { "Hide and Seek Act 2", "Ravine Mist", "..."};
 
 	public Guid ExeId = Guid.Empty;
 
@@ -41,7 +41,9 @@ public class Server : TcpServer
 
 	private Timer _timer = new Timer(1000.0);
 
-	public Server(int id, int port)
+    private int _lastMapIndex = -1;
+
+    public Server(int id, int port)
 		: base(IPAddress.Any, port)
 	{
 		ID = id;
@@ -58,7 +60,7 @@ public class Server : TcpServer
 		Countdown.ReachedEvent += Countdown_Reached;
 	}
 
-	public void CheckEscapedAndAlive()
+    public void CheckEscapedAndAlive()
 	{
 		lock (Players)
 		{
@@ -98,8 +100,8 @@ public class Server : TcpServer
 			if (alive == 0)
 			{
 				Logger.Log("Exe wins!", ConsoleColor.Red, ID);
-				Packet packet4 = new Packet(PacketType.SERVER_GAME_EXE_WINS);
-				MulticastAsync(packet4);
+				Packet packet2 = new Packet(PacketType.SERVER_GAME_EXE_WINS);
+				MulticastAsync(packet2);
 				EndGame();
 			}
 			else if (Players.Count - alive + escaped >= Players.Count)
@@ -114,8 +116,8 @@ public class Server : TcpServer
 				else
 				{
 					Logger.Log("Survivors win!", ConsoleColor.Green, ID);
-					Packet packet2 = new Packet(PacketType.SERVER_GAME_SURVIVOR_WIN);
-					MulticastAsync(packet2);
+					Packet packet4 = new Packet(PacketType.SERVER_GAME_SURVIVOR_WIN);
+					MulticastAsync(packet4);
 					EndGame();
 				}
 			}
@@ -146,9 +148,9 @@ public class Server : TcpServer
 		lock (Players)
 		{
 			int cnt = 0;
-			foreach (KeyValuePair<Guid, Player> player in Players)
+			foreach (KeyValuePair<Guid, Player> player2 in Players)
 			{
-				if (player.Value.Character != Character.NONE)
+				if (player2.Value.Character != Character.NONE)
 				{
 					cnt++;
 				}
@@ -230,21 +232,17 @@ public class Server : TcpServer
 					p.Value.LastPacketTime = 0;
 					continue;
 				}
-				//Anti-AFK System
-				if (Program.enabledAntiAfkSystem) {
-					Logger.Log("[Anti-AFK] "+$"{p.Key}: {p.Value.LastPacketTime}",ConsoleColor.Magenta);
-                    //Console.WriteLine($"{p.Key}: {p.Value.LastPacketTime}");
-                    if (p.Value.LastPacketTime > ((State == State.GAME) ? 20 : 30))
-                    {
-                        Logger.Log(p.Value.Nickname + " disconnected for AFK.", ConsoleColor.Red, ID);
-                        Packet pk = new Packet(PacketType.SERVER_PLAYER_FORCE_DISCONNECT);
-                        pk.Write("AFK/Conection issue");
-                        TcpSession tcpSession = FindSession(p.Key);
-                        tcpSession.Send(pk.ToArray());
-                        tcpSession.Disconnect();
-                        CheckLeftPlayers();
-                    }
-                }
+				Console.WriteLine($"{p.Key}: {p.Value.LastPacketTime}");
+				if (p.Value.LastPacketTime > ((State == State.GAME) ? 20 : 30))
+				{
+					Logger.Log(p.Value.Nickname + " disconnected for AFK.", ConsoleColor.Red, ID);
+					Packet pk = new Packet(PacketType.SERVER_PLAYER_FORCE_DISCONNECT);
+					pk.Write("AFK/Conection issue");
+					TcpSession tcpSession = FindSession(p.Key);
+					tcpSession.Send(pk.ToArray());
+					tcpSession.Disconnect();
+					CheckLeftPlayers();
+				}
 				p.Value.LastPacketTime++;
 			}
 		}
@@ -252,37 +250,46 @@ public class Server : TcpServer
 		MulticastAsync(packet);
 	}
 
-	private void StartVote()
-	{
-		lock (Players)
-		{
-			int map = Rand.Next(MAPS.Length);
-			if (Players.Count <= 0)
-			{
-				Packet pk = new Packet(PacketType.SERVER_GAME_BACK_TO_LOBBY);
-				MulticastAsync(pk);
-				StartLobby();
-				return;
-			}
-			ExeId = Players.ElementAt(Rand.Next(Players.Count)).Key;
-			foreach (KeyValuePair<Guid, Player> i in Players)
-			{
-				i.Value.Character = Character.NONE;
-				i.Value.IsReady = false;
-				i.Value.LastPacketTime = 0;
-			}
-			Players[ExeId].Character = Character.EXE;
-			Logger.Log(Players[ExeId].Nickname + " is EXE!", ConsoleColor.Red, ID);
-			Logger.Log("Map is " + MAPS[map], ConsoleColor.White, ID);
-			Packet packet = new Packet(PacketType.SERVER_LOBBY_EXE);
-			packet.Write(Players[ExeId].ID);
-			packet.Write((ushort)map);
-			MulticastAsync(packet);
-		}
-		State = State.VOTE;
-	}
+    private void StartVote()
+    {
+        lock (Players)
+        {
+            if (Players.Count <= 0)
+            {
+                Packet pk = new Packet(PacketType.SERVER_GAME_BACK_TO_LOBBY);
+                MulticastAsync(pk);
+                StartLobby();
+                return;
+            }
 
-	private void GameTick()
+            ExeId = Players.ElementAt(Rand.Next(Players.Count)).Key;
+            foreach (KeyValuePair<Guid, Player> k in Players)
+            {
+                k.Value.Character = Character.NONE;
+                k.Value.IsReady = false;
+                k.Value.LastPacketTime = 0;
+            }
+            Players[ExeId].Character = Character.EXE;
+            Logger.Log(Players[ExeId].Nickname + " is EXE!", ConsoleColor.Red, ID);
+
+            int map;
+            do
+            {
+                map = Rand.Next(MAPS.Length);
+            } while (MAPS.Length > 1 && map == _lastMapIndex);
+            _lastMapIndex = map;
+
+            Logger.Log("Map is " + MAPS[map], ConsoleColor.White, ID);
+
+            Packet packet = new Packet(PacketType.SERVER_LOBBY_EXE);
+            packet.Write(Players[ExeId].ID);
+            packet.Write((ushort)map);
+            MulticastAsync(packet);
+        }
+        State = State.VOTE;
+    }
+
+    private void GameTick()
 	{
 		_ringTimer++;
 		if (_bigRingTimer != -1)
@@ -389,14 +396,14 @@ public class Server : TcpServer
 		}
 		else if (!GameEnded)
 		{
-			Packet packet3 = new Packet(PacketType.SERVER_GAME_TIME_OVER);
-			MulticastAsync(packet3);
+			Packet packet2 = new Packet(PacketType.SERVER_GAME_TIME_OVER);
+			MulticastAsync(packet2);
 			EndGame();
 		}
 		else
 		{
-			Packet packet2 = new Packet(PacketType.SERVER_GAME_BACK_TO_LOBBY);
-			MulticastAsync(packet2);
+			Packet packet3 = new Packet(PacketType.SERVER_GAME_BACK_TO_LOBBY);
+			MulticastAsync(packet3);
 			StartLobby();
 		}
 	}
@@ -450,13 +457,12 @@ public class Server : TcpServer
 		return new ServerSession(this);
 	}
 
-	protected override void OnStarted()
-	{
-		Logger.Log($"Server started on port {base.Port}.", ConsoleColor.Green);
-		Logger.SendDiscord($"Server started on port {base.Port}.", ID, $"Version {206}");
-	}
+    protected override void OnStarted()
+    {
+        Logger.Log($"Server started on port {base.Port}.", ConsoleColor.Green, ID);
+    }
 
-	protected override void OnError(SocketError error)
+    protected override void OnError(SocketError error)
 	{
 		Logger.Log($"Server caught an error: {error}", ConsoleColor.Red, ID);
 	}

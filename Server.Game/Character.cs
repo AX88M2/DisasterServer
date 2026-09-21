@@ -10,4 +10,5 @@ public enum Character
 	AMY,
 	CREAM,
 	SALLY
+	
 }

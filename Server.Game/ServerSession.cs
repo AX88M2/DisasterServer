@@ -21,7 +21,7 @@ internal class ServerSession : ServerSessionBase
 			SendAsync(p);
 			return;
 		}
-		if (_server.State != 0)
+		if (_server.State != State.LOBBY)
 		{
 			Packet p2 = new Packet(PacketType.SERVER_PLAYER_FORCE_DISCONNECT);
 			p2.Write("Game has already started!");
@@ -34,10 +34,10 @@ internal class ServerSession : ServerSessionBase
 			{
 				_server.Countdown.Count = 5;
 				_server.Countdown.Stop();
-				Packet packet2 = new Packet(PacketType.SERVER_LOBBY_COUNTDOWN);
-				packet2.Write((byte)0);
-				packet2.Write((byte)5);
-				_server.MulticastAsync(packet2);
+				Packet packet = new Packet(PacketType.SERVER_LOBBY_COUNTDOWN);
+				packet.Write((byte)0);
+				packet.Write((byte)5);
+				_server.MulticastAsync(packet);
 			}
 		}
 		ushort id = ++_server.IdCounter;
@@ -49,12 +49,12 @@ internal class ServerSession : ServerSessionBase
 				ID = id,
 				EndPoint = base.Socket.RemoteEndPoint
 			});
-			Packet packet = new Packet(PacketType.SERVER_PLAYER_JOINED);
-			packet.Write(id);
-			_server.MulticastAsync(packet, base.Id);
-			packet = new Packet(PacketType.SERVER_REQUEST_INFO);
-			packet.Write(id);
-			SendAsync(packet);
+			Packet packet2 = new Packet(PacketType.SERVER_PLAYER_JOINED);
+			packet2.Write(id);
+			_server.MulticastAsync(packet2, base.Id);
+			packet2 = new Packet(PacketType.SERVER_REQUEST_INFO);
+			packet2.Write(id);
+			SendAsync(packet2);
 		}
 		base.OnConnected();
 	}
@@ -105,19 +105,19 @@ internal class ServerSession : ServerSessionBase
 			using BinaryReader rd = new BinaryReader(ms);
 			if (rd.ReadBoolean())
 			{
-				Packet packet3 = new Packet();
+				Packet packet = new Packet();
 				for (int i = 0; i < data.Length; i++)
 				{
-					packet3.Write(data[i]);
+					packet.Write(data[i]);
 				}
-				_server.MulticastAsync(packet3, base.Id);
+				_server.MulticastAsync(packet, base.Id);
 				return;
 			}
 			switch ((PacketType)rd.ReadByte())
 			{
 			case PacketType.CLIENT_REQUESTED_INFO:
 			{
-				if (_server.State != 0)
+				if (_server.State != State.LOBBY)
 				{
 					break;
 				}
@@ -132,7 +132,7 @@ internal class ServerSession : ServerSessionBase
 						_server.Players.Remove(base.Id, out var _);
 					}
 				}
-				Packet packet5 = new Packet(PacketType.SERVER_PLAYER_INFO);
+				Packet packet4 = new Packet(PacketType.SERVER_PLAYER_INFO);
 				lock (_server.Players)
 				{
 					string name = rd.ReadStringNull();
@@ -147,36 +147,36 @@ internal class ServerSession : ServerSessionBase
 						_server.Players[base.Id].HasEscaped = false;
 						_server.Players[base.Id].IsReady = false;
 						Logger.Log(_server.Players[base.Id].Nickname + " joined.", ConsoleColor.White, _server.ID);
-						packet5.Write(_server.Players[base.Id].ID);
-						packet5.Write(name);
+						packet4.Write(_server.Players[base.Id].ID);
+						packet4.Write(name);
 					}
 				}
-				_server.MulticastAsync(packet5, base.Id);
+				_server.MulticastAsync(packet4, base.Id);
 				break;
 			}
 			case PacketType.CLIENT_LOBBY_PLAYERS_REQUEST:
-				if (_server.State != 0)
+				if (_server.State != State.LOBBY)
 				{
 					break;
 				}
 				lock (_server.Players)
 				{
-					foreach (KeyValuePair<Guid, Player> player in _server.Players)
+					foreach (KeyValuePair<Guid, Player> player2 in _server.Players)
 					{
-						if (!player.Value.Pending && !(player.Key == base.Id))
+						if (!player2.Value.Pending && !(player2.Key == base.Id))
 						{
-							Packet packet4 = new Packet(PacketType.SERVER_LOBBY_PLAYER);
-							packet4.Write(player.Value.ID);
-							packet4.Write(player.Value.IsReady);
-							packet4.Write(player.Value.Nickname);
-							SendAsync(packet4);
+							Packet packet7 = new Packet(PacketType.SERVER_LOBBY_PLAYER);
+							packet7.Write(player2.Value.ID);
+							packet7.Write(player2.Value.IsReady);
+							packet7.Write(player2.Value.Nickname);
+							SendAsync(packet7);
 						}
 					}
 				}
 				break;
 			case PacketType.CLIENT_LOBBY_READY_STATE:
 			{
-				if (_server.State != 0)
+				if (_server.State != State.LOBBY)
 				{
 					break;
 				}
@@ -194,7 +194,7 @@ internal class ServerSession : ServerSessionBase
 					}
 					lock (_server.Countdown)
 					{
-						if (cnt >= _server.Players.Count && _server.Players.Count > 1 && !_server.Countdown.IsCounting)
+						if (cnt >= _server.Players.Count && _server.Players.Count > 0 && !_server.Countdown.IsCounting)
 						{
 							_server.Countdown.Count = 5;
 							_server.Countdown.Start();
@@ -207,16 +207,16 @@ internal class ServerSession : ServerSessionBase
 						{
 							_server.Countdown.Count = 5;
 							_server.Countdown.Stop();
-							Packet packet = new Packet(PacketType.SERVER_LOBBY_COUNTDOWN);
-							packet.Write((byte)0);
-							packet.Write((byte)5);
-							_server.MulticastAsync(packet);
+							Packet packet3 = new Packet(PacketType.SERVER_LOBBY_COUNTDOWN);
+							packet3.Write((byte)0);
+							packet3.Write((byte)5);
+							_server.MulticastAsync(packet3);
 						}
 					}
-					Packet pk = new Packet(PacketType.SERVER_LOBBY_READY_STATE);
-					pk.Write(_server.Players[base.Id].ID);
-					pk.Write(ready);
-					_server.MulticastAsync(pk, base.Id);
+					Packet pk2 = new Packet(PacketType.SERVER_LOBBY_READY_STATE);
+					pk2.Write(_server.Players[base.Id].ID);
+					pk2.Write(ready);
+					_server.MulticastAsync(pk2, base.Id);
 				}
 				break;
 			}
@@ -231,13 +231,13 @@ internal class ServerSession : ServerSessionBase
 				int cnt2 = 0;
 				lock (_server.Players)
 				{
-					foreach (KeyValuePair<Guid, Player> player2 in _server.Players)
+					foreach (KeyValuePair<Guid, Player> player in _server.Players)
 					{
-						if (player2.Value.Character == (Character)id)
+						if (player.Value.Character == (Character)id)
 						{
 							canUse = false;
 						}
-						if (player2.Value.Character != Character.NONE)
+						if (player.Value.Character != Character.NONE)
 						{
 							cnt2++;
 						}
@@ -246,14 +246,14 @@ internal class ServerSession : ServerSessionBase
 					{
 						_server.Players[base.Id].Character = (Character)id;
 						Logger.Log($"{_server.Players[base.Id].Nickname} chooses {id}", ConsoleColor.Yellow, _server.ID);
-						Packet packet7 = new Packet(PacketType.SERVER_LOBBY_CHARACTER_RESPONSE);
-						packet7.Write(id);
-						packet7.Write(value: true);
-						SendAsync(packet7);
-						packet7 = new Packet(PacketType.SERVER_LOBBY_CHARACTER_CHANGE);
-						packet7.Write(_server.Players[base.Id].ID);
-						packet7.Write(id);
-						_server.MulticastAsync(packet7, base.Id);
+						Packet packet5 = new Packet(PacketType.SERVER_LOBBY_CHARACTER_RESPONSE);
+						packet5.Write(id);
+						packet5.Write(value: true);
+						SendAsync(packet5);
+						packet5 = new Packet(PacketType.SERVER_LOBBY_CHARACTER_CHANGE);
+						packet5.Write(_server.Players[base.Id].ID);
+						packet5.Write(id);
+						_server.MulticastAsync(packet5, base.Id);
 						if (cnt2 >= _server.Players.Count - 1)
 						{
 							_server.StartGame();
@@ -327,9 +327,9 @@ internal class ServerSession : ServerSessionBase
 							break;
 						}
 						Logger.Log(_server.Players[base.Id].Nickname + " has escaped!", ConsoleColor.Green, _server.ID);
-						Packet pk2 = new Packet(PacketType.SERVER_GAME_PLAYER_ESCAPED);
-						pk2.Write(_server.Players[base.Id].ID);
-						_server.MulticastAsync(pk2);
+						Packet pk = new Packet(PacketType.SERVER_GAME_PLAYER_ESCAPED);
+						pk.Write(_server.Players[base.Id].ID);
+						_server.MulticastAsync(pk);
 						_server.Players[base.Id].HasEscaped = true;
 						goto IL_0b0e;
 					}

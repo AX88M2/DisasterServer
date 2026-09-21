@@ -12,3 +12,4 @@ using System.Security.Permissions;
 [assembly: AssemblyProduct("DisasterServer")]
 [assembly: AssemblyTitle("DisasterServer")]
 [assembly: AssemblyVersion("1.0.0.0")]
+//[module: System.Runtime.CompilerServices.RefSafetyRules(11)]
