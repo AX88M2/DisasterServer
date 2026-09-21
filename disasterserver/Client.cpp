@@ -25,8 +25,6 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    uint64_t timeout = 0;
-
     const uint16_t buildVersion = packet.read<uint16_t>();
     const int32_t serverIndex = packet.read<int32_t>();
     const std::string nickname = packet.readString();
@@ -40,6 +38,7 @@ bool Client::identity(Packet &packet) {
     this->udid = udid;
     this->lobbyIcon = lobbyIcon;
     this->pet = pet;
+    this->op = server->getApplication().getStorage().isOperator(*this);
     
     uint64_t rawKeyA = packet.read<uint64_t>();
     uint64_t rawKeyB = packet.read<uint64_t>();
@@ -95,7 +94,9 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    if (!identityProcess(ip, server->getApplication().getStorage().isBanned(*this), timeout, serverIndex == -1)) {
+    bool isBanned = server->getApplication().getStorage().isBanned(*this);
+
+    if (!identityProcess(ip, isBanned, 0, serverIndex == -1)) {
         return false;
     }
 
@@ -110,8 +111,8 @@ bool Client::identity(Packet &packet) {
     return true;
 }
 
-bool Client::identityProcess(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout) {
-    if (is_banned) {
+bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout) {
+    if (isBanned) {
         Info("{} banned by host (id {}, ip {})", nickname, id, addr);
         this->disconnect(DisconnectReason::BANNEDBYHOST);
         return false;

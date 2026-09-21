@@ -173,7 +173,7 @@ namespace DisasterServer
         bool isVoted() const { return voted; }
 
         bool identity(Packet &packet);
-        bool identityProcess(const std::string &addr, bool is_banned, uint64_t timeout, bool do_timeout);
+        bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout);
         bool messageReceived(Packet &packet);
         void disconnect(DisconnectReason reason, const std::string& message = "");
 

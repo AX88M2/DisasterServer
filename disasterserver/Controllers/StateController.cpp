@@ -75,7 +75,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    //TODO: add kick logic
+                    //TODO: add timeout logic
                     c->disconnect(DisconnectReason::KICKEDBYHOST);
                 }
             }
@@ -91,7 +91,8 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    //TODO: add operator logic
+                    server.getApplication().getStorage().addOperator(*c);
+                    c->setOperator(true);
                     server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
                 }
             }
@@ -262,6 +263,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 break;
             }
 
+            server.getApplication().getStorage().addOperator(client);
             client.setOperator(true);
             this->server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
             break;
@@ -271,8 +273,6 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
                 this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
                 break;
             }
-
-            this->server.getApplication().getStorage().addBan(client);
 
             break;
         }
