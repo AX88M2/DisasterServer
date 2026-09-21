@@ -362,8 +362,11 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
 #endif
 
             int requested;
-
+#if _WIN32
             if (sscanf_s(message.c_str(), ".map %d", &requested) != 1) {
+#else
+            if (sscanf_r(message.c_str(), ".map %d", &requested) != 1) {
+#endif
                 this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }
