@@ -448,6 +448,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
                 case 0: {
                     player.getStats().addHpRestored();
+                    break;
                 }
 
                 case 1: {
