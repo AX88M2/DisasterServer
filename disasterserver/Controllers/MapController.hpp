@@ -1,5 +1,4 @@
-﻿#ifndef DISASTERSERVER_MAPCONTROLLER_HPP
-#define DISASTERSERVER_MAPCONTROLLER_HPP
+﻿#pragma once
 
 #include <memory>
 #include <typeindex>
@@ -10,7 +9,7 @@
 #include <unordered_map>
 
 #include "Core/Log.hpp"
-#include "../Maps/Map.hpp"
+#include "Maps/Map.hpp"
 
 namespace DisasterServer
 {
@@ -59,6 +58,3 @@ namespace DisasterServer
         void setMapWeight(Map *map, int16_t w) { map_weights[map] = w; }
     };
 }
-
-#endif //DISASTERSERVER_MAPCONTROLLER_HPP
-

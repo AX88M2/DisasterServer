@@ -1,6 +1,4 @@
-#ifndef PACKET_H
-
-#define PACKET_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -338,6 +336,7 @@ static constexpr int PACKET_MAXSIZE = 256;
 namespace DisasterServer {
 	class Server;
 	class Client;
+	class Vector2;
 
 	class Packet {
 		std::array<uint8_t, PACKET_MAXSIZE> buffer{};
@@ -411,10 +410,10 @@ namespace DisasterServer {
 		std::string readString();
 		void writeString(const std::string &value);
 
+		Vector2 readVector2();
+		void writeVector2(const Vector2 &value);
+
 		bool send(Client &client, bool reliable = true);
 		void sendBroadcast(Server &server, bool reliable = true, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
 	};
 }
-
-
-#endif

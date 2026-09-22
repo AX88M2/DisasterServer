@@ -1,20 +1,22 @@
 #pragma once
-#include <cstdint>
 #include "Entity.hpp"
 
 namespace DisasterServer {
+    class Server;
+}
 
-class Server;
+namespace DisasterServer::Entities
+{
+    class Ring : public Entity {
+        uint8_t rid = 0;
+        bool red = false;
+    public:
+        Ring(entityId id, Server &server, GameState &state);
+        ~Ring() override;
 
-class Ring : public Entity {
-public:
-    Ring(uint16_t id, Server &server, StateController &stateController);
+        bool init() override;
+        bool uninit() override;
 
-    bool init() override;
-    bool uninit() override;
-
-    uint8_t rid = 0;
-    uint8_t red = 0;
-};
-
+        bool isRed() const { return red; }
+    };
 }

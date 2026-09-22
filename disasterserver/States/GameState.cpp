@@ -10,13 +10,14 @@
 #include "ResultsState.hpp"
 #include "Core/Defines.hpp"
 #include "Core/Constansts.hpp"
-#include "Entities/Ring.hpp"
+#include "Entities/MapRing.hpp"
 #include "Util/Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController),
-        currentMapId(mapid), currentMap(map), exe(exe), entityController(server, stateController) {}
+        currentMapId(mapid), currentMap(map), exe(exe), entityController(server, *this) {}
 
 GameState::~GameState() = default;
 
@@ -197,7 +198,7 @@ void GameState::tick() {
     }
 
     tickPlayers();
-    tickEntities();
+    entityController.tick();
 
     if (gameTime.remaining() <= TICKS_PER_SEC && bringState < BigRingState::DEACTIVATED) {
         bigRing(BigRingState::DEACTIVATED);
@@ -293,10 +294,6 @@ void GameState::tickPlayers() {
 
         player.setDeathTimerSec(player.getDeathTimerSec() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
     }
-}
-
-void GameState::tickEntities() {
-    unused();
 }
 
 bool GameState::checkState() {
@@ -511,10 +508,10 @@ bool GameState::handle(Client& client, Packet& packet) {
             const uint8_t id  = packet.read<uint8_t>();
             const uint16_t eid = packet.read<uint16_t>();
 
-            auto* ent = entityController.findEntity<Ring>(eid);
+            auto* ent = entityController.findEntity<MapRing>(eid);
             if (!ent) break;
 
-            const bool isRed = ent->red;
+            const bool isRed = ent->isRed();
             entityController.despawnEntity(eid);
 
             auto& player = client.getPlayer();
@@ -677,8 +674,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             auto &player = client.getPlayer();
 
-            const uint16_t x = packet.read<uint16_t>();
-            const uint16_t y = packet.read<uint16_t>();
+            const Vector2 position = packet.readVector2();
             [[maybe_unused]] const uint16_t _xspd = packet.read<uint16_t>();
             [[maybe_unused]] const uint16_t _yspd = packet.read<uint16_t>();
 
@@ -686,8 +682,6 @@ bool GameState::handle(Client& client, Packet& packet) {
             [[maybe_unused]] const int16_t _angle = packet.read<int16_t>();
             [[maybe_unused]] const uint8_t _index = packet.read<uint8_t>();
             [[maybe_unused]] const int8_t _xscale = packet.read<int8_t>();
-
-            Vector2 newPos = { static_cast<float>(x), static_cast<float>(y) };
 
             [[maybe_unused]] int duration = 2000;
 
@@ -716,7 +710,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
             }
 
-            player.setPosition(newPos);
+            player.setPosition(position);
             player.setTimeout(0);
 
             const auto now = Clock::now();
@@ -753,7 +747,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 bool GameState::spawnRing() {
     if (!currentMap) return false;
 
-    if (!entityController.spawnEntity<Ring>()) {
+    if (!entityController.spawnEntity<MapRing>()) {
         Debug("Not enough space for rings");
         return false;
     }
@@ -790,6 +784,8 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
             break;
         }
     }
+
+    this->gameTime.stop();
 
     this->endTime.start(5);
     this->ending = endtype;

@@ -102,9 +102,22 @@ void Packet::writeString(const std::string &value) {
 	write<uint8_t>(0);
 }
 
+Vector2 Packet::readVector2() {
+	const float x = read<uint16_t>();
+	const float y = read<uint16_t>();
+
+	return { static_cast<float>(x), static_cast<float>(y) };
+}
+
+void Packet::writeVector2(const Vector2 &value) {
+	write<uint16_t>(static_cast<uint16_t>(value.x));
+	write<uint16_t>(static_cast<uint16_t>(value.y));
+}
+
 bool Packet::send(Client &client, bool reliable) {
-	if(client.isDisconnecting())
+	if(client.isDisconnecting()) {
 		return true;
+	}
 
 	Debug("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
 

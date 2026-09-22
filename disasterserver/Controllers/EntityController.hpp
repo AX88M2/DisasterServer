@@ -9,18 +9,20 @@ namespace DisasterServer
 
     class EntityController {
         Server &server;
-        StateController &stateController;
+        GameState &state;
 
         std::vector<std::unique_ptr<Entity>> entities = {};
         uint16_t entityIdCounter = 0;
     public:
-        EntityController(Server &server, StateController &stateController);
+        EntityController(Server &server, GameState &state);
         ~EntityController() = default;
+
+        void tick();
 
         template <typename T, typename... Args>
         T* spawnEntity(Args&&... args) {
             ++entityIdCounter;
-            auto ent = std::make_unique<T>(entityIdCounter, server, stateController, std::forward<Args>(args)...);
+            auto ent = std::make_unique<T>(entityIdCounter, server, state, std::forward<Args>(args)...);
 
             if (!ent->init())
                 return nullptr;

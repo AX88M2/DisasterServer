@@ -83,7 +83,6 @@ namespace DisasterServer
         void uninit(bool show_results);
 
         void tickPlayers();
-        void tickEntities();
 
         bool checkState();
         bool checkStart();

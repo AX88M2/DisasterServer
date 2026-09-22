@@ -1,22 +1,24 @@
 #pragma once
 
-#include <cstdint>
 #include <string>
+#include "Core/Types.hpp"
+#include "Core/Vector2.hpp"
 
 namespace DisasterServer
 {
     class Server;
-    class StateController;
+    class GameState;
 
     class Entity {
     protected:
         Server &server;
-        StateController &stateController;
+        GameState &state;
 
-        uint16_t id = 0;
+        entityId id = 0;
         std::string tag;
+        Vector2 position = {};
     public:
-        Entity(uint16_t id, Server &server, StateController &stateController, const std::string &tag) : server(server), stateController(stateController), id(id), tag(tag) {}
+        Entity(entityId id, Server &server, GameState &state, const std::string &tag) : server(server), state(state), id(id), tag(tag) {}
 
         virtual ~Entity() = default;
         virtual bool init(){ return true; }

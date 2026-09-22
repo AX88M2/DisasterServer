@@ -106,53 +106,7 @@ void log_hook(loghook_t func)
 {
 	hook = func;
 }
-
-void log_fmt(const char* fmt, const char* type, const char* file, int line, ...)
-{
-	const char* thd_name = (const char*)ThreadVarGet(g_threadName);
-	char filename[24];
-	snprintf(filename, 24, "%s:%d", file, line);
-
-	time_t t = time(NULL);
-	struct tm* p = localtime(&t);
-
-	va_list list;
-	if (logFile)
-	{
-		char strtime[32];
-		strftime(strtime, 32, "%m/%d/%Y %H:%M:%S", p);
-		fprintf(logFile, "[%s %s %s %s] ", strtime, type, thd_name != NULL ? thd_name : "unknown", filename);
-
-		va_start(list, line);
-		vfprintf(logFile, fmt, list);
-		va_end(list);
-
-		fputs("\n", logFile);
-		fflush(logFile);
-	}
-
-	if (hook)
-	{
-		char fmt_log[512];
-		va_start(list, line);
-		vsnprintf(fmt_log, 512, fmt, list);
-		va_end(list);
-
-		char log[1024];
-		snprintf(log, 1024, "[%s]: %s", filename, fmt_log);
-
-		hook(type, log);
-		return;
-	}
-
-	printf("[%s %s %s] ", type, thd_name != NULL ? thd_name : "unknown", filename);
-
-	va_start(list, line);
-	vprintf(fmt, list);
-	va_end(list);
-
-	puts("");
-}*/
+*/
 
 #include "Log.hpp"
 
