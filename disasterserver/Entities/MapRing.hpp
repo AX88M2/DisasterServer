@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "Entity.hpp"
+#include "Core/Types.hpp"
 
 namespace DisasterServer {
     class Server;
@@ -18,7 +18,8 @@ namespace DisasterServer::Entities
         uint8_t rid = 0;
         bool red = false;
     public:
-        MapRing(entityId id, Server &server, GameState &state);
+        MapRing(entityId id, Server &server, GameState &state, const Vector2 &position);
+        ~MapRing() override;
 
         bool init() override;
         bool uninit() override;

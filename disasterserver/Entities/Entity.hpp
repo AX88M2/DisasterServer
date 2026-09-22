@@ -16,9 +16,10 @@ namespace DisasterServer
 
         entityId id = 0;
         std::string tag;
-        Vector2 position = {};
+        Vector2 position;
     public:
-        Entity(entityId id, Server &server, GameState &state, const std::string &tag) : server(server), state(state), id(id), tag(tag) {}
+        Entity(entityId id, Server &server, GameState &state, const std::string &tag, const Vector2 &position) :
+            server(server), state(state), id(id), tag(tag), position(position) {}
 
         virtual ~Entity() = default;
         virtual bool init(){ return true; }

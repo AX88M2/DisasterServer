@@ -7,8 +7,10 @@ using namespace DisasterServer::Entities;
 
 #define MAP_BRING INT16_MAX
 
-BlackRing::BlackRing(entityId id, Server &server, GameState &state) : Entity(id, server, state, "bring") {}
-BlackRing::~BlackRing() noexcept = default;
+BlackRing::BlackRing(entityId id, Server &server, GameState &state, const Vector2 &position) :
+    Entity(id, server, state, "bring", position) {}
+
+BlackRing::~BlackRing() = default;
 
 bool BlackRing::init() {
     if (position == Vector2(MAP_BRING, MAP_BRING)) {

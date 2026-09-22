@@ -9,9 +9,9 @@ namespace DisasterServer::Entities
 {
     class Ring : public Entity {
         uint8_t rid = 0;
-        bool red = false;
+        bool red;
     public:
-        Ring(entityId id, Server &server, GameState &state);
+        Ring(entityId id, Server &server, GameState &state, const Vector2 &position, bool red = false);
         ~Ring() override;
 
         bool init() override;

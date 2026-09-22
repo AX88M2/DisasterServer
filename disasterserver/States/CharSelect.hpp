@@ -12,29 +12,28 @@
 
 namespace DisasterServer
 {
+    class StateController;
 
-class StateController;
+    class CharSelectState : public State {
+        Countdown countdown { TICKS_PER_SEC };
 
-class CharSelectState : public State {
-    Countdown countdown { TICKS_PER_SEC };
+        Map *map = nullptr;
+        mapId mapid = 0;
+        clientId exe = 0;
+        std::unordered_map<SurvCharacters, bool> avail;
+    public:
+        CharSelectState(Server &server, StateController &stateController, Map* map, mapId id);
+        ~CharSelectState() override;
 
-    Map *map = nullptr;
-    mapId mapid = 0;
-    clientId exe = 0;
-    std::unordered_map<SurvCharacters, bool> avail;
-public:
-    CharSelectState(Server &server, StateController &stateController, Map* map, mapId id);
-    ~CharSelectState() override;
-
-    void enter() override;
-    void exit() override;
-    bool playerJoined(Client& client) override;
-    bool playerLeaved(Client& client) override;
-    void tick() override;
-    bool handle(Client& client, Packet& packet) override;
-private:
-    bool checkState();
-    bool chooseExe();
-};
+        void enter() override;
+        void exit() override;
+        bool playerJoined(Client& client) override;
+        bool playerLeaved(Client& client) override;
+        void tick() override;
+        bool handle(Client& client, Packet& packet) override;
+    private:
+        bool checkState();
+        bool chooseExe();
+    };
 }
 #endif

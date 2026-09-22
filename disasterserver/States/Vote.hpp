@@ -5,7 +5,8 @@
 
 #include "Client.hpp"
 
-namespace DisasterServer {
+namespace DisasterServer
+{
     class Server;
 
     enum class VoteType

@@ -2,6 +2,7 @@
 
 #include "Server.hpp"
 #include "Entities/Entity.hpp"
+#include "Core/Vector2.hpp"
 
 namespace DisasterServer
 {
@@ -20,9 +21,9 @@ namespace DisasterServer
         void tick();
 
         template <typename T, typename... Args>
-        T* spawnEntity(Args&&... args) {
+        T* spawnEntity(const Vector2 &pos = {}, Args&&... args) {
             ++entityIdCounter;
-            auto ent = std::make_unique<T>(entityIdCounter, server, state, std::forward<Args>(args)...);
+            auto ent = std::make_unique<T>(entityIdCounter, server, state, pos, std::forward<Args>(args)...);
 
             if (!ent->init())
                 return nullptr;

@@ -1,13 +1,16 @@
+#include "MapRing.hpp"
+
 #include "Server.hpp"
-#include "Controllers/StateController.hpp"
 #include "States/GameState.hpp"
 #include "Util/Packet.hpp"
-#include "MapRing.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-MapRing::MapRing(entityId id, Server &server, GameState &state) : Entity(id, server, state, "ring") {}
+MapRing::MapRing(entityId id, Server &server, GameState &state, const Vector2 &position) :
+    Entity(id, server, state, "ring", position) {}
+
+MapRing::~MapRing() = default;
 
 bool MapRing::init() {
     Map* map = state.getCurrentMap();

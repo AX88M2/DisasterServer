@@ -505,7 +505,7 @@ bool GameState::handle(Client& client, Packet& packet) {
         case PacketType::CLIENT_RING_COLLECTED: {
             AssertOrDisconnect(client, client.isInGame());
 
-            const uint8_t id  = packet.read<uint8_t>();
+            const uint8_t id = packet.read<uint8_t>();
             const uint16_t eid = packet.read<uint16_t>();
 
             auto* ent = entityController.findEntity<MapRing>(eid);
@@ -514,7 +514,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             const bool isRed = ent->isRed();
             entityController.despawnEntity(eid);
 
-            auto& player = client.getPlayer();
+            auto &player = client.getPlayer();
             if (!isRed) {
                 player.setLastRings(Clock::now());
                 player.setRings(player.getRings() + 1);

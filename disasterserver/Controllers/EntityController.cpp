@@ -6,7 +6,7 @@ EntityController::EntityController(Server &server, GameState &state) : server(se
 }
 
 void EntityController::tick() {
-    for (auto &entity : entities) {
+    for (const auto &entity : entities) {
         entity->tick();
     }
 }

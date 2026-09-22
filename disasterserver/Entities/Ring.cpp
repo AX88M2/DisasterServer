@@ -5,7 +5,8 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-Ring::Ring(entityId id, Server &server, GameState &state) : Entity(id, server, state, "cring") {}
+Ring::Ring(entityId id, Server &server, GameState &state, const Vector2 &position, const bool red) :
+    Entity(id, server, state, "cring", position), red(red) {}
 
 Ring::~Ring() = default;
 
