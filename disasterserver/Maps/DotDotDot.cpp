@@ -23,5 +23,5 @@ void DotDotDot::left(Client&) {
 }
 
 DisasterServer::MapProperties DotDotDot::getMapTime() const {
-    return MapProperties(205 * TICKS_PER_SEC, 20, 5);
+    return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
 }
