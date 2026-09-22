@@ -124,6 +124,7 @@ else()
             add_executable(DisasterServerCXX
                     ${SOURCES}
                     Main.cpp
+                    Entities/Spike.cpp
             )
 
             if (WIN32)

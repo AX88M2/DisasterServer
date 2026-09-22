@@ -10,8 +10,6 @@
 #include "Maps/Map.hpp"
 #include "Core/Types.hpp"
 #include "Util/Countdown.hpp"
-
-// NEW: базовый класс сущностей
 #include "Controllers/EntityController.hpp"
 
 namespace DisasterServer
@@ -79,6 +77,7 @@ namespace DisasterServer
 
         clientId getExe() const { return exe; }
         Map* getCurrentMap() const { return currentMap; }
+        EntityController& getEntityController() { return entityController; }
     private:
         void uninit(bool show_results);
 
