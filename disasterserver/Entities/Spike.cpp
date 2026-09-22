@@ -1,7 +1,7 @@
 #include "Spike.hpp"
 #include "Server.hpp"
 #include "States/GameState.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 
 using namespace DisasterServer;
 
