@@ -1,8 +1,6 @@
 #include "MajinForest.hpp"
 
 #include "Server.hpp"
-#include "Client.hpp"
-#include "Util/Packet.hpp"
 
 using namespace DisasterServer::Maps;
 

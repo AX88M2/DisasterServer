@@ -1,5 +1,4 @@
 #include "EntityController.hpp"
-#include <algorithm>
 
 using namespace DisasterServer;
 

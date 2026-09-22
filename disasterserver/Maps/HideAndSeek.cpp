@@ -1,9 +1,6 @@
 #include "HideAndSeek.hpp"
 
 #include "Server.hpp"
-#include "Client.hpp"
-#include "Util/Packet.hpp"
-#include "Core/Constansts.hpp"
 
 using namespace DisasterServer::Maps;
 
