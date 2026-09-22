@@ -3,7 +3,7 @@
 
 #include "Player.hpp"
 #include "Controllers/StateController.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer

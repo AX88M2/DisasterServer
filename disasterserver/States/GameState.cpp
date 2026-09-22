@@ -13,7 +13,7 @@
 #include "Entities/BlackRing.hpp"
 #include "Entities/MapRing.hpp"
 #include "Entities/Ring.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;

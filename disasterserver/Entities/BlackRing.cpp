@@ -1,6 +1,6 @@
 #include "BlackRing.hpp"
 
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;

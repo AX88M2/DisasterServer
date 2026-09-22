@@ -4,7 +4,7 @@
 
 #include "Server.hpp"
 #include "Core/Log.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 #include "States/GameState.hpp"
 #include "States/LobbyState.hpp"
 

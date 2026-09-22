@@ -4,7 +4,7 @@
 #include "Core/Time.hpp"
 #include "Server.hpp"
 #include "ConfigManager.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 #include "Controllers/StateController.hpp"
 
 using namespace DisasterServer;

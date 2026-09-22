@@ -6,7 +6,7 @@
 #include "Core/Constansts.hpp"
 #include "Maps/Map.hpp"
 #include "Util/Countdown.hpp"
-#include "Util/Packet.hpp"
+#include "Packet.hpp"
 
 #include "Core/Types.hpp"
 
