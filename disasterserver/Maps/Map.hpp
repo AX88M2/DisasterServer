@@ -29,12 +29,11 @@ namespace DisasterServer
 
         virtual ~Map() = default;
 
-        virtual void init() = 0;
+        virtual void init(GameState& game) = 0;
         virtual void tick() = 0;
         virtual void handle(Client& client, Packet& packet) = 0;
         virtual void left(Client& client) = 0;
         virtual MapProperties getMapTime() const = 0;
-        virtual void spawnControllers(GameState& game) {}
 
         const std::string& getName() const { return name; }
 

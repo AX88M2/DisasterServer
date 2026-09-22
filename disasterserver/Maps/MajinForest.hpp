@@ -10,7 +10,7 @@ namespace DisasterServer::Maps
     public:
         explicit MajinForest();
 
-        void init() override;
+        void init(GameState& game) override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;

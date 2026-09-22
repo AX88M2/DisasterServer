@@ -226,8 +226,9 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             if (!motd.empty()) {
                 this->server.sendMessage(client, motd);
             }
-            if (client.isModified())
+            if (client.isModified()) {
                 this->server.sendMessage(client, "{}your client is disallowed on this server", CLRCODE_RED);
+            }
             break;
         }
 

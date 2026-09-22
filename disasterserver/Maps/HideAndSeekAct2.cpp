@@ -9,7 +9,7 @@ using namespace DisasterServer::Maps;
 
 HideAndSeekAct2::HideAndSeekAct2() : Map("Hide And Seek 2", 1, 30) {}
 
-void HideAndSeekAct2::init()
+void HideAndSeekAct2::init(GameState& game)
 {
 }
 

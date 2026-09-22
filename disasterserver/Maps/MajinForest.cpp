@@ -8,7 +8,7 @@ using namespace DisasterServer::Maps;
 
 MajinForest::MajinForest(): Map("Majin Forest", 1, 30) {}
 
-void MajinForest::init()
+void MajinForest::init(GameState& game)
 {
 }
 

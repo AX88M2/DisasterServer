@@ -9,7 +9,7 @@ using namespace DisasterServer::Maps;
 
 DesertTown::DesertTown() : Map("Desert Town", 1, 30) {}
 
-void DesertTown::init()
+void DesertTown::init(GameState& game)
 {
 }
 

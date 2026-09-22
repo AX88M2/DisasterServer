@@ -8,6 +8,8 @@ using namespace DisasterServer;
 SpikeController::SpikeController(entityId id, Server &server, GameState &state, const Vector2 &pos)
     : Entity(id, server, state, "spikectrl", pos) {}
 
+SpikeController::~SpikeController() = default;
+
 bool SpikeController::tick() {
     timer -= server.getDelta();
     if (timer > 0)

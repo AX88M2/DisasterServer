@@ -9,7 +9,7 @@ using namespace DisasterServer::Maps;
 
 HideAndSeek::HideAndSeek() : Map("Hide And Seek", 1, 30) {}
 
-void HideAndSeek::init()
+void HideAndSeek::init(GameState& game)
 {
 }
 

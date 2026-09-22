@@ -10,7 +10,9 @@
 #include "ResultsState.hpp"
 #include "Core/Defines.hpp"
 #include "Core/Constansts.hpp"
+#include "Entities/BlackRing.hpp"
 #include "Entities/MapRing.hpp"
+#include "Entities/Ring.hpp"
 #include "Util/Packet.hpp"
 
 using namespace DisasterServer;
@@ -346,8 +348,7 @@ bool GameState::checkStart() {
         pack.sendBroadcast(server);
 
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
-        currentMap->init();
-        currentMap->spawnControllers(*this);
+        currentMap->init(*this);
 
         elapsed = 0.0f;
         gameTime.stop();
@@ -723,6 +724,36 @@ bool GameState::handle(Client& client, Packet& packet) {
                 pack.write<clientId>(client.getId());
                 pack.append(packet, 2);
                 pack.sendBroadcast(server, false);
+            }
+
+            break;
+        }
+
+        case PacketType::CLIENT_ERECTOR_BRING_SPAWN: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, client.getId() == this->exe);
+            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXETIOR);
+
+            const Vector2 position = packet.readVector2();
+
+            if (client.isModified()) {
+                entityController.spawnEntity<Ring>(position);
+                break;
+            }
+
+            entityController.spawnEntity<BlackRing>(position);
+            break;
+        }
+
+        case PacketType::CLIENT_BRING_COLLECTED: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, client.getId() != this->exe);
+
+            const entityId eid = packet.read<entityId>();
+
+            if (entityController.despawnEntity(eid)) {
+                Packet pack(PacketType::SERVER_BRING_COLLECTED);
+                pack.send(client);
             }
 
             break;

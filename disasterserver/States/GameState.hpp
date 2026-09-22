@@ -73,8 +73,6 @@ namespace DisasterServer
                 ringSlots[i] = used;
         }
 
-        bool spawnRing();
-
         clientId getExe() const { return exe; }
         Map* getCurrentMap() const { return currentMap; }
         EntityController& getEntityController() { return entityController; }
@@ -86,6 +84,7 @@ namespace DisasterServer
         bool checkState();
         bool checkStart();
 
+        bool spawnRing();
         void bigRing(BigRingState state);
         bool endingRound(Ending ending, bool achiv);
         void demonize(Client& client);
