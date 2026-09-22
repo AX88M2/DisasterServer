@@ -1,4 +1,5 @@
 #include "EntityController.hpp"
+#include <algorithm>
 
 using namespace DisasterServer;
 
@@ -6,7 +7,12 @@ EntityController::EntityController(Server &server, GameState &state) : server(se
 }
 
 void EntityController::tick() {
-    for (const auto &entity : entities) {
-        entity->tick();
+    for (auto it = entities.begin(); it != entities.end(); ) {
+        if (!(*it)->tick()) {
+            (*it)->uninit();
+            it = entities.erase(it);
+        } else {
+            ++it;
+        }
     }
 }

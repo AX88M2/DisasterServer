@@ -347,6 +347,7 @@ bool GameState::checkStart() {
 
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
         currentMap->init();
+        currentMap->spawnControllers(*this);
 
         elapsed = 0.0f;
         gameTime.stop();

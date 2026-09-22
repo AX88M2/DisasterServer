@@ -2,7 +2,6 @@
 #define DISASTERSERVER_MAP_HPP
 
 #include <string>
-
 #include "Core/Constansts.hpp"
 
 namespace DisasterServer
@@ -10,6 +9,7 @@ namespace DisasterServer
     class Server;
     class Client;
     class Packet;
+    class GameState;
 
     struct MapProperties {
         int time = 3 * TICKS_PER_SEC;
@@ -34,6 +34,7 @@ namespace DisasterServer
         virtual void handle(Client& client, Packet& packet) = 0;
         virtual void left(Client& client) = 0;
         virtual MapProperties getMapTime() const = 0;
+        virtual void spawnControllers(GameState& game) {}
 
         const std::string& getName() const { return name; }
 

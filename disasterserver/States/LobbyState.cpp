@@ -340,9 +340,10 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
 static std::vector<mapId> convertMapIds = {
     0,   // 1. Hide And Seek Act 2
-    3,   // 2. Desert Town
-    13,  // 3. Majin Forest
-    14   // 4. Hide And Seek
+    2,   // 2. ... (DotDotDot)
+    3,   // 3. Desert Town
+    13,  // 4. Majin Forest
+    14   // 5. Hide And Seek
 };
 
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
@@ -430,7 +431,6 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
 
             break;
         }
-
 
         case CMD_VP: {
             if (vote.isOnGoing()) {
