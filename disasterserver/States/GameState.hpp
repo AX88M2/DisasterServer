@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <array>
 #include <cstdint>
 
 #include "State.hpp"
@@ -10,6 +11,7 @@
 #include "Maps/Map.hpp"
 #include "Core/Types.hpp"
 #include "Util/Countdown.hpp"
+
 #include "Controllers/EntityController.hpp"
 
 namespace DisasterServer
@@ -31,7 +33,7 @@ namespace DisasterServer
     class GameState : public State
     {
         mapId currentMapId = 0;
-        Map* currentMap = nullptr;
+        Map*  currentMap   = nullptr;
 
         clientId exe = 0;
 
@@ -42,18 +44,19 @@ namespace DisasterServer
         Countdown startTimeout { TICKS_PER_SEC };
         Countdown endTime { TICKS_PER_SEC };
 
-        double elapsed = 0.0;
+        double elapsed  = 0.0;
         int ringCoff = 0;
         Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;
-        uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать класс для рандома
+        uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать отдельный класс рандома
 
         std::vector<std::unique_ptr<Client>> leftClients = {};
-
         std::vector<bool> ringSlots;
+        std::array<double, PLAYER_COOLCOUNT> cooldowns{};
 
         EntityController entityController;
+
     public:
         GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);
         ~GameState() override;
@@ -65,26 +68,35 @@ namespace DisasterServer
         void tick() override;
         bool handle(Client& client, Packet& packet) override;
 
+        // ring slots
         bool isRingSlotUsed(int i) const {
             return i >= 0 && i < static_cast<int>(ringSlots.size()) && ringSlots[i];
         }
+
         void setRingSlot(int i, bool used) {
-            if (i >= 0 && i < static_cast<int>(ringSlots.size()))
+            if (i >= 0 && i < static_cast<int>(ringSlots.size())) {
                 ringSlots[i] = used;
+            }
         }
 
+        // cooldowns
+        double getCooldown(CooldownId id) const { return cooldowns[static_cast<size_t>(id)]; }
+        void setCooldown(CooldownId id, double value) { cooldowns[static_cast<size_t>(id)] = value; }
+
         clientId getExe() const { return exe; }
+        mapId getCurrentMapId() const { return currentMapId; }
         Map* getCurrentMap() const { return currentMap; }
         EntityController& getEntityController() { return entityController; }
+
     private:
         void uninit(bool show_results);
 
         void tickPlayers();
+        bool spawnRing();
 
         bool checkState();
         bool checkStart();
 
-        bool spawnRing();
         void bigRing(BigRingState state);
         bool endingRound(Ending ending, bool achiv);
         void demonize(Client& client);

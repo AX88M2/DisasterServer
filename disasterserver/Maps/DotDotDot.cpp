@@ -10,7 +10,7 @@ using namespace DisasterServer::Maps;
 DotDotDot::DotDotDot() : Map("...", 1, 30) {}
 
 void DotDotDot::init(GameState& game) {
-    game.getEntityController().spawnEntity<SpikeController>();
+    game.getEntityController().spawnEntity<Entities::SpikeController>();
 }
 void DotDotDot::tick() {
 

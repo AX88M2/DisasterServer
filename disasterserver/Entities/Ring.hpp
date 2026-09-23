@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Entity.hpp"
 
 namespace DisasterServer {

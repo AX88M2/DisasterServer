@@ -1,15 +1,10 @@
 #ifndef DISASTERSERVER_LOBBY_HPP
 #define DISASTERSERVER_LOBBY_HPP
 
-#include <cstdint>
-
 #include "State.hpp"
 #include "Vote.hpp"
 #include "Core/Constansts.hpp"
 #include "Util/Countdown.hpp"
-
-constexpr int START_COUNTDOWN = 5;
-constexpr int NO_COUNTDOWN  = START_COUNTDOWN + 1;
 
 namespace DisasterServer
 {
@@ -17,7 +12,9 @@ namespace DisasterServer
 
     class LobbyState : public State {
         Countdown countdown { TICKS_PER_SEC };
+
         double pracCountdown = 0;
+
         Vote vote;
         clientId kickTarget = 0;
     public:

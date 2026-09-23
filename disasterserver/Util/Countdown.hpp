@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_COUNTDOWN_HPP
-#define DISASTERSERVER_COUNTDOWN_HPP
+#pragma once
 
 #include <algorithm>
 #include <cstdint>
@@ -183,7 +182,3 @@ namespace DisasterServer
         bool active_ = false;
     };
 }
-
-
-
-#endif //DISASTERSERVER_COUNTDOWN_HPP

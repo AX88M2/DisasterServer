@@ -40,6 +40,7 @@ set(DEFINES
 set(LIBS
         enet
         Boost::algorithm
+        Boost::bind
         toml11
         sqlite_orm::sqlite_orm
 )
