@@ -10,7 +10,7 @@
 
 using namespace DisasterServer::Maps;
 
-YouCantRun::YouCantRun() : Map("You Can't Run", 1, 30) {}
+YouCantRun::YouCantRun(Server &server) : Map(server, "You Can't Run", 1, 30) {}
 
 void YouCantRun::init(GameState& game) {
     auto& ec = game.getEntityController();
@@ -29,6 +29,6 @@ void YouCantRun::left(Client&) {
 
 }
 
-DisasterServer::MapProperties YouCantRun::getMapTime() const {
+DisasterServer::MapProperties YouCantRun::getMapProperties() const {
     return MapProperties(3 * TICKS_PER_SEC, 20, 5);
 }

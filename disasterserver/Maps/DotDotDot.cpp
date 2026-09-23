@@ -7,7 +7,7 @@
 
 using namespace DisasterServer::Maps;
 
-DotDotDot::DotDotDot() : Map("...", 1, 30) {}
+DotDotDot::DotDotDot(Server &server) : Map(server, "...", 1, 30) {}
 
 void DotDotDot::init(GameState& game) {
     game.getEntityController().spawnEntity<Entities::SpikeController>();
@@ -22,6 +22,6 @@ void DotDotDot::left(Client&) {
 
 }
 
-DisasterServer::MapProperties DotDotDot::getMapTime() const {
+DisasterServer::MapProperties DotDotDot::getMapProperties() const {
     return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
 }

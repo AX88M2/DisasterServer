@@ -17,13 +17,16 @@ namespace DisasterServer
     };
 
     class Map {
+    protected:
+        Server &server;
+    private:
         std::string name;
 
         MapProperties countdown;
         int spawnRedRings;
         int ringCount;
     public:
-        Map(std::string name, const int spawnRedRings, const int ringCount) : name(std::move(name)),
+        Map(Server &server, std::string name, const int spawnRedRings, const int ringCount) : server(server), name(std::move(name)),
             spawnRedRings(spawnRedRings), ringCount(ringCount) {}
 
         virtual ~Map() = default;
@@ -32,7 +35,7 @@ namespace DisasterServer
         virtual void tick() = 0;
         virtual void handle(Client& client, Packet& packet) = 0;
         virtual void left(Client& client) = 0;
-        virtual MapProperties getMapTime() const = 0;
+        virtual MapProperties getMapProperties() const = 0;
 
         const std::string& getName() const { return name; }
 

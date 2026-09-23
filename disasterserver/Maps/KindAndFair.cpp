@@ -9,7 +9,7 @@
 
 using namespace DisasterServer::Maps;
 
-KindAndFair::KindAndFair() : Map("Kind And Fair", 1, 30) {}
+KindAndFair::KindAndFair(Server &server) : Map(server, "Kind And Fair", 1, 30) {}
 
 void KindAndFair::init(GameState& state) {
     this->game = &state;
@@ -50,6 +50,6 @@ void KindAndFair::handle(Client& client, Packet& packet) {
     box->activate(client.getId(), proj);
 }
 
-DisasterServer::MapProperties KindAndFair::getMapTime() const {
+DisasterServer::MapProperties KindAndFair::getMapProperties() const {
     return MapProperties(3 * TICKS_PER_SEC, 20, 5);
 }

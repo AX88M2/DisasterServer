@@ -211,5 +211,6 @@ namespace DisasterServer
         void setPosition(Vector2 vec2) { position = vec2; }
 
         PlayerStats &getStats() { return this->stats; }
+        Userdata &getUserdata() { return this->userdata; }
     };
 }

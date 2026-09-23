@@ -4,7 +4,7 @@
 
 using namespace DisasterServer::Maps;
 
-HideAndSeek::HideAndSeek() : Map("Hide And Seek", 1, 30) {}
+HideAndSeek::HideAndSeek(Server &server) : Map(server, "Hide And Seek", 1, 30) {}
 
 void HideAndSeek::init(GameState& game)
 {
@@ -22,6 +22,6 @@ void HideAndSeek::left(Client&) {
 
 }
 
-DisasterServer::MapProperties HideAndSeek::getMapTime() const {
+DisasterServer::MapProperties HideAndSeek::getMapProperties() const {
     return MapProperties();
 }

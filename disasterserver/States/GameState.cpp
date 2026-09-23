@@ -337,7 +337,7 @@ bool GameState::checkStart() {
         gameTime.stop();
         endTime.stop();
 
-        auto [time, mul, mapRingCoff] = currentMap->getMapTime();
+        auto [time, mul, mapRingCoff] = currentMap->getMapProperties();
         this->ringCoff = mapRingCoff;
         this->gameTime.start((time + ((this->server.getInGameCount() - 1) * mul)));
 

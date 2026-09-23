@@ -4,7 +4,7 @@
 
 using namespace DisasterServer::Maps;
 
-MajinForest::MajinForest(): Map("Majin Forest", 1, 30) {}
+MajinForest::MajinForest(Server &server): Map(server, "Majin Forest", 1, 30) {}
 
 void MajinForest::init(GameState& game)
 {
@@ -22,6 +22,6 @@ void MajinForest::left(Client&)
 {
 }
 
-DisasterServer::MapProperties MajinForest::getMapTime() const {
+DisasterServer::MapProperties MajinForest::getMapProperties() const {
     return MapProperties(2.585 * TICKS_PER_SEC, 10, 3);
 }
