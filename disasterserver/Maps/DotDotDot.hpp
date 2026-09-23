@@ -7,13 +7,13 @@ namespace DisasterServer::Maps
     class DotDotDot : public Map
     {
     public:
-        explicit DotDotDot();
+        explicit DotDotDot(Server &server);
 
         void init(GameState& game) override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;
 
-        MapProperties getMapTime() const override;
+        MapProperties getMapProperties() const override;
     };
 }

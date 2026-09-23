@@ -31,6 +31,7 @@ enum CooldownId : uint8_t {
 // Классный конечно кастыль (спасибо UwU)
 static std::vector<mapId> convertMapIds = {
     0,   // 1. Hide And Seek Act 2
+    1,   //
     2,   // 2. ... (DotDotDot)
     3,   // 3. Desert Town
     4,   // 4. You Can't Run (5)

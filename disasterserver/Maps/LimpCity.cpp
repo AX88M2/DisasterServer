@@ -10,7 +10,7 @@
 
 using namespace DisasterServer::Maps;
 
-LimpCity::LimpCity() : Map("Limp City", 1, 30) {
+LimpCity::LimpCity(Server &server) : Map(server, "Limp City", 1, 30) {
 }
 
 void LimpCity::init(GameState& state) {
@@ -68,6 +68,6 @@ void LimpCity::handle(Client& client, Packet& packet) {
     }
 }
 
-DisasterServer::MapProperties LimpCity::getMapTime() const {
+DisasterServer::MapProperties LimpCity::getMapProperties() const {
     return MapProperties(2.585 * TICKS_PER_SEC, 20, 5);
 }

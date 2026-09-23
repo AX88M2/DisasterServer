@@ -43,7 +43,7 @@ namespace DisasterServer
         Countdown startTimeout { TICKS_PER_SEC };
         Countdown endTime { TICKS_PER_SEC };
 
-        double elapsed  = 0.0;
+        double elapsed = 0.0;
         int ringCoff = 0;
         Ending ending = Ending::EXEWIN;
 
@@ -85,6 +85,8 @@ namespace DisasterServer
         clientId getExe() const { return exe; }
         mapId getCurrentMapId() const { return currentMapId; }
         Map* getCurrentMap() const { return currentMap; }
+        Countdown &getGameTime() { return gameTime; }
+        Countdown &getEndTime() { return endTime; }
         EntityController& getEntityController() { return entityController; }
 
     private:

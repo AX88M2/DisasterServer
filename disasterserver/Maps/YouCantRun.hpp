@@ -7,14 +7,14 @@ namespace DisasterServer::Maps
 
     class YouCantRun : public Map {
     public:
-        explicit YouCantRun();
+        explicit YouCantRun(Server &server);
 
         void init(GameState& game) override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;
 
-        MapProperties getMapTime() const override;
+        MapProperties getMapProperties() const override;
     };
 
 }

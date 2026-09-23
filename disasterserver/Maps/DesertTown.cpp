@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-DesertTown::DesertTown() : Map("Desert Town", 1, 30) {}
+DesertTown::DesertTown(Server &server) : Map(server, "Desert Town", 1, 30) {}
 
 void DesertTown::init(GameState& game)
 {
@@ -23,6 +23,6 @@ void DesertTown::left(Client&) {
 
 }
 
-DisasterServer::MapProperties DesertTown::getMapTime() const {
+DisasterServer::MapProperties DesertTown::getMapProperties() const {
     return MapProperties();
 }

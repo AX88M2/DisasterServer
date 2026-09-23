@@ -4,15 +4,15 @@
 
 namespace DisasterServer::Maps
 {
-    class WoodDream : public Map {
+    class MysticWood : public Map {
     public:
-        explicit WoodDream();
+        explicit MysticWood(Server &server);
 
         void init(GameState& game) override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;
 
-        MapProperties getMapTime() const override;
+        MapProperties getMapProperties() const override;
     };
 }
