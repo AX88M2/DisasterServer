@@ -46,6 +46,15 @@ namespace DisasterServer
             return nullptr;
         }
 
+        template <typename T, typename Pred>
+        T* findIf(Pred pred) {
+            for (auto& e : entities) {
+                if (auto* p = dynamic_cast<T*>(e.get()); p && pred(*p))
+                    return p;
+            }
+            return nullptr;
+        }
+
         bool despawnEntity(uint16_t id) {
             const auto it = std::ranges::find_if(entities.begin(), entities.end(), [id](const auto& e) {
                 return e->getId() == id;
@@ -58,5 +67,8 @@ namespace DisasterServer
             }
             return false;
         }
+
+        std::vector<std::unique_ptr<Entity>>&       getEntities()       { return entities; }
+        const std::vector<std::unique_ptr<Entity>>& getEntities() const { return entities; }
     };
 }

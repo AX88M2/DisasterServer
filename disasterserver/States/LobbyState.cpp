@@ -343,8 +343,12 @@ static std::vector<mapId> convertMapIds = {
     0,   // 1. Hide And Seek Act 2
     2,   // 2. ... (DotDotDot)
     3,   // 3. Desert Town
-    13,  // 4. Majin Forest
-    14   // 5. Hide And Seek
+    4,   // 4. You Can't Run (5)
+    5,   // 5. Limp City (6)
+    7,   // 8. Kind And Fair (8)
+    13,  // 5. Majin Forest
+    14,  // 6. Hide And Seek
+    18,  // 7. Mystic Wood (19)
 };
 
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {

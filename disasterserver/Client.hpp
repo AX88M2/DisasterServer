@@ -138,6 +138,7 @@ namespace DisasterServer
         clientId getId() const { return id; }
         std::string getIp() const { return ip; }
         ENetPeer *getPeer() const { return peer; }
+        StateController& getStateController() { return stateController; }
         Player &getPlayer() { return player; }
         std::string getNickname() { return nickname; }
         std::string getUdid() { return udid; }
