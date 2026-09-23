@@ -15,5 +15,10 @@ namespace DisasterServer::Maps
         void left(Client &client) override;
 
         MapProperties getMapProperties() const override;
+
+    private:
+
+        void spawnShards(Client &client);
+        void checkState();
     };
 }

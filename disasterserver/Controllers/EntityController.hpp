@@ -57,6 +57,15 @@ namespace DisasterServer
             return nullptr;
         }
 
+        template <std::derived_from<Entity> T>
+        size_t find() {
+            const auto count = std::ranges::count_if(entities, [](const auto &entity) {
+                return EntityController::isEntity<T>(entity.get());
+            });
+
+            return count;
+        }
+
         bool despawnEntity(entityId id) {
             const auto it = std::ranges::find_if(entities.begin(), entities.end(), [id](const auto& e) {
                 return e->getId() == id;
@@ -68,6 +77,11 @@ namespace DisasterServer
                 return true;
             }
             return false;
+        }
+
+        template <std::derived_from<Entity> T>
+        static bool isEntity(Entity *entity) {
+            return dynamic_cast<T*>(entity) != nullptr;
         }
 
         std::vector<std::unique_ptr<Entity>> &getEntities() { return entities; }

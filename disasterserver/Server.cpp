@@ -199,7 +199,7 @@ void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
 }
 
 size_t Server::getClientCount() {
-    return std::ranges::count_if(peers, [](const auto& _) { return true; });
+    return peers.size();
 }
 
 size_t Server::getInGameCount() {

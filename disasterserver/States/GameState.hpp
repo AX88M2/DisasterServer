@@ -82,6 +82,8 @@ namespace DisasterServer
         double getCooldown(CooldownId id) const { return cooldowns[static_cast<size_t>(id)]; }
         void setCooldown(CooldownId id, double value) { cooldowns[static_cast<size_t>(id)] = value; }
 
+        void bigRing(BigRingState state);
+
         clientId getExe() const { return exe; }
         mapId getCurrentMapId() const { return currentMapId; }
         Map* getCurrentMap() const { return currentMap; }
@@ -98,7 +100,6 @@ namespace DisasterServer
         bool checkState();
         bool checkStart();
 
-        void bigRing(BigRingState state);
         bool endingRound(Ending ending, bool achiv);
         void demonize(Client& client);
     };
