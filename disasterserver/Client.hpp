@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_PEER_HPP
-#define DISASTERSERVER_PEER_HPP
+#pragma once
 
 #include "Player.hpp"
 #include "Controllers/StateController.hpp"
@@ -183,5 +182,3 @@ namespace DisasterServer
         }
     };
 }
-
-#endif //DISASTERSERVER_PEER_HPP

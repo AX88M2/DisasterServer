@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_GAMESTATE_HPP
-#define DISASTERSERVER_GAMESTATE_HPP
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -102,5 +101,3 @@ namespace DisasterServer
         void demonize(Client& client);
     };
 }
-
-#endif

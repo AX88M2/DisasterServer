@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_HIDEANDSEEKACT2_HPP
-#define DISASTERSERVER_HIDEANDSEEKACT2_HPP
+#pragma once
 
 #include "Map.hpp"
 
@@ -18,5 +17,3 @@ namespace DisasterServer::Maps
         MapProperties getMapTime() const override;
     };
 }
-
-#endif

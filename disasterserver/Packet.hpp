@@ -5,7 +5,6 @@
 #include <functional>
 #include <optional>
 #include <string>
-#include <cstring>
 
 #include "Core/Log.hpp"
 #include "enet/enet.h"

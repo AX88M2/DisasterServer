@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_MAPVOTESTATE_HPP
-#define DISASTERSERVER_MAPVOTESTATE_HPP
+#pragma once
 
 #include "Client.hpp"
 #include "State.hpp"
@@ -31,5 +30,3 @@ namespace DisasterServer
         void checkState();
     };
 }
-
-#endif //DISASTERSERVER_MAPVOTESTATE_HPP

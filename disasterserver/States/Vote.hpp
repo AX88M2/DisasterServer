@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_VOTE_HPP
-#define DISASTERSERVER_VOTE_HPP
+#pragma once
 
 #include <unordered_set>
 
@@ -49,5 +48,3 @@ namespace DisasterServer
         size_t getVoteCount() const { return votes.size(); }
     };
 }
-
-#endif //DISASTERSERVER_VOTE_HPP

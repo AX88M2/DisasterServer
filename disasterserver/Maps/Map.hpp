@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_MAP_HPP
-#define DISASTERSERVER_MAP_HPP
+#pragma once
 
 #include <string>
 #include "Core/Constansts.hpp"
@@ -41,5 +40,3 @@ namespace DisasterServer
         int getRingCount() const { return ringCount; }
     };
 }
-
-#endif

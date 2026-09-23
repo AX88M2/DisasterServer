@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_RESULTSSTATE_HPP
-#define DISASTERSERVER_RESULTSSTATE_HPP
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -38,5 +37,3 @@ namespace DisasterServer
         bool sendResult(Client& client, Client& data, bool hasQuit);
     };
 }
-
-#endif //DISASTERSERVER_RESULTSSTATE_HPP

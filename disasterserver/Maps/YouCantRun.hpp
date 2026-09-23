@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_YOUCANTRUN_HPP
-#define DISASTERSERVER_YOUCANTRUN_HPP
+#pragma once
 
 #include "Map.hpp"
 
@@ -19,5 +18,3 @@ namespace DisasterServer::Maps
     };
 
 }
-
-#endif

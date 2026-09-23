@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_PLAYER_HPP
-#define DISASTERSERVER_PLAYER_HPP
+#pragma once
 
 #include <array>
 
@@ -214,5 +213,3 @@ namespace DisasterServer
         PlayerStats &getStats() { return this->stats; }
     };
 }
-
-#endif //DISASTERSERVER_PLAYER_HPP

@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_SERVER_HPP
-#define DISASTERSERVER_SERVER_HPP
+#pragma once
 
 #include "Application.hpp"
 #include "Client.hpp"
@@ -56,5 +55,3 @@ namespace DisasterServer
         double getDelta() const { return delta; }
     };
 }
-
-#endif

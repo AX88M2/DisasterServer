@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_STATE_HPP
-#define DISASTERSERVER_STATE_HPP
+#pragma once
 
 namespace DisasterServer
 {
@@ -24,5 +23,3 @@ namespace DisasterServer
         virtual bool handle(Client& client, Packet& packet) { return true; }
     };
 }
-
-#endif //DISASTERSERVER_STATE_HPP

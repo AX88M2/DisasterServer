@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_LOBBY_HPP
-#define DISASTERSERVER_LOBBY_HPP
+#pragma once
 
 #include "State.hpp"
 #include "Vote.hpp"
@@ -35,5 +34,3 @@ namespace DisasterServer
         bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
     };
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_CHARSELECTSTATE_HPP
-#define DISASTERSERVER_CHARSELECTSTATE_HPP
+#pragma once
 
 #include "Client.hpp"
 #include "State.hpp"
@@ -36,4 +35,3 @@ namespace DisasterServer
         bool chooseExe();
     };
 }
-#endif

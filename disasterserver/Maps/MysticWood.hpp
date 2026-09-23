@@ -1,5 +1,4 @@
-#ifndef DISASTERSERVER_WOODDREAM_HPP
-#define DISASTERSERVER_WOODDREAM_HPP
+#pragma once
 
 #include "Map.hpp"
 
@@ -17,5 +16,3 @@ namespace DisasterServer::Maps
         MapProperties getMapTime() const override;
     };
 }
-
-#endif
