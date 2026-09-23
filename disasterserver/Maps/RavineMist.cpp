@@ -23,6 +23,7 @@ void RavineMist::init(GameState &game) {
     game.getEntityController().spawnEntity<Entities::Shard>(Vector2(282, 2228), 0);
     game.getEntityController().spawnEntity<Entities::Shard>(Vector2(1318, 1916), 0);
     game.getEntityController().spawnEntity<Entities::Shard>(Vector2(3010, 1766), 0);
+    //
 }
 
 void RavineMist::tick() {
