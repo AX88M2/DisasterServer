@@ -5,8 +5,42 @@
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 LCEye::LCEye(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t eyeId) : Entity(id, server, state, "lceye", pos), eyeId(eyeId) {}
+
+bool LCEye::tick() {
+    const double delta = server.getDelta();
+
+    if (cooldownTimer.active()) {
+        [[maybe_unused]]
+        auto r = cooldownTimer.tick(delta);
+        return true;
+    }
+
+    if (!chargeTimer.active()) {
+        chargeTimer.start(1);
+    }
+
+    if (chargeTimer.tick(delta) == Countdown::TickResult::Second) {
+        if (used && charge > 0) {
+            charge -= 20;
+            if (charge < 20) {
+                cooldownTimer.start(2);
+                used = false;
+                chargeTimer.stop();
+            }
+            update();
+        }
+        else if (!used && charge < 100) {
+            charge = std::min<uint8_t>(100, charge + 10);
+
+            update();
+        }
+    }
+
+    return true;
+}
 
 bool LCEye::update() {
     Packet pack(PacketType::SERVER_LCEYE_STATE);
@@ -16,32 +50,5 @@ bool LCEye::update() {
     pack.write<uint8_t>(static_cast<uint8_t>(target));
     pack.write<uint8_t>(charge);
     pack.sendBroadcast(server, true);
-    return true;
-}
-
-bool LCEye::tick() {
-    if (cooldown > 0) {
-        cooldown -= server.getDelta();
-        return true;
-    }
-
-    if (timer >= TICKS_PER_SEC) {
-        if (used && charge > 0) {
-            charge -= 20;
-            if (charge < 20) {
-                cooldown = 2.0 * TICKS_PER_SEC;
-                used = false;
-                timer = 0;
-            }
-            update();
-        } else if (!used && charge < 100) {
-            charge += 10;
-            update();
-        }
-
-        timer = 0;
-    }
-
-    timer += server.getDelta();
     return true;
 }

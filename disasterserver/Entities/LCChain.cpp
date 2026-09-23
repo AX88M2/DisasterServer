@@ -5,6 +5,7 @@
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 LCChain::LCChain(entityId id, Server &server, GameState &state, const Vector2 &pos) : Entity(id, server, state, "lcchain", pos) {}
 

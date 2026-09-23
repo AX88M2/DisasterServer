@@ -10,13 +10,16 @@
 
 using namespace DisasterServer::Maps;
 
-LimpCity::LimpCity() : Map("Limp City", 1, 30) {}
+LimpCity::LimpCity() : Map("Limp City", 1, 30) {
+}
 
-void LimpCity::init(GameState& game) {
-    auto& ec = game.getEntityController();
-    ec.spawnEntity<LCEye>({}, 0);
-    ec.spawnEntity<LCEye>({}, 1);
-    ec.spawnEntity<LCChain>();
+void LimpCity::init(GameState& state) {
+    this->game = &state;
+
+    auto& ec = state.getEntityController();
+    ec.spawnEntity<Entities::LCEye>({}, 0);
+    ec.spawnEntity<Entities::LCEye>({}, 1);
+    ec.spawnEntity<Entities::LCChain>();
     Debug("LimpCity: spawned 2 LCEye and 1 LCChain");
 }
 
@@ -34,40 +37,37 @@ void LimpCity::handle(Client& client, Packet& packet) {
     if (!client.isInGame())
         return;
 
-    const uint8_t val = packet.read<uint8_t>();
-    const uint8_t nid = packet.read<uint8_t>();
+    const uint8_t isActivated = packet.read<uint8_t>();
+    const uint8_t eyeId = packet.read<uint8_t>();
     const uint8_t target = packet.read<uint8_t>();
 
-    if (nid >= 2)
+    if (eyeId >= 2)
         return;
 
-    auto* game = client.getStateController().getState<GameState>();
-    if (!game) return;
-
-    auto* eye = game->getEntityController().findIf<LCEye>([nid](const LCEye& e) { return e.eyeId == nid; });
+    auto* eye = game->getEntityController().findIf<Entities::LCEye>([eyeId](Entities::LCEye& e) { return e.getEyeId() == eyeId; });
 
     if (!eye)
         return;
 
-    if (val) {
-        if (eye->used)
+    if (isActivated) {
+        if (eye->isUsed())
             return;
 
-        if (eye->charge < 20)
+        if (eye->getCharge() < 20)
             return;
 
-        eye->useId  = client.getId();
-        eye->target = target;
-        eye->used   = true;
-        eye->timer  = 0;
+        eye->setUseId(client.getId());
+        eye->setTarget(target);
+        eye->setUsed(true);
+        eye->getChargeTimer().stop();
         eye->update();
     } else {
-        eye->used  = false;
-        eye->timer = 0;
+        eye->setUsed(false);
+        eye->getChargeTimer().stop();
         eye->update();
     }
 }
 
 DisasterServer::MapProperties LimpCity::getMapTime() const {
-    return MapProperties(static_cast<int>(2.585 * TICKS_PER_SEC), 20, 5);
+    return MapProperties(2.585 * TICKS_PER_SEC, 20, 5);
 }

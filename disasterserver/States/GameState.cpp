@@ -17,6 +17,7 @@
 #include "Entities/Ring.hpp"
 #include "Entities/TailsProjectile.hpp"
 #include "Packet.hpp"
+#include "Maps/HideAndSeekAct2.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
@@ -175,8 +176,7 @@ void GameState::tick() {
             break;
         }
         case Countdown::TickResult::Second: {
-            if (ringCoff > 0 && gameTime.remaining() > 0 &&
-                (gameTime.remaining() % ringCoff) == 0) {
+            if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
                 spawnRing();
             }
 
@@ -220,8 +220,9 @@ void GameState::tickPlayers() {
             return a->getPlayer().getDeathTimerSec() > b->getPlayer().getDeathTimerSec();
         });
 
-        for (auto *c : dead)
+        for (auto *c : dead) {
             demonize(*c);
+        }
     }
 
     for (auto &client : server.getClients()) {
@@ -278,8 +279,7 @@ void GameState::tickPlayers() {
             player.setDeathTimer(0);
         }
 
-        player.setDeathTimerSec(player.getDeathTimerSec() +
-            (demonized_near ? 0.5f : 1.0f) * server.getDelta());
+        player.setDeathTimerSec(player.getDeathTimerSec() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
     }
 }
 
@@ -381,7 +381,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 return true;
             }
 
-            if (rings >= 140 && currentMapId != 20) {
+            if (rings >= 140 && MapController::isMap<Maps::HideAndSeekAct2>(currentMap)) {
                 client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
                 return true;
             }

@@ -3,7 +3,8 @@
 
 #include "Map.hpp"
 
-namespace DisasterServer::Maps {
+namespace DisasterServer::Maps
+{
 
     class YouCantRun : public Map {
     public:

@@ -1,9 +1,11 @@
 #include "Spike.hpp"
+
 #include "Server.hpp"
 #include "States/GameState.hpp"
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 SpikeController::SpikeController(entityId id, Server &server, GameState &state, const Vector2 &pos)
     : Entity(id, server, state, "spikectrl", pos) {}

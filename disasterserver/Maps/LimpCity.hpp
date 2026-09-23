@@ -3,9 +3,10 @@
 
 #include "Map.hpp"
 
-namespace DisasterServer::Maps {
-
+namespace DisasterServer::Maps
+{
     class LimpCity : public Map {
+        GameState *game = nullptr;
     public:
         explicit LimpCity();
 
@@ -16,7 +17,6 @@ namespace DisasterServer::Maps {
 
         MapProperties getMapTime() const override;
     };
-
 }
 
 #endif

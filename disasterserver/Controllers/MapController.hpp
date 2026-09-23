@@ -42,6 +42,11 @@ namespace DisasterServer
             maps.push_back(std::move(map));
         }
 
+        template <std::derived_from<Map> T>
+        static bool isMap(Map *map) {
+            return dynamic_cast<T*>(map) != nullptr;
+        }
+
         void initialize();
 
         std::optional<Map*> getMap(int id);

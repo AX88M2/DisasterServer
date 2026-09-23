@@ -1,12 +1,11 @@
 #include "YCRSmoke.hpp"
 
-#include <cstdlib>
-
-#include "Server.hpp"
+#include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 YCRController::YCRController(entityId id, Server &server, GameState &state, const Vector2 &pos) : Entity(id, server, state, "ycrctrl", pos) {}
 

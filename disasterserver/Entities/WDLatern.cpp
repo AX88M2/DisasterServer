@@ -1,12 +1,11 @@
 #include "WDLatern.hpp"
 
-#include <cstdlib>
-
 #include "Server.hpp"
 #include "States/GameState.hpp"
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 Latern::Latern(entityId id, Server &server, GameState &state, const Vector2 &pos) : Entity(id, server, state, "latrn", pos), time(static_cast<uint16_t>(7 + std::rand() % 2)) {}
 

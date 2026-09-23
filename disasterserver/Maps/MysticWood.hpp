@@ -3,8 +3,8 @@
 
 #include "Map.hpp"
 
-namespace DisasterServer::Maps {
-
+namespace DisasterServer::Maps
+{
     class WoodDream : public Map {
     public:
         explicit WoodDream();
@@ -16,7 +16,6 @@ namespace DisasterServer::Maps {
 
         MapProperties getMapTime() const override;
     };
-
 }
 
 #endif

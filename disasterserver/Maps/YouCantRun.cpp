@@ -14,8 +14,8 @@ YouCantRun::YouCantRun() : Map("You Can't Run", 1, 30) {}
 
 void YouCantRun::init(GameState& game) {
     auto& ec = game.getEntityController();
-    ec.spawnEntity<SpikeController>();
-    ec.spawnEntity<YCRController>();
+    ec.spawnEntity<Entities::SpikeController>();
+    ec.spawnEntity<Entities::YCRController>();
     Debug("Spawned SpikeController and YCRController");
 }
 

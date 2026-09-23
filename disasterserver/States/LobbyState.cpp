@@ -77,7 +77,7 @@ bool LobbyState::checkCountdown() {
     });
 
     if (clientsIsReady == clients->size() && clients->size() > 1) {
-        countdown.start(START_COUNTDOWN);
+        countdown.start(5);
         return sendCountdown();
     }
 
@@ -339,17 +339,6 @@ bool LobbyState::handle(Client &client, Packet &packet) {
     return true;
 }
 
-static std::vector<mapId> convertMapIds = {
-    0,   // 1. Hide And Seek Act 2
-    2,   // 2. ... (DotDotDot)
-    3,   // 3. Desert Town
-    4,   // 4. You Can't Run (5)
-    5,   // 5. Limp City (6)
-    7,   // 8. Kind And Fair (8)
-    13,  // 5. Majin Forest
-    14,  // 6. Hide And Seek
-    18,  // 7. Mystic Wood (19)
-};
 
 bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
     switch (hash) {
@@ -377,8 +366,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            if (requested < 1 ||
-                static_cast<size_t>(requested) > controller.getMapCount()) {
+            if (requested < 1 || static_cast<size_t>(requested) > controller.getMapCount()) {
                 this->server.sendMessage(client, "{}map should be between 1 and {}", CLRCODE_RED, controller.getMapCount());
                 break;
             }
@@ -392,7 +380,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
                 break;
             }
 
-            const mapId clientMapId = convertMapIds[index];
+            const mapId clientMapId = convertMapIds[index]; //Костыль
             stateController.changeTo<CharSelectState>(*map, clientMapId);
 
             break;

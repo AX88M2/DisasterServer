@@ -11,11 +11,14 @@ using namespace DisasterServer::Maps;
 
 KindAndFair::KindAndFair() : Map("Kind And Fair", 1, 30) {}
 
-void KindAndFair::init(GameState& game) {
-    auto& ec = game.getEntityController();
+void KindAndFair::init(GameState& state) {
+    this->game = &state;
+
+    auto& ec = state.getEntityController();
     for (uint8_t i = 0; i < 11; i++) {
-        ec.spawnEntity<KafBox>({}, i);
+        ec.spawnEntity<Entities::KafBox>({}, i);
     }
+
     Debug("Spawned 11 KafBox");
 }
 
@@ -39,12 +42,7 @@ void KindAndFair::handle(Client& client, Packet& packet) {
     if (nid >= 11)
         return;
 
-    auto* game = client.getStateController().getState<GameState>();
-
-    if (!game)
-        return;
-
-    auto* box = game->getEntityController().findIf<KafBox>([nid](const KafBox& b) { return b.nid == nid; });
+    auto* box = game->getEntityController().findIf<Entities::KafBox>([nid](Entities::KafBox& b) { return b.getNid() == nid; });
 
     if (!box)
         return;

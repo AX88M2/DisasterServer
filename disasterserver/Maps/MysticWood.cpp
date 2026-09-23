@@ -12,7 +12,7 @@ using namespace DisasterServer::Maps;
 WoodDream::WoodDream() : Map("Mystic Wood", 1, 30) {}
 
 void WoodDream::init(GameState& game) {
-    game.getEntityController().spawnEntity<Latern>();
+    game.getEntityController().spawnEntity<Entities::Latern>();
     Debug("Spawned Latern");
 }
 

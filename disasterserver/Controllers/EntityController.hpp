@@ -13,14 +13,14 @@ namespace DisasterServer
         GameState &state;
 
         std::vector<std::unique_ptr<Entity>> entities = {};
-        uint16_t entityIdCounter = 0;
+        entityId entityIdCounter = 0;
     public:
         EntityController(Server &server, GameState &state);
         ~EntityController() = default;
 
         void tick();
 
-        template <typename T, typename... Args>
+        template <std::derived_from<Entity> T, typename... Args>
         T* spawnEntity(const Vector2 &pos = {}, Args&&... args) {
             ++entityIdCounter;
             auto ent = std::make_unique<T>(entityIdCounter, server, state, pos, std::forward<Args>(args)...);
@@ -33,8 +33,8 @@ namespace DisasterServer
             return raw;
         }
 
-        template <typename T>
-        T* findEntity(uint16_t id) {
+        template <std::derived_from<Entity> T>
+        T* findEntity(entityId id) {
             auto it = std::ranges::find_if(entities.begin(), entities.end(), [id](const auto& e) {
                 return e->getId() == id;
             });
@@ -46,16 +46,18 @@ namespace DisasterServer
             return nullptr;
         }
 
-        template <typename T, typename Pred>
-        T* findIf(Pred pred) {
-            for (auto& e : entities) {
-                if (auto* p = dynamic_cast<T*>(e.get()); p && pred(*p))
-                    return p;
+        template <std::derived_from<Entity> T, typename Predicate>
+        T* findIf(Predicate predicate) {
+            for (auto& entity : entities) {
+                if (auto* ptr = dynamic_cast<T*>(entity.get()); ptr && std::invoke(predicate, *ptr)) {
+                    return ptr;
+                }
             }
+
             return nullptr;
         }
 
-        bool despawnEntity(uint16_t id) {
+        bool despawnEntity(entityId id) {
             const auto it = std::ranges::find_if(entities.begin(), entities.end(), [id](const auto& e) {
                 return e->getId() == id;
             });
@@ -68,7 +70,6 @@ namespace DisasterServer
             return false;
         }
 
-        std::vector<std::unique_ptr<Entity>>&       getEntities()       { return entities; }
-        const std::vector<std::unique_ptr<Entity>>& getEntities() const { return entities; }
+        std::vector<std::unique_ptr<Entity>> &getEntities() { return entities; }
     };
 }

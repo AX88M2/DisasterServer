@@ -1,12 +1,12 @@
 #include "KAFSpeedBox.hpp"
 
-#include <cstdlib>
-
 #include "Server.hpp"
+#include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
 #include "Packet.hpp"
 
 using namespace DisasterServer;
+using namespace DisasterServer::Entities;
 
 KafBox::KafBox(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t nid) : Entity(id, server, state, "kafbox", pos), nid(nid) {}
 
@@ -36,7 +36,7 @@ bool KafBox::tick() {
     return true;
 }
 
-bool KafBox::activate(uint16_t pid, uint8_t isProj) {
+bool KafBox::activate(clientId pid, uint8_t isProj) {
     if (activated)
         return true;
 
