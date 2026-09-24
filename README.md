@@ -2,7 +2,7 @@
 
 ## Building source
 ```bash
-git clone --recursive  --branch dev/cxx https://github.com/AX88M2/DisasterServer.git
+git clone --recursive  --branch 1101-cxx https://github.com/AX88M2/DisasterServer.git
 cmake -S . -B build && cmake --build build
 ```
 
