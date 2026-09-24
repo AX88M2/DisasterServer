@@ -2,6 +2,8 @@
 
 #include "States/GameState.hpp"
 #include "Entities/Shard.hpp"
+#include "Entities/SlugSpawner.hpp"
+#include "Util/Random.hpp"
 
 using namespace DisasterServer::Maps;
 
@@ -11,7 +13,19 @@ RavineMist::RavineMist(Server &server) : Map(server, "Ravine Mist", 1, 27) {
 void RavineMist::init(GameState &game) {
     this->state = &game;
 
-    std::vector positions {
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1901, 392));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2193, 392));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2468, 392));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1188, 860));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2577, 1952));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2564, 2264));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2782, 2264));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1441, 2264));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(884, 2264));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(988, 2004));
+    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(915, 2004));
+
+    std::vector positionsShard {
         Vector2(862, 248),
         Vector2(3078, 248),
         Vector2(292, 558),
@@ -27,7 +41,8 @@ void RavineMist::init(GameState &game) {
     };
 
     for (int i = 0; i < 7; i++) {
-        game.getEntityController().spawnEntity<Entities::Shard>(positions[i], 0);
+        const int id = random.nextInt(1, positionsShard.size() - 1);
+        game.getEntityController().spawnEntity<Entities::Shard>(positionsShard[id], 0);
     }
 }
 
@@ -46,6 +61,7 @@ void RavineMist::handle(Client &client, Packet &packet) {
                 break;
             }
 
+            // ReSharper disable once CppDFAConstantConditions
             if (state->getEndTime().active()) {
                 break;
             }
@@ -74,6 +90,7 @@ void RavineMist::handle(Client &client, Packet &packet) {
         }
 
         case PacketType::CLIENT_PLAYER_DEATH_STATE: {
+            // ReSharper disable once CppDFAConstantConditions
             if (state->getEndTime().active()) {
                 break;
             }

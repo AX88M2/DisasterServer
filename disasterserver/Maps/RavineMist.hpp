@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Map.hpp"
+#include "Util/Random.hpp"
 
 namespace DisasterServer::Maps
 {
     class RavineMist : public Map {
         GameState* state = nullptr;
+        Random random = {};
     public:
         explicit RavineMist(Server &server);
 

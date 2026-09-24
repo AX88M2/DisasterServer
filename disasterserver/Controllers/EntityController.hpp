@@ -13,6 +13,9 @@ namespace DisasterServer
         GameState &state;
 
         std::vector<std::unique_ptr<Entity>> entities = {};
+        std::vector<std::unique_ptr<Entity>> pendingEntities = {};
+        std::unordered_set<entityId> pendingRemoval = {};
+
         entityId entityIdCounter = 0;
     public:
         EntityController(Server &server, GameState &state);
@@ -29,7 +32,7 @@ namespace DisasterServer
                 return nullptr;
 
             T* raw = ent.get();
-            entities.push_back(std::move(ent));
+            pendingEntities.push_back(std::move(ent));
             return raw;
         }
 
@@ -49,7 +52,8 @@ namespace DisasterServer
         template <std::derived_from<Entity> T, typename Predicate>
         T* findIf(Predicate predicate) {
             for (auto& entity : entities) {
-                if (auto* ptr = dynamic_cast<T*>(entity.get()); ptr && std::invoke(predicate, *ptr)) {
+                auto* ptr = dynamic_cast<T*>(entity.get());
+                if (ptr && std::invoke(predicate, *ptr)) {
                     return ptr;
                 }
             }
@@ -66,24 +70,13 @@ namespace DisasterServer
             return count;
         }
 
-        bool despawnEntity(entityId id) {
-            const auto it = std::ranges::find_if(entities.begin(), entities.end(), [id](const auto& e) {
-                return e->getId() == id;
-            });
-
-            if (it != entities.end()) {
-                (*it)->uninit();
-                entities.erase(it);
-                return true;
-            }
-            return false;
-        }
+        bool despawnEntity(entityId id);
 
         template <std::derived_from<Entity> T>
         static bool isEntity(Entity *entity) {
             return dynamic_cast<T*>(entity) != nullptr;
         }
 
-        std::vector<std::unique_ptr<Entity>> &getEntities() { return entities; }
+        const std::vector<std::unique_ptr<Entity>> &getEntities() const { return entities; }
     };
 }
