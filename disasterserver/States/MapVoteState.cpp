@@ -224,11 +224,6 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
             [[maybe_unused]] const clientId pid = packet.read<clientId>();
             const std::string message = packet.readString();
 
-            if (message.length() > 40) {
-                client.disconnect(DisconnectReason::OTHER, "Chat message too long");
-                return false;
-            }
-
             client.setTimeout(0);
 
             Commands cmd = stateController.cmdParse(message);
