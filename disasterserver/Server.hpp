@@ -4,6 +4,7 @@
 #include "Client.hpp"
 #include "Controllers/MapController.hpp"
 #include "Controllers/StateController.hpp"
+#include "Core/Defines.hpp"
 
 namespace DisasterServer
 {
@@ -24,7 +25,7 @@ namespace DisasterServer
         explicit Server(int port = 8606);
         ~Server();
 
-        void initialize();
+        void worker();
 
         void disconnectById(clientId id, DisconnectReason reason, const std::string& message = "") const;
 

@@ -13,22 +13,20 @@ namespace DisasterServer
     void Application::initialize() {
         config.load();
 
-        // TODO: Сделать это по нормальному
-        /*for (uint32_t i = 0; i < g_config.lobby_count; ++i) {
-            auto ptr = std::make_unique<Server>(i);
-            auto server = ptr.get();
-            servers.push_back(std::move(ptr));
-            threads.emplace_back([server] {
-                server->initialize();
-            });
+        for (int i = 0; i < config.config().getLobbyCount(); i++) {
+            workers.push_back(std::thread([&, i] {
+                const auto ptr = std::make_shared<Server>(config.config().getServerPort() + i);
+                {
+                    std::lock_guard lock(server_mutex);
+                    servers.push_back(ptr);
+                }
+                ptr->worker();
+            }));
         }
 
-        for (auto& thread : threads) {
-            thread.join();
-        }*/
-
-        auto ptr = std::make_unique<Server>(config.config().getServerPort());
-        ptr->initialize();
+        for (auto& worker : workers) {
+            worker.join();
+        }
     }
 
 }

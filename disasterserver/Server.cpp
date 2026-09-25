@@ -22,7 +22,7 @@ Server::~Server() {
     enet_host_destroy(host);
 }
 
-void Server::initialize() {
+void Server::worker() {
     mapController.initialize();
 
     const auto start = Clock::now();

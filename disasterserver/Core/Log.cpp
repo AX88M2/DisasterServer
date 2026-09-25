@@ -113,6 +113,7 @@ void log_hook(loghook_t func)
 #include <boost/algorithm/string.hpp>
 #include <iomanip>
 #include <sstream>
+#include <syncstream>
 
 #include "Constansts.hpp"
 
@@ -147,7 +148,7 @@ void Logger::write(LogLevel level, std::string message, std::source_location loc
 
 	ss << " " << message << TerminalColors::reset;
 
-	std::cout << ss.str() << std::endl;
+	std::osyncstream(std::cout) << ss.str() << std::endl;
 }
 
 void Logger::replaceColor(std::string &msg) {
