@@ -31,6 +31,6 @@ namespace DisasterServer
         bool sendCountdown();
         bool checkCountdown();
         void checkVote();
-        bool cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message);
+        bool cmdHandle(Client &client, clientId pid, Commands hash, std::string &message);
     };
 }

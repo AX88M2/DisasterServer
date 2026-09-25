@@ -185,8 +185,8 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController.cmdParse(message);
-            bool isCommand = stateController.cmdHandle(client, hash, message);
+            Commands cmd = stateController.cmdParse(message);
+            bool isCommand = stateController.cmdHandle(client, cmd, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
             if (!isCommand) {

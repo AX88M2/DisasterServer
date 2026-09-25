@@ -243,7 +243,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             client.setTimeout(0);
 
-            commandHash hash = stateController.cmdParse(message);
+            Commands hash = stateController.cmdParse(message);
             bool isCommand = cmdHandle(client, pid, hash, message);
 
             Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
@@ -340,13 +340,13 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 }
 
 
-bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::string &message) {
+bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::string &message) {
     switch (hash) {
         default: {
             return stateController.cmdHandle(client, hash, message);
         }
 
-        case CMD_MAP: {
+        case Commands::MAP: {
             auto &controller = server.getMapController();
 
 #if !defined(SERVER_DEBUG)
@@ -386,8 +386,8 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             break;
         }
 
-        case CMD_Y:
-        case CMD_YES: {
+        case Commands::Y:
+        case Commands::YES: {
             if (!vote.isOnGoing()) {
                 break;
             }
@@ -425,7 +425,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             break;
         }
 
-        case CMD_VP: {
+        case Commands::VP: {
             if (vote.isOnGoing()) {
                 if (!client.isCanVote()) {
                     this->server.sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
@@ -470,7 +470,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, commandHash hash, std::
             break;
         }
 
-        case CMD_VK: {
+        case Commands::VK: {
             if (vote.isOnGoing()) {
                 this->server.sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
                 break;

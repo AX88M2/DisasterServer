@@ -43,6 +43,19 @@ void StateController::playerLeft(Client &client) {
 }
 
 void StateController::tick() {
+    if (!pendingState.empty()) {
+        for (auto &state : pendingState) {
+            if (current) {
+                current->exit();
+            }
+            current = std::move(state);
+        }
+
+        pendingState.clear();
+
+        current->enter();
+    }
+
     if (current) {
         current->tick();
     }
@@ -109,9 +122,7 @@ bool StateController::handle(Client &client, Packet &packet) {
     return true;
 }
 
-commandHash StateController::cmdParse(std::string string) {
-    static std::array clr_list = CLRLIST;
-
+Commands StateController::cmdParse(std::string string) {
     std::string current;
     bool started = false;
 
@@ -145,12 +156,12 @@ commandHash StateController::cmdParse(std::string string) {
     for (unsigned char ch : current)
         hash = 31 * hash + ch;
 
-    return hash;
+    return static_cast<Commands>(hash);
 }
 
-bool StateController::cmdHandle(Client &client, commandHash hash, const std::string &message) {
+bool StateController::cmdHandle(Client &client, Commands hash, const std::string &message) {
     switch (hash) {
-        case CMD_BAN: {
+        case Commands::BAN: {
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
@@ -169,7 +180,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_KICK: {
+        case Commands::KICK: {
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
@@ -188,7 +199,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_OP: {
+        case Commands::OP: {
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
                 break;
@@ -207,7 +218,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_LOBBY: {
+        case Commands::LOBBY: {
             int ind;
             if (sscanf(message.c_str(), ".lobby %d", &ind) != 1) {
                 this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
@@ -232,7 +243,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_HELP: {            
+        case Commands::HELP: {
             this->server.sendMessage(client, "|- .info~ - information about server");
             this->server.sendMessage(client, "|- .vk~ - vote kick");
             this->server.sendMessage(client, "|- .vp~ - vote practice mode (wip)");
@@ -249,7 +260,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-        case CMD_INFO: {
+        case Commands::INFO: {
             this->server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
             this->server.sendMessage(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
             this->server.sendMessage(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
@@ -257,8 +268,7 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             break;
         }
 
-#if defined(SERVER_DEBUG)
-        case CMD_SELFOP: {
+        case Commands::SELFOP: {
             if (client.getIp() != "127.0.0.1") {
                 break;
             }
@@ -268,7 +278,9 @@ bool StateController::cmdHandle(Client &client, commandHash hash, const std::str
             this->server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
             break;
         }
-        case CMD_DEBUG: {
+
+#if defined(SERVER_DEBUG)
+        case Commands::DEBUG: {
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
                 break;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string_view>
 #include <vector>
@@ -18,6 +19,9 @@ constexpr std::string_view CLRCODE_GRA = "|";
 constexpr std::string_view CLRCODE_YLW = "`";
 constexpr std::string_view CLRCODE_ORG = "\xE2\x84\x96";
 constexpr std::string_view CLRCODE_RST = "~";
+
+static std::array clr_list = { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST };
+constexpr int CLRLIST_LEN = 8;
 
 enum CooldownId : uint8_t {
     TAILS_RECHARGE = 0,
@@ -41,7 +45,4 @@ static std::vector<mapId> convertMapIds = {
     14,  // 6. Hide And Seek
     18,  // 7. Mystic Wood (19)
 };
-
-#define CLRLIST  { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST }
-constexpr int CLRLIST_LEN = 8;
 
