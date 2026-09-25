@@ -132,6 +132,7 @@ else()
             else() # UNIX
                 set(THREADS_PREFER_PTHREAD_FLAG ON)
                 find_package(Threads REQUIRED)
+                add_compile_options(-static)
                 target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
             endif()
 

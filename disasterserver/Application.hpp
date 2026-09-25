@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <mutex>
+#include <thread>
+
 #include "ConfigManager.hpp"
 #include "Storage.hpp"
 #include "Core/Singleton.hpp"
