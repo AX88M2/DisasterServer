@@ -31,6 +31,7 @@ void MapController::initialize() {
     //this->registerMap<Maps::PricelessFreedom>();
     //this->registerMap<Maps::VolcanoValley>();
     //this->registerMap<Maps::Hill>();
+#if defined(SERVER_MODE)
     this->registerMap<Maps::MajinForest>();
     this->registerMap<Maps::HideAndSeek>();
     //this->registerMap<Maps::TortureCave>();
@@ -39,6 +40,7 @@ void MapController::initialize() {
     this->registerMap<Maps::MysticWood>();
     //this->registerMap<Maps::EchidnaRuins>();
     //this->registerMap<Maps::FartZone>();
+#endif
 }
 
 std::optional<Map*> MapController::getMap(int id) {
