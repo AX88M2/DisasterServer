@@ -30,6 +30,7 @@ namespace DisasterServer
         N = 1536,
         INFO = 45719004,
         LOBBY = 1420085352,
+        EXE = 1471268,
         SELFOP = 1264443355,
 #if defined(SERVER_DEBUG)
         DEBUG = 1412399845,

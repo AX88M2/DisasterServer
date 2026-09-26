@@ -481,6 +481,18 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
 
             break;
         }
+
+        case Commands::EXE: {
+            if (!client.isOperator()) {
+                break;
+            }
+
+            client.setExeChance(101);
+            Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
+            pack.write<uint8_t>(client.getExeChance());
+            pack.send(client, true);
+            break;
+        }
     }
     return true;
 }

@@ -118,6 +118,18 @@ void Packet::writeVector2(const Vector2 &value) {
 	write<uint16_t>(static_cast<uint16_t>(value.y));
 }
 
+Vector2 Packet::readVector2F() {
+	const float x = read<float>();
+	const float y = read<float>();
+
+	return { x, y };
+}
+
+void Packet::writeVector2F(const Vector2 &value) {
+	write<float>(value.x);
+	write<float>(value.y);
+}
+
 bool Packet::send(Client &client, bool reliable) {
 	if(client.isDisconnecting()) {
 		return true;

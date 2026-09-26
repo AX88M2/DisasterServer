@@ -6,6 +6,7 @@
 #include "LobbyState.hpp"
 #include "Controllers/StateController.hpp"
 #include "Server.hpp"
+#include "Util/Random.hpp"
 
 using namespace DisasterServer;
 
@@ -38,7 +39,7 @@ void MapVoteState::enter() {
         int attempts = 0;
 
         while (count < 3 && attempts++ < 1000) {
-            int8_t mapid = static_cast<size_t>(rand()) % mapController.getMapCount();
+            int8_t mapid = static_cast<size_t>(Random::randInt()) % mapController.getMapCount();
 
             auto map = mapController.getMap(mapid);
 
@@ -53,7 +54,7 @@ void MapVoteState::enter() {
 
             const int16_t weight = mapController.getMapWeight(*map);
 
-            const int num = rand() % 255;
+            const int num = Random::randInt() % 255;
 
             if (num >= weight) {
                 Debug("{} vs {} lost", num, weight);
@@ -138,7 +139,7 @@ void MapVoteState::tick() {
             }
 
             // Find winner
-            int8_t wonId = indeces[rand() % count];
+            int8_t wonId = indeces[Random::randInt() % count];
             auto wonMap = controller.getMap(wonId);
 
             if (!wonMap.has_value()) {

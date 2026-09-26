@@ -415,6 +415,9 @@ namespace DisasterServer {
 		Vector2 readVector2();
 		void writeVector2(const Vector2 &value);
 
+		Vector2 readVector2F();
+		void writeVector2F(const Vector2 &value);
+
 		bool send(Client &client, bool reliable = true);
 		void sendBroadcast(Server &server, bool reliable = true, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
 	};
