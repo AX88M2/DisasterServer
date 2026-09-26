@@ -226,9 +226,11 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             if (!motd.empty()) {
                 this->server.sendMessage(client, motd);
             }
+
             if (client.isModified()) {
                 this->server.sendMessage(client, "{}your client is disallowed on this server", CLRCODE_RED);
             }
+
             break;
         }
 
@@ -236,15 +238,9 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
 
-            client.setTimeout(0);
-
-            Commands hash = stateController.cmdParse(message);
-            bool isCommand = cmdHandle(client, pid, hash, message);
-
-            Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
-            if (!isCommand) {
-                server.sendBroadcastMessage(client.getId(), message);
-            }
+            stateController.handleChat(client, message, [&, pid](const Commands cmd, std::string &msg) {
+                return cmdHandle(client, pid, cmd, msg);
+            });
 
             break;
         }
@@ -344,12 +340,10 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
         case Commands::MAP: {
             auto &controller = server.getMapController();
 
-#if !defined(SERVER_DEBUG)
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
                 break;
             }
-#endif
 
             int requested;
 #if _WIN32

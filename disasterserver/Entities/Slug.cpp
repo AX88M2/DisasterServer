@@ -19,11 +19,11 @@ bool Slug::init() {
     int num = Random::randInt() % 100;
 
     if (num < 50) {
-        ring = Drop::NORING;
+        drop = Drop::NORING;
     } else if (num < 90) {
-        ring = Drop::RING;
+        drop = Drop::RING;
     } else {
-        ring = Drop::REDRING;
+        drop = Drop::REDRING;
     }
 
     sPosition = Vector2(position);
@@ -45,7 +45,7 @@ bool Slug::tick() {
         case State::NONELEFT:
         case State::RINGLEFT:
         case State::REDRINGLEFT: {
-            position.x -= static_cast<float>(server.getDelta());
+            position.x -= static_cast<float>(server.getDelta() / 1.5);
             if (position.x <= sPosition.x - 100) {
                 face(true);
             }
@@ -54,7 +54,7 @@ bool Slug::tick() {
         case State::NONERIGHT:
         case State::RINGRIGHT:
         case State::REDRINGRIGHT: {
-            position.x += static_cast<float>(server.getDelta());
+            position.x += static_cast<float>(server.getDelta() / 1.5);
             if (position.x >= sPosition.x + 100) {
                 face(false);
             }
@@ -83,7 +83,7 @@ bool Slug::uninit() {
         return e.getSlug() == this;
     });
 
-    Debug("removed slug from %d", spawner->getId());
+    Debug("removed slug from {}", spawner->getId());
     spawner->setSlug(nullptr);
 
     return true;
@@ -91,7 +91,7 @@ bool Slug::uninit() {
 
 void Slug::face(bool side) {
     if (side) {
-        switch (ring) {
+        switch (drop) {
             case Drop::NORING: {
                 moveState = State::NONERIGHT;
                 break;
@@ -107,7 +107,7 @@ void Slug::face(bool side) {
             default: break;
         }
     } else {
-        switch (ring) {
+        switch (drop) {
             case Drop::NORING: {
                 moveState = State::NONELEFT;
                 break;

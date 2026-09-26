@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <concepts>
+#include <functional>
 #include <memory>
 #include <ranges>
 
@@ -36,6 +37,9 @@ namespace DisasterServer
     };
 
     class StateController {
+        friend class Client;
+        friend class Server;
+
         Server &server;
 
         std::vector<std::unique_ptr<State>> pendingState = {};
@@ -61,16 +65,19 @@ namespace DisasterServer
 
         template <std::derived_from<State> T>
         T* getState() const {
-            return dynamic_cast<T*>(current.get());
+            return static_cast<T*>(current.get());
         }
 
+        Commands cmdParse(std::string string);
+
+        void handleChat(Client &client, std::string& message, std::function<bool(Commands, std::string &)> cmdProcessor);
+        bool cmdHandle(Client& client, Commands hash, const std::string& message);
+    private:
+        /*** === Events === ***/
         bool playerJoined(Client& client);
         void playerLeft(Client& client);
         void tick();
         bool handle(Client& client, Packet& packet);
-
-        Commands cmdParse(std::string string);
-        bool cmdHandle(Client& client, Commands hash, const std::string& message);
     };
 }
 

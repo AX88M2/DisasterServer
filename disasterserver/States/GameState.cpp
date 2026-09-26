@@ -495,9 +495,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             auto &player = client.getPlayer();
             if (!isRed) {
-                player.setLastRings(Clock::now());
-                player.setRings(player.getRings() + 1);
-                player.getStats().addRing();
+                player.addRings(1);
             }
 
             Packet pack(PacketType::SERVER_RING_COLLECTED);
@@ -506,24 +504,6 @@ bool GameState::handle(Client& client, Packet& packet) {
             pack.write<uint8_t>(isRed);
             pack.write<uint8_t>(player.getRings() > 0);
             pack.send(client, true);
-            break;
-        }
-
-        case PacketType::CLIENT_CHAT_MESSAGE: {
-            if (client.isInGame()) break;
-
-            [[maybe_unused]] const clientId pid = packet.read<clientId>();
-            std::string message = packet.readString();
-
-            client.setTimeout(0);
-
-            Commands cmd = stateController.cmdParse(message);
-            bool isCommand = stateController.cmdHandle(client, cmd, message);
-
-            Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
-
-            if (!isCommand)
-                server.sendBroadcastMessage(client.getId(), message);
             break;
         }
 
@@ -662,8 +642,9 @@ bool GameState::handle(Client& client, Packet& packet) {
                 if (!player.isFlag(Player::Flags::PLAYER_DEAD) &&
                     !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
 
-                    if (client.getId() != this->exe)
+                    if (client.getId() != this->exe) {
                         player.setRings(rings);
+                    }
 
                     player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
 

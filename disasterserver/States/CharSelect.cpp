@@ -174,22 +174,6 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             return checkState();
         }
 
-        case PacketType::CLIENT_CHAT_MESSAGE: {
-            [[maybe_unused]] const clientId pid = packet.read<clientId>();
-            std::string message = packet.readString();
-
-            client.setTimeout(0);
-
-            Commands cmd = stateController.cmdParse(message);
-            bool isCommand = stateController.cmdHandle(client, cmd, message);
-
-            Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
-            if (!isCommand) {
-                server.sendBroadcastMessage(client.getId(), message);
-            }
-            break;
-        }
-
         default: break;
     }
 

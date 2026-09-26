@@ -7,6 +7,7 @@
 
 namespace DisasterServer
 {
+    class PacketHandler;
     class Server;
 
     enum class SurvCharacters {
@@ -19,6 +20,7 @@ namespace DisasterServer
         CREAM,
         SALLY,
         SONIC,
+
         COUNT
     };
 
@@ -29,6 +31,7 @@ namespace DisasterServer
         CHAOS,
         EXETIOR,
         EXELLER,
+
         COUNT
     };
 
@@ -173,7 +176,7 @@ namespace DisasterServer
 
         bool identity(Packet &packet);
         bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout);
-        bool messageReceived(Packet &packet);
+        bool received(Packet &packet);
         void disconnect(DisconnectReason reason, const std::string& message = "");
 
         template <typename... Args>

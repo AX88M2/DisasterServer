@@ -15,7 +15,7 @@ Client::Client(Server *server, StateController &stateController, ENetPeer *peer,
     ip(std::move(ip)),
     peer(peer),
     server(server),
-    stateController(stateController) {}
+    stateController(stateController){}
 
 bool Client::identity(Packet &packet) {
     RAssert(id > 0);
@@ -189,7 +189,7 @@ bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t ti
     return true;
 }
 
-bool Client::messageReceived(Packet &packet) {
+bool Client::received(Packet &packet) {
     if (id == 0) {
         return false;
     }

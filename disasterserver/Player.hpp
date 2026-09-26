@@ -61,6 +61,7 @@ namespace DisasterServer
         void setHpRestored(uint16_t value) { this->hp_restored = value; }
 
         void addRing() { rings++; }
+        void addRings(const uint16_t value) { this->rings += value; }
         uint16_t getRings() const { return rings; }
         void clearRings() { rings = 0; }
 
@@ -194,6 +195,11 @@ namespace DisasterServer
 
         uint16_t getRings() const { return rings; }
         void setRings(uint16_t ring) { this->rings = ring; }
+        void addRings(const uint16_t value) {
+            lastRings = Clock::now();
+            this->rings += value;
+            this->stats.addRings(value);
+        }
 
         uint8_t getState() { return this->state; }
         void setState(const uint8_t value) { this->state = value; }

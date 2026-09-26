@@ -29,15 +29,19 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	[[maybe_unused]]
 	const uint8_t isPasstrough = read<uint8_t>();
 	type = read<PacketType>();
+#if NETWORK_LOGGER
 	Debug("Packet received {} (length {})", getPacketTypeName(type), len);
+#endif
 }
 
 Packet::Packet(PacketType type) : buffer({}), type(type) {
 	write<uint8_t>(0);
 	write<PacketType>(type);
+#if NETWORK_LOGGER
 	if (type != PacketType::SERVER_HEARTBEAT) {
 		Debug("Packet created {}", getPacketTypeName(type));
 	}
+#endif
 }
 
 Packet::~Packet() = default;
@@ -118,9 +122,9 @@ bool Packet::send(Client &client, bool reliable) {
 	if(client.isDisconnecting()) {
 		return true;
 	}
-
+#if NETWORK_LOGGER
 	Debug("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
-
+#endif
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 
 	if (!pack) {

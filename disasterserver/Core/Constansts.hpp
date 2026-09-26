@@ -8,7 +8,7 @@
 #include "Types.hpp"
 
 constexpr int TICKS_PER_SEC = 60;
-constexpr int MAX_PLAYERS = 7;
+constexpr int MAX_PLAYERS = 8;
 constexpr int BUILD_VERSION = 1101;
 
 constexpr std::string_view CLRCODE_RED = "\\";

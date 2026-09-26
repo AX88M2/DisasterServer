@@ -333,6 +333,8 @@ static constexpr int PACKET_MAXSIZE = 256;
 #undef min
 #undef max
 
+#define NETWORK_LOGGER 0
+
 namespace DisasterServer {
 	class Server;
 	class Client;

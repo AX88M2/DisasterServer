@@ -30,22 +30,28 @@ void KindAndFair::left(Client&) {
 }
 
 void KindAndFair::handle(Client& client, Packet& packet) {
-    if (packet.getType() != PacketType::CLIENT_KAFMONITOR_ACTIVATE)
+    if (packet.getType() != PacketType::CLIENT_KAFMONITOR_ACTIVATE) {
         return;
+    }
 
-    if (!client.isInGame())
+    if (!client.isInGame()) {
         return;
+    }
 
     const uint8_t nid  = packet.read<uint8_t>();
     const uint8_t proj = packet.read<uint8_t>();
 
-    if (nid >= 11)
+    if (nid >= 11) {
         return;
+    }
 
-    auto* box = game->getEntityController().findIf<Entities::KafBox>([nid](Entities::KafBox& b) { return b.getNid() == nid; });
+    auto* box = game->getEntityController().findIf<Entities::KafBox>([nid](Entities::KafBox& b) {
+        return b.getNid() == nid;
+    });
 
-    if (!box)
+    if (!box) {
         return;
+    }
 
     box->activate(client.getId(), proj);
 }

@@ -3,6 +3,7 @@
 #include "States/GameState.hpp"
 #include "Entities/Shard.hpp"
 #include "Entities/SlugSpawner.hpp"
+#include "Entities/Slug.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer::Maps;
@@ -54,6 +55,30 @@ void RavineMist::handle(Client &client, Packet &packet) {
         case PacketType::CLIENT_RMZSLIME_HIT: {
             const entityId eid = packet.read<entityId>();
             const uint8_t proj = packet.read<uint8_t>();
+
+            auto &player = client.getPlayer();
+
+            auto ent = state->getEntityController().findEntity<Entities::Slug>(eid);
+
+            if (!state->getEntityController().despawnEntity(eid)) {
+                break;
+            }
+
+            if (proj) {
+                break;
+            }
+
+            if (ent->getDrop() != Entities::Slug::Drop::NORING) {
+                if (ent->getDrop() == Entities::Slug::Drop::RING) {
+                    player.addRings(1);
+                }
+
+                Packet pack(PacketType::SERVER_RMZSLIME_RINGBONUS);
+                pack.write<uint8_t>(static_cast<uint8_t>(ent->getDrop()) - 1);
+                pack.write<uint8_t>(player.getRings() > 0);
+                pack.send(client);
+            }
+
             break;
         }
         case PacketType::CLIENT_RMZSHARD_COLLECT: {
@@ -61,29 +86,25 @@ void RavineMist::handle(Client &client, Packet &packet) {
                 break;
             }
 
-            // ReSharper disable once CppDFAConstantConditions
-            if (state->getEndTime().active()) {
-                break;
-            }
-
             const entityId eid = packet.read<entityId>();
 
-            Entities::Shard *shard = state->getEntityController().findEntity<Entities::Shard>(eid);
-            if (!shard) {
-                break;
-            }
+            auto ent = state->getEntityController().findEntity<Entities::Shard>(eid);
 
             auto &player = client.getPlayer();
 
+            if (!state->getEntityController().despawnEntity(eid)) {
+                Debug("ignoring entity {}", eid);
+                break;
+            }
+
             player.getUserdata().shards++;
+            Debug("Add shards {}", player.getUserdata().shards);
 
             Packet pack(PacketType::SERVER_RMZSHARD_STATE);
             pack.write<uint8_t>(2);
-            pack.write<entityId>(shard->getId());
+            pack.write<entityId>(ent->getId());
             pack.write<clientId>(client.getId());
             pack.sendBroadcast(server);
-
-            state->getEntityController().despawnEntity(shard->getId());
 
             checkState();
             break;
@@ -116,7 +137,7 @@ void RavineMist::left(Client &client) {
 }
 
 DisasterServer::MapProperties RavineMist::getMapProperties() const {
-    return MapProperties();
+    return MapProperties(9999 * TICKS_PER_SEC);
 }
 
 void RavineMist::spawnShards(Client &client) {
@@ -131,12 +152,13 @@ void RavineMist::spawnShards(Client &client) {
 }
 
 void RavineMist::checkState() {
+    Debug("check state");
     size_t total = 7 - static_cast<uint8_t>(state->getEntityController().find<Entities::Shard>());
 
     Packet packet(PacketType::SERVER_RMZSHARD_STATE);
     packet.write<uint8_t>(3);
-    packet.write<uint8_t>(total);
-    packet.sendBroadcast(server);
+    packet.write<uint8_t>(total + 1);
+    packet.sendBroadcast(server, true);
 
     if (state->getGameTime().remaining() <= TICKS_PER_SEC - 10) {
         state->bigRing(total >= 6 ? BigRingState::ACTIVATED : BigRingState::DEACTIVATED);

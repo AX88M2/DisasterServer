@@ -6,6 +6,7 @@
 #include "ConfigManager.hpp"
 #include "Packet.hpp"
 #include "Controllers/StateController.hpp"
+#include "Util/Random.hpp"
 
 using namespace DisasterServer;
 
@@ -52,8 +53,8 @@ void Server::worker() {
                     Packet pack(PacketType::SERVER_PREIDENTITY);
 
                     auto &auth = rawClient->getAuthPeer();
-                    auth.one = (uint8_t) rand() % 128;
-                    auth.two = (uint8_t) rand() % 255;
+                    auth.one = (uint8_t) Random::randInt() % 128;
+                    auth.two = (uint8_t) Random::randInt() % 255;
 
                     uint32_t type = 0;
 
@@ -153,7 +154,7 @@ void Server::worker() {
                             Debug("Identity failed for id {}", client->getId());
                         }
                     } else {
-                        client->messageReceived(packet);
+                        client->received(packet);
                     }
                     break;
                 }
@@ -174,7 +175,7 @@ void Server::worker() {
                 if (heartbeat >= (TICKS_PER_SEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
-                    //Debug("Heartbeat done.");
+                    Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -194,7 +195,9 @@ void Server::disconnectById(const clientId id, DisconnectReason reason, const st
 }
 
 void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
+#if NETWORK_LOGGER
     Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getType()), ignore);
+#endif
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 

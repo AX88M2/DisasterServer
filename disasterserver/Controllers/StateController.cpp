@@ -79,6 +79,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             break;
         }
+
         case PacketType::CLIENT_LOBBY_CHOOSEKICK: {
             if (!client.isOperator()) {
                 break;
@@ -95,6 +96,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             break;
         }
+
         case PacketType::CLIENT_LOBBY_CHOOSEOP: {
             if (!client.isOperator()) {
                 break;
@@ -112,6 +114,20 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             break;
         }
+
+        case PacketType::CLIENT_CHAT_MESSAGE: {
+            if (client.isInGame()) break;
+
+            [[maybe_unused]] const clientId pid = packet.read<clientId>();
+            std::string message = packet.readString();
+
+            handleChat(client, message, [&](Commands cmd, std::string &msg) {
+                return cmdHandle(client, cmd, msg);
+            });
+
+            break;
+        }
+
         default: break;
     }
 
@@ -157,6 +173,19 @@ Commands StateController::cmdParse(std::string string) {
         hash = 31 * hash + ch;
 
     return static_cast<Commands>(hash);
+}
+
+void StateController::handleChat(Client &client, std::string &message, std::function<bool(Commands, std::string &)> cmdProcessor) {
+    client.setTimeout(0);
+
+    Commands cmd = cmdParse(message);
+    bool isCommand = cmdProcessor(cmd, message);
+
+    Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
+
+    if (!isCommand) {
+        server.sendBroadcastMessage(client.getId(), message);
+    }
 }
 
 bool StateController::cmdHandle(Client &client, Commands hash, const std::string &message) {

@@ -31,7 +31,7 @@ void MapController::initialize() {
     //this->registerMap<Maps::PricelessFreedom>();
     //this->registerMap<Maps::VolcanoValley>();
     //this->registerMap<Maps::Hill>();
-#if defined(SERVER_MODE)
+#if SERVER_DEBUG
     this->registerMap<Maps::MajinForest>();
     this->registerMap<Maps::HideAndSeek>();
     //this->registerMap<Maps::TortureCave>();

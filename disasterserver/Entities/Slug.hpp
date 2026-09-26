@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ranges>
+
 #include "Entity.hpp"
 
 namespace DisasterServer {
@@ -9,8 +11,16 @@ namespace DisasterServer {
 namespace DisasterServer::Entities
 {
     class Slug : public Entity {
-        Vector2 sPosition = {};
+    public:
 
+
+        enum class Drop : uint8_t {
+            NORING,
+            RING,
+            REDRING
+        };
+
+    private:
         enum class State : uint8_t {
             NONERIGHT,
             NONELEFT,
@@ -20,14 +30,11 @@ namespace DisasterServer::Entities
             REDRINGLEFT
         };
 
-        enum class Drop : uint8_t {
-            NORING,
-            RING,
-            REDRING
-        };
+
+        Vector2 sPosition = {};
 
         State moveState = State::NONERIGHT;
-        Drop ring = Drop::NORING;
+        Drop drop = Drop::NORING;
 
     public:
         Slug(entityId id, Server &server, GameState &state, const Vector2 &position);
@@ -37,6 +44,9 @@ namespace DisasterServer::Entities
         bool tick() override;
         bool uninit() override;
 
+        Drop getDrop() const { return drop; }
+
+    private:
         void face(bool side);
     };
 }

@@ -44,7 +44,9 @@ void LimpCity::handle(Client& client, Packet& packet) {
     if (eyeId >= 2)
         return;
 
-    auto* eye = game->getEntityController().findIf<Entities::LCEye>([eyeId](Entities::LCEye& e) { return e.getEyeId() == eyeId; });
+    auto* eye = game->getEntityController().findIf<Entities::LCEye>([eyeId](Entities::LCEye& e) {
+        return e.getEyeId() == eyeId;
+    });
 
     if (!eye)
         return;
