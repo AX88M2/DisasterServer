@@ -16,7 +16,9 @@ namespace DisasterServer::Entities
         ~ExellerClone() override;
 
         bool init() override;
-
         bool uninit() override;
+
+        clientId getOwner() const { return owner; }
+        int8_t getDir() const { return dir; }
     };
 }

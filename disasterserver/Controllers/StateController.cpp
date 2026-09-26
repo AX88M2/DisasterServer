@@ -178,6 +178,11 @@ Commands StateController::cmdParse(std::string string) {
 void StateController::handleChat(Client &client, std::string &message, std::function<bool(Commands, std::string &)> cmdProcessor) {
     client.setTimeout(0);
 
+    if (message.length() > 90) {
+        this->server.sendMessage(client, "{}Chat message too long", CLRCODE_RED);
+        return;
+    }
+
     Commands cmd = cmdParse(message);
     bool isCommand = cmdProcessor(cmd, message);
 

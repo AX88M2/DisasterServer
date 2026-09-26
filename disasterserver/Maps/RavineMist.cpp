@@ -137,7 +137,7 @@ void RavineMist::left(Client &client) {
 }
 
 DisasterServer::MapProperties RavineMist::getMapProperties() const {
-    return MapProperties(9999 * TICKS_PER_SEC);
+    return MapProperties();
 }
 
 void RavineMist::spawnShards(Client &client) {

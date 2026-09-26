@@ -16,8 +16,10 @@
 #include "Entities/MapRing.hpp"
 #include "Entities/Ring.hpp"
 #include "Entities/TailsProjectile.hpp"
+#include "Entities/ExellerClone.hpp"
 #include "Packet.hpp"
 #include "Maps/HideAndSeekAct2.hpp"
+#include "Util/Random.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
@@ -40,7 +42,7 @@ void GameState::enter() {
     this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->bringLocation = static_cast<uint8_t>(std::rand());
+    this->bringLocation = static_cast<uint8_t>(Random::randInt());
     this->leftClients.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
     this->cooldowns.fill(0.0);
@@ -761,6 +763,74 @@ bool GameState::handle(Client& client, Packet& packet) {
                 Packet pack(PacketType::SERVER_BRING_COLLECTED);
                 pack.send(client);
             }
+            break;
+        }
+
+
+        case PacketType::CLIENT_ERECTOR_BALLS: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, client.getId() == this->exe);
+
+            const Vector2 pos = packet.readVector2F();
+
+            if (!client.isModified()) {
+                Packet pack(PacketType::CLIENT_ERECTOR_BALLS);
+                pack.writeVector2F(pos);
+                pack.sendBroadcast(server);
+            } else {
+                for (int i = -3; i < 3; i++) {
+                    entityController.spawnEntity<Ring>(Vector2(pos.x + i * 8, pos.y), false);
+                }
+            }
+
+            break;
+        }
+
+        case PacketType::CLIENT_EXELLER_SPAWN_CLONE: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, client.getId() == this->exe);
+            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXELLER);
+            AssertOrDisconnect(client, entityController.find<ExellerClone>() < 2);
+
+            const Vector2 pos = packet.readVector2();
+            const int8_t dir = packet.read<int8_t>();
+
+            entityController.spawnEntity<ExellerClone>(pos, dir, client.getId());
+            break;
+        }
+
+        case PacketType::CLIENT_EXELLER_TELEPORT_CLONE: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, client.getId() == this->exe);
+            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXELLER);
+
+            const entityId eid = packet.read<entityId>();
+
+            auto &player = client.getPlayer();
+
+            auto ent = entityController.findEntity<ExellerClone>(eid);
+
+            if (!entityController.despawnEntity(eid)) {
+                break;
+            }
+
+            if (client.isModified()) {
+                Packet pack(PacketType::SERVER_EXELLERCLONE_STATE);
+                pack.write<uint8_t>(0);
+                pack.write<entityId>(ent->getId());
+                pack.write<clientId>(ent->getOwner());
+                pack.writeVector2(player.getPosition());
+                pack.write<int8_t>(ent->getDir());
+                pack.sendBroadcast(server);
+                break;
+            }
+
+            Packet pack(PacketType::SERVER_EXELLERCLONE_STATE);
+            pack.write<uint8_t>(1);
+            pack.write<entityId>(ent->getId());
+            pack.sendBroadcast(server);
+
+            player.setExTeleport(60);
             break;
         }
 
