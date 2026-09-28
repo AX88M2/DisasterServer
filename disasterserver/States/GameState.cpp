@@ -24,7 +24,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-GameState::GameState(Server &server, StateController &stateController, clientId exe, mapId mapid, Map* map) : State(server, stateController), currentMapId(mapid), currentMap(map), exe(exe), entityController(server, *this) {}
+GameState::GameState(Server &server, const ContextControllers ctx, clientId exe, mapId mapid, Map* map) : State(server, ctx), currentMapId(mapid), currentMap(map), exe(exe), entityController(server, *this) {}
 GameState::~GameState() = default;
 
 void GameState::enter() {
@@ -131,7 +131,9 @@ bool GameState::playerLeaved(Client& client) {
 
     auto &player = client.getPlayer();
     player.setFlag(Player::Flags::PLAYER_LEFT);
-    leftClients.push_back(std::make_unique<Client>(Client(client)));
+
+    auto copyClient = Client(client);
+    leftClients.push_back(std::make_unique<Client>(copyClient));
 
     if (client.getId() == this->exe) {
         this->endingRound(Ending::EXEWIN, elapsed >= static_cast<float>(TICKS_PER_SEC * TICKS_PER_SEC));
@@ -383,7 +385,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 return true;
             }
 
-            if (rings >= 140 && MapController::isMap<Maps::HideAndSeekAct2>(currentMap)) {
+            if (rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()) {
                 client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
                 return true;
             }
@@ -625,8 +627,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             auto &player = client.getPlayer();
 
             const Vector2 position = packet.readVector2();
-            [[maybe_unused]] const uint16_t _xspd = packet.read<uint16_t>();
-            [[maybe_unused]] const uint16_t _yspd = packet.read<uint16_t>();
+            [[maybe_unused]] const Vector2 posSpd = packet.readVector2();
 
             const uint8_t state = packet.read<uint8_t>();
             [[maybe_unused]] const int16_t _angle  = packet.read<int16_t>();
@@ -686,8 +687,11 @@ bool GameState::handle(Client& client, Packet& packet) {
             AssertOrDisconnect(client, client.getSurvCharacter() == SurvCharacters::TAILS);
 
             int projCount = 0;
-            for (auto& e : entityController.getEntities())
-                if (dynamic_cast<TProjectile*>(e.get())) projCount++;
+            for (auto& e : entityController.getEntities()) {
+                if (e->is<TProjectile>()) {
+                    projCount++;
+                }
+            }
 
             AssertOrDisconnect(client, projCount <= 2);
 
@@ -695,14 +699,11 @@ bool GameState::handle(Client& client, Packet& packet) {
             const CooldownId cooldownId = demonized ? ETAILS_RECHARGE : TAILS_RECHARGE;
 
             if (getCooldown(cooldownId) > 0) {
-                char msg[256];
-                std::snprintf(msg, sizeof(msg), "is_exe: %d, cool_id: %s, remaining_cooldown: %f", demonized, cooldownId == TAILS_RECHARGE ? "TAILS_RECHARGE" : "ETAILS_RECHARGE", getCooldown(cooldownId));
-                client.disconnect(DisconnectReason::OTHER, msg);
+                client.disconnect(DisconnectReason::OTHER, "is_exe: {}, cool_id: {}, remaining_cooldown: {}", demonized, cooldownId == TAILS_RECHARGE ? "TAILS_RECHARGE" : "ETAILS_RECHARGE", getCooldown(cooldownId));
                 return false;
             }
 
-            const uint16_t x = packet.read<uint16_t>();
-            const uint16_t y = packet.read<uint16_t>();
+            const Vector2 position = packet.readVector2();
             int8_t dir = packet.read<int8_t>();
             const uint8_t dmg = packet.read<uint8_t>();
             const uint8_t exe = packet.read<uint8_t>();
@@ -720,7 +721,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 AssertOrDisconnect(client, dmg <= 6);
             }
 
-            entityController.spawnEntity<TProjectile>(Vector2{static_cast<float>(x), static_cast<float>(y)},client.getId(), dir, exe, chg, dmg);
+            entityController.spawnEntity<TProjectile>(position, client.getId(), dir, exe, chg, dmg);
             setCooldown(cooldownId, 10.0 * TICKS_PER_SEC);
             break;
         }
@@ -729,7 +730,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             AssertOrDisconnect(client, client.isInGame());
 
             for (auto& e : entityController.getEntities()) {
-                if (auto* proj = dynamic_cast<TProjectile*>(e.get())) {
+                if (auto* proj = e->as<TProjectile>()) {
                     entityController.despawnEntity(proj->getId());
                     break;
                 }

@@ -15,7 +15,7 @@ using namespace DisasterServer;
 
 MapController::MapController(Server &server) : server(server) {
     Info("MapController initialize...");
-    //meow (7) UwU
+    //meow (7) UwU ( Кто-то превратился в кота ;] )
 }
 
 void MapController::initialize() {

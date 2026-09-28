@@ -42,11 +42,12 @@ namespace DisasterServer
         friend class Server;
 
         Server &server;
+        MapController &mapController;
 
         std::vector<std::unique_ptr<State>> pendingState = {};
         std::unique_ptr<State> current;
     public:
-        explicit StateController(Server &server);
+        explicit StateController(Server &server, MapController &mapController);
         ~StateController();
 
         /**
@@ -55,7 +56,7 @@ namespace DisasterServer
          */
         template <std::derived_from<State> T, typename... Args>
         void changeTo(Args&&... args) {
-            auto next = std::make_unique<T>(server, *this, std::forward<Args>(args)...);
+            auto next = std::make_unique<T>(server, ContextControllers {*this, mapController}, std::forward<Args>(args)...);
             pendingState.emplace_back(std::move(next));
         }
 

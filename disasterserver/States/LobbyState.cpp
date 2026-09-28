@@ -11,7 +11,7 @@
 
 using namespace DisasterServer;
 
-LobbyState::LobbyState(Server &server, StateController &stateController) : State(server, stateController), vote(server) {
+LobbyState::LobbyState(Server &server, ContextControllers ctx) : State(server, ctx), vote(server) {
 }
 
 LobbyState::~LobbyState() = default;
@@ -164,8 +164,7 @@ void LobbyState::tick() {
     if (pracCountdown > 0) {
         pracCountdown -= server.getDelta();
         if (pracCountdown <= 0) {
-            auto &controller = server.getMapController();
-            auto map = controller.getMap(0);
+            auto map = mapController.getMap(0);
 
             if (!map.has_value()) {
                 Error("Map with ID 0 was not found!");
@@ -338,7 +337,6 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
         }
 
         case Commands::MAP: {
-            auto &controller = server.getMapController();
 
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
@@ -355,14 +353,14 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
                 break;
             }
 
-            if (requested < 1 || static_cast<size_t>(requested) > controller.getMapCount()) {
-                this->server.sendMessage(client, "{}map should be between 1 and {}", CLRCODE_RED, controller.getMapCount());
+            if (requested < 1 || static_cast<size_t>(requested) > mapController.getMapCount()) {
+                this->server.sendMessage(client, "{}map should be between 1 and {}", CLRCODE_RED, mapController.getMapCount());
                 break;
             }
 
             const int index = requested - 1;
 
-            auto map = controller.getMap(index);
+            auto map = mapController.getMap(index);
 
             if (!map.has_value()) {
                 this->server.sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, requested);

@@ -21,7 +21,7 @@ namespace DisasterServer
         Ending ending;
         std::vector<std::unique_ptr<Client>> leftClients;
     public:
-        ResultsState(Server &server, StateController &stateController, clientId exe, Ending ending, mapId id,
+        ResultsState(Server &server, ContextControllers ctx, clientId exe, Ending ending, mapId id,
             uint16_t mapTimeSec, std::vector<std::unique_ptr<Client>> leftClients
         );
         ~ResultsState() override;

@@ -57,7 +57,7 @@ namespace DisasterServer
         EntityController entityController;
 
     public:
-        GameState(Server &server, StateController &stateController, clientId exe, mapId mapId, Map* map);
+        GameState(Server &server, ContextControllers ctx, clientId exe, mapId mapId, Map* map);
         ~GameState() override;
 
         void enter() override;

@@ -19,8 +19,8 @@ namespace DisasterServer
         Application &application = Application::getInstance();
 
         std::vector<std::unique_ptr<Client>> peers;
-        StateController stateController;
         MapController mapController;
+        StateController stateController;
     public:
         explicit Server(int port = 8606);
         ~Server();
@@ -51,8 +51,14 @@ namespace DisasterServer
 
         Application &getApplication() { return application; }
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
-        MapController &getMapController() { return mapController; }
-
         double getDelta() const { return delta; }
+
+        /**
+         * @warning Данные геттеры исключительно предназначены чтобы можно было достать данные с сервера из вне!
+         * И не должный использоваться в коде сервера
+         **/
+        
+        MapController &getMapController() { return mapController; }
+        StateController &getStateController() { return stateController; }
     };
 }

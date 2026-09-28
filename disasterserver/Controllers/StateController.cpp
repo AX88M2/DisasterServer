@@ -7,8 +7,8 @@
 
 using namespace DisasterServer;
 
-StateController::StateController(Server &server): server(server) {
-    this->current = std::make_unique<LobbyState>(server, *this);
+StateController::StateController(Server &server, MapController &mapController): server(server), mapController(mapController) {
+    this->current = std::make_unique<LobbyState>(server, ContextControllers { *this, mapController });
 }
 
 StateController::~StateController() = default;
@@ -254,7 +254,7 @@ bool StateController::cmdHandle(Client &client, Commands hash, const std::string
 
         case Commands::LOBBY: {
             int ind;
-            if (sscanf(message.c_str(), ".lobby %d", &ind) != 1) {
+            if (sscanf_s(message.c_str(), ".lobby %d", &ind) != 1) {
                 this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
                 break;
             }

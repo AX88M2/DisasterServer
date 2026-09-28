@@ -12,7 +12,8 @@
 
 using namespace DisasterServer;
 
-CharSelectState::CharSelectState(Server &server, StateController &stateController, Map* map, mapId id) : State(server, stateController), map(map), mapid(id) {
+CharSelectState::CharSelectState(Server &server, ContextControllers ctx, Map* map, mapId id) :
+    State(server, ctx), map(map), mapid(id) {
 }
 
 CharSelectState::~CharSelectState() = default;

@@ -17,7 +17,7 @@ namespace DisasterServer
         Vote vote;
         clientId kickTarget = 0;
     public:
-        LobbyState(Server &server, StateController &stateController);
+        LobbyState(Server &server, ContextControllers ctx);
         ~LobbyState() override;
 
         void enter() override;

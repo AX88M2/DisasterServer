@@ -35,8 +35,13 @@ namespace DisasterServer
         virtual void tick() = 0;
         virtual void handle(Client& client, Packet& packet) = 0;
         virtual void left(Client& client) = 0;
-        virtual MapProperties getMapProperties() const = 0;
 
+        template<std::derived_from<Map> T>
+        bool is() const {
+            return dynamic_cast<const T*>(this) != nullptr;
+        }
+
+        virtual MapProperties getMapProperties() const = 0;
         const std::string& getName() const { return name; }
 
         int getSpawnRedRings() const { return spawnRedRings; }

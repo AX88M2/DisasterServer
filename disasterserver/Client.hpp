@@ -3,6 +3,7 @@
 #include "Player.hpp"
 #include "Controllers/StateController.hpp"
 #include "Packet.hpp"
+#include "Characters/Character.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer
@@ -122,6 +123,7 @@ namespace DisasterServer
         /* Character */
         SurvCharacters survChar = SurvCharacters::NONE;
         ExesCharacters exeChar = ExesCharacters::NONE;
+        //std::unique_ptr<Character> character;
 
         bool shouldTimeout = false;
 

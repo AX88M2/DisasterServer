@@ -333,9 +333,8 @@ static constexpr int PACKET_MAXSIZE = 256;
 #undef min
 #undef max
 
-#define NETWORK_LOGGER 0
-
-namespace DisasterServer {
+namespace DisasterServer
+{
 	class Server;
 	class Client;
 	class Vector2;
@@ -347,7 +346,13 @@ namespace DisasterServer {
 		size_t len = 0;
 	public:
 		explicit Packet(ENetPacket *packet);
-		explicit Packet(PacketType type);
+
+		/**
+		 * Создаст пустой пакет с заданным типом
+		 * @param type Тип пакета
+		 * @param passtrough должен ли клиент про игнорировать пакет (по умолчанию false)
+		 */
+		explicit Packet(PacketType type, bool passtrough = false);
 		~Packet();
 
 		PacketType getType() {
@@ -365,7 +370,7 @@ namespace DisasterServer {
 
 			T value {};
 
-			std::memcpy(&value, buffer.data() + position, sizeof(T));
+			memcpy(&value, buffer.data() + position, sizeof(T));
 			position += sizeof(T);
 
 #ifdef SYS_BIG_ENDIAN
@@ -400,13 +405,19 @@ namespace DisasterServer {
 			}
 #endif
 
-			std::memcpy(buffer.data() + position, &value, sizeof(T));
+			memcpy(buffer.data() + position, &value, sizeof(T));
 			position += sizeof(T);
 
 			len = std::max(len, position);
 		}
 
 		void seek(size_t offset);
+		
+		/**
+		 *
+		 * @param other объект пакета который будет вставлен
+		 * @param offset Сдвик куда будет вставка
+		 */
 		void append(const Packet& other, size_t offset);
 
 		std::string readString();
@@ -418,6 +429,12 @@ namespace DisasterServer {
 		Vector2 readVector2F();
 		void writeVector2F(const Vector2 &value);
 
+		/**
+		 *
+		 * @param client Ссылка на клиент
+		 * @param reliable Переотправка пакета если он не дойдёт (по умолчанию true)
+		 * @return true успешная отправка, false нет
+		 */
 		bool send(Client &client, bool reliable = true);
 		void sendBroadcast(Server &server, bool reliable = true, std::function<bool(const Client& client)> predicate = [](const Client& _) { return true; });
 	};

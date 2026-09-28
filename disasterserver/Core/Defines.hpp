@@ -14,3 +14,7 @@
 
 #define unusedArg(x) (void)x
 #define unused() (void)0
+
+
+/** == Configuration == **/
+#define NETWORK_LOGGER 0

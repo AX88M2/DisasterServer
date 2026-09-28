@@ -3,16 +3,24 @@
 namespace DisasterServer
 {
     class StateController;
+    class MapController;
     class Client;
     class Server;
     class Packet;
+
+    struct ContextControllers {
+        StateController &stateController;
+        MapController &mapController;
+    };
 
     class State {
     protected:
         Server &server;
         StateController &stateController;
+        MapController &mapController;
     public:
-        State(Server &server, StateController &stateController) : server(server), stateController(stateController) {}
+        State(Server &server, const ContextControllers ctx) :
+            server(server), stateController(ctx.stateController), mapController(ctx.mapController) {}
         virtual ~State() = default;
 
         virtual void enter() = 0;

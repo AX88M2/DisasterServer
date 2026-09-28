@@ -10,15 +10,13 @@
 
 using namespace DisasterServer;
 
-MapVoteState::MapVoteState(Server &server, StateController &stateController) : State(server, stateController) {
+MapVoteState::MapVoteState(Server &server, ContextControllers ctx) : State(server, ctx) {
 }
 
 MapVoteState::~MapVoteState() = default;
 
 void MapVoteState::enter() {
     Debug("Attepting to enter DisasterServer::MapVoteState...");
-
-    auto &mapController = server.getMapController();
 
     // randomize
     time_t seed = time(nullptr);
@@ -97,7 +95,7 @@ void MapVoteState::enter() {
 }
 
 void MapVoteState::exit() {
-    
+
 }
 
 bool MapVoteState::playerJoined(Client &client) {
@@ -115,7 +113,6 @@ bool MapVoteState::playerLeaved(Client &client) {
 void MapVoteState::tick() {
     switch (countdown.tick(server.getDelta())) {
         case Countdown::TickResult::Finished: {
-            auto &controller = server.getMapController();
 
             //choose the map
             int8_t indeces[3] = { -1, -1, -1 };
@@ -140,7 +137,7 @@ void MapVoteState::tick() {
 
             // Find winner
             int8_t wonId = indeces[Random::randInt() % count];
-            auto wonMap = controller.getMap(wonId);
+            auto wonMap = mapController.getMap(wonId);
 
             if (!wonMap.has_value()) {
                 Error("Map with id {} was not found!", wonId);
@@ -148,19 +145,19 @@ void MapVoteState::tick() {
                 return;
             }
 
-            controller.setLatestMap(*wonMap);
+            mapController.setLatestMap(*wonMap);
 
-            int16_t weight = controller.getMapWeight(*wonMap);
+            int16_t weight = mapController.getMapWeight(*wonMap);
 
             weight -= 255;
             if (weight < 0)
                 weight = 0;
 
-            controller.setMapWeight(*wonMap, weight);
+            mapController.setMapWeight(*wonMap, weight);
 
             Debug("Pickrates:");
-            for (int8_t i = 0; i < controller.getMapCount(); i++) {
-                auto map = controller.getMap(i);
+            for (int8_t i = 0; i < mapController.getMapCount(); i++) {
+                auto map = mapController.getMap(i);
 
                 if (!map.has_value()) {
                     Error("Map with id {} was not found!", i);
@@ -168,17 +165,17 @@ void MapVoteState::tick() {
                     return;
                 }
 
-                Debug("{}: {}", i, controller.getMapWeight(*map));
+                Debug("{}: {}", i, mapController.getMapWeight(*map));
                 if (i == wonId) {
                     continue;
                 }
 
-                int16_t weigh = controller.getMapWeight(*map);
+                int16_t weigh = mapController.getMapWeight(*map);
                 weigh += 25;
                 if (weigh > 255) {
                     weigh = 255;
                 }
-                controller.setMapWeight(*map, weigh);
+                mapController.setMapWeight(*map, weigh);
             }
 
             stateController.changeTo<CharSelectState>(*wonMap, wonId);
@@ -215,7 +212,7 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
             for (int i = 0; i < 3; i++) {
                 pack.write<uint8_t>(votes[i]);
             }
-            Info("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), server.getMapController().getMaps().at(maps[map])->getName());
+            Info("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), mapController.getMaps().at(maps[map])->getName());
             pack.sendBroadcast(server);
             checkState();
             break;

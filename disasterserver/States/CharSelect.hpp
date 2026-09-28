@@ -21,7 +21,7 @@ namespace DisasterServer
         clientId exe = 0;
         std::unordered_map<SurvCharacters, bool> avail;
     public:
-        CharSelectState(Server &server, StateController &stateController, Map* map, mapId id);
+        CharSelectState(Server &server, ContextControllers ctx, Map* map, mapId id);
         ~CharSelectState() override;
 
         void enter() override;

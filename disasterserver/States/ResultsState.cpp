@@ -11,13 +11,13 @@ constexpr uint8_t PLRSTATE_DEAD = 2;
 constexpr uint8_t PLRSTATE_DEMONIZED = 1;
 constexpr uint8_t PLRSTATE_EXE = 0;
 
-ResultsState::ResultsState(Server &server, StateController &stateController,
+ResultsState::ResultsState(Server &server, ContextControllers ctx,
         clientId exe,
         Ending ending,
         mapId id,
         uint16_t mapTimeSec,
         std::vector<std::unique_ptr<Client>> leftClients
-    ) : State(server, stateController),
+    ) : State(server, ctx),
 id(id), mapTimeSec(mapTimeSec), exe(exe), ending(ending), leftClients(std::move(leftClients)) {}
 
 ResultsState::~ResultsState() = default;

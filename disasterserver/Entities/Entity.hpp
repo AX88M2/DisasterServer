@@ -22,9 +22,20 @@ namespace DisasterServer
             server(server), state(state), id(id), tag(tag), position(position) {}
 
         virtual ~Entity() = default;
-        virtual bool init(){ return true; }
-        virtual bool tick(){ return true; }
-        virtual bool uninit(){ return true; }
+
+        virtual bool init() { return true; }
+        virtual bool tick() { return true; }
+        virtual bool uninit() { return true; }
+
+        template<std::derived_from<Entity> T>
+        bool is() const {
+            return dynamic_cast<const T*>(this) != nullptr;
+        }
+
+        template<std::derived_from<Entity> T>
+        T* as() {
+            return dynamic_cast<T*>(this);
+        }
 
         std::string getTag() { return tag; }
         uint16_t getId() const { return id; }

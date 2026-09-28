@@ -34,8 +34,8 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 #endif
 }
 
-Packet::Packet(PacketType type) : buffer({}), type(type) {
-	write<uint8_t>(0);
+Packet::Packet(PacketType type, const bool passtrough) : buffer({}), type(type) {
+	write<uint8_t>(passtrough); // Понятия не имею зачем вообще нужна игнорирования пакета, да и тем более она может работать не на всех пакетах
 	write<PacketType>(type);
 #if NETWORK_LOGGER
 	if (type != PacketType::SERVER_HEARTBEAT) {

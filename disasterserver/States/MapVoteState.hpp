@@ -16,7 +16,7 @@ namespace DisasterServer
         std::array<mapId, 3> maps = {};
         std::array<uint8_t, 3> votes = {};
     public:
-        MapVoteState(Server &server, StateController &stateController);
+        MapVoteState(Server &server, ContextControllers ctx);
         ~MapVoteState() override;
 
         void enter() override;

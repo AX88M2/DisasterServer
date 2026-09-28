@@ -43,7 +43,7 @@ namespace DisasterServer
             });
 
             if (it != entities.end()) {
-                return dynamic_cast<T*>(it->get());
+                return (*it)->template as<T>();
             }
 
             return nullptr;
@@ -52,7 +52,7 @@ namespace DisasterServer
         template <std::derived_from<Entity> T, typename Predicate>
         T* findIf(Predicate predicate) {
             for (auto& entity : entities) {
-                auto* ptr = dynamic_cast<T*>(entity.get());
+                auto* ptr = entity->as<T>();
                 if (ptr && std::invoke(predicate, *ptr)) {
                     return ptr;
                 }
@@ -64,19 +64,14 @@ namespace DisasterServer
         template <std::derived_from<Entity> T>
         size_t find() {
             const auto count = std::ranges::count_if(entities, [](const auto &entity) {
-                return EntityController::isEntity<T>(entity.get());
+                return entity->template is<T>();
             });
 
             return count;
         }
 
         bool despawnEntity(entityId id);
-
-        template <std::derived_from<Entity> T>
-        static bool isEntity(Entity *entity) {
-            return dynamic_cast<T*>(entity) != nullptr;
-        }
-
+        
         const std::vector<std::unique_ptr<Entity>> &getEntities() const { return entities; }
     };
 }
