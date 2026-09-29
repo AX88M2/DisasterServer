@@ -17,7 +17,7 @@
 - [x] Exeller
 ### Maps
 - [x] Hide and Seek 2
-- [ ] Ravine Mist
+- [x] Ravine Mist (Not done)
 - [x] ...
 - [x] Desert Town
 - [x] You Can't Run
