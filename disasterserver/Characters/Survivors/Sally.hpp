@@ -4,10 +4,10 @@
 
 namespace DisasterServer::Characters
 {
-    class Knuckles : public Character {
+    class Sally : public Character {
     public:
-        explicit Knuckles(Server &server, Client &client);
-        ~Knuckles() override;
+        explicit Sally(Server &server, Client &client);
+        ~Sally() override;
 
         void tick() override;
         bool handle(GameState& state, Packet &packet) override;

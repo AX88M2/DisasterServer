@@ -6,8 +6,6 @@ namespace DisasterServer::Characters
 {
     class Eggman : public Character {
     public:
-        static constexpr CharacterType Type = CharacterType::EGGMAN;
-
         explicit Eggman(Server &server, Client &client);
         ~Eggman() override;
 

@@ -42,6 +42,8 @@ void ResultsState::exit() {
 
         client->setSurvCharacter(SurvCharacters::NONE);
         client->setExeCharacter(ExesCharacters::NONE);
+
+        client->setCharacter<Characters::None>();
     }
 }
 

@@ -15,7 +15,9 @@ Client::Client(Server *server, StateController &stateController, ENetPeer *peer,
     ip(std::move(ip)),
     peer(peer),
     server(server),
-    stateController(stateController){}
+    stateController(stateController),
+    character(std::make_shared<Characters::None>(*server, *this))
+{}
 
 bool Client::identity(Packet &packet) {
     RAssert(id > 0);

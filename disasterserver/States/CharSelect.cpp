@@ -7,6 +7,19 @@
 #include "Controllers/StateController.hpp"
 #include "GameState.hpp"
 #include "LobbyState.hpp"
+#include "Characters/None.hpp"
+#include "Characters/UndefinedExe.hpp"
+#include "Characters/UndefinedSurvival.hpp"
+#include "Characters/Exes/Chaos.hpp"
+#include "Characters/Exes/Exeller.hpp"
+#include "Characters/Exes/Exetior.hpp"
+#include "Characters/Exes/Original.hpp"
+#include "Characters/Survivors/AmyRose.hpp"
+#include "Characters/Survivors/Cream.hpp"
+#include "Characters/Survivors/Eggman.hpp"
+#include "Characters/Survivors/Knuckles.hpp"
+#include "Characters/Survivors/Sally.hpp"
+#include "Characters/Survivors/Tails.hpp"
 #include "Core/Constansts.hpp"
 #include "Util/Random.hpp"
 
@@ -51,7 +64,7 @@ bool CharSelectState::playerJoined(Client& client) {
 }
 
 bool CharSelectState::playerLeaved(Client& client) {
-    if (client.getSurvCharacter() != SurvCharacters::NONE) {
+    if (!client.isCharacter<Characters::None>()) {
         const auto character = client.getSurvCharacter();
         avail[character] = false;
     }
@@ -71,8 +84,7 @@ void CharSelectState::tick() {
                 if (!client || !client->isInGame())
                     continue;
 
-                if (client->getExeCharacter() == ExesCharacters::NONE && client->getSurvCharacter() == SurvCharacters::NONE) {
-
+                if (client->isCharacter<Characters::None>()) {
                     client->disconnect(DisconnectReason::AFKTIMEOUT);
                 }
             }
@@ -100,18 +112,19 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 return false;
             }
 
-            uint8_t id = packet.read<uint8_t>();
-            id--;
+            uint8_t charExe = packet.read<uint8_t>();
+            charExe--;
 
-            if (id > static_cast<uint8_t>(ExesCharacters::COUNT)) {
+            if (charExe > static_cast<uint8_t>(ExesCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid exe character");
                 return false;
             }
 
-            client.setExeCharacter(static_cast<ExesCharacters>(id));
+            client.setExeCharacter(static_cast<ExesCharacters>(charExe));
+            selectExe(client, static_cast<ExesCharacters>(charExe));
 
             Packet pack(PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE);
-            pack.write<uint8_t>(id);
+            pack.write<ExesCharacters>(static_cast<ExesCharacters>(charExe));
             if (!pack.send(client, true)) {
                 Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
@@ -119,10 +132,10 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
 
             Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
             change.write<clientId>(client.getId());
-            change.write<uint8_t>(id);
+            change.write<ExesCharacters>(static_cast<ExesCharacters>(charExe));
             change.sendBroadcast(server, true);
 
-            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, EXE_NAMES[id], CLRCODE_RST);
+            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, client.getCharacter()->getName(), CLRCODE_RST);
             return checkState();
         }
 
@@ -131,7 +144,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 break;
             }
 
-            if (client.getSurvCharacter() != SurvCharacters::NONE) {
+            if (!client.isCharacter<Characters::None>()) {
                 break;
             }
 
@@ -140,15 +153,15 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 return false;
             }
 
-            uint8_t id = packet.read<uint8_t>();
-            id--;
+            uint8_t charSurv = packet.read<uint8_t>();
+            charSurv--;
 
-            if (id > static_cast<uint8_t>(SurvCharacters::COUNT)) {
+            if (charSurv > static_cast<uint8_t>(SurvCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid survivor character");
                 return false;
             }
 
-            SurvCharacters character = static_cast<SurvCharacters>(id);
+            SurvCharacters character = static_cast<SurvCharacters>(charSurv);
 
             const bool available = !avail[character];
 
@@ -157,22 +170,23 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             }
 
             Packet response(PacketType::SERVER_LOBBY_CHARACTER_RESPONSE);
-            response.write<uint8_t>(id + 1);
+            response.write<uint8_t>(charSurv + 1);
             response.write<uint8_t>(available);
 
             if (!response.send(client, true))
                 return false;
 
             if (available) {
-                client.setSurvCharacter(static_cast<SurvCharacters>(id));
+                client.setSurvCharacter(static_cast<SurvCharacters>(charSurv));
+                selectSurvival(client, character);
 
                 Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
                 change.write<clientId>(client.getId());
-                change.write<uint8_t>(id + 1);
+                change.write<uint8_t>(charSurv + 1);
                 change.sendBroadcast(server, true);
             }
 
-            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, SURV_NAMES[id], CLRCODE_RST);
+            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, client.getCharacter()->getName(), CLRCODE_RST);
             return checkState();
         }
 
@@ -189,9 +203,7 @@ bool CharSelectState::checkState() {
         if (!client->isInGame())
             continue;
 
-        if (client->getExeCharacter() == ExesCharacters::NONE &&
-            client->getSurvCharacter() == SurvCharacters::NONE) {
-
+        if (client->isCharacter<Characters::None>()) {
             shouldStart = false;
             break;
         }
@@ -214,6 +226,8 @@ bool CharSelectState::chooseExe() {
 
         client->setExeCharacter(ExesCharacters::NONE);
         client->setSurvCharacter(SurvCharacters::NONE);
+
+        client->setCharacter<Characters::None>();
 
         weight += client->getExeChance();
     }
@@ -246,4 +260,30 @@ bool CharSelectState::chooseExe() {
 
     exe = static_cast<clientId>(-1);
     return false;
+}
+
+void CharSelectState::selectSurvival(Client &client, SurvCharacters survChar) {
+    switch (survChar) {
+        case SurvCharacters::NONE: client.setCharacter<Characters::None>(); break;
+        case SurvCharacters::TAILS: client.setCharacter<Characters::Tails>(); break;
+        case SurvCharacters::KNUX: client.setCharacter<Characters::Knuckles>(); break;
+        case SurvCharacters::EGGMAN: client.setCharacter<Characters::Eggman>(); break;
+        case SurvCharacters::CREAM: client.setCharacter<Characters::Cream>(); break;
+        case SurvCharacters::SALLY: client.setCharacter<Characters::Sally>(); break;
+
+
+        default: client.setCharacter<Characters::UndefinedSurvival>(); break;
+    }
+}
+
+void CharSelectState::selectExe(Client &client, const ExesCharacters charExe) {
+    switch (charExe) {
+        case ExesCharacters::ORIGINAL: client.setCharacter<Characters::Original>(); break;
+        case ExesCharacters::CHAOS: client.setCharacter<Characters::Chaos>(); break;
+        case ExesCharacters::EXETIOR: client.setCharacter<Characters::Exetior>(); break;
+        case ExesCharacters::EXELLER: client.setCharacter<Characters::Exeller>(); break;
+
+
+        default: client.setCharacter<Characters::UndefinedExe>(); break;
+    }
 }

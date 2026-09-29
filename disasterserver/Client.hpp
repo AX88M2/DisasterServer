@@ -4,6 +4,7 @@
 #include "Controllers/StateController.hpp"
 #include "Packet.hpp"
 #include "Characters/Character.hpp"
+#include "Characters/None.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer
@@ -20,7 +21,6 @@ namespace DisasterServer
         AMY,
         CREAM,
         SALLY,
-        SONIC,
 
         COUNT
     };
@@ -49,8 +49,7 @@ namespace DisasterServer
         "Eggman",
         "Amy",
         "Cream",
-        "Sally",
-        "Sonic"
+        "Sally"
     };
 
     enum class DisconnectReason : uint8_t
@@ -123,7 +122,7 @@ namespace DisasterServer
         /* Character */
         SurvCharacters survChar = SurvCharacters::NONE;
         ExesCharacters exeChar = ExesCharacters::NONE;
-        //std::unique_ptr<Character> character;
+        std::shared_ptr<Character> character;
 
         bool shouldTimeout = false;
 
@@ -152,9 +151,21 @@ namespace DisasterServer
         uint8_t getExeChance() const { return exeChance; }
 
         SurvCharacters getSurvCharacter() const { return survChar; }
-        void setSurvCharacter(SurvCharacters character) { survChar = character; }
+        void setSurvCharacter(const SurvCharacters ch) { survChar = ch; }
         ExesCharacters getExeCharacter() const { return exeChar; }
-        void setExeCharacter(ExesCharacters character) { exeChar = character; }
+        void setExeCharacter(const ExesCharacters ch) { exeChar = ch; }
+
+        std::shared_ptr<Character> getCharacter() const { return character; }
+
+        template <std::derived_from<Character> T>
+        void setCharacter() {
+            character = std::move(std::make_shared<T>(*server, *this));
+        }
+
+        template <std::derived_from<Character> T>
+        bool isCharacter() const {
+            return dynamic_cast<T *>(character.get()) != nullptr;
+        }
 
         void setTimeout(const double value) { timeout = value; }
         double getTimeout() const { return timeout; }

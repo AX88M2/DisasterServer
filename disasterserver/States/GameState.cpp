@@ -267,6 +267,8 @@ void GameState::tickPlayers() {
             continue;
         }
 
+        client->getCharacter()->tick();
+
         if (player.getDeathTimer() >= TICKS_PER_SEC) {
             if (!exeNear) {
                 player.setDeathTimerSec(player.getDeathTimerSec() - 1);
@@ -683,51 +685,6 @@ bool GameState::handle(Client& client, Packet& packet) {
             break;
         }
 
-        case PacketType::CLIENT_TPROJECTILE: {
-            AssertOrDisconnect(client, client.isInGame());
-            AssertOrDisconnect(client, client.getId() != this->exe);
-            AssertOrDisconnect(client, client.getSurvCharacter() == SurvCharacters::TAILS);
-
-            int projCount = 0;
-            for (auto& e : entityController.getEntities()) {
-                if (e->is<TProjectile>()) {
-                    projCount++;
-                }
-            }
-
-            AssertOrDisconnect(client, projCount <= 2);
-
-            const bool demonized = client.getPlayer().isFlag(Player::Flags::PLAYER_DEMONIZED);
-            const CooldownId cooldownId = demonized ? ETAILS_RECHARGE : TAILS_RECHARGE;
-
-            if (getCooldown(cooldownId) > 0) {
-                client.disconnect(DisconnectReason::OTHER, "is_exe: {}, cool_id: {}, remaining_cooldown: {}", demonized, cooldownId == TAILS_RECHARGE ? "TAILS_RECHARGE" : "ETAILS_RECHARGE", getCooldown(cooldownId));
-                return false;
-            }
-
-            const Vector2 position = packet.readVector2();
-            int8_t dir = packet.read<int8_t>();
-            const uint8_t dmg = packet.read<uint8_t>();
-            const uint8_t exe = packet.read<uint8_t>();
-            const uint8_t chg = packet.read<uint8_t>();
-            AssertOrDisconnect(client, dir >= -1 && dir <= 1);
-
-            if (client.isModified()) {
-                if (dir > 0) dir = -1;
-                else if (dir < 0) dir = 1;
-            }
-
-            if (demonized) {
-                AssertOrDisconnect(client, dmg <= 60);
-            } else {
-                AssertOrDisconnect(client, dmg <= 6);
-            }
-
-            entityController.spawnEntity<TProjectile>(position, client.getId(), dir, exe, chg, dmg);
-            setCooldown(cooldownId, 10.0 * TICKS_PER_SEC);
-            break;
-        }
-
         case PacketType::CLIENT_TPROJECTILE_HIT: {
             AssertOrDisconnect(client, client.isInGame());
 
@@ -737,22 +694,6 @@ bool GameState::handle(Client& client, Packet& packet) {
                     break;
                 }
             }
-            break;
-        }
-
-        case PacketType::CLIENT_ERECTOR_BRING_SPAWN: {
-            AssertOrDisconnect(client, client.isInGame());
-            AssertOrDisconnect(client, client.getId() == this->exe);
-            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXETIOR);
-
-            const Vector2 position = packet.readVector2();
-
-            if (client.isModified()) {
-                entityController.spawnEntity<Ring>(position);
-                break;
-            }
-
-            entityController.spawnEntity<BlackRing>(position);
             break;
         }
 
@@ -789,56 +730,10 @@ bool GameState::handle(Client& client, Packet& packet) {
             break;
         }
 
-        case PacketType::CLIENT_EXELLER_SPAWN_CLONE: {
-            AssertOrDisconnect(client, client.isInGame());
-            AssertOrDisconnect(client, client.getId() == this->exe);
-            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXELLER);
-            AssertOrDisconnect(client, entityController.find<ExellerClone>() < 2);
-
-            const Vector2 pos = packet.readVector2();
-            const int8_t dir = packet.read<int8_t>();
-
-            entityController.spawnEntity<ExellerClone>(pos, dir, client.getId());
-            break;
-        }
-
-        case PacketType::CLIENT_EXELLER_TELEPORT_CLONE: {
-            AssertOrDisconnect(client, client.isInGame());
-            AssertOrDisconnect(client, client.getId() == this->exe);
-            AssertOrDisconnect(client, client.getExeCharacter() == ExesCharacters::EXELLER);
-
-            const entityId eid = packet.read<entityId>();
-
-            auto &player = client.getPlayer();
-
-            auto ent = entityController.findEntity<ExellerClone>(eid);
-
-            if (!entityController.despawnEntity(eid)) {
-                break;
-            }
-
-            if (client.isModified()) {
-                Packet pack(PacketType::SERVER_EXELLERCLONE_STATE);
-                pack.write<uint8_t>(0);
-                pack.write<entityId>(ent->getId());
-                pack.write<clientId>(ent->getOwner());
-                pack.writeVector2(player.getPosition());
-                pack.write<int8_t>(ent->getDir());
-                pack.sendBroadcast(server);
-                break;
-            }
-
-            Packet pack(PacketType::SERVER_EXELLERCLONE_STATE);
-            pack.write<uint8_t>(1);
-            pack.write<entityId>(ent->getId());
-            pack.sendBroadcast(server);
-
-            player.setExTeleport(60);
-            break;
-        }
-
         default: break;
     }
+
+    client.getCharacter()->handle(*this, packet);
 
     if (!started) {
         auto &player = client.getPlayer();
@@ -921,19 +816,7 @@ void GameState::demonize(Client &client) {
 
         player.getStats().clearRings();
 
-        switch (client.getSurvCharacter()) {
-            case SurvCharacters::TAILS:
-                setCooldown(TAILS_RECHARGE,  0.0);
-                setCooldown(ETAILS_RECHARGE, 0.0);
-                break;
-            case SurvCharacters::EGGMAN:
-                setCooldown(EGGTRACK_RECHARGE, 0.0);
-                break;
-            case SurvCharacters::CREAM:
-                setCooldown(CREAM_RING_SPAWN, 0.0);
-                break;
-            default: break;
-        }
+        client.getCharacter()->demonize();
 
         Info("{} (id {}) was {}demonized!", client.getNickname(), client.getId(), CLRCODE_RED);
         pack.write<uint8_t>(1);
