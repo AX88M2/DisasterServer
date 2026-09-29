@@ -91,10 +91,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          NAME="DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}"
+          NAME="DisasterServer_${{ matrix.os }}_${{ matrix.c_compiler }}"
           BUILD="${{ steps.strings.outputs.build-output-dir }}"
 
-          # Ищем оба варианта: C++ (DisasterServerCXX) и C (DisasterServer)
           FOUND=0
           for pattern in \
             "$BUILD/disasterserver/Release/DisasterServerCXX.exe" \
@@ -104,8 +103,8 @@ jobs:
               BASENAME=$(basename "$pattern" .exe)
               EXT=""
               [[ "$pattern" == *.exe ]] && EXT=".exe"
-              cp "$pattern" "dist/${NAME}-${BASENAME}${EXT}"
-              echo "Copied: $pattern -> dist/${NAME}-${BASENAME}${EXT}"
+              cp "$pattern" "dist/${NAME}${EXT}"
+              echo "Copied: $pattern -> dist/${NAME}${EXT}"
               FOUND=1
             fi
           done
@@ -122,7 +121,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
+          name: DisasterServer_${{ matrix.os }}_${{ matrix.c_compiler }}
           path: dist/*
           if-no-files-found: error
           retention-days: 7
