@@ -143,6 +143,10 @@ else()
 					${UI_SOURCES}
 				)
 
+				set_target_properties(DisasterServer PROPERTIES
+						WIN32_EXECUTABLE TRUE
+				)
+
 				target_link_libraries(DisasterServer PRIVATE
 						ws2_32
 						enet

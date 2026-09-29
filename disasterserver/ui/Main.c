@@ -152,7 +152,19 @@ int console_loop(void)
 	return server_loop();
 }
 
-int main(int argc, char** argv)
+int start(int argc, char** argv);
+
+#ifdef WIN32
+INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nShowCmd) {
+	return start(1, &lpCmdLine);
+}
+#else
+int main(int argc, char** argv) {
+	return start(argc, argv);
+}
+#endif
+
+int start(int argc, char** argv)
 {
 	if (argc > 1)
 	{
