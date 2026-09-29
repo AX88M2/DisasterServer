@@ -94,15 +94,31 @@ jobs:
           NAME="DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}"
           BUILD="${{ steps.strings.outputs.build-output-dir }}"
 
-          if [ -f "$BUILD/disasterserver/Release/DisasterServer.exe" ]; then
-            cp "$BUILD/disasterserver/Release/DisasterServer.exe" "dist/${NAME}.exe"
-          elif [ -f "$BUILD/disasterserver/DisasterServer.exe" ]; then
-            cp "$BUILD/disasterserver/DisasterServer.exe" "dist/${NAME}.exe"
-          elif [ -f "$BUILD/disasterserver/DisasterServer" ]; then
-            cp "$BUILD/disasterserver/DisasterServer" "dist/${NAME}"
-          else
-            echo "Binary not found"; find "$BUILD" -name "DisasterServer*"; exit 1
+          # Ищем оба варианта: C++ (DisasterServerCXX) и C (DisasterServer)
+          FOUND=0
+          for pattern in \
+            "$BUILD/disasterserver/Release/DisasterServerCXX.exe" \
+            "$BUILD/disasterserver/DisasterServerCXX" \
+            "$BUILD/disasterserver_c/Release/DisasterServer.exe" \
+            "$BUILD/disasterserver_c/DisasterServer" \
+          ; do
+            if [ -f "$pattern" ]; then
+              BASENAME=$(basename "$pattern" .exe)
+              EXT=""
+              [[ "$pattern" == *.exe ]] && EXT=".exe"
+              cp "$pattern" "dist/${NAME}-${BASENAME}${EXT}"
+              echo "Copied: $pattern -> dist/${NAME}-${BASENAME}${EXT}"
+              FOUND=1
+            fi
+          done
+
+          if [ "$FOUND" = "0" ]; then
+            echo "=== Binary not found. Searching build tree: ==="
+            find "$BUILD" -type f \( -name "DisasterServer*" -o -name "*.exe" \) 2>/dev/null | head -50
+            exit 1
           fi
+
+          echo "=== dist contents ==="
           ls -la dist/
 
       - name: Upload
