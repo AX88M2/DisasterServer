@@ -45,7 +45,7 @@ bool Slug::tick() {
         case State::NONELEFT:
         case State::RINGLEFT:
         case State::REDRINGLEFT: {
-            position.x -= static_cast<float>(server.getDelta() / 1.5);
+            position.x -= server.getDelta();
             if (position.x <= sPosition.x - 100) {
                 face(true);
             }
@@ -54,7 +54,7 @@ bool Slug::tick() {
         case State::NONERIGHT:
         case State::RINGRIGHT:
         case State::REDRINGRIGHT: {
-            position.x += static_cast<float>(server.getDelta() / 1.5);
+            position.x += server.getDelta();
             if (position.x >= sPosition.x + 100) {
                 face(false);
             }

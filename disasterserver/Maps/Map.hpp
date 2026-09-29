@@ -11,7 +11,7 @@ namespace DisasterServer
     class GameState;
 
     struct MapProperties {
-        int time = 3 * TICKS_PER_SEC;
+        double time = 3 * TICKS_PER_SEC;
         float mul = 20;
         int ringCoff = 5;
     };

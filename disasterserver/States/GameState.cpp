@@ -174,22 +174,24 @@ void GameState::tick() {
         if (cd < 0)  cd = 0;
     }
 
-    switch (gameTime.tick(delta)) {
-        case Countdown::TickResult::Finished: {
-            endingRound(Ending::TIMEOVER, true);
-            break;
-        }
-        case Countdown::TickResult::Second: {
-            if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
-                spawnRing();
-            }
+    const auto result = gameTime.tick(delta);
 
-            Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
-            pack.write<uint16_t>(static_cast<uint16_t>((gameTime.remaining() - 1) * TICKS_PER_SEC));
-            pack.sendBroadcast(server, true);
-            break;
+    if (result == Countdown::TickResult::Second) {
+        if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
+            spawnRing();
         }
-        default: break;
+
+        Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
+        pack.write<uint16_t>(static_cast<uint16_t>(gameTime.remaining() * TICKS_PER_SEC));
+        pack.sendBroadcast(server, true);
+    }
+
+    if (result == Countdown::TickResult::Finished) {
+        Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
+        pack.write<uint16_t>(static_cast<uint16_t>(gameTime.remaining() * TICKS_PER_SEC));
+        pack.sendBroadcast(server, true);
+
+        endingRound(Ending::TIMEOVER, true);
     }
 
     tickPlayers();
@@ -208,7 +210,7 @@ void GameState::tick() {
 
 void GameState::tickPlayers() {
     // Start demonization
-    if (!suddenDeath && gameTime.remaining() <= 2) {
+    if (!suddenDeath && gameTime.remaining() <= TICKS_PER_SEC * 2) {
         suddenDeath = true;
 
         std::vector<Client*> dead;
