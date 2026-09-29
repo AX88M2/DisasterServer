@@ -70,7 +70,7 @@ bool Tails::handle(GameState& state, Packet &packet) {
             }
 
             entityController.spawnEntity<TProjectile>(position, client.getId(), dir, exe, chg, dmg);
-            countdown.setRemaining(10 * TICKS_PER_SEC);
+            countdown.setRemaining(10);
             break;
         }
 

@@ -672,7 +672,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
             const auto now = Clock::now();
             if (player.getState() != state ||
-                now - player.getLastPacket() >= std::chrono::duration<double, std::milli>(15 * 2.9)) {
+                now - player.getLastPacket() >= Duration(15 * 2.9)) {
 
                 player.setState(state);
                 player.setLastPacket(now);
