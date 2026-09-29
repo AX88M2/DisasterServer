@@ -1,19 +1,66 @@
-# DisasterServer
+# DisasterServer on C++
+
+<details open>
+
+<summary>Progress</summary>
+
+### Characters
+- [x] Tails
+- [x] Knuckles
+- [ ] Eggman
+- [ ] Amy
+- [ ] Cream
+- [ ] Sally
+- [x] Original Exe
+- [ ] Chaos 
+- [x] Exetior
+- [x] Exeller
+### Maps
+- [x] Hide and Seek 2
+- [ ] Ravine Mist
+- [x] ...
+- [x] Desert Town
+- [x] You Can't Run
+- [x] Limp City
+- [ ] Not Perfect
+- [ ] Kind and Fair
+- [ ] Act 9
+- [ ] Nasty Paradise
+- [ ] Priceless Freedom
+- [ ] Volcano Valley
+- [ ] Hill
+- [x] Majin Forest
+- [x] Hide and Seek
+- [ ] Torture Cave
+- [ ] Dark Tower
+- [ ] Haunting Dream
+- [ ] Mystic Wood
+- [ ] Echidna Ruins
+- [ ] Fart Zone
+
+</details>
+
 
 ## Building source
+#### For Microsoft Windows
+
+Required Installing 
+1. [Git](https://git-scm.com/)
+2. [Microsoft Visual Studio](https://visualstudio.microsoft.com)
+3. [vcpkg](https://github.com/microsoft/vcpkg.git)
+
 ```bash
-git clone --recursive  --branch 1101-cxx https://github.com/AX88M2/DisasterServer.git
-cmake -S . -B build && cmake --build build
+git clone --recursive https://github.com/AX88M2/DisasterServer.git
+cmake --preset windows-release
+cmake --build build/windows-release
 ```
 
-## Alternative method building source
+#### For GNU Linux
+Required Installing
+1. [Git](https://git-scm.com/)
+2. [vcpkg](https://github.com/microsoft/vcpkg.git)
 ```bash
-cmake -S . -B build
-cmake --build build --config Release
-```
-
-## Building source from linux
-```bash
-cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=/mnt/c/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux-release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug
+git clone --recursive https://github.com/AX88M2/DisasterServer.git
+cmake --preset linux-release
+cmake --build build/linux-release
 ```

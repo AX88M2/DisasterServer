@@ -279,6 +279,59 @@
           ]
         }
       }
+    },
+
+
+    {
+      "name": "base-linux",
+      "hidden": true,
+      "generator": "Ninja",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux-release"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/2.0": {
+          "sourceRootDir": "$ms{localSourceDir}\\..",
+          "remoteSourceRootDir": "$env{HOME}/.vs/wsl",
+          "copySourcesOptions": {
+            "method": "rsync",
+            "exclusionList": [
+              ".git",
+              "out",
+              "dist",
+              "attic",
+              "build"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "inherits": "base-linux",
+      "name": "linux-release",
+      "displayName": "Linux (Release)",
+      "binaryDir": "${sourceDir}/build/linux-release",
+      "installDir": "${sourceDir}/build/linux-release/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      }
+    },
+    {
+      "inherits": "base-linux",
+      "name": "linux-debug",
+      "displayName": "Linux (Debug)",
+      "binaryDir": "${sourceDir}/build/linux-debug",
+      "installDir": "${sourceDir}/build/linux-debug/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      }
     }
   ]
 }
