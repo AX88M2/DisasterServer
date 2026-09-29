@@ -26,7 +26,7 @@ jobs:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
-            vcpkg_triplet: x64-windows-release
+            vcpkg_triplet: x64-windows-static
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
