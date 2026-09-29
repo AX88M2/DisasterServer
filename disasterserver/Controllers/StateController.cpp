@@ -254,7 +254,8 @@ bool StateController::cmdHandle(Client &client, Commands hash, const std::string
 
         case Commands::LOBBY: {
             int ind;
-            if (sscanf_s(message.c_str(), ".lobby %d", &ind) != 1) {
+
+            if (scanf(message.c_str(), ".lobby %d", &ind) != 1) {
                 this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
                 break;
             }
