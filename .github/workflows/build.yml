@@ -1,27 +1,21 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ "1101-oss" ]
+    branches: ["1101-oss"]
   pull_request:
-    branches: [ "1101-oss" ]
+    branches: ["1101-oss"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
-
-      # Set up a matrix to run the following 3 configurations:
-      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
-      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
-      #
-      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
@@ -46,73 +40,98 @@ jobs:
             c_compiler: cl
 
     steps:
-    - uses: actions/checkout@v7
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Install dependencies (Only Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get install build-essential -y
-        sudo apt-get install make -y
-        sudo apt-get install pkg-config -y
-        sudo apt-get install cmake -y
-        sudo apt-get install ninja-build -y
-        sudo apt-get install gnome-desktop-testing -y
-        sudo apt-get install libasound2-dev -y
-        sudo apt-get install libpulse-dev -y
-        sudo apt-get install libaudio-dev -y
-        sudo apt-get install libfribidi-dev -y
-        sudo apt-get install libjack-dev -y
-        sudo apt-get install libsndio-dev -y
-        sudo apt-get install libx11-dev -y
-        sudo apt-get install libxext-dev -y
-        sudo apt-get install libxrandr-dev -y
-        sudo apt-get install libxcursor-dev -y
-        sudo apt-get install libxfixes-dev -y
-        sudo apt-get install libxi-dev -y
-        sudo apt-get install libxss-dev -y
-        sudo apt-get install libxtst-dev -y
-        sudo apt-get install libxkbcommon-dev -y
-        sudo apt-get install libdrm-dev -y
-        sudo apt-get install libgbm-dev -y
-        sudo apt-get install libgl1-mesa-dev -y
-        sudo apt-get install libgles2-mesa-dev -y
-        sudo apt-get install libegl1-mesa-dev -y
-        sudo apt-get install libdbus-1-dev -y
-        sudo apt-get install libibus-1.0-dev -y
-        sudo apt-get install libudev-dev -y
-        sudo apt-get install libthai-dev -y
-        sudo apt-get install libusb-1.0-0-dev -y
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config \
+            libasound2-dev libpulse-dev libfribidi-dev libjack-dev \
+            libsndio-dev libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxfixes-dev libxi-dev libxss-dev \
+            libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev \
+            libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev \
+            libusb-1.0-0-dev libsdl2-dev
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+      - name: Set build dir
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DBUILD_UI=${{ matrix.ui }}
-        -S ${{ github.workspace }}
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DBUILD_UI=${{ matrix.ui }}
+          -S ${{ github.workspace }}
 
-    - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      - name: Build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
-        path: |
-          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/DisasterServer
-          ${{ steps.strings.outputs.build-output-dir }}/disasterserver/Release/DisasterServer.exe
-        if-no-files-found: error
-        retention-days: 7
+      - name: Prepare unique binary name
+        shell: bash
+        run: |
+          mkdir -p dist
+          NAME="DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}"
+          BUILD="${{ steps.strings.outputs.build-output-dir }}"
+
+          if [ -f "$BUILD/disasterserver/Release/DisasterServer.exe" ]; then
+            cp "$BUILD/disasterserver/Release/DisasterServer.exe" "dist/${NAME}.exe"
+          elif [ -f "$BUILD/disasterserver/DisasterServer.exe" ]; then
+            cp "$BUILD/disasterserver/DisasterServer.exe" "dist/${NAME}.exe"
+          elif [ -f "$BUILD/disasterserver/DisasterServer" ]; then
+            cp "$BUILD/disasterserver/DisasterServer" "dist/${NAME}"
+          else
+            echo "Binary not found"; find "$BUILD" -name "DisasterServer*"; exit 1
+          fi
+          ls -la dist/
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: DisasterServer-${{ matrix.os }}-${{ matrix.c_compiler }}-ui-${{ matrix.ui }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Create Release 1101-oss
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+
+      - name: List files
+        run: ls -la ./dist
+
+      - name: Delete old tag 1101-oss
+        continue-on-error: true
+        run: git push origin :refs/tags/1101-oss
+
+      - name: Create Release 1101-oss
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: 1101-oss
+          name: "1101-oss"
+          body: |
+            Automatic build from commit `${{ github.sha }}`.
+          files: ./dist/*
+          draft: false
+          prerelease: false
+          make_latest: false
