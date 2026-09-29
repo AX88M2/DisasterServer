@@ -120,15 +120,15 @@ jobs:
       - name: List files
         run: ls -la ./dist
 
-      - name: Delete old tag 1101-oss
+      - name: Delete old tag 1101
         continue-on-error: true
-        run: git push origin :refs/tags/1101-oss
+        run: git push origin :refs/tags/1101
 
-      - name: Create Release 1101-oss
+      - name: Create Release 1101
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: 1101-oss
-          name: "1101-oss"
+          tag_name: 1101
+          name: "DisasterServer v1101"
           body: |
             Automatic build from commit `${{ github.sha }}`.
           files: ./dist/*
