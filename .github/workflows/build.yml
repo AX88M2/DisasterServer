@@ -99,8 +99,6 @@ jobs:
           for pattern in \
             "$BUILD/disasterserver/Release/DisasterServerCXX.exe" \
             "$BUILD/disasterserver/DisasterServerCXX" \
-            "$BUILD/disasterserver_c/Release/DisasterServer.exe" \
-            "$BUILD/disasterserver_c/DisasterServer" \
           ; do
             if [ -f "$pattern" ]; then
               BASENAME=$(basename "$pattern" .exe)
