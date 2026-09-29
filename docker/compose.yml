@@ -1,0 +1,14 @@
+name: "DisasterServer"
+
+services:
+  disasterserver:
+    image: disasterserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - target: 8606
+        published: 8606
+        protocol: udp
+        mode: host
+    restart: unless-stopped
