@@ -36,22 +36,6 @@ namespace DisasterServer
         COUNT
     };
 
-    static std::vector<std::string_view> EXE_NAMES = {
-        "Classic Exe",
-        "Chaos",
-        "Exetior",
-        "Exeller"
-    };
-
-    static std::vector<std::string_view> SURV_NAMES = {
-        "Tails",
-        "Knuckles",
-        "Eggman",
-        "Amy",
-        "Cream",
-        "Sally"
-    };
-
     enum class DisconnectReason : uint8_t
     {
         FAILEDTOCONNECT,
