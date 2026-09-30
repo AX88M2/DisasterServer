@@ -34,7 +34,7 @@
 - [ ] Torture Cave
 - [ ] Dark Tower
 - [ ] Haunting Dream
-- [ ] Mystic Wood
+- [x] Mystic Wood
 - [ ] Echidna Ruins
 - [ ] Fart Zone
 
