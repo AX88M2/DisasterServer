@@ -6,7 +6,7 @@
 
 namespace DisasterServer
 {
-    Application::Application() : config(ConfigManager()), storage(Storage()) {}
+    Application::Application() : config(Configuration()), storage(Storage()) {}
 
     Application::~Application() = default;
 

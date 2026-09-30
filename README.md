@@ -23,7 +23,7 @@
 - [x] You Can't Run
 - [x] Limp City
 - [ ] Not Perfect
-- [ ] Kind and Fair
+- [x] Kind and Fair
 - [ ] Act 9
 - [ ] Nasty Paradise
 - [ ] Priceless Freedom

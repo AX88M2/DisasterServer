@@ -26,7 +26,7 @@ namespace DisasterServer
         std::string getMotd() { return toml["server"]["motd"].as_string(); }
     };
 
-    class ConfigManager {
+    class Configuration {
         static std::string defaultConfig;
         std::string filename = "config.toml";
         toml::basic_value<toml::type_config> toml;
@@ -34,8 +34,8 @@ namespace DisasterServer
 
         Config config_;
     public:
-        explicit ConfigManager();
-        ~ConfigManager();
+        explicit Configuration();
+        ~Configuration();
 
         void load();
         void save();

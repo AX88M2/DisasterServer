@@ -41,6 +41,7 @@ set(LIBS
         enet
         Boost::algorithm
         Boost::bind
+        Boost::lexical_cast
         toml11
         sqlite_orm::sqlite_orm
 )

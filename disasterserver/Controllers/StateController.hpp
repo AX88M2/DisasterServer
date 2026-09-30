@@ -15,7 +15,7 @@ namespace DisasterServer
 {
     class Client;
 
-    enum class Commands : commandHash {
+    enum class CommandsHash : commandHash {
         HELP = 45680751,
         MAP = 1478254,
         STINK = 1426706039,
@@ -70,10 +70,10 @@ namespace DisasterServer
             return static_cast<T*>(current.get());
         }
 
-        Commands cmdParse(std::string string);
+        CommandsHash cmdParse(std::string string);
 
-        void handleChat(Client &client, std::string& message, std::function<bool(Commands, std::string &)> cmdProcessor);
-        bool cmdHandle(Client& client, Commands hash, const std::string& message);
+        void handleChat(Client &client, std::string& message, std::function<bool(CommandsHash, std::string &)> cmdProcessor);
+        bool cmdHandle(Client& client, CommandsHash hash, const std::string& msg);
     private:
         /*** === Events === ***/
         bool playerJoined(Client& client);

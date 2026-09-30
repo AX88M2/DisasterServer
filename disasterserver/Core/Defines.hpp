@@ -16,11 +16,11 @@
 #define unused() (void)0
 
 #if defined(_WIN32)
-#define scanf(buf, format, ...) scanf_s(buf, format __VA_OPT__(,) __VA_ARGS__)
+#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
 #elif defined(__GNUC__)
-#define scanf(buf, format, ...) scanf(buf, format __VA_OPT__(,) __VA_ARGS__)
+#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
 #else
-#define scanf(buf, format, ...) scanf(buf, format __VA_OPT__(,) __VA_ARGS__)
+#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 

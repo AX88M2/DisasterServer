@@ -5,7 +5,7 @@
 #include "CharSelect.hpp"
 #include "MapVoteState.hpp"
 #include "Server.hpp"
-#include "ConfigManager.hpp"
+#include "Configuration.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Constansts.hpp"
 
@@ -237,7 +237,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
             const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
 
-            stateController.handleChat(client, message, [&, pid](const Commands cmd, std::string &msg) {
+            stateController.handleChat(client, message, [&, pid](const CommandsHash cmd, std::string &msg) {
                 return cmdHandle(client, pid, cmd, msg);
             });
 
@@ -330,21 +330,20 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 }
 
 
-bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::string &message) {
+bool LobbyState::cmdHandle(Client &client, clientId pid, CommandsHash hash, std::string &message) {
     switch (hash) {
         default: {
             return stateController.cmdHandle(client, hash, message);
         }
 
-        case Commands::MAP: {
-
+        case CommandsHash::MAP: {
             if (!client.isOperator()) {
                 this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
                 break;
             }
 
             int requested;
-            if (scanf(message.c_str(), ".map %d", &requested) != 1) {
+            if (sscanf(message.c_str(), ".map %d", &requested) != 1) {
                 this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
                 break;
             }
@@ -363,14 +362,12 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
                 break;
             }
 
-            const mapId clientMapId = convertMapIds[index]; //Костыль
-            stateController.changeTo<CharSelectState>(*map, clientMapId);
-
+            stateController.changeTo<CharSelectState>(*map, index);
             break;
         }
 
-        case Commands::Y:
-        case Commands::YES: {
+        case CommandsHash::Y:
+        case CommandsHash::YES: {
             if (!vote.isOnGoing()) {
                 break;
             }
@@ -408,7 +405,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
             break;
         }
 
-        case Commands::VP: {
+        case CommandsHash::VP: {
             if (vote.isOnGoing()) {
                 if (!client.isCanVote()) {
                     this->server.sendMessage(client, "{}you can't participate in this vote.", CLRCODE_RED);
@@ -453,7 +450,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
             break;
         }
 
-        case Commands::VK: {
+        case CommandsHash::VK: {
             if (vote.isOnGoing()) {
                 this->server.sendMessage(client, "{}another vote is already in progress.", CLRCODE_RED);
                 break;
@@ -476,7 +473,7 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, Commands hash, std::str
             break;
         }
 
-        case Commands::EXE: {
+        case CommandsHash::EXE: {
             if (!client.isOperator()) {
                 break;
             }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <utility>
+#include <format>
+
 namespace DisasterServer
 {
     class ServerException : public std::exception {
@@ -27,6 +30,28 @@ namespace DisasterServer
         template <typename... Args>
         static PacketError format(std::format_string<Args...> fmt, Args&&... args) {
             return PacketError(std::format(fmt, std::forward<Args>(args)...));
+        }
+    };
+
+    class CommandException : public ServerException {
+    public:
+        explicit CommandException(std::string message) : ServerException(message) {
+        }
+
+        template <typename... Args>
+        static CommandException format(std::format_string<Args...> fmt, Args&&... args) {
+            return CommandException(std::format(fmt, std::forward<Args>(args)...));
+        }
+    };
+
+    class NotFoundCommandPrefix : public CommandException {
+    public:
+        explicit NotFoundCommandPrefix(std::string message = "") : CommandException(std::move(message)) {
+        }
+
+        template <typename... Args>
+        static NotFoundCommandPrefix format(std::format_string<Args...> fmt, Args&&... args) {
+            return NotFoundCommandPrefix(std::format(fmt, std::forward<Args>(args)...));
         }
     };
 }

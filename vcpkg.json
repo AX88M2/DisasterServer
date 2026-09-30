@@ -4,6 +4,7 @@
   "dependencies": [
     "sqlite-orm",
     "boost-algorithm",
-    "boost-bind"
+    "boost-bind",
+    "boost-lexical-cast"
   ]
 }

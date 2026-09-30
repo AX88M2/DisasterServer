@@ -3,14 +3,14 @@
 #include "Core/Log.hpp"
 #include "Core/Time.hpp"
 #include "Server.hpp"
-#include "ConfigManager.hpp"
+#include "Configuration.hpp"
 #include "Packet.hpp"
 #include "Controllers/StateController.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer;
 
-Server::Server(const int port) : port(port), mapController(*this), stateController(*this, mapController) {
+Server::Server(const int port) : port(port), mapController(*this), stateController(*this, mapController), commandController(*this, stateController) {
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
     addr.port = port;
@@ -219,6 +219,10 @@ std::optional<Client*> Server::findClient(clientId clientId) {
     }
 
     return std::nullopt;
+}
+
+CommandController & Server::getCommandController() {
+    return commandController;
 }
 
 void Server::sendMessage(Client &client, std::string message) {

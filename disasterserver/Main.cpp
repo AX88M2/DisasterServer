@@ -1,5 +1,5 @@
 #include "Server.hpp"
-#include "ConfigManager.hpp"
+#include "Configuration.hpp"
 #include "Application.hpp"
 #include "Core/Log.hpp"
 

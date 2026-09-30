@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 
-#include "ConfigManager.hpp"
+#include "Configuration.hpp"
 #include "Storage.hpp"
 #include "Core/Singleton.hpp"
 
@@ -14,7 +14,7 @@ namespace DisasterServer
 
     class Application : public Singleton<Application> {
         friend class Singleton;
-        ConfigManager config;
+        Configuration config;
         Storage storage;
 
         std::mutex server_mutex;
@@ -26,7 +26,7 @@ namespace DisasterServer
     public:
         void initialize();
 
-        ConfigManager& getConfigManager() { return config; }
+        Configuration& getConfigManager() { return config; }
         Storage& getStorage() { return storage; }
     };
 }

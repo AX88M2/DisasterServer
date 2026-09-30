@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "Client.hpp"
+#include "Controllers/CommandController.hpp"
 #include "Controllers/MapController.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Defines.hpp"
@@ -9,7 +10,7 @@
 namespace DisasterServer
 {
     class StateController;
-
+    class CommandController;
     class Server {
         int port = 0;
         bool running = false;
@@ -21,6 +22,7 @@ namespace DisasterServer
         std::vector<std::unique_ptr<Client>> peers;
         MapController mapController;
         StateController stateController;
+        CommandController commandController;
     public:
         explicit Server(int port = 8606);
         ~Server();
@@ -52,12 +54,12 @@ namespace DisasterServer
         Application &getApplication() { return application; }
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
         double getDelta() const { return delta; }
+        CommandController &getCommandController();
 
         /**
          * @warning Данные геттеры исключительно предназначены чтобы можно было достать данные с сервера из вне!
          * И не должный использоваться в коде сервера
          **/
-        
         MapController &getMapController() { return mapController; }
         StateController &getStateController() { return stateController; }
     };

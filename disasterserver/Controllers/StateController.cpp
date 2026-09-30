@@ -1,6 +1,6 @@
 #include "StateController.hpp"
 #include "Server.hpp"
-#include "ConfigManager.hpp"
+#include "Configuration.hpp"
 #include "Core/Constansts.hpp"
 #include "States/LobbyState.hpp"
 #include "States/GameState.hpp"
@@ -121,7 +121,7 @@ bool StateController::handle(Client &client, Packet &packet) {
             [[maybe_unused]] const clientId pid = packet.read<clientId>();
             std::string message = packet.readString();
 
-            handleChat(client, message, [&](Commands cmd, std::string &msg) {
+            handleChat(client, message, [&](CommandsHash cmd, std::string &msg) {
                 return cmdHandle(client, cmd, msg);
             });
 
@@ -138,7 +138,7 @@ bool StateController::handle(Client &client, Packet &packet) {
     return true;
 }
 
-Commands StateController::cmdParse(std::string string) {
+CommandsHash StateController::cmdParse(std::string string) {
     std::string current;
     bool started = false;
 
@@ -172,10 +172,10 @@ Commands StateController::cmdParse(std::string string) {
     for (unsigned char ch : current)
         hash = 31 * hash + ch;
 
-    return static_cast<Commands>(hash);
+    return static_cast<CommandsHash>(hash);
 }
 
-void StateController::handleChat(Client &client, std::string &message, std::function<bool(Commands, std::string &)> cmdProcessor) {
+void StateController::handleChat(Client &client, std::string &message, std::function<bool(CommandsHash, std::string &)> cmdProcessor) {
     client.setTimeout(0);
 
     if (message.length() > 90) {
@@ -183,7 +183,7 @@ void StateController::handleChat(Client &client, std::string &message, std::func
         return;
     }
 
-    Commands cmd = cmdParse(message);
+    CommandsHash cmd = cmdParse(message);
     bool isCommand = cmdProcessor(cmd, message);
 
     Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
@@ -193,140 +193,7 @@ void StateController::handleChat(Client &client, std::string &message, std::func
     }
 }
 
-bool StateController::cmdHandle(Client &client, Commands hash, const std::string &message) {
-    switch (hash) {
-        case Commands::BAN: {
-            if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
-                break;
-            }
-
-            if (this->server.getInGameCount() <= 1) {
-                this->server.sendMessage(client, "{}dude are you gonna ban yourself?", CLRCODE_RED);
-                break;
-            }
-
-            Packet pack(PacketType::SERVER_LOBBY_CHOOSEBAN);
-            if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
-                return false;
-            }
-            break;
-        }
-
-        case Commands::KICK: {
-            if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
-                break;
-            }
-
-            if (this->server.getInGameCount() <= 1) {
-                this->server.sendMessage(client, "{}dude are you gonna kick yourself?", CLRCODE_RED);
-                break;
-            }
-
-            Packet pack(PacketType::SERVER_LOBBY_CHOOSEKICK);
-            if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
-                return false;
-            }
-            break;
-        }
-
-        case Commands::OP: {
-            if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}you aren't an operator.", CLRCODE_RED);
-                break;
-            }
-
-            if (this->server.getInGameCount() <= 1) {
-                this->server.sendMessage(client, "{}you're already an operator tho??", CLRCODE_RED);
-                break;
-            }
-
-            Packet pack(PacketType::SERVER_LOBBY_CHOOSEOP);
-            if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
-                return false;
-            }
-            break;
-        }
-
-        case Commands::LOBBY: {
-            int ind;
-
-            if (scanf(message.c_str(), ".lobby %d", &ind) != 1) {
-                this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
-                break;
-            }
-
-            auto config = this->server.getApplication().getConfigManager().config();
-
-            if (ind < 1 || ind > config.getLobbyCount()) {
-                this->server.sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());
-                break;
-            }
-
-            Packet pack(PacketType::SERVER_LOBBY_CHANGELOBBY);
-            uint32_t port = config.getServerPort() + (ind - 1);
-            pack.write<uint32_t>(port);
-
-            if (!pack.send(client, true)) {
-                Warn("Failed to send lobby change packet to {} (id {})", client.getNickname(), client.getId());
-            }
-
-            break;
-        }
-
-        case Commands::HELP: {
-            this->server.sendMessage(client, "|- .info~ - information about server");
-            this->server.sendMessage(client, "|- .vk~ - vote kick");
-            this->server.sendMessage(client, "|- .vp~ - vote practice mode (wip)");
-            this->server.sendMessage(client, "|- .lobby~ - change lobby (1-{})", this->server.getApplication().getConfigManager().config().getLobbyCount());
-
-            if(client.isOperator())
-            {
-                this->server.sendMessage(client, "|- .map~ - force map (1-21)");
-                this->server.sendMessage(client, "|- .kick~ - kick someone");
-                this->server.sendMessage(client, "|- .ban~ - ban someone");
-                this->server.sendMessage(client, "|- .op~ - op someone");
-                break;
-            }
-            break;
-        }
-
-        case Commands::INFO: {
-            this->server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
-            this->server.sendMessage(client, "{}hander{} - original binary", CLRCODE_YLW, CLRCODE_RST);
-            this->server.sendMessage(client, "{}miles{}glitch{} - rewritten server to c++", CLRCODE_BLU, CLRCODE_PUR, CLRCODE_RST);
-            this->server.sendMessage(client, "{}faker{}null{}0{} - help with code", CLRCODE_GRA, CLRCODE_RED, CLRCODE_GRN, CLRCODE_RST);
-            break;
-        }
-
-        case Commands::SELFOP: {
-            if (client.getIp() != "127.0.0.1") {
-                break;
-            }
-
-            server.getApplication().getStorage().addOperator(client);
-            client.setOperator(true);
-            this->server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
-            break;
-        }
-
-#if defined(SERVER_DEBUG)
-        case Commands::DEBUG: {
-            if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
-                break;
-            }
-
-            break;
-        }
-#endif
-
-        default: return false;
-    }
-
-    return true;
+bool StateController::cmdHandle(Client &client, CommandsHash hash, const std::string &msg) {
+    std::string message(msg);
+    return server.getCommandController().process(client, message);
 }
