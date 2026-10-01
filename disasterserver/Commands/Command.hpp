@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
@@ -23,7 +24,7 @@ namespace DisasterServer
     class CommandArguments {
         std::vector<std::string> arguments;
     public:
-        explicit CommandArguments(std::vector<std::string> arguments) : arguments(arguments) {}
+        explicit CommandArguments(std::vector<std::string> arguments) : arguments(std::move(arguments)) {}
 
         /**
          * @tparam T Тип данных
