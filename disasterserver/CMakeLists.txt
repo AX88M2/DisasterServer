@@ -25,7 +25,6 @@ if((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU"))
 endif()
 
 set(SOURCES
-	"Auth.c"
 	"Config.c"
 	"cJSON.c"
 	"UTF8.c"
