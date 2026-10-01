@@ -9,6 +9,10 @@
 #include "Core/Log.hpp"
 #include "Core/Types.hpp"
 
+#define CMD_GET_ARG(name, type, id, defaultValue) \
+    const auto _internal_##name##id = args.get<type>(id, defaultValue); \
+    const type name = _internal_##name##id.has_value() ? _internal_##name##id.value() : defaultValue;
+
 namespace DisasterServer
 {
     class CommandController;

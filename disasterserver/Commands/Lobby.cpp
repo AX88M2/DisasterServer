@@ -11,8 +11,7 @@ Lobby::Lobby(Server &server, StateController &stateController) : Command(server,
 Lobby::~Lobby() = default;
 
 void Lobby::execute(Client &client, CommandArguments &args) {
-    auto arg1 = args.get<int>(0, -1);
-    int ind = arg1.has_value() ? arg1.value() : -1;
+    CMD_GET_ARG(ind, int, 0, -1)
 
     auto config = this->server.getApplication().getConfigManager().config();
 

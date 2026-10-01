@@ -16,13 +16,9 @@ void Debuging::execute(Client &client, CommandArguments &args) {
         return;
     }
 
-    auto arg1 = args.get<std::string>(0, "null");
-    std::string a1 = arg1.has_value() ? arg1.value() : "null";
+    CMD_GET_ARG(param_one, std::string, 0, "null")
+    CMD_GET_ARG(param_two, std::string, 1, "null")
 
-    this->server.sendMessage(client, "testing1: {}", a1);
-
-    auto arg2 = args.get<std::string>(1, "null");
-    std::string a2 = arg2.has_value() ? arg2.value() : "null";
-
-    this->server.sendMessage(client, "testing2: {}", a2);
+    this->server.sendMessage(client, "testing1: {}", param_one);
+    this->server.sendMessage(client, "testing2: {}", param_two);
 }
