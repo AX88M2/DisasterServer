@@ -11,14 +11,8 @@ Lobby::Lobby(Server &server, StateController &stateController) : Command(server,
 Lobby::~Lobby() = default;
 
 void Lobby::execute(Client &client, CommandArguments &args) {
-    int ind;
-
-    try {
-        ind = args.get<int>(0);
-    } catch (CommandException &) {
-        this->server.sendMessage(client, "{}example: .lobby 1", CLRCODE_RED);
-        return;
-    }
+    auto arg1 = args.get<int>(0, -1);
+    int ind = arg1.has_value() ? arg1.value() : -1;
 
     auto config = this->server.getApplication().getConfigManager().config();
 

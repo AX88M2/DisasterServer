@@ -1,5 +1,6 @@
 #include "Client.hpp"
 
+#include <cassert>
 #include <utility>
 
 #include "Server.hpp"
@@ -20,7 +21,7 @@ Client::Client(Server *server, StateController &stateController, ENetPeer *peer,
 {}
 
 bool Client::identity(Packet &packet) {
-    RAssert(id > 0);
+    assert(id > 0);
 
     if (packet.getType() != PacketType::IDENTITY) {
         this->disconnect(DisconnectReason::OTHER, "type != IDENTITY?");

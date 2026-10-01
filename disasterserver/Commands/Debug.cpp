@@ -12,11 +12,17 @@ Debuging::~Debuging() = default;
 
 void Debuging::execute(Client &client, CommandArguments &args) {
     if (!client.isOperator()) {
-        this->server.sendMessage(client, "{}иди нахуй (мяу :3)", CLRCODE_PUR);
+        this->server.sendMessage(client, "{}мяу сюка :3", CLRCODE_PUR);
         return;
     }
 
-    this->server.sendMessage(client, "ты блять :)");
+    auto arg1 = args.get<std::string>(0, "null");
+    std::string a1 = arg1.has_value() ? arg1.value() : "null";
 
-    this->server.sendMessage(client, "testing: {}", args.get<int>(0));
+    this->server.sendMessage(client, "testing1: {}", a1);
+
+    auto arg2 = args.get<std::string>(1, "null");
+    std::string a2 = arg2.has_value() ? arg2.value() : "null";
+
+    this->server.sendMessage(client, "testing2: {}", a2);
 }

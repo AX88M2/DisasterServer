@@ -1,6 +1,8 @@
 #include "CommandController.hpp"
 
 #include <vector>
+#include <regex>
+#include <boost/algorithm/string.hpp>
 
 #include "Commands/Ban.hpp"
 #include "Commands/Kick.hpp"
@@ -42,31 +44,26 @@ bool CommandController::process(Client &client, std::string &message) {
 }
 
 std::pair<std::string, CommandArguments> CommandController::parseCommand(const std::string &str) {
-    std::vector<std::string> arguments;
-    std::string::size_type start = 0;
+    std::vector<std::string> arguments = {};
 
-    const auto prefix = str.find_first_of('.', 0);
-
-    if (prefix == std::string::npos) {
+    if (str[0] != '.') {
         throw NotFoundCommandPrefix();
     }
 
-    auto cmd = str.substr(prefix + 1, str.size());
+    const std::regex regex(R"(^\.([^\s]+)(?:\s+(.+))?$)");
+    std::smatch matches;
+    std::regex_search(str, matches, regex);
 
-    auto end = cmd.find(' ', prefix);
+    std::string cmd = matches[1].str();
+    std::string cmdArgs = matches[2].str();
 
-    auto cmdName = cmd.substr(start, end - start);
-    start = end + 1;
-    end = cmd.find(' ', start);
-
-    while (end == std::string::npos) {
-        arguments.push_back(cmd.substr(start, end - start));
-
-        start = end + 1;
-        end = cmd.find(' ', start);
+    try {
+        if (!cmdArgs.empty()) {
+            boost::split(arguments, cmdArgs, boost::is_any_of(" "));
+        }
+    } catch (std::exception const &e) {
+        Error("Failed to parse arguments command {}: {}", cmd, e.what());
     }
 
-    auto args = CommandArguments(arguments);
-
-    return { cmdName, args };
+    return { cmd, CommandArguments(std::move(arguments)) };
 }
