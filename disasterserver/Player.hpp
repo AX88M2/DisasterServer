@@ -213,6 +213,7 @@ namespace DisasterServer
         void setState(const uint8_t value) { this->state = value; }
 
         uint8_t getDeathTimerSec() const { return this->deathTimerSec; }
+        uint8_t removeDeathTimerSec() { return --this->deathTimerSec; }
         void setDeathTimerSec(const uint8_t value) { this->deathTimerSec = value; }
 
         double getDeathTimer() const { return this->deathTimer; }

@@ -234,7 +234,7 @@ void GameState::tickPlayers() {
 
             if (player.getPingTimer() >= 20 * TICKS_PER_SEC) {
                 double avg_ping = player.getPingTotal() / player.getPingTimer();
-                if (avg_ping >= 0xffffui16) { //TODO: add to config
+                if (avg_ping >= 9000000) { //TODO: add to config
                     client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avg_ping);
                     continue;
                 }
@@ -294,7 +294,6 @@ void GameState::tickPlayers() {
             }
         }
     }
-
 
 
     /*if (currentMap->is<Maps::NastyParadise>() && exeCamp) {
@@ -364,8 +363,7 @@ void GameState::tickPlayers() {
 
         if (player.getDeathTimer() >= TICKS_PER_SEC) {
             if (!exeNear) {
-                player.setDeathTimerSec(player.getDeathTimerSec() - 1);
-                if (player.getDeathTimerSec() <= 0) {
+                if (player.removeDeathTimerSec() <= 0) {
                     demonize(*client);
                     continue;
                 }
@@ -380,7 +378,7 @@ void GameState::tickPlayers() {
             player.setDeathTimer(0);
         }
 
-        player.setDeathTimerSec(player.getDeathTimerSec() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
+        player.setDeathTimer(player.getDeathTimer() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
     }
 }
 
@@ -470,8 +468,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
         case PacketType::CLIENT_PLAYER_HEAL_PART: {
             AssertOrDisconnect(client, client.isInGame());
-            const uint16_t x = packet.read<uint16_t>();
-            const uint16_t y = packet.read<uint16_t>();
+            const Vector2 pos = packet.readVector2();
             const uint16_t rings = packet.read<uint16_t>();
 
             auto &player = client.getPlayer();
@@ -503,7 +500,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 return true;
             }
 
-            if (rings >= 140 && currentMapId != 20) {
+            if (rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()) {
                 client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
                 return true;
             }
@@ -740,8 +737,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 const int16_t rings = packet.read<int16_t>();
                 const uint8_t flags = packet.read<uint8_t>();
 
-                if (!player.isFlag(Player::Flags::PLAYER_DEAD) &&
-                    !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                if (!player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
 
                     if (client.getId() != this->exeId) {
                         player.setRings(rings);
