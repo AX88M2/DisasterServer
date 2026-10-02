@@ -19,15 +19,15 @@ MapController::MapController(Server &server) : server(server) {
 }
 
 void MapController::initialize() {
-    this->registerMap<Maps::HideAndSeekAct2>();
-    this->registerMap<Maps::RavineMist>();
-    this->registerMap<Maps::DotDotDot>();
-    this->registerMap<Maps::DesertTown>();
-    this->registerMap<Maps::YouCantRun>();
-    this->registerMap<Maps::LimpCity>();
-    this->registerMap<Maps::KindAndFair>();
-    //this->registerMap<Maps::Act9>();
-    //this->registerMap<Maps::NastyParadise>();
+    this->registerMap<Maps::HideAndSeekAct2>(); // 1
+    this->registerMap<Maps::RavineMist>(); // 2
+    this->registerMap<Maps::DotDotDot>(); // 3
+    this->registerMap<Maps::DesertTown>(); // 4
+    this->registerMap<Maps::YouCantRun>(); // 5
+    this->registerMap<Maps::LimpCity>(); // 6
+    this->registerMap<Maps::KindAndFair>(); // 7
+    //this->registerMap<Maps::Act9>(); // 8
+    //this->registerMap<Maps::NastyParadise>(); // 9
     //this->registerMap<Maps::PricelessFreedom>();
     //this->registerMap<Maps::VolcanoValley>();
     //this->registerMap<Maps::Hill>();

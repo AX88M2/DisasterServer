@@ -363,10 +363,10 @@ namespace DisasterServer
 		T read() {
 			static_assert(std::is_trivially_copyable_v<T>, "Packet::read requires trivially copyable type");
 
-			if (position > len || sizeof(T) > len - position) {
+			/*if (position > len || sizeof(T) > len - position) {
 				Error("Packet underflow: trying to read {} bytes at position {} from {} byte packet ({})", sizeof(T), position, len, getPacketTypeName(type));
 				throw std::runtime_error("Packet underflow");
-			}
+			}*/
 
 			T value {};
 

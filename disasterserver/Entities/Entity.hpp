@@ -38,6 +38,6 @@ namespace DisasterServer
         }
 
         std::string getTag() { return tag; }
-        uint16_t getId() const { return id; }
+        entityId getId() const { return id; }
     };
 }

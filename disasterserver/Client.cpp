@@ -42,37 +42,9 @@ bool Client::identity(Packet &packet) {
     this->lobbyIcon = lobbyIcon;
     this->pet = pet;
     this->op = server->getApplication().getStorage().isOperator(*this);
-    
+
     uint64_t rawKeyA = packet.read<uint64_t>();
     uint64_t rawKeyB = packet.read<uint64_t>();
-
-    /* Verify auth */
-    uint64_t keyA = rawKeyA - auth.type;
-    uint64_t keyB = rawKeyB - auth.type;
-    
-    if ((auth.type >> 9) & 1) {
-        if (keyA != 0x2f09cdda)
-            isModifiedClient = true;
-
-        if (keyB != 0xf1006056)
-            isModifiedClient = true;
-    }
-    else if ((auth.type & 0x80000000) != 0) {
-        if (keyA != 0x947)
-            isModifiedClient = true;
-
-        if (keyB != 0xb43)
-            isModifiedClient = true;
-    }
-    else if ((auth.type >> 26) & 1) {
-        if (keyA != 0xdcd)
-            isModifiedClient = true;
-
-        if (keyB != 0xc15)
-            isModifiedClient = true;
-    } else {
-        isModifiedClient = true;
-    }
 
     this->in_game = stateController.isState<LobbyState>();
     this->exeChance = 1 + rand() % 4;

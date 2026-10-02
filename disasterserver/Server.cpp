@@ -175,7 +175,7 @@ void Server::worker() {
                 if (heartbeat >= (TICKS_PER_SEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
-                    Debug("Heartbeat done.");
+                    //Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;

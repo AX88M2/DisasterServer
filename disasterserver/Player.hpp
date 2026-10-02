@@ -29,15 +29,15 @@ namespace DisasterServer
         PlayerStats() = default;
         ~PlayerStats() = default;
 
-        void addSurviveTime() { survive_time++; }
+        void addSurviveTime(double value) { survive_time += value; }
         double getSurviveTime() const { return this->survive_time; }
         void setSurviveTime(double value) { this->survive_time = value; }
 
-        void addDangerTime() { danger_time++; }
+        void addDangerTime(double value) { danger_time += value; }
         double getDangerTime() const { return this->danger_time; }
         void setDangerTime(double value) { this->danger_time = value; }
 
-        void addCampTime() { camp_time++; }
+        void addCampTime(double value) { camp_time += value; }
         double getCampTime() const { return this->camp_time; }
         void setCampTime(double value) { this->camp_time = value; }
 
@@ -65,7 +65,7 @@ namespace DisasterServer
         uint16_t getRings() const { return rings; }
         void clearRings() { rings = 0; }
 
-        void addDamage() { damage++; }
+        uint16_t addDamage(uint16_t value) { return damage += value; }
         uint16_t getDamage() const { return this->damage; }
         void setDamage(uint16_t value) { this->damage = value; }
 
@@ -190,8 +190,16 @@ namespace DisasterServer
         TimeStamp getLastAttack() const { return this->lastAttack; }
         void setLastAttack(const TimeStamp value) { this->lastAttack = value; }
 
-        uint16_t getLastPing() const { return this->pingLast; }
+        uint16_t getPingLast() const { return this->pingLast; }
         void setLastPing(const uint16_t value) { this->pingLast = value; }
+
+        double getPingTotal() const { return this->pingTotal; }
+        void addPingTotal(const double value) { this->pingTotal += value; }
+        void setPingTotal(const double value) { this->pingTotal = value; }
+
+        double getPingTimer() const { return this->pingTimer; }
+        void addPingTimer(double value) { this->pingTimer += value; }
+        void setPingTimer(const double value) { this->pingTimer = value; }
 
         uint16_t getRings() const { return rings; }
         void setRings(uint16_t ring) { this->rings = ring; }
@@ -209,6 +217,14 @@ namespace DisasterServer
 
         double getDeathTimer() const { return this->deathTimer; }
         void setDeathTimer(const double value) { this->deathTimer = value; }
+
+        double getRevival() const { return this->revival; }
+        void removeRevival(const double value) { this->revival -= value; }
+        void setRevival(const double value) { this->revival = value; }
+
+        void setRevivalInit(int32_t index, int32_t value) {
+            revivalInit[index] = value;
+        }
 
         Vector2 getStartPosition() const { return this->startPos; }
         void setStartPosition(Vector2 vec2) { this->startPos = vec2;  }

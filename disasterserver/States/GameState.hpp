@@ -34,7 +34,8 @@ namespace DisasterServer
         mapId currentMapId = 0;
         Map*  currentMap   = nullptr;
 
-        clientId exe = 0;
+        clientId exeId = 0;
+        Client *exeClient = nullptr;
 
         bool started = false;
         bool suddenDeath = false;
@@ -84,7 +85,7 @@ namespace DisasterServer
 
         void bigRing(BigRingState state);
 
-        clientId getExe() const { return exe; }
+        clientId getExe() const { return exeId; }
         mapId getCurrentMapId() const { return currentMapId; }
         Map* getCurrentMap() const { return currentMap; }
         Countdown &getGameTime() { return gameTime; }
