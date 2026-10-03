@@ -22,7 +22,7 @@ bool Exeller::handle(GameState &state, Packet &packet) {
         case PacketType::CLIENT_EXELLER_SPAWN_CLONE: {
             AssertOrDisconnect(client, client.isInGame());
             AssertOrDisconnect(client, client.getId() == state.getExe());
-            AssertOrDisconnect(client, entityController.find<Entities::ExellerClone>() < 2);
+            AssertOrDisconnect(client, entityController.findCount<Entities::ExellerClone>() < 2);
 
             const Vector2 pos = packet.readVector2();
             const int8_t dir = packet.read<int8_t>();

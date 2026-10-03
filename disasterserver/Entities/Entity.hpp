@@ -39,5 +39,6 @@ namespace DisasterServer
 
         std::string getTag() { return tag; }
         entityId getId() const { return id; }
+        Vector2 getPosition() const { return position; }
     };
 }

@@ -51,7 +51,7 @@ namespace DisasterServer
 
         template <std::derived_from<Entity> T, typename Predicate>
         T* findIf(Predicate predicate) {
-            for (auto& entity : entities) {
+            for (const auto& entity : entities) {
                 auto* ptr = entity->as<T>();
                 if (ptr && std::invoke(predicate, *ptr)) {
                     return ptr;
@@ -62,7 +62,7 @@ namespace DisasterServer
         }
 
         template <std::derived_from<Entity> T>
-        size_t find() {
+        size_t findCount() {
             const auto count = std::ranges::count_if(entities, [](const auto &entity) {
                 Debug("Search {} (id {}) vs {}", entity->getTag(), entity->getId(), typeid(T).name());
                 return entity->template is<T>();
@@ -70,6 +70,16 @@ namespace DisasterServer
 
             Debug("Search for \"{}\" found {} entities", typeid(T).name(), count);
             return count;
+        }
+
+        template <std::derived_from<Entity> T>
+        void forEachIf(std::function<void(T&)> predicate) {
+            for (const auto &entity : entities) {
+                if (entity->is<T>()) {
+                    auto raw = entity->as<T>();
+                    predicate(*raw);
+                }
+            }
         }
 
         bool despawnEntity(entityId id);

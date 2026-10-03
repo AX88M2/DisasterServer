@@ -8,7 +8,7 @@ using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
 MapRing::MapRing(entityId id, Server &server, GameState &state, const Vector2 &position) :
-    Entity(id, server, state, "ring", position) {}
+    BaseRing(id, server, state, "ring", position) {}
 
 MapRing::~MapRing() = default;
 

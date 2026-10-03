@@ -153,7 +153,7 @@ void RavineMist::spawnShards(Client &client) {
 
 void RavineMist::checkState() {
     Debug("check state");
-    size_t total = 7 - static_cast<uint8_t>(state->getEntityController().find<Entities::Shard>());
+    size_t total = 7 - static_cast<uint8_t>(state->getEntityController().findCount<Entities::Shard>());
 
     Packet packet(PacketType::SERVER_RMZSHARD_STATE);
     packet.write<uint8_t>(3);

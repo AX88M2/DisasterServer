@@ -13,6 +13,7 @@ Cream::Cream(Server &server, Client &client) : Character(server, client, client.
 Cream::~Cream() = default;
 
 void Cream::tick() {
+    auto result = countdown.tick(server.getDelta());
 }
 
 bool Cream::handle(GameState &state, Packet &packet) {
@@ -47,11 +48,15 @@ bool Cream::handle(GameState &state, Packet &packet) {
             }
 
             if (isRedRing) {
+                for (auto &entity : entityController.getEntities()) {
+                    if (entity->is<Entities::Ring>()) {
+                        auto ring = entity->as<Entities::Ring>();
+                        if (!ring->isRed()) {
+                            continue;
+                        }
 
-                auto cnt = entityController.find<Entities::Ring>();
-
-                for (int i = 0; i < cnt; i++) {
-
+                        AssertOrDisconnect(client, position.distance(ring->getPosition()) >= 150);
+                    }
                 }
 
                 float posX[2] = { 25, -27 };
@@ -64,8 +69,7 @@ bool Cream::handle(GameState &state, Packet &packet) {
                 float posX[3] = { 26, 0, -27 };
                 float posY[3] = { 0, -26, 0 };
                 for (int i = 0; i < 3; i++) {
-                    Vector2 r(position.x + posX[i], position.y + posY[i]);
-                    entityController.spawnEntity<Entities::Ring>(r, isRedRing);
+                    entityController.spawnEntity<Entities::Ring>(Vector2(position.x + posX[i], position.y + posY[i]), isRedRing);
                 }
             }
 

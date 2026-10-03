@@ -8,7 +8,8 @@
 
 using namespace DisasterServer;
 
-std::string Configuration::defaultConfig =R"([server]
+std::string Configuration::defaultConfig =R"(
+[server]
 port = 8606
 lobby-count = 1
 motd = "Hello from DisasterServerCXX"

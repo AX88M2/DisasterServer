@@ -18,6 +18,7 @@
 #include "Entities/TailsProjectile.hpp"
 #include "Entities/ExellerClone.hpp"
 #include "Packet.hpp"
+#include "Entities/EggTracker.hpp"
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/KindAndFair.hpp"
 #include "Maps/LimpCity.hpp"
@@ -233,9 +234,9 @@ void GameState::tickPlayers() {
             player.addPingTotal(player.getPingLast() * server.getDelta());
 
             if (player.getPingTimer() >= 20 * TICKS_PER_SEC) {
-                double avg_ping = player.getPingTotal() / player.getPingTimer();
-                if (avg_ping >= 9000000) { //TODO: add to config
-                    client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avg_ping);
+                double avgPing = player.getPingTotal() / player.getPingTimer();
+                if (avgPing >= 9000000) { //TODO: add to config
+                    client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avgPing);
                     continue;
                 }
 
@@ -587,25 +588,37 @@ bool GameState::handle(Client& client, Packet& packet) {
             AssertOrDisconnect(client, client.isInGame());
 
             const uint8_t id = packet.read<uint8_t>();
-            const uint16_t eid = packet.read<uint16_t>();
+            const entityId eid = packet.read<entityId>();
 
-            auto* ent = entityController.findEntity<MapRing>(eid);
-            if (!ent) break;
+            if (BaseRing* ent = entityController.findEntity<BaseRing>(eid)) {
+                auto &player = client.getPlayer();
+                if (!ent->isRed()) {
+                    player.addRings(1);
+                }
 
-            const bool isRed = ent->isRed();
-            entityController.despawnEntity(eid);
+                Packet pack(PacketType::SERVER_RING_COLLECTED);
+                pack.write<uint8_t>(id);
+                pack.write<uint16_t>(eid);
+                pack.write<uint8_t>(ent->isRed());
+                pack.write<uint8_t>(player.getRings() > 0);
+                pack.send(client, true);
 
-            auto &player = client.getPlayer();
-            if (!isRed) {
-                player.addRings(1);
+                entityController.despawnEntity(eid);
+            }
+            break;
+        }
+
+        case PacketType::CLIENT_ETRACKER_ACTIVATED: {
+            AssertOrDisconnect(client, client.isInGame());
+
+            const entityId eid = packet.read<entityId>();
+
+            if (EggTracker* ent = entityController.findEntity<EggTracker>(eid)) {
+                ent->setActivId(client.getId());
+                entityController.despawnEntity(eid);
+                break;
             }
 
-            Packet pack(PacketType::SERVER_RING_COLLECTED);
-            pack.write<uint8_t>(id);
-            pack.write<uint16_t>(eid);
-            pack.write<uint8_t>(isRed);
-            pack.write<uint8_t>(player.getRings() > 0);
-            pack.send(client, true);
             break;
         }
 

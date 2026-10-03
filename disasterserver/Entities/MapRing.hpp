@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "BaseRing.hpp"
 #include "Core/Types.hpp"
 
 namespace DisasterServer {
@@ -14,17 +14,13 @@ namespace DisasterServer::Entities
      *
      * Как по мне для этой сущности названия Ring не очень подходит так как она используется только для спавна колец на карте
      **/
-    class MapRing : public Entity {
-        uint8_t rid = 0;
-        bool red = false;
+    class MapRing : public BaseRing {
     public:
         MapRing(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~MapRing() override;
 
         bool init() override;
         bool uninit() override;
-
-        bool isRed() const { return red; }
     };
 
 }
