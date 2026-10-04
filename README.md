@@ -8,11 +8,11 @@
 - [x] Tails
 - [x] Knuckles
 - [x] Eggman
-- [ ] Amy
+- [x] Amy
 - [x] Cream
 - [ ] Sally
 - [x] Original Exe
-- [ ] Chaos 
+- [x] Chaos 
 - [x] Exetior
 - [x] Exeller
 ### Maps
