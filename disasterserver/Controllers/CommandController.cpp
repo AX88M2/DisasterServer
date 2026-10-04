@@ -11,12 +11,15 @@
 #include "Commands/Help.hpp"
 #include "Commands/Info.hpp"
 #include "Commands/SelfOp.hpp"
+#include "Commands/Map.hpp"
 #include "Commands/Debug.hpp"
 #include "Core/Log.hpp"
 
 using namespace DisasterServer;
 
-CommandController::CommandController(Server &server, StateController &stateController) : server(server), stateController(stateController) {
+CommandController::CommandController(Server &server, StateController &stateController, MapController &mapController) :
+    server(server), stateController(stateController), mapController(mapController)
+{
     this->registerCommand<Commands::Ban>();
     this->registerCommand<Commands::Kick>();
     this->registerCommand<Commands::Op>();
@@ -24,6 +27,7 @@ CommandController::CommandController(Server &server, StateController &stateContr
     this->registerCommand<Commands::Help>();
     this->registerCommand<Commands::Information>();
     this->registerCommand<Commands::SelfOp>();
+    this->registerCommand<Commands::Map>();
     this->registerCommand<Commands::Debuging>();
 }
 

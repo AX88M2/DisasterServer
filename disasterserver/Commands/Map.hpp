@@ -4,10 +4,10 @@
 
 namespace DisasterServer::Commands
 {
-    class Debuging : public Command {
+    class Map : public Command {
     public:
-        Debuging(Server &server, StateController &stateController, MapController &mapController);
-        ~Debuging() override;
+        Map(Server &server, StateController &stateController, MapController &mapController);
+        ~Map() override;
 
         void execute(Client &client, CommandArguments &args) override;
     };

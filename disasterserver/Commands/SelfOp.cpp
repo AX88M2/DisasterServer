@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-SelfOp::SelfOp(Server &server, StateController &stateController) : Command(server, stateController, "selfop") {
+SelfOp::SelfOp(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "selfop") {
 }
 
 SelfOp::~SelfOp() = default;

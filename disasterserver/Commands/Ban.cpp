@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Ban::Ban(Server &server, StateController &stateController) : Command(server, stateController, "ban") {
+Ban::Ban(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "ban") {
 }
 
 Ban::~Ban() = default;

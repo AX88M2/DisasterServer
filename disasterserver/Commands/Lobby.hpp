@@ -6,7 +6,7 @@ namespace DisasterServer::Commands
 {
     class Lobby : public Command {
     public:
-        Lobby(Server &server, StateController &stateController);
+        Lobby(Server &server, StateController &stateController, MapController &mapController);
         ~Lobby() override;
 
         void execute(Client &client, CommandArguments &args) override;

@@ -6,7 +6,7 @@ namespace DisasterServer::Commands
 {
     class SelfOp : public Command {
     public:
-        SelfOp(Server &server, StateController &stateController);
+        SelfOp(Server &server, StateController &stateController, MapController &mapController);
         ~SelfOp() override;
 
         void execute(Client &client, CommandArguments &args) override;

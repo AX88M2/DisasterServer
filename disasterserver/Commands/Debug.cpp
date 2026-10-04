@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Debuging::Debuging(Server &server, StateController &stateController) : Command(server, stateController, "debug") {
+Debuging::Debuging(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "debug") {
 }
 
 Debuging::~Debuging() = default;

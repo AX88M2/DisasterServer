@@ -16,6 +16,7 @@
 
 namespace DisasterServer
 {
+    class MapController;
     class CommandController;
     class StateController;
     class Server;
@@ -34,7 +35,6 @@ namespace DisasterServer
          */
         template <typename T>
         std::optional<T> get(size_t id, std::optional<T> defaultValue = std::nullopt) {
-
             if (id < arguments.size()) {
 
                 try {
@@ -47,9 +47,9 @@ namespace DisasterServer
                     return defaultValue;
                 }
 
-            } else {
-                return defaultValue;
             }
+
+            return defaultValue;
         }
     };
 
@@ -58,11 +58,12 @@ namespace DisasterServer
     protected:
         Server &server;
         StateController &stateController;
+        MapController &mapController;
     private:
         std::string name;
     public:
-        explicit Command(Server &server, StateController &stateController, std::string command) :
-            server(server), stateController(stateController), name(std::move(command)) {}
+        explicit Command(Server &server, StateController &stateController, MapController &mapController, std::string command) :
+            server(server), stateController(stateController), mapController(mapController),  name(std::move(command)) {}
 
         virtual ~Command() = default;
 

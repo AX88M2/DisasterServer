@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Information::Information(Server &server, StateController &stateController) : Command(server, stateController, "info") {
+Information::Information(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "info") {
 }
 
 Information::~Information() = default;

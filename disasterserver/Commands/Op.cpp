@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Op::Op(Server &server, StateController &stateController) : Command(server, stateController, "op") {
+Op::Op(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "op") {
 }
 
 Op::~Op() = default;

@@ -10,7 +10,9 @@
 
 using namespace DisasterServer;
 
-Server::Server(const int port) : port(port), mapController(*this), stateController(*this, mapController), commandController(*this, stateController) {
+Server::Server(const int port) :
+    port(port), mapController(*this), stateController(*this, mapController), commandController(*this, stateController, mapController)
+{
     ENetAddress addr;
     addr.host = ENET_HOST_ANY;
     addr.port = port;

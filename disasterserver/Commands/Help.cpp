@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Help::Help(Server &server, StateController &stateController) : Command(server, stateController, "help") {
+Help::Help(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "help") {
 }
 
 Help::~Help() = default;

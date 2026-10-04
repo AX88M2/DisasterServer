@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Kick::Kick(Server &server, StateController &stateController) : Command(server, stateController, "kick") {
+Kick::Kick(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "kick") {
 }
 
 Kick::~Kick() = default;

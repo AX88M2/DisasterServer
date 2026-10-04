@@ -13,10 +13,11 @@ namespace DisasterServer
     class CommandController {
         Server& server;
         StateController &stateController;
+        MapController &mapController;
 
         std::vector<std::unique_ptr<Command>> commands;
     public:
-        CommandController(Server& server, StateController &stateController);
+        CommandController(Server& server, StateController &stateController, MapController &mapController);
 
         bool process(Client& client, std::string &message);
     private:
@@ -24,7 +25,7 @@ namespace DisasterServer
 
         template <std::derived_from<Command> T>
         void registerCommand() {
-            auto next = std::make_unique<T>(server, stateController);
+            auto next = std::make_unique<T>(server, stateController, mapController);
             commands.emplace_back(std::move(next));
         }
     };

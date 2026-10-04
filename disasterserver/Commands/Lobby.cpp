@@ -5,7 +5,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Commands;
 
-Lobby::Lobby(Server &server, StateController &stateController) : Command(server, stateController, "lobby") {
+Lobby::Lobby(Server &server, StateController &stateController, MapController &mapController) : Command(server, stateController, mapController, "lobby") {
 }
 
 Lobby::~Lobby() = default;

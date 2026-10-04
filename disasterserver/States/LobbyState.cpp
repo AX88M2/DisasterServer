@@ -336,36 +336,6 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, CommandsHash hash, std:
             return stateController.cmdHandle(client, hash, message);
         }
 
-        case CommandsHash::MAP: {
-            if (!client.isOperator()) {
-                this->server.sendMessage(client, "{}you aren't an operator", CLRCODE_RED);
-                break;
-            }
-
-            int requested;
-            if (sscanf(message.c_str(), ".map %d", &requested) != 1) {
-                this->server.sendMessage(client, "{}example:~ .map 1", CLRCODE_RED);
-                break;
-            }
-
-            if (requested < 1 || static_cast<size_t>(requested) > mapController.getMapCount()) {
-                this->server.sendMessage(client, "{}map should be between 1 and {}", CLRCODE_RED, mapController.getMapCount());
-                break;
-            }
-
-            const int index = requested - 1;
-
-            auto map = mapController.getMap(index);
-
-            if (!map.has_value()) {
-                this->server.sendMessage(client, "{}map with id {} was not found!", CLRCODE_RED, requested);
-                break;
-            }
-
-            stateController.changeTo<CharSelectState>(*map, index);
-            break;
-        }
-
         case CommandsHash::Y:
         case CommandsHash::YES: {
             if (!vote.isOnGoing()) {
