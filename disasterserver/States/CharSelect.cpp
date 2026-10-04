@@ -268,6 +268,7 @@ void CharSelectState::selectSurvival(Client &client, SurvCharacters survChar) {
         case SurvCharacters::TAILS: client.setCharacter<Characters::Tails>(); break;
         case SurvCharacters::KNUX: client.setCharacter<Characters::Knuckles>(); break;
         case SurvCharacters::EGGMAN: client.setCharacter<Characters::Eggman>(); break;
+        case SurvCharacters::AMY: client.setCharacter<Characters::AmyRose>(); break;
         case SurvCharacters::CREAM: client.setCharacter<Characters::Cream>(); break;
         case SurvCharacters::SALLY: client.setCharacter<Characters::Sally>(); break;
 
