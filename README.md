@@ -10,7 +10,7 @@
 - [x] Eggman
 - [x] Amy
 - [x] Cream
-- [ ] Sally
+- [x] Sally
 - [x] Original Exe
 - [x] Chaos 
 - [x] Exetior
