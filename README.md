@@ -7,9 +7,9 @@
 ### Characters
 - [x] Tails
 - [x] Knuckles
-- [ ] Eggman
+- [x] Eggman
 - [ ] Amy
-- [ ] Cream
+- [x] Cream
 - [ ] Sally
 - [x] Original Exe
 - [ ] Chaos 

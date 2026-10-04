@@ -333,53 +333,55 @@ void GameState::tickPlayers() {
         if (player.isFlag(Player::Flags::PLAYER_CANTREVIVE))
             continue;
 
-        bool exeNear = false;
-        bool demonized_near = false;
+        if (player.isFlag(Player::Flags::PLAYER_DEAD) && player.getDeathTimerSec() > 0) {
+            bool exeNear = false;
+            bool demonized_near = false;
 
-        for (auto &check : server.getClients()) {
-            if (!check->isInGame()) continue;
+            for (auto &check : server.getClients()) {
+                if (!check->isInGame()) continue;
 
-            auto checkPlayer = check->getPlayer();
+                auto checkPlayer = check->getPlayer();
 
-            if (check->getId() != this->exeId && !checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED))
-                continue;
-
-            if (player.getPosition().distance(checkPlayer.getPosition()) <= 240) {
-                if (checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
-                    demonized_near = true;
-                } else {
-                    demonized_near = false;
-                    exeNear = true;
-                    break;
-                }
-            }
-        }
-
-        if (gameTime.remaining() < 2) {
-            demonize(*client);
-            continue;
-        }
-
-        client->getCharacter()->tick();
-
-        if (player.getDeathTimer() >= TICKS_PER_SEC) {
-            if (!exeNear) {
-                if (player.removeDeathTimerSec() <= 0) {
-                    demonize(*client);
+                if (check->getId() != this->exeId && !checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED))
                     continue;
+
+                if (player.getPosition().distance(checkPlayer.getPosition()) <= 240) {
+                    if (checkPlayer.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
+                        demonized_near = true;
+                    } else {
+                        demonized_near = false;
+                        exeNear = true;
+                        break;
+                    }
                 }
             }
 
-            Packet pack(PacketType::SERVER_GAME_DEATHTIMER_TICK);
-            pack.write<uint8_t>(exeNear);
-            pack.write<clientId>(client->getId());
-            pack.write<uint8_t>(player.getDeathTimerSec());
-            pack.sendBroadcast(server, true);
+            if (gameTime.remaining() < 2) {
+                demonize(*client);
+                continue;
+            }
 
-            player.setDeathTimer(0);
+            client->getCharacter()->tick();
+
+            if (player.getDeathTimer() >= TICKS_PER_SEC) {
+                if (!exeNear) {
+                    if (player.removeDeathTimerSec() <= 0) {
+                        demonize(*client);
+                        continue;
+                    }
+                }
+
+                Packet pack(PacketType::SERVER_GAME_DEATHTIMER_TICK);
+                pack.write<uint8_t>(exeNear);
+                pack.write<clientId>(client->getId());
+                pack.write<uint8_t>(player.getDeathTimerSec());
+                pack.sendBroadcast(server, true);
+
+                player.setDeathTimer(0);
+            }
+
+            player.setDeathTimer(player.getDeathTimer() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
         }
-
-        player.setDeathTimer(player.getDeathTimer() + (demonized_near ? 0.5f : 1.0f) * server.getDelta());
     }
 }
 
@@ -659,11 +661,11 @@ bool GameState::handle(Client& client, Packet& packet) {
             const uint8_t isDead = packet.read<uint8_t>();
             const uint8_t rtimes = packet.read<uint8_t>();
 
-            Packet playerDeadState(PacketType::SERVER_PLAYER_DEATH_STATE);
-            playerDeadState.write<clientId>(client.getId());
-            playerDeadState.write<uint8_t>(isDead);
-            playerDeadState.write<uint8_t>(rtimes);
-            playerDeadState.sendBroadcast(server, true);
+            Packet deadState(PacketType::SERVER_PLAYER_DEATH_STATE);
+            deadState.write<clientId>(client.getId());
+            deadState.write<uint8_t>(isDead);
+            deadState.write<uint8_t>(rtimes);
+            deadState.sendBroadcast(server, true);
 
             Packet revivalStatus(PacketType::SERVER_REVIVAL_STATUS);
             revivalStatus.write<uint8_t>(false);
@@ -679,9 +681,9 @@ bool GameState::handle(Client& client, Packet& packet) {
                 if (player.isFlag(Player::Flags::PLAYER_REVIVED) || this->gameTime.remaining() < 2) {
                     this->demonize(client);
                 } else {
-                    auto clientExeOpt = this->server.findClient(this->exeId);
-                    if (clientExeOpt.has_value()) {
-                        auto playerExe = clientExeOpt.value()->getPlayer();
+                    auto clientExe = this->server.findClient(this->exeId);
+                    if (clientExe.has_value()) {
+                        auto playerExe = (*clientExe)->getPlayer();
 
                         player.setDeathTimerSec(30);
 
@@ -767,8 +769,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             player.setTimeout(0);
 
             const auto now = Clock::now();
-            if (player.getState() != state ||
-                now - player.getLastPacket() >= Duration(15 * 2.9)) {
+            if (player.getState() != state || now - player.getLastPacket() >= Duration(15 * 2.9)) {
 
                 player.setState(state);
                 player.setLastPacket(now);
@@ -776,7 +777,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 Packet pack(PacketType::CLIENT_PLAYER_DATA);
                 pack.write<clientId>(client.getId());
                 pack.append(packet, 2);
-                pack.sendBroadcast(server, false);
+                server.broadcastEx(pack, false, client.getId());
             }
             break;
         }
