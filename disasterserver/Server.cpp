@@ -11,12 +11,21 @@
 using namespace DisasterServer;
 
 Server::Server(const int port) :
-    port(port), mapController(*this), stateController(*this, mapController), commandController(*this, stateController, mapController)
+    port(port),
+    mapController(*this),
+    stateController(*this, mapController),
+    commandController(*this, stateController, mapController)
 {
-    ENetAddress addr;
+    ENetAddress addr {};
     addr.host = ENET_HOST_ANY;
     addr.port = port;
+
     host = enet_host_create(&addr, 50, 2, 0, 0);
+
+    if (host == nullptr) {
+        Error("Failed to create ENet host on port {}", port);
+        throw ServerException("Failed to create ENet host");
+    }
 
     Info("Listening on port {}", port);
 }
@@ -177,7 +186,7 @@ void Server::worker() {
                 if (heartbeat >= (TICKS_PER_SEC * 2))
                 {
                     pack.sendBroadcast(*this, true);
-                    //Debug("Heartbeat done.");
+                    Debug("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -186,6 +195,14 @@ void Server::worker() {
             delta = 1;
         }
     }
+}
+
+void Server::quit() {
+    for (auto &client : peers) {
+        client->disconnect(DisconnectReason::SHUTDOWN);
+    }
+
+    running = false;
 }
 
 void Server::disconnectById(const clientId id, DisconnectReason reason, const std::string &message) const {

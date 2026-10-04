@@ -19,7 +19,7 @@ namespace DisasterServer
 
         std::mutex server_mutex;
         std::vector<std::shared_ptr<Server>> servers;
-        std::vector<std::thread> workers;
+        std::vector<std::jthread> workers;
     protected:
         Application();
         ~Application();

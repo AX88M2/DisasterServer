@@ -13,9 +13,10 @@ namespace DisasterServer
     void Application::initialize() {
         config.load();
 
-        /*for (int i = 0; i < config.config().getLobbyCount(); i++) {
-            workers.push_back(std::thread([&, i] {
-                const auto ptr = std::make_shared<Server>(config.config().getServerPort() + i);
+        for (int i = 0; i < config.config().getLobbyCount(); i++) {
+            workers.push_back(std::jthread([&, i] {
+                const auto basePort = config.config().getServerPort();
+                const auto ptr = std::make_shared<Server>(basePort + i);
                 {
                     std::lock_guard lock(server_mutex);
                     servers.push_back(ptr);
@@ -24,16 +25,9 @@ namespace DisasterServer
             }));
         }
 
-        for (auto& worker : workers) {
-            worker.join();
-        }*/
+        while (true) {
 
-        const auto ptr = std::make_shared<Server>(config.config().getServerPort() + 0);
-        {
-            std::lock_guard lock(server_mutex);
-            servers.push_back(ptr);
         }
-        ptr->worker();
     }
 
 }

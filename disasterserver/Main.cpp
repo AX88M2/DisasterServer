@@ -17,7 +17,10 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    enet_initialize();
+    if (enet_initialize() != 0) {
+        Error("Failed to initialize ENet");
+        return 1;
+    }
 
     Info("- DisasterServerCXX for game v{}", BUILD_VERSION);
     Info("- Build from {} {}", __DATE__, __TIME__);

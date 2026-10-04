@@ -17,6 +17,8 @@ namespace DisasterServer
         double delta = 0;
         ENetHost *host = nullptr;
 
+        std::mutex serverMutex;
+
         Application &application = Application::getInstance();
 
         std::vector<std::unique_ptr<Client>> peers;
@@ -28,6 +30,7 @@ namespace DisasterServer
         ~Server();
 
         void worker();
+        void quit();
 
         void disconnectById(clientId id, DisconnectReason reason, const std::string& message = "") const;
 
