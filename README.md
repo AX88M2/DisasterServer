@@ -1,5 +1,7 @@
 # DisasterServer
 
+Wiki: [Building on Android](https://github.com/AX88M2/DisasterServer/wiki/Building-on-Android-(1101%E2%80%90oss))
+
 ## Building source
 ```bash
 git clone --recursive --branch 1101-oss https://github.com/AX88M2/DisasterServer.git
