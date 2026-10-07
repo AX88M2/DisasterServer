@@ -17,7 +17,7 @@ namespace DisasterServer
 
         std::string reason;
 
-        explicit ClientBan() : ip(""), uid(""), username(""), reason("") {}
+        explicit ClientBan() {}
         explicit ClientBan(const std::string &ip, const std::string &uid, const std::string &username, const std::string &reason) :
             ip(ip), uid(uid), username(username), reason(reason) {}
         ~ClientBan() = default;
@@ -28,7 +28,7 @@ namespace DisasterServer
         std::string ip;
         std::string uid;
 
-        explicit ClientOperator() : ip(""), uid("") {}
+        explicit ClientOperator() {}
         explicit ClientOperator(const std::string &ip, const std::string &uid) : ip(ip), uid(uid) {}
         ~ClientOperator() = default;
     };

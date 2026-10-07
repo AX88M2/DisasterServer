@@ -235,7 +235,7 @@ bool CharSelectState::chooseExe() {
     if (weight == 0)
         weight++;
 
-    uint32_t rnd = server.getRandom().nextInt(0, static_cast<int>(weight));
+    uint32_t rnd = Random::randInt() % weight;
 
     for (auto& client : server.getClients()) {
         if (!client || !client->isInGame())

@@ -19,6 +19,7 @@
 #include "Entities/ExellerClone.hpp"
 #include "Packet.hpp"
 #include "Entities/EggTracker.hpp"
+#include "Maps/Act9.hpp"
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/KindAndFair.hpp"
 #include "Maps/LimpCity.hpp"
@@ -254,7 +255,7 @@ void GameState::tickPlayers() {
                     player.getStats().addDangerTime(server.getDelta());
                 }
 
-                if (/* currentMap->is<Maps::Act9>() && */ currentMap->is<Maps::LimpCity>()) {
+                if (currentMap->is<Maps::Act9>() && currentMap->is<Maps::LimpCity>()) {
                     uint32_t chunk = ((uint32_t)player.getPosition().x / 480) + ((uint32_t)player.getPosition().y / 270);
 
                     if (player.getChunk() != chunk) {
@@ -432,9 +433,6 @@ bool GameState::checkStart() {
         Packet pack(PacketType::SERVER_GAME_PLAYERS_READY);
         pack.sendBroadcast(server);
 
-        std::srand(static_cast<unsigned int>(std::time(nullptr)));
-        currentMap->init(*this);
-
         elapsed = 0.0f;
         gameTime.stop();
         endTime.stop();
@@ -442,6 +440,8 @@ bool GameState::checkStart() {
         auto [time, mul, mapRingCoff] = currentMap->getMapProperties();
         this->ringCoff = mapRingCoff;
         this->gameTime.start((time + ((this->server.getInGameCount() - 1) * mul)));
+
+        currentMap->init(*this);
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
         started = true;
