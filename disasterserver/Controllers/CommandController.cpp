@@ -39,9 +39,12 @@ bool CommandController::process(Client &client, std::string &message) {
             return cmd->name == executedCommand.first;
         });
 
-        (*it)->execute(client, executedCommand.second);
+        if (it != commands.end()) {
+            (*it)->execute(client, executedCommand.second);
+            return true;
+        }
 
-        return true;
+        return false;
     } catch (NotFoundCommandPrefix &) {
         return false;
     }
