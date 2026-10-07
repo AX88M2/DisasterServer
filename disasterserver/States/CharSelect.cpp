@@ -235,7 +235,7 @@ bool CharSelectState::chooseExe() {
     if (weight == 0)
         weight++;
 
-    uint32_t rnd = static_cast<uint32_t>(Random::randInt()) % weight;
+    uint32_t rnd = server.getRandom().nextInt(0, static_cast<int>(weight));
 
     for (auto& client : server.getClients()) {
         if (!client || !client->isInGame())
@@ -249,7 +249,7 @@ bool CharSelectState::chooseExe() {
         if (rnd < client->getExeChance() && !client->isModified()) {
             Info("{} (id {}, c {}) is exe!", client->getNickname(), client->getId(), client->getExeChance());
 
-            client->setExeChance(1 + Random::randInt() % 1);
+            client->setExeChance(1 + server.getRandom().nextInt(0, 1));
 
             exe = client->getId();
             return true;

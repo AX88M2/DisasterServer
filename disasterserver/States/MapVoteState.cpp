@@ -18,11 +18,6 @@ MapVoteState::~MapVoteState() = default;
 void MapVoteState::enter() {
     Debug("Attepting to enter DisasterServer::MapVoteState...");
 
-    // randomize
-    time_t seed = time(nullptr);
-    Debug("Mapvote seed: {}", seed);
-    srand(static_cast<unsigned int>(seed));
-
     countdown.start(30);
 
     // TODO: Сделать список разрешённых карт
@@ -37,7 +32,7 @@ void MapVoteState::enter() {
         int attempts = 0;
 
         while (count < 3 && attempts++ < 1000) {
-            int8_t mapid = static_cast<size_t>(Random::randInt()) % mapController.getMapCount();
+            int8_t mapid = server.getRandom().nextInt(0, static_cast<int>(mapController.getMapCount()));
 
             auto map = mapController.getMap(mapid);
 
@@ -52,7 +47,7 @@ void MapVoteState::enter() {
 
             const int16_t weight = mapController.getMapWeight(*map);
 
-            const int num = Random::randInt() % 255;
+            const int num = server.getRandom().nextInt(0, 255);
 
             if (num >= weight) {
                 Debug("{} vs {} lost", num, weight);
@@ -136,7 +131,7 @@ void MapVoteState::tick() {
             }
 
             // Find winner
-            int8_t wonId = indeces[Random::randInt() % count];
+            int8_t wonId = indeces[static_cast<int8_t>(server.getRandom().nextInt(0, count))];
             auto wonMap = mapController.getMap(wonId);
 
             if (!wonMap.has_value()) {

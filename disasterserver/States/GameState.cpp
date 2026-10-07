@@ -45,7 +45,7 @@ void GameState::enter() {
     this->ringCoff = 5;
     this->suddenDeath = false;
     this->bringState = BigRingState::NONE;
-    this->bringLocation = static_cast<uint8_t>(Random::randInt());
+    this->bringLocation = server.getRandom().nextInt(0, 255);
     this->leftClients.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
     this->cooldowns.fill(0.0);

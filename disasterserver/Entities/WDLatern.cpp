@@ -7,14 +7,15 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-Latern::Latern(entityId id, Server &server, GameState &state, const Vector2 &pos) : Entity(id, server, state, "latrn", pos), time(static_cast<uint16_t>(7 + std::rand() % 2)) {}
+Latern::Latern(entityId id, Server &server, GameState &state, const Vector2 &pos) : Entity(id, server, state, "latrn", pos),
+    time(static_cast<uint16_t>(7 + server.getRandom().nextInt(0, 2))) {}
 
 bool Latern::tick() {
     timer += server.getDelta();
 
     if (!side) {
         if (timer >= time * TICKS_PER_SEC) {
-            lid = static_cast<uint8_t>(std::rand() % 7);
+            lid = static_cast<uint8_t>(server.getRandom().nextInt(0, 7));
 
             Packet pack(PacketType::SERVER_WDLATERN_ACTIVATE);
             pack.write<uint8_t>(1);
@@ -23,7 +24,7 @@ bool Latern::tick() {
 
             side  = true;
             timer = 0;
-            time  = static_cast<uint16_t>(20 + std::rand() % 2);
+            time  = static_cast<uint16_t>(20 + server.getRandom().nextInt(0, 2));
         }
     } else {
         if (timer >= time * TICKS_PER_SEC) {
@@ -34,7 +35,7 @@ bool Latern::tick() {
 
             side  = false;
             timer = 0;
-            time  = static_cast<uint16_t>(7 + std::rand() % 2);
+            time  = static_cast<uint16_t>(7 + server.getRandom().nextInt(0, 2));
         }
     }
 

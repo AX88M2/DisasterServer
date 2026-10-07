@@ -13,10 +13,10 @@ Slug::Slug(entityId id, Server &server, GameState &state, const Vector2 &positio
     Entity(id, server, state, "slug", position) {}
 
 Slug::~Slug() {
-};
+}
 
 bool Slug::init() {
-    int num = Random::randInt() % 100;
+    int num = server.getRandom().nextInt(0, 100);
 
     if (num < 50) {
         drop = Drop::NORING;
@@ -28,7 +28,7 @@ bool Slug::init() {
 
     sPosition = Vector2(position);
 
-    face(Random::randInt() % 2);
+    face(server.getRandom().nextInt(0, 2));
 
     Packet packet(PacketType::SERVER_RMZSLIME_STATE);
     packet.write<uint8_t>(0);

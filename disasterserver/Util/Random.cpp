@@ -17,7 +17,7 @@ double Random::nextDouble(const double min, const double max) {
 }
 
 int Random::randInt() {
-    return std::rand();
+    return rand();
 }
 
 

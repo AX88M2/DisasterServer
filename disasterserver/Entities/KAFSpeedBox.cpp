@@ -47,6 +47,6 @@ bool KafBox::activate(clientId pid, uint8_t isProj) {
     pack.sendBroadcast(server, true);
 
     activated = true;
-    timer = (25.0 + std::rand() % 5) * TICKS_PER_SEC;
+    timer = (25.0 + server.getRandom().nextInt(0, 5)) * TICKS_PER_SEC;
     return true;
 }

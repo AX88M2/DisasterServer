@@ -31,12 +31,12 @@ bool MapRing::init() {
     int slot;
 
     do {
-        slot = std::rand() % ringCount;
+        slot = server.getRandom().nextInt(0, ringCount);
     } while (state.isRingSlotUsed(slot));
 
     state.setRingSlot(slot, true);
     rid = static_cast<uint8_t>(slot);
-    red = map->getSpawnRedRings() && (std::rand() % 100 <= 10);
+    red = map->getSpawnRedRings() && (server.getRandom().nextInt(0, 100) <= 10);
 
     Packet pack(PacketType::SERVER_RING_STATE);
     pack.write<uint8_t>(0);

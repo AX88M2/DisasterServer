@@ -29,7 +29,7 @@ bool YCRController::tick() {
                 activated = !activated;
 
                 if (activated)
-                    smokeId = static_cast<uint8_t>(std::rand() % 7);
+                    smokeId = static_cast<uint8_t>(server.getRandom().nextInt(0, 7));
                 else
                     smokeId = 0;
 

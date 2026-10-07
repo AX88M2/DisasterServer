@@ -41,13 +41,13 @@ bool Client::identity(Packet &packet) {
     this->udid = udid;
     this->lobbyIcon = lobbyIcon;
     this->pet = pet;
-    this->op = server->getApplication().getStorage().isOperator(*this);
+    this->op = server->getApp().getStorage().isOperator(*this);
 
     uint64_t rawKeyA = packet.read<uint64_t>();
     uint64_t rawKeyB = packet.read<uint64_t>();
 
     this->in_game = stateController.isState<LobbyState>();
-    this->exeChance = 1 + rand() % 4;
+    this->exeChance = 1 + server->getRandom().nextInt(0, 4);
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);
@@ -69,7 +69,7 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    bool isBanned = server->getApplication().getStorage().isBanned(*this);
+    bool isBanned = server->getApp().getStorage().isBanned(*this);
 
     if (!identityProcess(ip, isBanned, 0, serverIndex == -1)) {
         return false;
@@ -155,7 +155,7 @@ bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t ti
         this->server->sendMessage(*this, "|build from &{} @{}~", __DATE__, __TIME__);
         this->server->sendMessage(*this, "|type .help for command list~");
 
-        const auto motd = this->server->getApplication().getConfigManager().config().getMotd();
+        const auto motd = this->server->getApp().getConfigManager().config().getMotd();
         if (!motd.empty()) {
             this->server->sendMessage(*this, motd);
         }

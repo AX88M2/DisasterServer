@@ -30,7 +30,7 @@ bool SlugSpawner::tick() {
         timer = 0;
         slug = entity;
 
-        offset = static_cast<double>(Random::randInt() % 2 * TICKS_PER_SEC);
+        offset = server.getRandom().nextDouble(0, 2) * TICKS_PER_SEC;
     }
 
     return true;

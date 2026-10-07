@@ -145,7 +145,7 @@ void RavineMist::spawnShards(Client &client) {
     for (int i = 0; i < player.getUserdata().shards; i++) {
         auto pos = player.getPosition();
         Debug("shard spawned at {} {}", pos.x, pos.y);
-        state->getEntityController().spawnEntity<Entities::Shard>(Vector2(pos.x + (-8 + rand() % 17), pos.y), 1);
+        state->getEntityController().spawnEntity<Entities::Shard>(Vector2(pos.x + (-8 + static_cast<float>(server.getRandom().nextDouble(0, 17))), pos.y), 1);
     }
 
     player.getUserdata().shards = 0;

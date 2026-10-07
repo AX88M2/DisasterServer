@@ -15,7 +15,7 @@ void SelfOp::execute(Client &client, CommandArguments &args) {
         return;
     }
 
-    server.getApplication().getStorage().addOperator(client);
+    server.getApp().getStorage().addOperator(client);
     client.setOperator(true);
     server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
 }

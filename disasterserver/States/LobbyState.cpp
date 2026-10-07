@@ -221,7 +221,7 @@ bool LobbyState::handle(Client &client, Packet &packet) {
 
             server.sendMessage(client, "|build from &{} @{}~", __DATE__, __TIME__);
             server.sendMessage(client, "|type .help for command list~");
-            const auto motd = this->server.getApplication().getConfigManager().config().getMotd();
+            const auto motd = this->server.getApp().getConfigManager().config().getMotd();
             if (!motd.empty()) {
                 this->server.sendMessage(client, motd);
             }

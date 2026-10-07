@@ -49,7 +49,7 @@ namespace DisasterServer
         Ending ending = Ending::EXEWIN;
 
         BigRingState bringState = BigRingState::NONE;
-        uint8_t bringLocation = static_cast<uint8_t>(rand()); //TODO: Сделать отдельный класс рандома
+        uint8_t bringLocation = 0;
 
         std::vector<std::unique_ptr<Client>> leftClients = {};
         std::vector<bool> ringSlots;

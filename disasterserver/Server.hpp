@@ -6,18 +6,20 @@
 #include "Controllers/MapController.hpp"
 #include "Controllers/StateController.hpp"
 #include "Core/Defines.hpp"
+#include "Util/Random.hpp"
 
 namespace DisasterServer
 {
     class StateController;
     class CommandController;
+
     class Server {
         int port = 0;
         bool running = false;
         double delta = 0;
         ENetHost *host = nullptr;
 
-        std::mutex serverMutex;
+        Random random;
 
         Application &application = Application::getInstance();
 
@@ -52,11 +54,21 @@ namespace DisasterServer
         size_t getClientCount();
         size_t getInGameCount();
 
+        /**
+         * Поиск клиента по его ID
+         * @param clientId ID клиента
+         * @return Возвращает указатель на клиента а если такого нет то nullopt
+         */
         std::optional<Client*> findClient(clientId clientId);
 
-        Application &getApplication() { return application; }
+        Application &getApp() { return application; }
+
+        Random &getRandom() { return random; }
+
         std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
+
         double getDelta() const { return delta; }
+
         CommandController &getCommandController();
 
         /**

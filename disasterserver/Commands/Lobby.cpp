@@ -13,7 +13,7 @@ Lobby::~Lobby() = default;
 void Lobby::execute(Client &client, CommandArguments &args) {
     CMD_GET_ARG(ind, int, 0, -1)
 
-    auto config = this->server.getApplication().getConfigManager().config();
+    auto config = this->server.getApp().getConfigManager().config();
 
     if (ind < 1 || ind > config.getLobbyCount()) {
         this->server.sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.getLobbyCount());

@@ -72,7 +72,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    server.getApplication().getStorage().addBan(*c);
+                    server.getApp().getStorage().addBan(*c);
                     c->disconnect(DisconnectReason::BANNEDBYHOST);
                 }
             }
@@ -106,7 +106,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    server.getApplication().getStorage().addOperator(*c);
+                    server.getApp().getStorage().addOperator(*c);
                     c->setOperator(true);
                     server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
                 }

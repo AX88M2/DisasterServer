@@ -69,7 +69,7 @@ void Server::worker() {
 
                     uint32_t type = 0;
 
-                    switch (rand() % 3)
+                    switch (Random::randInt() % 3)
                     {
                         case 0:
                             type = 1u << 9;
@@ -91,7 +91,7 @@ void Server::worker() {
                         if (bit == 9 || bit == 31 || bit == 26)
                             continue;
 
-                        if (rand() % 3 <= 1)
+                        if (Random::randInt() % 3 <= 1)
                             type &= ~(1u << bit);
                         else
                             type |= 1u << bit;
@@ -102,13 +102,13 @@ void Server::worker() {
                     pack.write<uint16_t>(0);
                     pack.write<uint16_t>(1);
                     pack.write<uint8_t>(auth.one);
-                    pack.write<uint8_t>(static_cast<uint8_t>(rand()) % 2);
+                    pack.write<uint8_t>(static_cast<uint8_t>(Random::randInt()) % 2);
                     pack.write<uint8_t>(auth.two);
 
                     const uint8_t key[6] = { 0x00, 0x00, 0xFF, 0x1F, 0x80, 0x14 };
 
                     for (int i = 0; i < 3; i++) {
-                        pack.write<uint8_t>(key[rand() % sizeof(key)]);
+                        pack.write<uint8_t>(key[Random::randInt() % sizeof(key)]);
                     }
 
                     pack.write<uint32_t>(auth.type);
