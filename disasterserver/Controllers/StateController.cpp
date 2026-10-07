@@ -179,7 +179,7 @@ void StateController::handleChat(Client &client, std::string &message, std::func
     client.setTimeout(0);
 
     if (message.length() > 90) {
-        this->server.sendMessage(client, "{}Chat message too long", CLRCODE_RED);
+        this->server.sendMessage(client, "{}message too long", CLRCODE_RED);
         return;
     }
 
