@@ -10,9 +10,9 @@ Act9::Act9(Server &server) : Map(server, "Act 9", 1, 38) {
 }
 
 void Act9::init(GameState &game) {
-    //game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(0, 1025), 0);
-    //game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 1);
-    //game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 2);
+    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(0, 1025), 0);
+    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 1);
+    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 2);
 }
 
 void Act9::tick() {
