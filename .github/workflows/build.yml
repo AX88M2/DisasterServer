@@ -145,14 +145,10 @@ jobs:
       - name: List files
         run: ls -la ./dist
 
-      - name: Delete old tag server_cxx
-        continue-on-error: true
-        run: git push origin :refs/tags/server_cxx
-
       - name: Create Pre-Release server_cxx
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: server_cxx
+          tag_name: v${{ github.action }}.cxx
           name: "DisasterServer on C++ (pre-release)"
           body: |
             Automatic C++ build from commit `${{ github.sha }}`.
