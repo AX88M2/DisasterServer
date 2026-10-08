@@ -11,15 +11,10 @@ namespace DisasterServer::Maps
         ~NotPerfect() noexcept override;
 
         void init(GameState& game) override;
-
         void tick() override;
-
         void handle(Client &client, Packet &packet) override;
-
         void left(Client &client) override;
 
         MapProperties getMapProperties() const override;
-
-
     };
 }
