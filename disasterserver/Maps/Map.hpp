@@ -26,8 +26,7 @@ namespace DisasterServer
         int spawnRedRings;
         int ringCount;
     public:
-        Map(Server &server, std::string name, const int spawnRedRings, const int ringCount) : server(server), name(std::move(name)),
-            spawnRedRings(spawnRedRings), ringCount(ringCount) {}
+        Map(Server &server, std::string name, const int spawnRedRings, const int ringCount) : server(server), name(std::move(name)), spawnRedRings(spawnRedRings), ringCount(ringCount) {}
 
         virtual ~Map() = default;
 

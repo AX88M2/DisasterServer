@@ -12,11 +12,14 @@
 #include "Maps/MysticWood.hpp"
 #include "Maps/NotPerfect.hpp"
 #include "Maps/RavineMist.hpp"
+#include "Maps/PricelessFreedom.hpp"
+#include "Maps/NastyParadise.hpp"
 
 using namespace DisasterServer;
 
 MapController::MapController(Server &server) : server(server) {
     //meow (7) UwU ( Кто-то превратился в кота ;] )
+    //MRREOW~~ (cat mode)
 }
 
 void MapController::initialize() {
@@ -29,8 +32,8 @@ void MapController::initialize() {
     this->registerMap<Maps::NotPerfect>();              // 6
     this->registerMap<Maps::KindAndFair>();             // 7
     this->registerMap<Maps::Act9>();                    // 8
-    //this->registerMap<Maps::NastyParadise>();         // 9
-    //this->registerMap<Maps::PricelessFreedom>();      // 10
+    this->registerMap<Maps::NastyParadise>();         // 9
+    this->registerMap<Maps::PricelessFreedom>();      // 10
     //this->registerMap<Maps::VolcanoValley>();         // 12
     //this->registerMap<Maps::Hill>();                  // 13
 #if 0
