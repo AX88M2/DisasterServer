@@ -40,7 +40,9 @@ void PricelessFreedom::handle(Client& client, Packet& packet) {
 
     const uint8_t lid = packet.read<uint8_t>();
 
-    auto* lift = game->getEntityController().findIf<Entities::PFLift>([lid](Entities::PFLift& l) { return l.getLid() == lid; });
+    auto* lift = game->getEntityController().findIf<Entities::PFLift>([lid](Entities::PFLift& l) {
+        return l.getLid() == lid;
+    });
 
     if (!lift)
         return;
