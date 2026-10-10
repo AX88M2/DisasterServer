@@ -22,9 +22,9 @@
 - [x] Desert Town
 - [x] You Can't Run
 - [x] Limp City
-- [ ] Not Perfect
+- [x] Not Perfect
 - [x] Kind and Fair
-- [ ] Act 9
+- [x] Act 9
 - [ ] Nasty Paradise
 - [ ] Priceless Freedom
 - [ ] Volcano Valley
