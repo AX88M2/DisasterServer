@@ -31,7 +31,7 @@ namespace DisasterServer::Entities
         };
 
 
-        Vector2 sPosition = {};
+        Vector2 sPosition = Vector2();
 
         State moveState = State::NONERIGHT;
         Drop drop = Drop::NORING;

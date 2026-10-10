@@ -112,8 +112,8 @@ namespace DisasterServer
             uint8_t	shards = 0;
         } userdata = {};
 
-        Vector2 startPos = {};
-        Vector2 position = {};
+        Vector2 startPos = Vector2();
+        Vector2 position = Vector2();
 
         PlayerStats stats = {};
 

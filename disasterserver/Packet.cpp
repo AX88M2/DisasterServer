@@ -110,7 +110,7 @@ Vector2 Packet::readVector2() {
 	const float x = read<uint16_t>();
 	const float y = read<uint16_t>();
 
-	return { static_cast<float>(x), static_cast<float>(y) };
+	return Vector2(x, y);
 }
 
 void Packet::writeVector2(const Vector2 &value) {
@@ -122,7 +122,7 @@ Vector2 Packet::readVector2F() {
 	const float x = read<float>();
 	const float y = read<float>();
 
-	return { x, y };
+	return Vector2(x, y);
 }
 
 void Packet::writeVector2F(const Vector2 &value) {

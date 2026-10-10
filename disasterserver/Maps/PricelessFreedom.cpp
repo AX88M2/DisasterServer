@@ -19,7 +19,7 @@ void PricelessFreedom::init(GameState& state) {
     auto& ec = state.getEntityController();
 
     for (uint8_t i = 0; i < 29; i++) {
-        ec.spawnEntity<Entities::BlackRing>({INT16_MAX, INT16_MAX});
+        ec.spawnEntity<Entities::BlackRing>(Vector2(INT16_MAX, INT16_MAX));
     }
 
     ec.spawnEntity<Entities::PFLift>(Vector2(), 0, 1669.0f, 1016.0f);
@@ -48,6 +48,6 @@ void PricelessFreedom::handle(Client& client, Packet& packet) {
     lift->activate(client.getId());
 }
 
-DisasterServer::MapProperties PricelessFreedom::getMapProperties() const {
+MapProperties PricelessFreedom::getMapProperties() const {
     return MapProperties(static_cast<int>(2.585 * TICKS_PER_SEC), 10, 5);
 }
