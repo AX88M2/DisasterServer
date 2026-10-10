@@ -6,6 +6,7 @@
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
 #include "Entities/PFLift.hpp"
+#include "Entities/BlackRing.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
@@ -17,10 +18,14 @@ void PricelessFreedom::init(GameState& state) {
 
     auto& ec = state.getEntityController();
 
+    for (uint8_t i = 0; i < 29; i++) {
+        ec.spawnEntity<Entities::BlackRing>({INT16_MAX, INT16_MAX});
+    }
+
     ec.spawnEntity<Entities::PFLift>({}, 0, 1669.0f, 1016.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 1, 1069.0f, 704.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 2, 829.0f, 400.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 3, 1070.0f, 544.0f);
+    ec.spawnEntity<Entities::PFLift>({}, 1, 1069.0f,  704.0f);
+    ec.spawnEntity<Entities::PFLift>({}, 2,  829.0f,  400.0f);
+    ec.spawnEntity<Entities::PFLift>({}, 3, 1070.0f,  544.0f);
 }
 
 void PricelessFreedom::tick() {}
@@ -34,6 +39,7 @@ void PricelessFreedom::handle(Client& client, Packet& packet) {
         return;
 
     const uint8_t lid = packet.read<uint8_t>();
+
     auto* lift = game->getEntityController().findIf<Entities::PFLift>([lid](Entities::PFLift& l) { return l.getLid() == lid; });
 
     if (!lift)
