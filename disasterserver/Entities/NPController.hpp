@@ -14,7 +14,7 @@ namespace DisasterServer::Maps
         State state = State::None;
         uint8_t stage = 0;
         double timer = 0.0;
-        bool balls = false;
+        bool isPreparationStarted = false;
     public:
         NPController(entityId id, Server& server, GameState& state, const Vector2& pos, const std::string& tag = "npctrl");
 

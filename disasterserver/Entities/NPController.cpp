@@ -21,19 +21,19 @@ bool NPController::uninit() {
 
 bool NPController::tick()
 {
-    if (game.getGameTime().remaining() <= TICKS_PER_SEC && !balls)
+    if (game.getGameTime().remaining() <= TICKS_PER_SEC && !isPreparationStarted)
     {
         timer = 5 * TICKS_PER_SEC;
         state = State::Prepare;
-        balls = true;
+        isPreparationStarted = true;
     }
 
     switch (state)
     {
         case State::None:
         {
-            const int intr1 = game.getGameTime().remaining() < TICKS_PER_SEC ? 2 : 15;
-            if (timer >= intr1 * TICKS_PER_SEC)
+            const int transitionDelaySeconds = game.getGameTime().remaining() < TICKS_PER_SEC ? 2 : 15;
+            if (timer >= transitionDelaySeconds * TICKS_PER_SEC)
             {
                 Packet pack(PacketType::SERVER_NPCONTROLLER_STATE);
                 pack.write<uint8_t>(0);
@@ -49,8 +49,8 @@ bool NPController::tick()
 
         case State::Prepare:
         {
-            const int intr2 = game.getGameTime().remaining() < TICKS_PER_SEC ? 3 : 5;
-            if (timer >= intr2 * TICKS_PER_SEC)
+            const int prepareDelaySeconds = game.getGameTime().remaining() < TICKS_PER_SEC ? 3 : 5;
+            if (timer >= prepareDelaySeconds * TICKS_PER_SEC)
             {
                 stage++;
 
