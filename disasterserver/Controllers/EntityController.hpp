@@ -24,7 +24,7 @@ namespace DisasterServer
         void tick();
 
         template <std::derived_from<Entity> T, typename... Args>
-        T* spawnEntity(const Vector2 &pos = {}, Args&&... args) {
+        T* spawnEntity(const Vector2 &pos = Vector2(), Args&&... args) {
             ++entityIdCounter;
             auto ent = std::make_unique<T>(entityIdCounter, server, state, pos, std::forward<Args>(args)...);
 

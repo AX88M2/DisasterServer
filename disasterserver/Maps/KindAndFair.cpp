@@ -16,7 +16,7 @@ void KindAndFair::init(GameState& state) {
 
     auto& ec = state.getEntityController();
     for (uint8_t i = 0; i < 11; i++) {
-        ec.spawnEntity<Entities::KafBox>({}, i);
+        ec.spawnEntity<Entities::KafBox>(Vector2(), i);
     }
 
     Debug("Spawned 11 KafBox");

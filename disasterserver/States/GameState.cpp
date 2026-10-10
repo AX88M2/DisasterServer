@@ -56,8 +56,9 @@ void GameState::enter() {
     for (auto &client : server.getClients()) {
         if (!client->isInGame()) continue;
 
+        client->resetPlayer();
+
         auto &player = client->getPlayer();
-        player.reset();
 
         if (client->getId() == exeId)
             player.setFlag(Player::Flags::PLAYER_KILLER);

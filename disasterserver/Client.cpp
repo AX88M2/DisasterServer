@@ -20,6 +20,11 @@ Client::Client(Server *server, StateController &stateController, ENetPeer *peer,
     character(std::make_shared<Characters::None>(*server, *this))
 {}
 
+void Client::resetPlayer() {
+    player.reset();
+    player = std::make_shared<Player>();
+}
+
 bool Client::identity(Packet &packet) {
     assert(id > 0);
 

@@ -76,21 +76,6 @@ namespace DisasterServer
         void addKill() { kills++; }
         uint16_t getKills() const { return this->kills; }
         void setKills(uint16_t value) { this->kills = value; }
-
-        void reset() {
-            this->survive_time = 0;
-            this->danger_time = 0;
-            this->camp_time = 0.0;
-            this->braindead_time = 0;
-            this->brain_damage = false;
-            this->stun_time = 0;
-            this->stuns = 0;
-            this->hp_restored = 0;
-            this->rings = 0;
-            this->damage = 0;
-            this->damage_taken = 0;
-            this->kills = 0;
-        }
     };
 
     class Player {
@@ -127,8 +112,8 @@ namespace DisasterServer
             uint8_t	shards = 0;
         } userdata = {};
 
-        Vector2 startPos = {};
-        Vector2 position = {};
+        Vector2 startPos = Vector2();
+        Vector2 position = Vector2();
 
         PlayerStats stats = {};
 
@@ -147,8 +132,6 @@ namespace DisasterServer
 
         Player();
         ~Player();
-
-        void reset();
 
         bool isFlag(Flags flag) const { return this->flags & static_cast<PlayerFlags>(flag); }
         void setFlag(Flags flag) { this->flags |= static_cast<PlayerFlags>(flag); }
@@ -209,7 +192,7 @@ namespace DisasterServer
             this->stats.addRings(value);
         }
 
-        uint8_t getState() { return this->state; }
+        uint8_t getState() const { return this->state; }
         void setState(const uint8_t value) { this->state = value; }
 
         uint8_t getDeathTimerSec() const { return this->deathTimerSec; }

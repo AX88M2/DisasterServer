@@ -17,5 +17,4 @@ namespace DisasterServer::Entities
 
         uint8_t getNid() const { return nid; };
     };
-
 }

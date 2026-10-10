@@ -82,7 +82,7 @@ namespace DisasterServer
         ENetPeer *peer;
 
         /* General info */
-        Player player = {};
+        std::shared_ptr<Player> player = std::make_shared<Player>();
         std::string nickname = "<unknown>";
         std::string udid;
         uint8_t lobbyIcon = 0;
@@ -125,7 +125,11 @@ namespace DisasterServer
         clientId getId() const { return id; }
         std::string getIp() const { return ip; }
         ENetPeer *getPeer() const { return peer; }
-        Player &getPlayer() { return player; }
+
+        Player &getPlayer() { return *player; }
+
+        void resetPlayer();
+
         std::string getNickname() { return nickname; }
         std::string getUdid() { return udid; }
         uint8_t getLobbyIcon() const { return lobbyIcon; }

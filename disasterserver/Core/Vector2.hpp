@@ -11,9 +11,9 @@ namespace DisasterServer
         float x = 0;
         float y = 0;
 
-        constexpr Vector2() noexcept = default;
+        constexpr explicit Vector2() noexcept = default;
 
-        constexpr Vector2(float x, float y) noexcept : x(x), y(y){}
+        constexpr explicit Vector2(float x, float y) noexcept : x(x), y(y){}
 
         [[nodiscard]]
         float length() const noexcept {
@@ -30,15 +30,15 @@ namespace DisasterServer
 
         [[nodiscard]]
         constexpr Vector2 direction(const Vector2& other) const noexcept {
-            return {sign(x - other.x), sign(y - other.y)};
+            return Vector2(sign(x - other.x), sign(y - other.y));
         }
 
         [[nodiscard]]
         constexpr Vector2 lerp(const Vector2& other, float factor) const noexcept {
-            return {
+            return Vector2(
                 x * (1.0f - factor) + other.x * factor,
                 y * (1.0f - factor) + other.y * factor
-            };
+            );
         }
 
         [[nodiscard]]
@@ -46,25 +46,25 @@ namespace DisasterServer
             const float len = length();
 
             if (len == 0.0f)
-                return {};
+                return Vector2();
 
-            return {x / len, y / len};
+            return Vector2(x / len, y / len);
         }
 
         constexpr Vector2 operator+(const Vector2& other) const noexcept {
-            return {x + other.x, y + other.y};
+            return Vector2(x + other.x, y + other.y);
         }
 
         constexpr Vector2 operator-(const Vector2& other) const noexcept {
-            return {x - other.x, y - other.y};
+            return Vector2(x - other.x, y - other.y);
         }
 
         constexpr Vector2 operator*(float scalar) const noexcept {
-            return {x * scalar, y * scalar};
+            return Vector2(x * scalar, y * scalar);
         }
 
         constexpr Vector2 operator/(float scalar) const noexcept {
-            return {x / scalar, y / scalar};
+            return Vector2(x / scalar, y / scalar);
         }
 
         constexpr Vector2& operator+=(const Vector2& other) noexcept {
