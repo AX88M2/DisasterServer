@@ -12,14 +12,14 @@ namespace DisasterServer
     class Entity {
     protected:
         Server &server;
-        GameState &state;
+        GameState &game;
 
         entityId id = 0;
         std::string tag;
         Vector2 position;
     public:
         Entity(entityId id, Server &server, GameState &state, const std::string &tag, const Vector2 &position) :
-            server(server), state(state), id(id), tag(tag), position(position) {}
+            server(server), game(state), id(id), tag(tag), position(position) {}
 
         virtual ~Entity() = default;
 

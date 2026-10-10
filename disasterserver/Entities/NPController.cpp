@@ -1,8 +1,9 @@
 #include "NPController.hpp"
-#include "../Server.hpp"
+#include "Server.hpp"
 
 #include <algorithm>
-#include <cmath>
+
+#include "States/GameState.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
@@ -20,55 +21,52 @@ bool NPController::uninit() {
 
 bool NPController::tick()
 {
-    const double dt = server.getDelta();
-    timeSec_ += dt;
-
-    if (timeSec_ <= TICKS_PER_SEC && !balls_)
+    if (game.getGameTime().remaining() <= TICKS_PER_SEC && !balls)
     {
-        timer_ = 5 * TICKS_PER_SEC;
-        state_ = State::Prepare;
-        balls_ = true;
+        timer = 5 * TICKS_PER_SEC;
+        state = State::Prepare;
+        balls = true;
     }
 
-    switch (state_)
+    switch (state)
     {
         case State::None:
         {
-            const int intr1 = timeSec_ < TICKS_PER_SEC ? 2 : 15;
-            if (timer_ >= intr1 * TICKS_PER_SEC)
+            const int intr1 = game.getGameTime().remaining() < TICKS_PER_SEC ? 2 : 15;
+            if (timer >= intr1 * TICKS_PER_SEC)
             {
                 Packet pack(PacketType::SERVER_NPCONTROLLER_STATE);
                 pack.write<uint8_t>(0);
                 pack.write<uint8_t>(0);
                 pack.write<uint8_t>(0);
-                server.broadcastEx(pack, true, 0);
+                pack.sendBroadcast(server, true);
 
-                state_ = State::Prepare;
-                timer_ = 0.0;
+                state = State::Prepare;
+                timer = 0.0;
             }
             break;
         }
 
         case State::Prepare:
         {
-            const int intr2 = timeSec_ < TICKS_PER_SEC ? 3 : 5;
-            if (timer_ >= intr2 * TICKS_PER_SEC)
+            const int intr2 = game.getGameTime().remaining() < TICKS_PER_SEC ? 3 : 5;
+            if (timer >= intr2 * TICKS_PER_SEC)
             {
-                stage_++;
+                stage++;
 
                 Packet pack(PacketType::SERVER_NPCONTROLLER_STATE);
                 pack.write<uint8_t>(1);
-                pack.write<uint8_t>(uint8_t(stage_ % 4));
-                pack.write<uint8_t>(uint8_t(std::max<int>(stage_ - 1, 0) % 4));
-                server.broadcastEx(pack, true, 0);
+                pack.write<uint8_t>(static_cast<uint8_t>(stage % 4));
+                pack.write<uint8_t>(static_cast<uint8_t>(std::max<int>(stage - 1, 0) % 4));
+                pack.sendBroadcast(server, true);
 
-                state_ = State::None;
-                timer_ = 0.0;
+                state = State::None;
+                timer = 0.0;
             }
             break;
         }
     }
 
-    timer_ += dt;
+    timer += server.getDelta();
     return true;
 }

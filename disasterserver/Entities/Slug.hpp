@@ -12,8 +12,6 @@ namespace DisasterServer::Entities
 {
     class Slug : public Entity {
     public:
-
-
         enum class Drop : uint8_t {
             NORING,
             RING,
@@ -33,7 +31,7 @@ namespace DisasterServer::Entities
 
         Vector2 sPosition = {};
 
-        State moveState = State::NONERIGHT;
+        State state = State::NONERIGHT;
         Drop drop = Drop::NORING;
 
     public:

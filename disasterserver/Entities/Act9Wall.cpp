@@ -13,12 +13,12 @@ Act9Wall::Act9Wall(entityId id, Server &server, GameState &state, const Vector2 
 Act9Wall::~Act9Wall() = default;
 
 bool Act9Wall::init() {
-    startTime = state.getGameTime().remaining() * TICKS_PER_SEC + state.getGameTime().remainingTicks();
+    startTime = game.getGameTime().remaining() * TICKS_PER_SEC + game.getGameTime().remainingTicks();
     return true;
 }
 
 bool Act9Wall::tick() {
-    double time = state.getGameTime().remaining() * TICKS_PER_SEC + state.getGameTime().remainingTicks();
+    double time = game.getGameTime().remaining() * TICKS_PER_SEC + game.getGameTime().remainingTicks();
     double off = (startTime - time) / startTime;
 
     double x = position.x * off;

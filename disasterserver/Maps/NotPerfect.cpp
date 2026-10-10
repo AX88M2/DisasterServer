@@ -1,7 +1,7 @@
 #include "NotPerfect.hpp"
 #include "Server.hpp"
-#include "../Entities/NPController.hpp"
-#include "../States/GameState.hpp"
+#include "Entities/NPController.hpp"
+#include "States/GameState.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;

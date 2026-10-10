@@ -34,14 +34,14 @@ bool Slug::init() {
     packet.write<uint8_t>(0);
     packet.write<entityId>(id);
     packet.writeVector2(position);
-    packet.write<State>(moveState);
+    packet.write<State>(state);
     packet.sendBroadcast(server);
 
     return true;
 }
 
 bool Slug::tick() {
-    switch (moveState) {
+    switch (state) {
         case State::NONELEFT:
         case State::RINGLEFT:
         case State::REDRINGLEFT: {
@@ -67,7 +67,7 @@ bool Slug::tick() {
     packet.write<uint8_t>(1);
     packet.write<entityId>(id);
     packet.writeVector2(position);
-    packet.write<State>(moveState);
+    packet.write<State>(state);
     packet.sendBroadcast(server, false);
 
     return true;
@@ -93,15 +93,15 @@ void Slug::face(bool side) {
     if (side) {
         switch (drop) {
             case Drop::NORING: {
-                moveState = State::NONERIGHT;
+                state = State::NONERIGHT;
                 break;
             }
             case Drop::RING: {
-                moveState = State::RINGRIGHT;
+                state = State::RINGRIGHT;
                 break;
             }
             case Drop::REDRING: {
-                moveState = State::REDRINGRIGHT;
+                state = State::REDRINGRIGHT;
                 break;
             }
             default: break;
@@ -109,15 +109,15 @@ void Slug::face(bool side) {
     } else {
         switch (drop) {
             case Drop::NORING: {
-                moveState = State::NONELEFT;
+                state = State::NONELEFT;
                 break;
             }
             case Drop::RING: {
-                moveState = State::RINGLEFT;
+                state = State::RINGLEFT;
                 break;
             }
             case Drop::REDRING: {
-                moveState = State::REDRINGLEFT;
+                state = State::REDRINGLEFT;
                 break;
             }
             default: break;
