@@ -22,10 +22,10 @@ void PricelessFreedom::init(GameState& state) {
         ec.spawnEntity<Entities::BlackRing>({INT16_MAX, INT16_MAX});
     }
 
-    ec.spawnEntity<Entities::PFLift>({}, 0, 1669.0f, 1016.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 1, 1069.0f,  704.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 2,  829.0f,  400.0f);
-    ec.spawnEntity<Entities::PFLift>({}, 3, 1070.0f,  544.0f);
+    ec.spawnEntity<Entities::PFLift>(Vector2(), 0, 1669.0f, 1016.0f);
+    ec.spawnEntity<Entities::PFLift>(Vector2(), 1, 1069.0f,  704.0f);
+    ec.spawnEntity<Entities::PFLift>(Vector2(), 2,  829.0f,  400.0f);
+    ec.spawnEntity<Entities::PFLift>(Vector2(), 3, 1070.0f,  544.0f);
 }
 
 void PricelessFreedom::tick() {}
