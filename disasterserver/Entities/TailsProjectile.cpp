@@ -29,7 +29,7 @@ bool TProjectile::tick() {
     if (timer <= 0)
         return false;
 
-    if (state.getCurrentMapId() != 13) {
+    if (game.getCurrentMapId() != 13) {
         if (position.x <= 0)
             return false;
     } else {

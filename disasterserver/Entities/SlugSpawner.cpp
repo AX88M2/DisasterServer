@@ -25,7 +25,7 @@ bool SlugSpawner::tick() {
 
     timer += server.getDelta();
     if (timer >= 15 * TICKS_PER_SEC) {
-        const auto entity = state.getEntityController().spawnEntity<Slug>(position);
+        const auto entity = game.getEntityController().spawnEntity<Slug>(position);
 
         timer = 0;
         slug = entity;

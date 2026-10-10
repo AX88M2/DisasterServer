@@ -79,7 +79,7 @@ bool Slug::uninit() {
     packet.write<entityId>(id);
     packet.sendBroadcast(server);
 
-    const auto spawner = state.getEntityController().findIf<SlugSpawner>([this](const SlugSpawner& e) {
+    const auto spawner = game.getEntityController().findIf<SlugSpawner>([this](const SlugSpawner& e) {
         return e.getSlug() == this;
     });
 
