@@ -230,6 +230,9 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 this->server.sendMessage(client, "{}your client is disallowed on this server", CLRCODE_RED);
             }
 
+            if (client.isOperator) {
+                this->server.sendMessage(client, "{}you're an operator on this server", CLRCODE_GRN);
+            }
             break;
         }
 
