@@ -13,14 +13,14 @@ MapRing::MapRing(entityId id, Server &server, GameState &state, const Vector2 &p
 MapRing::~MapRing() = default;
 
 bool MapRing::init() {
-    Map* map = state.getCurrentMap();
+    Map* map = game.getCurrentMap();
     if (!map) return false;
 
     const int ringCount = map->getRingCount();
 
     int active = 0;
     for (int i = 0; i < ringCount; ++i) {
-        if (state.isRingSlotUsed(i)) {
+        if (game.isRingSlotUsed(i)) {
             ++active;
         }
     }
@@ -32,9 +32,9 @@ bool MapRing::init() {
 
     do {
         slot = server.getRandom().nextInt(0, ringCount);
-    } while (state.isRingSlotUsed(slot));
+    } while (game.isRingSlotUsed(slot));
 
-    state.setRingSlot(slot, true);
+    game.setRingSlot(slot, true);
     rid = static_cast<uint8_t>(slot);
     red = map->getSpawnRedRings() && (server.getRandom().nextInt(0, 100) <= 10);
 
@@ -49,7 +49,7 @@ bool MapRing::init() {
 }
 
 bool MapRing::uninit() {
-    state.setRingSlot(rid, false);
+    game.setRingSlot(rid, false);
 
     Packet pack(PacketType::SERVER_RING_STATE);
     pack.write<uint8_t>(1);
