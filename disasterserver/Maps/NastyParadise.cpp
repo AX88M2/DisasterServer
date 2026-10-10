@@ -21,29 +21,28 @@ void NastyParadise::tick() {
 }
 
 void NastyParadise::handle(Client &client, Packet &packet) {
-    if (packet.getType() != PacketType::CLIENT_NAPICE_ACTIVATE) {
-        return;
+    switch (packet.getType()) {
+        case PacketType::CLIENT_NAPICE_ACTIVATE: {
+            if (!client.isInGame()) {
+                return;
+            }
+
+            const uint8_t iid = packet.read<uint8_t>();
+
+            auto* ice = gameCtx->getEntityController().findIf<Entities::Ice>([iid](Entities::Ice& b) {
+                return b.getIid() == iid;
+            });
+
+            if (!ice) {
+                return;
+            }
+
+            ice->activate();
+
+            break;
+        }
+        default: break;
     }
-
-    if (!client.isInGame()) {
-        return;
-    }
-
-    const uint8_t iid = packet.read<uint8_t>();
-
-    if (iid < 10) {
-        return;
-    }
-
-    auto* ice = gameCtx->getEntityController().findIf<Entities::Ice>([iid](Entities::Ice& b) {
-        return b.getIid() == iid;
-    });
-
-    if (!ice) {
-        return;
-    }
-
-    ice->activate();
 }
 
 void NastyParadise::left(Client &client) {

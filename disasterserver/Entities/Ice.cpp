@@ -42,7 +42,7 @@ bool Ice::uninit() {
 
 bool Ice::activate() {
     if (activated) {
-        return true;
+        return false;
     }
 
     timer = 15 * TICKS_PER_SEC;
