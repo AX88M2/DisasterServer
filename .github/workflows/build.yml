@@ -148,7 +148,7 @@ jobs:
       - name: Create Pre-Release server_cxx
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_id }}.cxx
+          tag_name: v1101.cxx.${{ github.run_number }}
           name: "DisasterServer on C++ (pre-release)"
           body: |
             Automatic C++ build from commit `${{ github.sha }}`.
