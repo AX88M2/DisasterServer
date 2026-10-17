@@ -4,7 +4,7 @@
 #include "Packet.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/WDLatern.hpp"
+#include "Entities/MysticWood/WDLatern.hpp"
 
 using namespace DisasterServer::Maps;
 

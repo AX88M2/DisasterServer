@@ -5,8 +5,8 @@
 #include "Packet.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/LCEye.hpp"
-#include "Entities/LCChain.hpp"
+#include "Entities/LimpCity/LCEye.hpp"
+#include "Entities/LimpCity/LCChain.hpp"
 
 using namespace DisasterServer::Maps;
 

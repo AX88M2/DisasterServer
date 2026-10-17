@@ -148,6 +148,8 @@ namespace DisasterServer
 
         uint8_t getExTeleport() const { return this->exTeleport; }
         void setExTeleport(const uint8_t value) { this->exTeleport = value; }
+        void addExTeleport() { this->exTeleport++; }
+        void removeExTeleport() { this->exTeleport--; }
 
         double getTimeout() const { return this->timeout; }
         void setTimeout(const double value) { this->timeout = value; }

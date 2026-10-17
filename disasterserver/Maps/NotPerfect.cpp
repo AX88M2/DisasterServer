@@ -1,6 +1,6 @@
 #include "NotPerfect.hpp"
 #include "Server.hpp"
-#include "Entities/NPController.hpp"
+#include "Entities/NotPerfect/NPController.hpp"
 #include "States/GameState.hpp"
 
 using namespace DisasterServer;

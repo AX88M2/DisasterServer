@@ -1,9 +1,9 @@
 #include "RavineMist.hpp"
 
 #include "States/GameState.hpp"
-#include "Entities/Shard.hpp"
-#include "Entities/SlugSpawner.hpp"
-#include "Entities/Slug.hpp"
+#include "Entities/RavineMist/Shard.hpp"
+#include "Entities/RavineMist/SlugSpawner.hpp"
+#include "Entities/RavineMist/Slug.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer::Maps;

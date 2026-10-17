@@ -8,7 +8,8 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-KafBox::KafBox(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t nid) : Entity(id, server, state, "kafbox", pos), nid(nid) {}
+KafBox::KafBox(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t nid) :
+    Entity(id, server, state, "kafbox", pos), nid(nid) {}
 
 bool KafBox::init() {
     Packet pack(PacketType::SERVER_KAFMONITOR_STATE);

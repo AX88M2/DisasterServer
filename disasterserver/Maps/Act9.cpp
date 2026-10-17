@@ -1,6 +1,6 @@
 #include "Act9.hpp"
 
-#include "Entities/Act9Wall.hpp"
+#include "Entities/Act9/Act9Wall.hpp"
 #include "States/GameState.hpp"
 
 using namespace DisasterServer;

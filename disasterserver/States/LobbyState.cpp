@@ -131,8 +131,8 @@ bool LobbyState::playerJoined(Client &) {
     return true;
 }
 
-bool LobbyState::playerLeaved(Client &peer) {
-    if (!peer.isInGame()) {
+bool LobbyState::playerLeaved(Client &client) {
+    if (!client.isInGame()) {
         return true;
     }
 
@@ -141,23 +141,23 @@ bool LobbyState::playerLeaved(Client &peer) {
 }
 
 void LobbyState::tick() {
-    for (auto &cl : server.getClients()) {
-        if (cl->getVoteCooldown() > 0) {
-            cl->setVoteCooldown(cl->getVoteCooldown() - server.getDelta());
+    for (auto &client : server.getClients()) {
+        if (client->getVoteCooldown() > 0) {
+            client->setVoteCooldown(client->getVoteCooldown() - server.getDelta());
         }
 
-        if (!cl->isReady()) {
+        if (!client->isReady()) {
 #if !defined(SERVER_DEBUG)
-            cl->setTimeout(cl->getTimeout() + server.getDelta());
-            if (std::fmod(cl->getTimeout(), 60) == 0) {
-                Debug("tick for {}: {}", cl->getNickname(), cl->getTimeout() / 60.0f);
+            client->setTimeout(client->getTimeout() + server.getDelta());
+            if (std::fmod(client->getTimeout(), 60) == 0) {
+                Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / 60.0f);
             }
 #endif
-            if (cl->getTimeout() >= 25 * TICKS_PER_SEC) {
-                cl->disconnect(DisconnectReason::AFKTIMEOUT);
+            if (client->getTimeout() >= 25 * TICKS_PER_SEC) {
+                client->disconnect(DisconnectReason::AFKTIMEOUT);
             }
         } else {
-            cl->setTimeout(0);
+            client->setTimeout(0);
         }
     }
 

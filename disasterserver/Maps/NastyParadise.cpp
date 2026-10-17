@@ -1,7 +1,7 @@
 #include "NastyParadise.hpp"
 
 #include "States/GameState.hpp"
-#include "Entities/Ice.hpp"
+#include "Entities/NastyParadise/Ice.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;

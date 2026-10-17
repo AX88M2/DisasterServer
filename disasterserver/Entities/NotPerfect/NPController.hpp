@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "Entities/Entity.hpp"
 
 namespace DisasterServer::Maps
 {

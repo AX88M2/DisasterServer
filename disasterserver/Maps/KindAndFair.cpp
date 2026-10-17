@@ -5,7 +5,7 @@
 #include "Packet.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/KAFSpeedBox.hpp"
+#include "Entities/KindAndFair/KAFSpeedBox.hpp"
 
 using namespace DisasterServer::Maps;
 
@@ -14,9 +14,9 @@ KindAndFair::KindAndFair(Server &server) : Map(server, "Kind And Fair", 1, 30) {
 void KindAndFair::init(GameState& state) {
     this->game = &state;
 
-    auto& ec = state.getEntityController();
+    auto &entityController = state.getEntityController();
     for (uint8_t i = 0; i < 11; i++) {
-        ec.spawnEntity<Entities::KafBox>(Vector2(), i);
+        entityController.spawnEntity<Entities::KafBox>(Vector2(), i);
     }
 
     Debug("Spawned 11 KafBox");

@@ -32,7 +32,7 @@ namespace DisasterServer
     class GameState : public State
     {
         mapId currentMapId = 0;
-        Map*  currentMap   = nullptr;
+        Map* currentMap = nullptr;
 
         clientId exeId = 0;
         Client *exeClient = nullptr;
@@ -53,7 +53,6 @@ namespace DisasterServer
 
         std::vector<std::unique_ptr<Client>> leftClients = {};
         std::vector<bool> ringSlots;
-        std::array<double, PLAYER_COOLCOUNT> cooldowns{};
 
         EntityController entityController;
 
@@ -78,10 +77,6 @@ namespace DisasterServer
                 ringSlots[i] = used;
             }
         }
-
-        // cooldowns
-        double getCooldown(CooldownId id) const { return cooldowns[static_cast<size_t>(id)]; }
-        void setCooldown(CooldownId id, double value) { cooldowns[static_cast<size_t>(id)] = value; }
 
         void bigRing(BigRingState state);
 

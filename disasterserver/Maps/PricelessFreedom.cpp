@@ -5,7 +5,7 @@
 #include "Packet.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/PFLift.hpp"
+#include "../Entities/PricelessFreedom/PFLift.hpp"
 #include "Entities/BlackRing.hpp"
 
 using namespace DisasterServer;
@@ -16,16 +16,16 @@ PricelessFreedom::PricelessFreedom(Server &server) : Map(server, "Priceless Free
 void PricelessFreedom::init(GameState& state) {
     this->game = &state;
 
-    auto& ec = state.getEntityController();
+    auto& entityController = state.getEntityController();
 
     for (uint8_t i = 0; i < 29; i++) {
-        ec.spawnEntity<Entities::BlackRing>(Vector2(INT16_MAX, INT16_MAX));
+        entityController.spawnEntity<Entities::BlackRing>(Vector2(INT16_MAX, INT16_MAX));
     }
 
-    ec.spawnEntity<Entities::PFLift>(Vector2(), 0, 1669.0f, 1016.0f);
-    ec.spawnEntity<Entities::PFLift>(Vector2(), 1, 1069.0f,  704.0f);
-    ec.spawnEntity<Entities::PFLift>(Vector2(), 2,  829.0f,  400.0f);
-    ec.spawnEntity<Entities::PFLift>(Vector2(), 3, 1070.0f,  544.0f);
+    entityController.spawnEntity<Entities::PFLift>(Vector2(), 0, 1669.0f, 1016.0f);
+    entityController.spawnEntity<Entities::PFLift>(Vector2(), 1, 1069.0f,  704.0f);
+    entityController.spawnEntity<Entities::PFLift>(Vector2(), 2,  829.0f,  400.0f);
+    entityController.spawnEntity<Entities::PFLift>(Vector2(), 3, 1070.0f,  544.0f);
 }
 
 void PricelessFreedom::tick() {}

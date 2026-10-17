@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "Entities/Entity.hpp"
 #include "Core/Types.hpp"
 #include "Core/Constansts.hpp"
 #include "Core/Vector2.hpp"

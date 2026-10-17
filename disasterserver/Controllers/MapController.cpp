@@ -9,11 +9,13 @@
 #include "Maps/KindAndFair.hpp"
 #include "Maps/MajinForest.hpp"
 #include "Maps/HideAndSeek.hpp"
+#include "Maps/Hill.hpp"
 #include "Maps/MysticWood.hpp"
 #include "Maps/NotPerfect.hpp"
 #include "Maps/RavineMist.hpp"
 #include "Maps/PricelessFreedom.hpp"
 #include "Maps/NastyParadise.hpp"
+#include "Maps/VolcanoValley.hpp"
 
 using namespace DisasterServer;
 
@@ -32,13 +34,13 @@ void MapController::initialize() {
     this->registerMap<Maps::NotPerfect>();              // 6
     this->registerMap<Maps::KindAndFair>();             // 7
     this->registerMap<Maps::Act9>();                    // 8
-    this->registerMap<Maps::NastyParadise>();         // 9
-    this->registerMap<Maps::PricelessFreedom>();      // 10
-    //this->registerMap<Maps::VolcanoValley>();         // 12
-    //this->registerMap<Maps::Hill>();                  // 13
+    this->registerMap<Maps::NastyParadise>();           // 9
+    this->registerMap<Maps::PricelessFreedom>();        // 10
+    this->registerMap<Maps::VolcanoValley>();           // 12
+    this->registerMap<Maps::Hill>();                    // 13
+    this->registerMap<Maps::MajinForest>();             // 14
+    this->registerMap<Maps::HideAndSeek>();             // 15
 #if 0
-    this->registerMap<Maps::MajinForest>();
-    this->registerMap<Maps::HideAndSeek>();
     //this->registerMap<Maps::TortureCave>();
     //this->registerMap<Maps::DarkTower>();
     //this->registerMap<Maps::HauntingDream>();

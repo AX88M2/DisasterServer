@@ -3,7 +3,7 @@
 #include "Server.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/Spike.hpp"
+#include "Entities/YouCantRun/SpikeController.hpp"
 
 using namespace DisasterServer::Maps;
 

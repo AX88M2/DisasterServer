@@ -5,8 +5,8 @@
 #include "Packet.hpp"
 #include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
-#include "Entities/Spike.hpp"
-#include "Entities/YCRSmoke.hpp"
+#include "Entities/YouCantRun/SpikeController.hpp"
+#include "Entities/YouCantRun/YCRController.hpp"
 
 using namespace DisasterServer::Maps;
 

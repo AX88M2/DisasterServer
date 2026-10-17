@@ -1,8 +1,6 @@
 #pragma once
 
-#include <ranges>
-
-#include "Entity.hpp"
+#include "Entities/Entity.hpp"
 
 namespace DisasterServer {
     class Server;

@@ -23,6 +23,8 @@
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/KindAndFair.hpp"
 #include "Maps/LimpCity.hpp"
+#include "Maps/NastyParadise.hpp"
+#include "Maps/NotPerfect.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer;
@@ -49,7 +51,6 @@ void GameState::enter() {
     this->bringLocation = server.getRandom().nextInt(0, 255);
     this->leftClients.clear();
     this->ringSlots.assign(currentMap->getRingCount(), false);
-    this->cooldowns.fill(0.0);
 
     this->startTimeout.start(15);
 
@@ -182,10 +183,6 @@ void GameState::tick() {
     }
 
     const double delta = server.getDelta();
-    for (auto& cd : cooldowns) {
-        if (cd > 0) cd -= delta;
-        if (cd < 0)  cd = 0;
-    }
 
     const auto result = gameTime.tick(delta);
 
@@ -222,6 +219,8 @@ void GameState::tick() {
 }
 
 void GameState::tickPlayers() {
+    bool exeCamp = false;
+
     for (auto &client : server.getClients()) {
         if (!client->isInGame()) continue;
         if (client->getId() == this->exeId) continue;
@@ -245,6 +244,10 @@ void GameState::tickPlayers() {
                 player.setPingTotal(0);
                 player.setPingTimer(0);
             }
+        }
+
+        if (player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_CANTREVIVE) && exeClient->getPlayer().getPosition().distance(player.getPosition()) < 300) {
+            exeCamp = true;
         }
 
         if (client->getId() != exeId && !player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
@@ -299,9 +302,9 @@ void GameState::tickPlayers() {
     }
 
 
-    /*if (currentMap->is<Maps::NastyParadise>() && exeCamp) {
+    if (currentMap->is<Maps::NastyParadise>() && exeCamp) {
         exeClient->getPlayer().getStats().addCampTime(server.getDelta());
-    }*/
+    }
 
     // Start demonization
     if (!suddenDeath && gameTime.remaining() <= TICKS_PER_SEC * 2) {
@@ -757,6 +760,19 @@ bool GameState::handle(Client& client, Packet& packet) {
 
                     if (client.getId() != this->exeId) {
                         player.setRings(rings);
+
+                        if (revival < 2) {
+                            if (rings < 0 || (/*currentMap->is<Maps::FartZone>() && */ rings >= 120)) {
+                                client.disconnect(DisconnectReason::OTHER, "disconnect code: 100");
+                                return true;
+                            }
+
+                            if (hp > 100) {
+                                client.disconnect(DisconnectReason::OTHER, "disconnect code: 200");
+                                return true;
+                            }
+                        }
+
                     }
 
                     player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
@@ -766,8 +782,44 @@ bool GameState::handle(Client& client, Packet& packet) {
                 player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
             }
 
+            if (this->endTime.remainingTime() <= 0 && player.isAttacking()) {
+                if (player.getAttackTimer() <= 0) {
+                    player.setLastAttack(Clock::now());
+                    player.setAttackTimer(1);
+                } else {
+                    auto elapsed = player.getLastAttack();
+
+                    player.setLastAttack(Clock::now());
+                }
+            } else {
+                player.setAttackTimer(0);
+            }
+
+            // ping limit disabled
+            if (false) {
+                // Calc distance before setting new posx
+                float dist = player.getPosition().distance(position);
+
+                if (started && !client.isModified() && player.getPosition() != Vector2(0, 0)) {
+                    if (player.getExTeleport() == 0) {
+                        if (dist > 700) {
+                            if (!currentMap->is<Maps::NotPerfect>() || currentMap->is<Maps::Act9>()) {
+                                client.disconnect(DisconnectReason::OTHER, "your ping is too high");
+                                return true;
+                            }
+                        }
+                    } else {
+                        player.removeExTeleport();
+                    }
+                }
+            }
+
             player.setPosition(position);
             player.setTimeout(0);
+
+            if (client.isModified()) {
+                //TODO: Добавить чтобы сервер мешал игрокам у которых модифицирован клиент
+            }
 
             const auto now = Clock::now();
             if (player.getState() != state || now - player.getLastPacket() >= Duration(15 * 2.9)) {
