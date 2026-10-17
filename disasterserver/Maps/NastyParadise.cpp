@@ -1,6 +1,7 @@
 #include "NastyParadise.hpp"
 
 #include "States/GameState.hpp"
+#include "Entities/NastyParadise/SnowBall.hpp"
 #include "Entities/NastyParadise/Ice.hpp"
 
 using namespace DisasterServer;
@@ -14,6 +15,65 @@ void NastyParadise::init(GameState &game) {
 
     for (uint8_t i = 0; i < 10; i++) {
         game.getEntityController().spawnEntity<Entities::Ice>(Vector2(), i);
+    }
+
+    {
+        std::array<float, 20> a;
+        std::array<float, 20> b;
+
+        for (int i = 0; i < 4; i++)
+        {
+            a[5 + i] = 0.05f + 0.05f * (i / 4.0f);
+            b[5 + i] = 0.35f + 0.25f * (i / 4.0f);
+        }
+
+        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 0, 10, 1, a, b);
+    }
+
+    {
+        std::array<float, 20> a;
+        std::array<float, 20> b;
+
+        for (int i = 0; i < 4; i++)
+        {
+            a[2 + i] = 0.05f + 0.05f * (i / 5.0f);
+            b[2 + i] = 0.35f + 0.25f * (i / 5.0f);
+        }
+
+        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 1, 8, -1, a, b);
+    }
+
+    {
+        std::array<float, 20> a;
+        std::array<float, 20> b;
+
+        for (int i = 0; i < 4; i++)
+        {
+            a[5 + i] = 0.05f + 0.05f * (i / 5.0f);
+            b[5 + i] = 0.35f + 0.25f * (i / 5.0f);
+        }
+
+        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 2, 11, 1, a, b);
+    }
+
+    {
+        std::array<float, 20> a;
+        std::array<float, 20> b;
+
+        for (int i = 0; i < 4; i++)
+        {
+            a[6 + i] = 0.05f + 0.05f * (i / 2.0f);
+            b[6 + i] = 0.35f + 0.25f * (i / 2.0f);
+        }
+
+        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 3, 9, 1, a, b);
+    }
+
+    {
+        std::array<float, 20> a;
+        std::array<float, 20> b;
+
+        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 4, 5, -1, a, b);
     }
 }
 
