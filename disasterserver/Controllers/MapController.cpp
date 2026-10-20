@@ -15,6 +15,7 @@
 #include "Maps/RavineMist.hpp"
 #include "Maps/PricelessFreedom.hpp"
 #include "Maps/NastyParadise.hpp"
+#include "Maps/TortureCave.hpp"
 #include "Maps/VolcanoValley.hpp"
 
 using namespace DisasterServer;
@@ -40,8 +41,8 @@ void MapController::initialize() {
     this->registerMap<Maps::Hill>();                    // 13
     this->registerMap<Maps::MajinForest>();             // 14
     this->registerMap<Maps::HideAndSeek>();             // 15
+    this->registerMap<Maps::TortureCave>();             // 16
 #if 0
-    //this->registerMap<Maps::TortureCave>();
     //this->registerMap<Maps::DarkTower>();
     //this->registerMap<Maps::HauntingDream>();
     this->registerMap<Maps::MysticWood>();
