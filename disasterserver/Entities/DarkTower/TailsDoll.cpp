@@ -80,18 +80,18 @@ bool TailsDoll::tick() {
 
             auto &player = (*client)->getPlayer();
 
-            if (abs(static_cast<int>(player.getPosition().x - position.x)) >= 4) {
-                vel.x += Vector2::sign(static_cast<int>(player.getPosition().x - position.x)) * 0.512 * server.getDelta();
+            if (abs((int)(player.getPosition().x - position.x)) >= 4) {
+                vel.x += Vector2::sign((int)(player.getPosition().x - position.x)) * 0.512 * server.getDelta();
                 vel.x = fmin(fmax(vel.x, -5), 5);
             }
 
-            if (abs(static_cast<int>(player.getPosition().y - position.y)) >= 5) {
-                vel.y += Vector2::sign(static_cast<int>(player.getPosition().y - position.y)) * 0.480 * server.getDelta();
+            if (abs((int)(player.getPosition().y - position.y)) >= 5) {
+                vel.y += Vector2::sign((int)(player.getPosition().y - position.y)) * 0.480 * server.getDelta();
                 vel.y = fmin(fmax(vel.y, -5), 5);
             }
 
-            position.x += vel.x * static_cast<float>(server.getDelta());
-            position.y += vel.y * static_cast<float>(server.getDelta());
+            position.x += vel.x * (float)server.getDelta();
+            position.y += vel.y * (float)server.getDelta();
 
             if (position.distance(player.getPosition()) < 12) {
                 Packet pack(PacketType::SERVER_DTTAILSDOLL_STATE);
@@ -101,6 +101,8 @@ bool TailsDoll::tick() {
                 state = States::RELOC;
                 break;
             }
+
+            break;
         }
 
         case States::RELOC: {
