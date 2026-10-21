@@ -93,7 +93,6 @@ namespace DisasterServer
 
         constexpr bool operator==(const Vector2&) const noexcept = default;
 
-    private:
         static constexpr float sign(float value) noexcept {
             return value > 0.0f ? 1.0f : value < 0.0f ? -1.0f : 0.0f;
         }

@@ -11,8 +11,8 @@ namespace DisasterServer::Entities
     class Stalactits : public Entity {
         uint8_t	sid;
         bool state = false;
-        bool show = false;
-        Vector2 SPosition {};
+        bool show = true;
+        Vector2 startPosition {};
         double timer = 0;
         float vel = 0;
     public:
@@ -24,5 +24,7 @@ namespace DisasterServer::Entities
         bool uninit() override;
 
         bool activate();
+
+        uint8_t getSID() const { return sid; }
     };
 }

@@ -57,7 +57,7 @@ void Server::worker() {
                     auto client = std::make_unique<Client>(this, stateController, ev.peer, id, buf);
                     Client *rawClient = client.get();
                     ev.peer->data = rawClient;
-                    peers.push_back(std::move(client));
+                    clients.push_back(std::move(client));
 
                     Debug("Connection peer id {}", rawClient->getId());
 
@@ -135,12 +135,12 @@ void Server::worker() {
 
                     ev.peer->data = nullptr;
 
-                    auto it = std::ranges::find_if(peers, [client](const auto& p) {
+                    auto it = std::ranges::find_if(clients, [client](const auto& p) {
                         return p.get() == client;
                     });
 
-                    if (it != peers.end()) {
-                        peers.erase(it);
+                    if (it != clients.end()) {
+                        clients.erase(it);
                     }
 
                     break;
@@ -181,7 +181,7 @@ void Server::worker() {
             stateController.tick();
 
             // Heartbeat
-            if (!peers.empty()) {
+            if (!clients.empty()) {
                 Packet pack(PacketType::SERVER_HEARTBEAT);
                 if (heartbeat >= (TICKS_PER_SEC * 2))
                 {
@@ -198,7 +198,7 @@ void Server::worker() {
 }
 
 void Server::quit() {
-    for (auto &client : peers) {
+    for (auto &client : clients) {
         client->disconnect(DisconnectReason::SHUTDOWN);
     }
 
@@ -206,7 +206,7 @@ void Server::quit() {
 }
 
 void Server::disconnectById(const clientId id, DisconnectReason reason, const std::string &message) const {
-    for (auto &client : peers) {
+    for (auto &client : clients) {
         if (client->getId() == id) {
             return client->disconnect(reason, message);
         }
@@ -221,19 +221,19 @@ void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
 }
 
 size_t Server::getClientCount() {
-    return peers.size();
+    return clients.size();
 }
 
 size_t Server::getInGameCount() {
-    return std::ranges::count_if(peers, [](const auto& cl) { return cl->isInGame(); });
+    return std::ranges::count_if(clients, [](const auto& cl) { return cl->isInGame(); });
 }
 
 std::optional<Client*> Server::findClient(clientId clientId) {
-    const auto it = std::ranges::find_if(peers.begin(), peers.end(), [&](const auto& client) {
+    const auto it = std::ranges::find_if(clients.begin(), clients.end(), [&](const auto& client) {
         return client->getId() == clientId;
     });
 
-    if (it != peers.end()) {
+    if (it != clients.end()) {
         return it->get();
     }
 

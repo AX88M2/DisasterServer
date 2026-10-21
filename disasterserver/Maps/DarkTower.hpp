@@ -5,6 +5,7 @@
 namespace DisasterServer::Maps
 {
     class DarkTower : public Map {
+        GameState *gameCtx = nullptr;
     public:
         explicit DarkTower(Server &server);
 

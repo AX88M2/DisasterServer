@@ -1,6 +1,7 @@
 #include "MapController.hpp"
 
 #include "Maps/Act9.hpp"
+#include "Maps/DarkTower.hpp"
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/DotDotDot.hpp"
 #include "Maps/DesertTown.hpp"
@@ -42,8 +43,8 @@ void MapController::initialize() {
     this->registerMap<Maps::MajinForest>();             // 14
     this->registerMap<Maps::HideAndSeek>();             // 15
     this->registerMap<Maps::TortureCave>();             // 16
+    this->registerMap<Maps::DarkTower>();               // 17
 #if 0
-    //this->registerMap<Maps::DarkTower>();
     //this->registerMap<Maps::HauntingDream>();
     this->registerMap<Maps::MysticWood>();
     //this->registerMap<Maps::EchidnaRuins>();

@@ -23,7 +23,7 @@ namespace DisasterServer
 
         Application &application = Application::getInstance();
 
-        std::vector<std::unique_ptr<Client>> peers;
+        std::vector<std::unique_ptr<Client>> clients;
         MapController mapController;
         StateController stateController;
         CommandController commandController;
@@ -65,7 +65,7 @@ namespace DisasterServer
 
         Random &getRandom() { return random; }
 
-        std::vector<std::unique_ptr<Client>> &getClients() { return peers; }
+        std::vector<std::unique_ptr<Client>> &getClients() { return clients; }
 
         double getDelta() const { return delta; }
 
