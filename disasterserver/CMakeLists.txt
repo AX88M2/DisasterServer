@@ -129,6 +129,7 @@ else()
             )
 
             if (WIN32)
+                target_sources(DisasterServerCXX PRIVATE "${CMAKE_SOURCE_DIR}/resources/icon.rc")
                 target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp)
             else() # UNIX
                 set(THREADS_PREFER_PTHREAD_FLAG ON)
