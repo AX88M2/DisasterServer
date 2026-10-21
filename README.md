@@ -25,14 +25,14 @@
 - [x] Not Perfect
 - [x] Kind and Fair
 - [x] Act 9
-- [ ] Nasty Paradise
-- [ ] Priceless Freedom
-- [ ] Volcano Valley
-- [ ] Hill
+- [x] Nasty Paradise
+- [x] Priceless Freedom
+- [x] Volcano Valley
+- [x] Hill
 - [x] Majin Forest
 - [x] Hide and Seek
-- [ ] Torture Cave
-- [ ] Dark Tower
+- [x] Torture Cave
+- [x] Dark Tower
 - [ ] Haunting Dream
 - [x] Mystic Wood
 - [ ] Echidna Ruins
