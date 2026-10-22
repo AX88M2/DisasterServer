@@ -33,10 +33,10 @@
 - [x] Hide and Seek
 - [x] Torture Cave
 - [x] Dark Tower
-- [ ] Haunting Dream
+- [x] Haunting Dream
 - [x] Mystic Wood
-- [ ] Echidna Ruins
-- [ ] Fart Zone
+- [x] Echidna Ruins
+- [x] Fart Zone
 
 </details>
 
