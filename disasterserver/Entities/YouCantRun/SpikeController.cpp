@@ -26,5 +26,5 @@ bool SpikeController::tick() {
     pack.write<uint8_t>(frame);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::tick();
 }

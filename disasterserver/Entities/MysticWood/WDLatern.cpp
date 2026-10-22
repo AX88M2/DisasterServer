@@ -39,5 +39,5 @@ bool Latern::tick() {
         }
     }
 
-    return true;
+    return Entity::tick();
 }

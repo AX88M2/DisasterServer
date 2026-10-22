@@ -16,7 +16,8 @@ bool EggTracker::init() {
     pack.write<entityId>(id);
     pack.writeVector2(position);
     pack.sendBroadcast(server);
-    return true;
+
+    return Entity::init();
 }
 
 bool EggTracker::uninit() {
@@ -25,5 +26,6 @@ bool EggTracker::uninit() {
     pack.write<entityId>(id);
     pack.write<clientId>(activId);
     pack.sendBroadcast(server);
-    return true;
+
+    return Entity::uninit();
 }

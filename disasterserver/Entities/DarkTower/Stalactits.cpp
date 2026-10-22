@@ -22,7 +22,7 @@ bool Stalactits::init() {
     pack.writeVector2(position);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::init();
 }
 
 bool Stalactits::tick() {
@@ -84,11 +84,11 @@ bool Stalactits::tick() {
         }
     }
 
-    return true;
+    return Entity::tick();
 }
 
 bool Stalactits::uninit() {
-    return true;
+    return Entity::uninit();
 }
 
 bool Stalactits::activate() {

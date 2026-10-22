@@ -18,9 +18,10 @@ bool ExellerClone::init() {
     pack.writeVector2(position);
     pack.write<int8_t>(dir);
     pack.sendBroadcast(server);
-    return true;
+
+    return Entity::init();
 }
 
 bool ExellerClone::uninit() {
-    return true;
+    return Entity::uninit();
 }

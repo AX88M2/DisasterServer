@@ -14,7 +14,7 @@ Lava::Lava(entityId id, Server &server, GameState &state, const Vector2 &positio
 Lava::~Lava() = default;
 
 bool Lava::init() {
-    return true;
+    return Entity::init();
 }
 
 bool Lava::tick() {
@@ -94,9 +94,9 @@ bool Lava::tick() {
     pack.write<float>(position.y);
     pack.sendBroadcast(server, false);
 
-    return true;
+    return Entity::tick();
 }
 
 bool Lava::uninit() {
-    return true;
+    return Entity::uninit();
 }

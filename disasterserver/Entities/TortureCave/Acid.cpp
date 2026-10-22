@@ -12,7 +12,7 @@ Acid::Acid(entityId id, Server &server, GameState &state, const Vector2 &positio
 Acid::~Acid() = default;
 
 bool Acid::init() {
-    return true;
+    return Entity::init();
 }
 
 bool Acid::tick() {
@@ -30,7 +30,7 @@ bool Acid::tick() {
     }
 
     timer += server.getDelta();
-    return true;
+    return Entity::tick();
 }
 
 bool Acid::uninit() {

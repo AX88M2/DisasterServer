@@ -15,14 +15,14 @@ bool TProjectile::init() {
     Packet pack(PacketType::SERVER_TPROJECTILE_STATE);
     pack.write<uint8_t>(0);
     pack.writeVector2(position);
-    pack.write<uint16_t>(owner);
+    pack.write<clientId>(owner);
     pack.write<uint8_t>(dir);
     pack.write<uint8_t>(damage);
     pack.write<uint8_t>(isExe);
     pack.write<uint8_t>(charge);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::init();
 }
 
 bool TProjectile::tick() {
@@ -46,12 +46,14 @@ bool TProjectile::tick() {
 
     position.x += static_cast<float>(dir * 14 * server.getDelta());
     timer -= server.getDelta();
-    return true;
+
+    return Entity::tick();
 }
 
 bool TProjectile::uninit() {
     Packet pack(PacketType::SERVER_TPROJECTILE_STATE);
     pack.write<uint8_t>(2);
     pack.sendBroadcast(server, true);
-    return true;
+
+    return Entity::uninit();
 }

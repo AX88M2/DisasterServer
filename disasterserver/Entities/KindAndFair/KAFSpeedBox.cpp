@@ -16,7 +16,8 @@ bool KafBox::init() {
     pack.write<uint8_t>(0);
     pack.write<uint8_t>(nid);
     pack.sendBroadcast(server, true);
-    return true;
+
+    return Entity::init();
 }
 
 bool KafBox::tick() {
@@ -34,7 +35,8 @@ bool KafBox::tick() {
     pack.sendBroadcast(server, true);
 
     activated = false;
-    return true;
+
+    return Entity::tick();
 }
 
 bool KafBox::activate(clientId pid, uint8_t isProj) {

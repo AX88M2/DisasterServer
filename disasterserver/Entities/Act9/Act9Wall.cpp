@@ -14,7 +14,8 @@ Act9Wall::~Act9Wall() = default;
 
 bool Act9Wall::init() {
     startTime = game.getGameTime().remaining() * TICKS_PER_SEC + game.getGameTime().remainingTicks();
-    return true;
+
+    return Entity::init();
 }
 
 bool Act9Wall::tick() {
@@ -73,5 +74,5 @@ bool Act9Wall::tick() {
 
     }
 
-    return true;
+    return Entity::tick();
 }

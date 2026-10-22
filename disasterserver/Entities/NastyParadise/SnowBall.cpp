@@ -21,7 +21,7 @@ bool SnowBall::init() {
         this->pAnim[i] = 0.35f;
     }
 
-    return true;
+    return Entity::init();
 }
 
 bool SnowBall::tick() {
@@ -61,7 +61,7 @@ bool SnowBall::tick() {
                 pack.write<uint8_t>(sid);
                 pack.sendBroadcast(server, true);
 
-                return true;
+                return Entity::tick();
             }
         }
 
@@ -74,11 +74,11 @@ bool SnowBall::tick() {
         pack.sendBroadcast(server, false);
     }
 
-    return true;
+    return Entity::tick();
 }
 
 bool SnowBall::uninit() {
-    return true;
+    return Entity::uninit();
 }
 
 void SnowBall::activate() {

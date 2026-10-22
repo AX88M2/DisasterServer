@@ -37,7 +37,7 @@ bool Slug::init() {
     packet.write<State>(state);
     packet.sendBroadcast(server);
 
-    return true;
+    return Entity::init();
 }
 
 bool Slug::tick() {
@@ -70,7 +70,7 @@ bool Slug::tick() {
     packet.write<State>(state);
     packet.sendBroadcast(server, false);
 
-    return true;
+    return Entity::tick();
 }
 
 bool Slug::uninit() {

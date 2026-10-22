@@ -5,6 +5,9 @@
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/DotDotDot.hpp"
 #include "Maps/DesertTown.hpp"
+#include "Maps/EchidnaRuins.hpp"
+#include "Maps/FartZone.hpp"
+#include "Maps/HauntingDream.hpp"
 #include "Maps/YouCantRun.hpp"
 #include "Maps/LimpCity.hpp"
 #include "Maps/KindAndFair.hpp"
@@ -44,12 +47,10 @@ void MapController::initialize() {
     this->registerMap<Maps::HideAndSeek>();             // 15
     this->registerMap<Maps::TortureCave>();             // 16
     this->registerMap<Maps::DarkTower>();               // 17
-#if 0
-    //this->registerMap<Maps::HauntingDream>();
-    this->registerMap<Maps::MysticWood>();
-    //this->registerMap<Maps::EchidnaRuins>();
-    //this->registerMap<Maps::FartZone>();
-#endif
+    this->registerMap<Maps::HauntingDream>();           // 18
+    this->registerMap<Maps::MysticWood>();              // 19
+    this->registerMap<Maps::EchidnaRuins>();            // 20
+    this->registerMap<Maps::FartZone>();                // 21
 }
 
 std::optional<Map*> MapController::getMap(int id) {

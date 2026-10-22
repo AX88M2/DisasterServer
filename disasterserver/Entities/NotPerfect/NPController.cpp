@@ -12,11 +12,11 @@ NPController::NPController(entityId id, Server& server, GameState& state, const 
 }
 
 bool NPController::init() {
-    return true;
+    return Entity::init();
 }
 
 bool NPController::uninit() {
-    return true;
+    return Entity::uninit();
 }
 
 bool NPController::tick()
@@ -68,5 +68,6 @@ bool NPController::tick()
     }
 
     timer += server.getDelta();
-    return true;
+
+    return Entity::tick();
 }

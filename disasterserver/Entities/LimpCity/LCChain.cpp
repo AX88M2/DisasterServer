@@ -46,5 +46,6 @@ bool LCChain::tick() {
     }
 
     timer += server.getDelta();
-    return true;
+
+    return Entity::tick();
 }

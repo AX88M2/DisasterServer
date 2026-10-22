@@ -12,7 +12,7 @@ Thunder::Thunder(entityId id, Server &server, GameState &state, const Vector2 &p
 Thunder::~Thunder() = default;
 
 bool Thunder::init() {
-    return true;
+    return Entity::init();
 }
 
 bool Thunder::tick() {
@@ -31,9 +31,10 @@ bool Thunder::tick() {
     }
 
     this->timer -= server.getDelta();
-    return true;
+
+    return Entity::tick();
 }
 
 bool Thunder::uninit() {
-    return true;
+    return Entity::uninit();
 }

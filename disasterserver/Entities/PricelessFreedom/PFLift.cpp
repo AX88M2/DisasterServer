@@ -12,7 +12,8 @@ PFLift::PFLift(entityId id, Server &server, GameState &state, const Vector2 &pos
 
 bool PFLift::init() {
     position.y = start;
-    return true;
+
+    return Entity::init();
 }
 
 bool PFLift::tick() {
@@ -57,14 +58,14 @@ bool PFLift::tick() {
     pack.write<uint16_t>(static_cast<uint16_t>(position.y));
     pack.sendBroadcast(server, false);
 
-    return true;
+    return Entity::tick();
 }
 
 bool PFLift::activate(clientId pid) {
     if (activated) return true;
     if (timer > 0) return true;
 
-    activator  = static_cast<uint16_t>(pid);
+    activator = pid;
     timer = 0;
     speed = 0;
     position.y = start;

@@ -43,5 +43,6 @@ bool YCRController::tick() {
     }
 
     timer += server.getDelta();
-    return true;
+
+    return Entity::tick();
 }

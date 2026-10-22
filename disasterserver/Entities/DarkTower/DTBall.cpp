@@ -11,7 +11,7 @@ DTBall::DTBall(entityId id, Server &server, GameState &state, const Vector2 &pos
 DTBall::~DTBall() = default;
 
 bool DTBall::init() {
-    return true;
+    return Entity::init();
 }
 
 bool DTBall::tick() {
@@ -34,9 +34,9 @@ bool DTBall::tick() {
     pack.write<float>(static_cast<float>(state));
     pack.sendBroadcast(server, false);
 
-    return true;
+    return Entity::tick();
 }
 
 bool DTBall::uninit() {
-    return true;
+    return Entity::uninit();
 }

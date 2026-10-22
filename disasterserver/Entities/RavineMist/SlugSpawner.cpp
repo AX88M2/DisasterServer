@@ -15,12 +15,12 @@ SlugSpawner::~SlugSpawner() = default;
 
 bool SlugSpawner::tick() {
     if (slug != nullptr) {
-        return true;
+        return Entity::tick();
     }
 
     if (offset > 0) {
         offset -= server.getDelta();
-        return true;
+        return Entity::tick();
     }
 
     timer += server.getDelta();
@@ -33,5 +33,5 @@ bool SlugSpawner::tick() {
         offset = server.getRandom().nextDouble(0, 2) * TICKS_PER_SEC;
     }
 
-    return true;
+    return Entity::tick();
 }

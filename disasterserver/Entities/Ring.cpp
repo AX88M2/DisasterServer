@@ -18,7 +18,8 @@ bool Ring::init() {
     pack.write<entityId>(id);
     pack.write<uint8_t>(red);
     pack.sendBroadcast(server);
-    return true;
+
+    return Entity::init();
 }
 
 bool Ring::uninit() {
@@ -27,5 +28,6 @@ bool Ring::uninit() {
     pack.write<uint8_t>(rid);
     pack.write<entityId>(id);
     pack.sendBroadcast(server);
-    return true;
+
+    return Entity::uninit();
 }

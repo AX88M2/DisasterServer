@@ -39,7 +39,7 @@ bool LCEye::tick() {
         }
     }
 
-    return true;
+    return Entity::tick();
 }
 
 bool LCEye::update() {

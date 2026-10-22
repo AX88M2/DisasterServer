@@ -17,5 +17,5 @@ bool Shard::init() {
     pack.writeVector2(position);
     pack.sendBroadcast(server);
 
-    return true;
+    return Entity::tick();
 }

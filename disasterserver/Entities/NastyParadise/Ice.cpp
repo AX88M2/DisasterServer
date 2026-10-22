@@ -13,12 +13,12 @@ Ice::Ice(entityId id, Server &server, GameState &state, const Vector2 &position,
 Ice::~Ice() = default;
 
 bool Ice::init() {
-    return true;
+    return Entity::init();
 }
 
 bool Ice::tick() {
     if (!activated) {
-        return true;
+        return Entity::tick();
     }
 
     timer -= server.getDelta();
@@ -33,11 +33,11 @@ bool Ice::tick() {
         pack.sendBroadcast(server, true);
     }
 
-    return true;
+    return Entity::tick();
 }
 
 bool Ice::uninit() {
-    return true;
+    return Entity::uninit();
 }
 
 bool Ice::activate() {

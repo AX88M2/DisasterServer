@@ -34,7 +34,7 @@ bool TailsDoll::init() {
     pack.write<States>(state);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::init();
 }
 
 bool TailsDoll::tick() {
@@ -119,11 +119,11 @@ bool TailsDoll::tick() {
     pack.write<States>(state);
     pack.sendBroadcast(server, false);
 
-    return true;
+    return Entity::tick();
 }
 
 bool TailsDoll::uninit() {
-    return true;
+    return Entity::uninit();
 }
 
 void TailsDoll::findSpot() {

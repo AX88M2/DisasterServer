@@ -45,7 +45,7 @@ bool MapRing::init() {
     pack.write<uint8_t>(red);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::init();
 }
 
 bool MapRing::uninit() {
@@ -57,5 +57,5 @@ bool MapRing::uninit() {
     pack.write<entityId>(id);
     pack.sendBroadcast(server, true);
 
-    return true;
+    return Entity::uninit();
 }

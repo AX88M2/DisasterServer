@@ -5,21 +5,19 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-#define MAP_BRING INT16_MAX
-
 BlackRing::BlackRing(entityId id, Server &server, GameState &state, const Vector2 &position) :
     Entity(id, server, state, "bring", position) {}
 
 BlackRing::~BlackRing() = default;
 
 bool BlackRing::init() {
-    if (position == Vector2(MAP_BRING, MAP_BRING)) {
+    if (position == Vector2(mapBring, mapBring)) {
         Packet pack(PacketType::SERVER_BRING_STATE);
         pack.write<uint8_t>(0);
         pack.write<entityId>(id);
         pack.sendBroadcast(server);
 
-        return true;
+        return Entity::init();
     }
 
     Packet pack(PacketType::SERVER_ERECTOR_BRING_SPAWN);
@@ -27,7 +25,7 @@ bool BlackRing::init() {
     pack.writeVector2(position);
     pack.sendBroadcast(server);
 
-    return true;
+    return Entity::init();
 }
 
 bool BlackRing::uninit() {
@@ -36,5 +34,5 @@ bool BlackRing::uninit() {
     pack.write<entityId>(id);
     pack.sendBroadcast(server);
 
-    return true;
+    return Entity::uninit();
 }

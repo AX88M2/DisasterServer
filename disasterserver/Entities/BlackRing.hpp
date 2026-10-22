@@ -8,6 +8,8 @@ namespace DisasterServer {
 
 namespace DisasterServer::Entities
 {
+    constexpr int16_t mapBring = INT16_MAX;
+
     class BlackRing : public Entity {
     public:
         BlackRing(entityId id, Server &server, GameState &state, const Vector2 &position);
