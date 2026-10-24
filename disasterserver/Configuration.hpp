@@ -1,45 +1,50 @@
 #pragma once
 
 #include <mutex>
-
-#include "toml.hpp"
 #include <string>
+#include <toml.hpp>
 
 namespace DisasterServer
 {
-    using tomlConfig = toml::basic_value<toml::type_config>;
-
-    class Config {
-        tomlConfig toml;
-    public:
-        Config() = default;
-        explicit Config(const tomlConfig &toml) : toml(toml) {}
-        ~Config() = default;
-
-        void setServerPort(const int port) { toml["server"]["port"] = port; }
-        tomlConfig::integer_type getServerPort() { return toml["server"]["port"].as_integer(); }
-
-        void setServerLobbyCount(const int count) { toml["server"]["lobby-count"] = count; }
-        tomlConfig::integer_type getLobbyCount() { return toml["server"]["lobby-count"].as_integer(); }
-
-        void setServerMotd(const std::string &motd) { toml["server"]["motd"] = motd; }
-        std::string getMotd() { return toml["server"]["motd"].as_string(); }
-    };
-
     class Configuration {
-        static std::string defaultConfig;
-        std::string filename = "config.toml";
-        toml::basic_value<toml::type_config> toml;
+        std::string filename;
+        toml::value root;
         std::mutex mutex;
 
-        Config config_;
+        struct ServerConfig {
+            int port;
+            int lobby_count;
+            int ping_limit;
+            std::string motd;
+        };
+
+        struct AfkConfig {
+            bool enable;
+            int timeout;
+        };
+
+        struct GameplayConfig {
+            bool anticheat;
+        };
+
+        ServerConfig serverConfig {};
+        AfkConfig afkConfig {};
+        GameplayConfig gameplayConfig {};
     public:
         explicit Configuration();
         ~Configuration();
 
-        void load();
+        Configuration(const Configuration&) = delete;
+        Configuration& operator=(const Configuration&) = delete;
+        Configuration(Configuration&&) noexcept = delete;
+        Configuration& operator=(Configuration&&) noexcept = delete;
+
         void save();
 
-        Config &config() { return config_; }
+        const ServerConfig &server() const { return serverConfig; }
+        const AfkConfig &afk() const { return afkConfig; }
+        const GameplayConfig &gamePlay() const { return gameplayConfig; }
+    private:
+        void loadFields();
     };
 }

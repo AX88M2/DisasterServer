@@ -4,6 +4,3 @@
 [submodule "thirdparty/SDL_image"]
 	path = thirdparty/SDL_image
 	url = https://github.com/MilesGlitch/SDL_image.git
-[submodule "thirdparty/toml11"]
-	path = thirdparty/toml11
-	url = https://github.com/AX88M2/toml11

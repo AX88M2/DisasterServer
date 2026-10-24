@@ -11,11 +11,10 @@ namespace DisasterServer
     Application::~Application() = default;
 
     void Application::initialize() {
-        config.load();
 
-        for (int i = 0; i < config.config().getLobbyCount(); i++) {
+        for (int i = 0; i < config.server().lobby_count; i++) {
             workers.push_back(std::jthread([&, i] {
-                const auto basePort = config.config().getServerPort();
+                const auto basePort = config.server().port;
                 const auto ptr = std::make_shared<Server>(basePort + i);
                 {
                     std::lock_guard lock(server_mutex);

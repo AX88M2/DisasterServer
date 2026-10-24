@@ -20,6 +20,7 @@
 #include "Packet.hpp"
 #include "Entities/EggTracker.hpp"
 #include "Maps/Act9.hpp"
+#include "Maps/FartZone.hpp"
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/KindAndFair.hpp"
 #include "Maps/LimpCity.hpp"
@@ -236,7 +237,7 @@ void GameState::tickPlayers() {
 
             if (player.getPingTimer() >= 20 * TICKS_PER_SEC) {
                 double avgPing = player.getPingTotal() / player.getPingTimer();
-                if (avgPing >= 9000000) { //TODO: add to config
+                if (avgPing >= server.getApp().getConfigManager().server().ping_limit) {
                     client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avgPing);
                     continue;
                 }
@@ -757,12 +758,11 @@ bool GameState::handle(Client& client, Packet& packet) {
                 const uint8_t flags = packet.read<uint8_t>();
 
                 if (!player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
-
                     if (client.getId() != this->exeId) {
                         player.setRings(rings);
 
                         if (revival < 2) {
-                            if (rings < 0 || (/*currentMap->is<Maps::FartZone>() && */ rings >= 120)) {
+                            if (rings < 0 || (currentMap->is<Maps::FartZone>() && rings >= 120)) {
                                 client.disconnect(DisconnectReason::OTHER, "disconnect code: 100");
                                 return true;
                             }
@@ -772,7 +772,6 @@ bool GameState::handle(Client& client, Packet& packet) {
                                 return true;
                             }
                         }
-
                     }
 
                     player.setAttacking(flags & static_cast<uint8_t>(Player::Flags::PLAYER_ATTACKING));
@@ -787,7 +786,10 @@ bool GameState::handle(Client& client, Packet& packet) {
                     player.setLastAttack(Clock::now());
                     player.setAttackTimer(1);
                 } else {
-                    auto elapsed = player.getLastAttack();
+                    double elapsed_ = Duration(Clock::now() - player.getLastAttack()).count();
+                    player.setAttackTimer(player.getAttackTimer() + elapsed_);
+
+                    //Check attack cooldown
 
                     player.setLastAttack(Clock::now());
                 }
@@ -796,7 +798,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             }
 
             // ping limit disabled
-            if (false) {
+            if (server.getApp().getConfigManager().server().ping_limit == UINT16_MAX) {
                 // Calc distance before setting new posx
                 float dist = player.getPosition().distance(position);
 

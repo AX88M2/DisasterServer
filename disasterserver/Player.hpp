@@ -8,6 +8,7 @@
 
 namespace DisasterServer
 {
+    class Client;
     class GameState;
 
     class PlayerStats {
@@ -132,6 +133,8 @@ namespace DisasterServer
 
         Player();
         ~Player();
+
+        bool addError(Client &client, uint16_t by);
 
         bool isFlag(Flags flag) const { return this->flags & static_cast<PlayerFlags>(flag); }
         void setFlag(Flags flag) { this->flags |= static_cast<PlayerFlags>(flag); }

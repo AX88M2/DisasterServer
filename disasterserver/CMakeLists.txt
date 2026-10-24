@@ -140,6 +140,7 @@ else()
 
             target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
             target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+            target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
 
         endif()
     endif()
