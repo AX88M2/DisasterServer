@@ -19,19 +19,19 @@ LobbyState::~LobbyState() = default;
 void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
 
-    for (auto &c : server.getClients()) {
-        c->setReady(false);
-        c->setVoted(false);
-        c->setTimeout(0);
+    for (auto &client : server.getClients()) {
+        client->setReady(false);
+        client->setVoted(false);
+        client->setTimeout(0);
 
-        if (!c->isInGame()) {
-            c->setInGame(true);
+        if (!client->isInGame()) {
+            client->setInGame(true);
 
             Packet pack(PacketType::SERVER_IDENTITY_RESPONSE);
             pack.write<uint8_t>(1);
-            pack.write<clientId>(c->getId());
-            if (!pack.send(*c, true)) {
-                c->disconnect(DisconnectReason::SERVERTIMEOUT);
+            pack.write<clientId>(client->getId());
+            if (!pack.send(*client, true)) {
+                client->disconnect(DisconnectReason::SERVERTIMEOUT);
             }
         } else {
             /*
@@ -40,8 +40,8 @@ void LobbyState::enter() {
             */
 
             Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
-            pack.write<uint8_t>(c->getExeChance());
-            pack.send(*c, true);
+            pack.write<uint8_t>(client->getExeChance());
+            pack.send(*client, true);
         }
     }
 
@@ -147,13 +147,13 @@ void LobbyState::tick() {
         }
 
         if (!client->isReady()) {
-#if !defined(SERVER_DEBUG)
-            client->setTimeout(client->getTimeout() + server.getDelta());
-            if (std::fmod(client->getTimeout(), 60) == 0) {
-                Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / 60.0f);
+            if (server.getApp().getConfigManager().afk().enable) {
+                client->setTimeout(client->getTimeout() + server.getDelta());
+                if (std::fmod(client->getTimeout(), 60) == 0) {
+                    Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / 60.0f);
+                }
             }
-#endif
-            if (client->getTimeout() >= 25 * TICKS_PER_SEC) {
+            if (client->getTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
                 client->disconnect(DisconnectReason::AFKTIMEOUT);
             }
         } else {
@@ -164,14 +164,14 @@ void LobbyState::tick() {
     if (pracCountdown > 0) {
         pracCountdown -= server.getDelta();
         if (pracCountdown <= 0) {
-            auto map = mapController.getMap(0);
+            auto map = mapController.getMap(21);
 
             if (!map.has_value()) {
-                Error("Map with ID 0 was not found!");
+                Error("Map with ID 21 was not found!");
                 return;
             }
 
-            stateController.changeTo<CharSelectState>(*map, 0); //Fart Zone
+            stateController.changeTo<CharSelectState>(*map, 21); //Fart Zone
             return;
         }
     }
