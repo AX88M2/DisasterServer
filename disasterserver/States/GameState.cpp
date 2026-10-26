@@ -27,6 +27,7 @@
 #include "Maps/MajinForest.hpp"
 #include "Maps/NastyParadise.hpp"
 #include "Maps/NotPerfect.hpp"
+#include "Maps/TortureCave.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer;
