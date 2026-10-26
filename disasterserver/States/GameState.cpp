@@ -24,6 +24,7 @@
 #include "Maps/HideAndSeekAct2.hpp"
 #include "Maps/KindAndFair.hpp"
 #include "Maps/LimpCity.hpp"
+#include "Maps/MajinForest.hpp"
 #include "Maps/NastyParadise.hpp"
 #include "Maps/NotPerfect.hpp"
 #include "Util/Random.hpp"
