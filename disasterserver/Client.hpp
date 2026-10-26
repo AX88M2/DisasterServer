@@ -77,6 +77,8 @@ namespace DisasterServer
 
 
     class Client {
+        friend class Server;
+
         clientId id;
         std::string ip;
         ENetPeer *peer;
