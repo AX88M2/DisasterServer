@@ -128,7 +128,7 @@ namespace DisasterServer
         std::string getIp() const { return ip; }
         ENetPeer *getPeer() const { return peer; }
 
-        Player &getPlayer() { return *player; }
+        Player &getPlayer() const { return *player; }
 
         void resetPlayer();
 
