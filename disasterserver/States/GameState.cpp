@@ -798,7 +798,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             }
 
             // ping limit disabled
-            if (server.getApp().getConfigManager().server().ping_limit == UINT16_MAX) {
+            if (server.getApp().getConfigManager().server().ping_limit == -1) {
                 // Calc distance before setting new posx
                 float dist = player.getPosition().distance(position);
 
