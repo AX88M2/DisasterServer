@@ -69,26 +69,54 @@ void ResultsState::tick() {
 bool ResultsState::handle(Client &client, Packet &packet) {
     switch (packet.getType()) {
         case PacketType::CLIENT_RESULTS_REQUEST: {
-            std::vector<Client> results;
-            for (auto &c : server.getClients()) {
-                if (!c->isInGame()) {
-                    continue;
+            std::vector<Client*> results;
+
+            auto appendInGame = [&results](const auto &collection) {
+                for (const auto &c : collection) {
+                    if (c && c->isInGame()) {
+                        results.push_back(c.get());
+                    }
                 }
-                results.push_back(*c);
-            }
+            };
 
-            for (auto &c : leftClients) {
-                if (!c->isInGame()) {
-                    continue;
+            appendInGame(server.getClients());
+            appendInGame(leftClients);
+
+            std::ranges::sort(results, [](Client* aPtr, Client* bPtr) {
+                auto& a = *aPtr;
+                auto& b = *bPtr;
+
+                auto hasFlag = [](Client& c, auto flag) {
+                    return c.getPlayer().isFlag(flag);
+                };
+
+                const bool aKiller = hasFlag(a, Player::Flags::PLAYER_KILLER);
+                const bool bKiller = hasFlag(b, Player::Flags::PLAYER_KILLER);
+                if (aKiller != bKiller) return aKiller;
+
+                const bool aLeft = hasFlag(a, Player::Flags::PLAYER_LEFT);
+                const bool bLeft = hasFlag(b, Player::Flags::PLAYER_LEFT);
+                if (aLeft != bLeft) return aLeft;
+
+                const bool aDem = hasFlag(a, Player::Flags::PLAYER_DEMONIZED);
+                const bool bDem = hasFlag(b, Player::Flags::PLAYER_DEMONIZED);
+                if (aDem != bDem) return aDem;
+
+                const bool aDead = hasFlag(a, Player::Flags::PLAYER_DEAD);
+                const bool bDead = hasFlag(b, Player::Flags::PLAYER_DEAD);
+                if (aDead == bDead) {
+                    if (a.getPlayer().getStats().getDangerTime() != b.getPlayer().getDeathTimer()) {
+                        return a.getPlayer().getStats().getDangerTime() > b.getPlayer().getDeathTimer();
+                    }
+                } else {
+                    return aDead;
                 }
 
-                results.push_back(*c);
-            }
+                return false;
+            });
 
-            //TODO: Add sort
-
-            for (auto c : results) {
-                RAssert(sendResult(client, c, c.getPlayer().isFlag(Player::Flags::PLAYER_LEFT)));
+            for (const auto c : results) {
+                RAssert(this->sendResult(client, *c, c->getPlayer().isFlag(Player::Flags::PLAYER_LEFT)));
             }
 
             break;
