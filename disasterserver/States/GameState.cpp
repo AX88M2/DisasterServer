@@ -805,8 +805,22 @@ bool GameState::handle(Client& client, Packet& packet) {
                 if (started && !client.isModified() && player.getPosition() != Vector2(0, 0)) {
                     if (player.getExTeleport() == 0) {
                         if (dist > 700) {
-                            if (!currentMap->is<Maps::NotPerfect>() || currentMap->is<Maps::Act9>()) {
-                                client.disconnect(DisconnectReason::OTHER, "your ping is too high");
+                            if (
+                                    currentMap->is<Maps::TortureCave>() ||
+                                    currentMap->is<Maps::MajinForest>() ||
+                                    currentMap->is<Maps::Act9>() ||
+                                    currentMap->is<Maps::NotPerfect>()
+                                )
+                            {
+                                return true;
+                            }
+
+                            client.disconnect(DisconnectReason::OTHER, "blud used a portal gun lmfao");
+                            return true;
+                        }
+
+                        if (dist > 60) {
+                            if (!player.addError(client, 500)) {
                                 return true;
                             }
                         }
