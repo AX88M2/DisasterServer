@@ -10,7 +10,6 @@
 namespace DisasterServer
 {
     class PacketHandler;
-    class Server;
 
     enum class SurvCharacters {
         NONE = -1,
@@ -146,12 +145,10 @@ namespace DisasterServer
         void setExeCharacter(const ExesCharacters ch) { exeChar = ch; }
 
         std::shared_ptr<Character> getCharacter() const { return character; }
-
         template <std::derived_from<Character> T>
         void setCharacter() {
             character = std::move(std::make_shared<T>(*server, *this));
         }
-
         template <std::derived_from<Character> T>
         bool isCharacter() const {
             return dynamic_cast<T *>(character.get()) != nullptr;
@@ -172,16 +169,13 @@ namespace DisasterServer
 
         bool isVerified() const { return verified; }
         bool isModified() const { return isModifiedClient; }
+
         void setReady(const bool flag) { ready = flag; }
         bool isReady() const { return ready; }
         void setVoted(const bool flag) { voted = flag; }
         bool isVoted() const { return voted; }
 
-        bool identity(Packet &packet);
-        bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout);
-        bool received(Packet &packet);
         void disconnect(DisconnectReason reason, const std::string& message = "");
-
         template <typename... Args>
         void disconnect(const DisconnectReason reason, std::format_string<Args...> fmt, Args&&... args) {
             disconnect(reason, std::format(fmt, std::forward<Args>(args)...));
