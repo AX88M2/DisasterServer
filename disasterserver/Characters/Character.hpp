@@ -14,7 +14,6 @@ namespace DisasterServer
     protected:
         Server &server;
         Client &client;
-        Player &player;
     private:
         std::string name;
         bool exe;
@@ -26,10 +25,11 @@ namespace DisasterServer
          * @param name Имя персонажа
          * @param isExe Является ли персонаж киллером
          */
-        Character(Server &server, Client &client, Player &player, const std::string& name, const bool isExe = false) :
-            server(server), client(client), player(player), name(name), exe(isExe) {}
+        Character(Server &server, Client &client, const std::string& name, const bool isExe = false) :
+            server(server), client(client), name(name), exe(isExe)
+        {}
 
-        virtual ~Character() {}
+        virtual ~Character() = default;
 
         virtual void tick() {}
 

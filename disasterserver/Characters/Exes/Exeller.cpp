@@ -7,7 +7,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Exeller::Exeller(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Exeller", true) {
+Exeller::Exeller(Server &server, Client &client) : Character(server, client, "Exeller", true) {
 }
 
 Exeller::~Exeller() = default;

@@ -6,7 +6,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-AmyRose::AmyRose(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Amy") {
+AmyRose::AmyRose(Server &server, Client &client) : Character(server, client, "Amy") {
 }
 
 AmyRose::~AmyRose() = default;

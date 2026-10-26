@@ -9,7 +9,7 @@ using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 using namespace DisasterServer::Characters;
 
-Tails::Tails(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Tails") {
+Tails::Tails(Server &server, Client &client) : Character(server, client, "Tails") {
 }
 
 Tails::~Tails() = default;

@@ -6,7 +6,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Knuckles::Knuckles(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Knuckles") {
+Knuckles::Knuckles(Server &server, Client &client) : Character(server, client, "Knuckles") {
 }
 
 Knuckles::~Knuckles() = default;

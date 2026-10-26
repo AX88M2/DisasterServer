@@ -7,7 +7,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Cream::Cream(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Cream") {
+Cream::Cream(Server &server, Client &client) : Character(server, client, "Cream") {
 }
 
 Cream::~Cream() = default;

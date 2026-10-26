@@ -6,7 +6,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Chaos::Chaos(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Chaos", true) {
+Chaos::Chaos(Server &server, Client &client) : Character(server, client, "Chaos", true) {
 }
 
 Chaos::~Chaos() = default;

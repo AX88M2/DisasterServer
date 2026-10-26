@@ -6,7 +6,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Original::Original(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Original Exe", true) {
+Original::Original(Server &server, Client &client) : Character(server, client, "Original Exe", true) {
 }
 
 Original::~Original() = default;

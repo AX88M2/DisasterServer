@@ -8,7 +8,7 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Characters;
 
-Exetior::Exetior(Server &server, Client &client) : Character(server, client, client.getPlayer(), "Exetior", true) {
+Exetior::Exetior(Server &server, Client &client) : Character(server, client, "Exetior", true) {
 }
 
 Exetior::~Exetior() = default;
