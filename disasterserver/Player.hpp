@@ -86,7 +86,7 @@ namespace DisasterServer
         uint8_t	exTeleport = 0;
         double timeout = 0.0;
 
-        uint32_t modifiedClientTimer = 0;
+        uint32_t backtrackTimer = 0;
         uint32_t chunk = 0;
         TimeStamp lastPacket;
 
@@ -156,6 +156,9 @@ namespace DisasterServer
 
         double getTimeout() const { return this->timeout; }
         void setTimeout(const double value) { this->timeout = value; }
+
+        uint32_t getBacktrackTimer() const { return this->backtrackTimer; }
+        void addBacktrackTimer() { this->backtrackTimer++; }
 
         uint32_t getChunk() const { return this->chunk; }
         void setChunk(const uint32_t value) { this->chunk = value; }
