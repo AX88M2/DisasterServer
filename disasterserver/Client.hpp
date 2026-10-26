@@ -186,5 +186,10 @@ namespace DisasterServer
         void disconnect(const DisconnectReason reason, std::format_string<Args...> fmt, Args&&... args) {
             disconnect(reason, std::format(fmt, std::forward<Args>(args)...));
         }
+
+    private:
+        bool identity(Packet &packet);
+        bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout);
+        bool received(Packet &packet);
     };
 }
