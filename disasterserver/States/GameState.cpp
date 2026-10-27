@@ -836,7 +836,44 @@ bool GameState::handle(Client& client, Packet& packet) {
             player.setTimeout(0);
 
             if (client.isModified()) {
-                //TODO: Добавить чтобы сервер мешал игрокам у которых модифицирован клиент
+                if (player.getBacktrackTimer() < 61) {
+                    player.addBacktrackTimer();
+                } else {
+                    float dist = player.getPosition().distance(player.getStartPosition());
+
+                    if (dist > 240) {
+                        Packet pack(PacketType::SERVER_PLAYER_BACKTRACK);
+                        pack.writeVector2F(player.getStartPosition());
+                        pack.send(client, true);
+                    } else if (dist >= 300) {
+                        client.disconnect(DisconnectReason::OTHER,
+                            "@@@@@@@......@@@\n"
+                            "@@@@@@@......@@@\n"
+                            "@@@@@@@.......@@\n"
+                            "@@@@@@@@@@@@....\n"
+                            "@@@@@@@@@@......\n"
+                            "....@@..........\n"
+                            "................\n"
+                            "@@@@@@@@@@@@....\n"
+                            "@@@@@@@@@@@@....\n"
+                            "@@@@@@@@@@@@@...\n"
+                            "@@@@@@@@@@@@@...\n"
+                            "@@@@@@@@@@@....."
+                        );
+                    }
+
+                    if (player.getBacktrackTimer() == 60) {
+                        player.setStartPosition(player.getPosition());
+
+                        Packet pack(PacketType::SERVER_FELLA);
+                        pack.write<clientId>(client.getId());
+                        pack.writeVector2F(player.getStartPosition());
+                        pack.sendBroadcast(server, true);
+                        break;
+                    }
+
+                    break;
+                }
             }
 
             const auto now = Clock::now();
