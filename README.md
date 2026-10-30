@@ -12,6 +12,7 @@ Client you can install here: [v206](https://github.com/FakerNull0/td2dr-files/re
 Required: **.NET 8 SDK**
 
 ```bash
-git clone --branch 206-decompiled https://github.com/FakerNull0/DisasterServer.git
+git clone --branch 206-decompiled https://github.com/AX88M2/DisasterServer.git
 cd DisasterServer
 dotnet run
+```
