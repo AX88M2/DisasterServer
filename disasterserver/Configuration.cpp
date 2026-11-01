@@ -25,7 +25,7 @@ static std::string_view defaultConfig = R"(
 
 Configuration::Configuration() : filename("config.toml") {
     if (std::filesystem::exists(filename)) {
-        Info("Loading configuration file...");
+        Info:("Loading configuration file...");
         root = toml::parse(filename);
     } else {
         root = toml::parse_str(std::string(defaultConfig));
