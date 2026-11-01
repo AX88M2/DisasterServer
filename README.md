@@ -64,3 +64,30 @@ git clone --recursive https://github.com/AX88M2/DisasterServer.git
 cmake --preset linux-release
 cmake --build build/linux-release
 ```
+
+### ...or build with the helper scripts
+
+Both scripts check dependencies, verify `VCPKG_ROOT`, and run the correct `cmake --preset` + `cmake --build` for your platform.
+
+#### Linux
+```bash
+chmod +x build_linux.sh
+./build_linux.sh
+```
+
+#### Windows
+`build_windows.sh` is a bash script, so it must run in a shell where `cl.exe` is already on `PATH`. Either:
+
+- **x64 Native Tools Command Prompt for VS** → run `bash`, then:
+  ```bash
+  cd /c/path/to/DisasterServer
+  ./build_windows.sh
+  ```
+- **Git Bash** after loading the VS environment:
+  ```bash
+  cmd //c "call \"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat\" && bash"
+  cd /c/path/to/DisasterServer
+  ./build_windows.sh
+  ```
+
+If `cl.exe` is not on `PATH`, the script will stop with a hint pointing to `vcvars64.bat`.
