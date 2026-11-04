@@ -5,11 +5,11 @@
 
 using namespace DisasterServer::Maps;
 
-TortureCave::TortureCave(Server &server) : Map(server, "Torture Cave", 1, 27) {
+TortureCave::TortureCave(MapContext context) : Map(context, "Torture Cave") {
 }
 
-void TortureCave::init(GameState &game) {
-    game.getEntityController().spawnEntity<Entities::Acid>();
+void TortureCave::init() {
+    state->getEntityController().spawnEntity<Entities::Acid>();
 }
 
 void TortureCave::tick() {
@@ -22,5 +22,11 @@ void TortureCave::left(Client &client) {
 }
 
 DisasterServer::MapProperties TortureCave::getMapProperties() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(27)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

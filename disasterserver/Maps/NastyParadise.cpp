@@ -7,14 +7,13 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-NastyParadise::NastyParadise(Server &server) : Map(server, "Nasty Paradise", 1, 26) {
+NastyParadise::NastyParadise(MapContext context) : Map(context, "Nasty Paradise") {
 }
 
-void NastyParadise::init(GameState &game) {
-    this->gameCtx = &game;
+void NastyParadise::init() {
 
     for (uint8_t i = 0; i < 10; i++) {
-        game.getEntityController().spawnEntity<Entities::Ice>(Vector2(), i);
+        state->getEntityController().spawnEntity<Entities::Ice>(Vector2(), i);
     }
 
     {
@@ -27,7 +26,7 @@ void NastyParadise::init(GameState &game) {
             b[5 + i] = 0.35f + 0.25f * (i / 4.0f);
         }
 
-        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 0, 10, 1, a, b);
+        state->getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 0, 10, 1, a, b);
     }
 
     {
@@ -40,7 +39,7 @@ void NastyParadise::init(GameState &game) {
             b[2 + i] = 0.35f + 0.25f * (i / 5.0f);
         }
 
-        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 1, 8, -1, a, b);
+        state->getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 1, 8, -1, a, b);
     }
 
     {
@@ -53,7 +52,7 @@ void NastyParadise::init(GameState &game) {
             b[5 + i] = 0.35f + 0.25f * (i / 5.0f);
         }
 
-        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 2, 11, 1, a, b);
+        state->getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 2, 11, 1, a, b);
     }
 
     {
@@ -66,14 +65,14 @@ void NastyParadise::init(GameState &game) {
             b[6 + i] = 0.35f + 0.25f * (i / 2.0f);
         }
 
-        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 3, 9, 1, a, b);
+        state->getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 3, 9, 1, a, b);
     }
 
     {
         std::array<float, 20> a;
         std::array<float, 20> b;
 
-        game.getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 4, 5, -1, a, b);
+        state->getEntityController().spawnEntity<Entities::SnowBall>(Vector2(), 4, 5, -1, a, b);
     }
 }
 
@@ -89,7 +88,7 @@ void NastyParadise::handle(Client &client, Packet &packet) {
 
             const uint8_t iid = packet.read<uint8_t>();
 
-            auto* ice = gameCtx->getEntityController().findIf<Entities::Ice>([iid](Entities::Ice& b) {
+            auto* ice = state->getEntityController().findIf<Entities::Ice>([iid](Entities::Ice& b) {
                 return b.getIid() == iid;
             });
 
@@ -109,5 +108,11 @@ void NastyParadise::left(Client &client) {
 }
 
 MapProperties NastyParadise::getMapProperties() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(26)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

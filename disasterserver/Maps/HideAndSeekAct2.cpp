@@ -5,9 +5,9 @@
 
 using namespace DisasterServer::Maps;
 
-HideAndSeekAct2::HideAndSeekAct2(Server &server) : Map(server, "Hide And Seek 2", 1, 30) {}
+HideAndSeekAct2::HideAndSeekAct2(MapContext context) : Map(context, "Hide And Seek 2") {}
 
-void HideAndSeekAct2::init(GameState& game)
+void HideAndSeekAct2::init()
 {
 }
 
@@ -24,5 +24,11 @@ void HideAndSeekAct2::left(Client&) {
 }
 
 DisasterServer::MapProperties HideAndSeekAct2::getMapProperties() const {
-    return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(3.42 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

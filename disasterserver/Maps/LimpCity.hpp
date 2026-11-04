@@ -7,9 +7,9 @@ namespace DisasterServer::Maps
     class LimpCity : public Map {
         GameState *game = nullptr;
     public:
-        explicit LimpCity(Server &server);
+        explicit LimpCity(MapContext context);
 
-        void init(GameState& game) override;
+        void init() override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;

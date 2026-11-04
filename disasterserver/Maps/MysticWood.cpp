@@ -8,10 +8,10 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-MysticWood::MysticWood(Server &server) : Map(server, "Mystic Wood", 1, 30) {}
+MysticWood::MysticWood(MapContext context) : Map(context, "Mystic Wood") {}
 
-void MysticWood::init(GameState& game) {
-    game.getEntityController().spawnEntity<Entities::Latern>();
+void MysticWood::init() {
+    state->getEntityController().spawnEntity<Entities::Latern>();
 }
 
 void MysticWood::tick() {}
@@ -19,5 +19,11 @@ void MysticWood::handle(Client&, Packet&) {}
 void MysticWood::left(Client&) {}
 
 MapProperties MysticWood::getMapProperties() const {
-    return MapProperties(static_cast<int>(2.585 * TICKS_PER_SEC), 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

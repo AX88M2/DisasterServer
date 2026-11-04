@@ -7,9 +7,9 @@ namespace DisasterServer::Maps
     class HauntingDream : public Map {
         GameState *gameCtx = nullptr;
     public:
-        explicit HauntingDream(Server &server);
+        explicit HauntingDream(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

@@ -7,12 +7,11 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-HauntingDream::HauntingDream(Server &server) : Map(server, "Haunting Dream", 1, 31) {
+HauntingDream::HauntingDream(MapContext context) : Map(context, "Haunting Dream") {
 }
 
-void HauntingDream::init(GameState &game) {
-    gameCtx = &game;
-    game.getEntityController().spawnEntity<Entities::HDDoor>();
+void HauntingDream::init() {
+    state->getEntityController().spawnEntity<Entities::HDDoor>();
 }
 
 void HauntingDream::tick() {
@@ -26,7 +25,7 @@ void HauntingDream::handle(Client &client, Packet &packet) {
                 return;
             }
 
-            auto *door = gameCtx->getEntityController().findIf<Entities::HDDoor>([](Entities::HDDoor &) {
+            auto *door = state->getEntityController().findIf<Entities::HDDoor>([](Entities::HDDoor &) {
                 return true;
             });
 
@@ -45,5 +44,11 @@ void HauntingDream::left(Client &client) {
 }
 
 MapProperties HauntingDream::getMapProperties() const {
-    return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(31)
+        .timer(3.42 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

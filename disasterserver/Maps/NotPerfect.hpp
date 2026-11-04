@@ -7,10 +7,10 @@ namespace DisasterServer::Maps
     class NotPerfect : public Map
     {
     public:
-        explicit NotPerfect(Server &server);
+        explicit NotPerfect(MapContext context);
         ~NotPerfect() noexcept override;
 
-        void init(GameState& game) override;
+        void init() override;
         void tick() override;
         void handle(Client &client, Packet &packet) override;
         void left(Client &client) override;

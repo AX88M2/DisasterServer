@@ -4,9 +4,9 @@
 
 using namespace DisasterServer::Maps;
 
-MajinForest::MajinForest(Server &server): Map(server, "Majin Forest", 1, 30) {}
+MajinForest::MajinForest(MapContext context): Map(context, "Majin Forest") {}
 
-void MajinForest::init(GameState& game)
+void MajinForest::init()
 {
 }
 
@@ -23,5 +23,11 @@ void MajinForest::left(Client&)
 }
 
 DisasterServer::MapProperties MajinForest::getMapProperties() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 10, 3);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(10)
+        .ringCoff(3)
+        .build();
 }

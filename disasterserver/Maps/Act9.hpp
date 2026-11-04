@@ -6,9 +6,9 @@ namespace DisasterServer::Maps
 {
     class Act9 : public Map {
     public:
-        explicit Act9(Server &server);
+        explicit Act9(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

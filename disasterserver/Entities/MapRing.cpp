@@ -16,7 +16,7 @@ bool MapRing::init() {
     Map* map = game.getCurrentMap();
     if (!map) return false;
 
-    const int ringCount = map->getRingCount();
+    const int ringCount = map->getMapProperties().ringCount;
 
     int active = 0;
     for (int i = 0; i < ringCount; ++i) {
@@ -36,7 +36,7 @@ bool MapRing::init() {
 
     game.setRingSlot(slot, true);
     rid = static_cast<uint8_t>(slot);
-    red = map->getSpawnRedRings() && (server.getRandom().nextInt(0, 100) <= 10);
+    red = map->getMapProperties().spawnRedRings && (server.getRandom().nextInt(0, 100) <= 10);
 
     Packet pack(PacketType::SERVER_RING_STATE);
     pack.write<uint8_t>(0);

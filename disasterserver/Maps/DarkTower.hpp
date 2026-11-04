@@ -5,11 +5,10 @@
 namespace DisasterServer::Maps
 {
     class DarkTower : public Map {
-        GameState *gameCtx = nullptr;
     public:
-        explicit DarkTower(Server &server);
+        explicit DarkTower(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

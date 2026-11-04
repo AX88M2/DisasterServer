@@ -10,19 +10,17 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-FartZone::FartZone(Server &server) : Map(server, "Fart Zone", 1, 15) {
+FartZone::FartZone(MapContext context) : Map(context, "Fart Zone") {
 }
 
-void FartZone::init(GameState &game) {
-    gameCtx = &game;
-
+void FartZone::init() {
     for (int i = 0; i < 3; i++) {
-        game.getEntityController().spawnEntity<Entities::BlackRing>(Vector2(Entities::mapBring, Entities::mapBring));
+        state->getEntityController().spawnEntity<Entities::BlackRing>(Vector2(Entities::mapBring, Entities::mapBring));
     }
 
-    game.getEntityController().spawnEntity<Entities::Dummy>(Vector2(1616, 2608));
-    game.getEntityController().spawnEntity<Entities::SpikeController>();
-    game.getEntityController().spawnEntity<Entities::DTBall>();
+    state->getEntityController().spawnEntity<Entities::Dummy>(Vector2(1616, 2608));
+    state->getEntityController().spawnEntity<Entities::SpikeController>();
+    state->getEntityController().spawnEntity<Entities::DTBall>();
 }
 
 void FartZone::tick() {
@@ -39,7 +37,7 @@ void FartZone::handle(Client &client, Packet &packet) {
 
             const int8_t spd = packet.read<int8_t>();
 
-            auto *dum = gameCtx->getEntityController().findIf<Entities::Dummy>([](Entities::Dummy&) {
+            auto *dum = state->getEntityController().findIf<Entities::Dummy>([](Entities::Dummy&) {
                 return true;
             });
 
@@ -59,5 +57,11 @@ void FartZone::left(Client &client) {
 }
 
 MapProperties FartZone::getMapProperties() const {
-    return MapProperties(4.27 * TICKS_PER_SEC, 20, 1);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(15)
+        .timer(4.27 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(1)
+        .build();
 }

@@ -10,16 +10,13 @@
 
 using namespace DisasterServer::Maps;
 
-LimpCity::LimpCity(Server &server) : Map(server, "Limp City", 1, 30) {
+LimpCity::LimpCity(MapContext context) : Map(context, "Limp City") {
 }
 
-void LimpCity::init(GameState& state) {
-    this->game = &state;
-
-    auto& ec = state.getEntityController();
-    ec.spawnEntity<Entities::LCEye>(Vector2(), 0);
-    ec.spawnEntity<Entities::LCEye>(Vector2(), 1);
-    ec.spawnEntity<Entities::LCChain>();
+void LimpCity::init() {
+    state->getEntityController().spawnEntity<Entities::LCEye>(Vector2(), 0);
+    state->getEntityController().spawnEntity<Entities::LCEye>(Vector2(), 1);
+    state->getEntityController().spawnEntity<Entities::LCChain>();
     Debug("LimpCity: spawned 2 LCEye and 1 LCChain");
 }
 
@@ -44,7 +41,7 @@ void LimpCity::handle(Client& client, Packet& packet) {
     if (eyeId >= 2)
         return;
 
-    auto* eye = game->getEntityController().findIf<Entities::LCEye>([eyeId](Entities::LCEye& e) {
+    auto* eye = state->getEntityController().findIf<Entities::LCEye>([eyeId](Entities::LCEye& e) {
         return e.getEyeId() == eyeId;
     });
 
@@ -71,5 +68,11 @@ void LimpCity::handle(Client& client, Packet& packet) {
 }
 
 DisasterServer::MapProperties LimpCity::getMapProperties() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(3)
+        .build();
 }

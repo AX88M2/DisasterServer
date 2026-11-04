@@ -6,11 +6,11 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-Hill::Hill(Server &server) : Map(server, "Hill", 1, 26) {
+Hill::Hill(MapContext context) : Map(context, "Hill") {
 }
 
-void Hill::init(GameState &game) {
-    game.getEntityController().spawnEntity<Entities::Thunder>();
+void Hill::init() {
+    state->getEntityController().spawnEntity<Entities::Thunder>();
 }
 
 void Hill::tick() {
@@ -23,5 +23,8 @@ void Hill::left(Client &client) {
 }
 
 MapProperties Hill::getMapProperties() const {
-    return MapProperties();
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(26)
+        .build();
 }

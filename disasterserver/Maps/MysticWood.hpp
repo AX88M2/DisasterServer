@@ -6,9 +6,9 @@ namespace DisasterServer::Maps
 {
     class MysticWood : public Map {
     public:
-        explicit MysticWood(Server &server);
+        explicit MysticWood(MapContext context);
 
-        void init(GameState& game) override;
+        void init() override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;

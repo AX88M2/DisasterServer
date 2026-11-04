@@ -7,9 +7,9 @@ namespace DisasterServer::Maps
     class MajinForest : public Map
     {
     public:
-        explicit MajinForest(Server &server);
+        explicit MajinForest(MapContext context);
 
-        void init(GameState& game) override;
+        void init() override;
         void tick() override;
         void handle(Client& client, Packet& packet) override;
         void left(Client& client) override;

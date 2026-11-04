@@ -9,14 +9,12 @@
 
 using namespace DisasterServer::Maps;
 
-KindAndFair::KindAndFair(Server &server) : Map(server, "Kind And Fair", 1, 30) {}
+KindAndFair::KindAndFair(MapContext context) : Map(context, "Kind And Fair") {}
 
-void KindAndFair::init(GameState& state) {
-    this->game = &state;
+void KindAndFair::init() {
 
-    auto &entityController = state.getEntityController();
     for (uint8_t i = 0; i < 11; i++) {
-        entityController.spawnEntity<Entities::KafBox>(Vector2(), i);
+        state->getEntityController().spawnEntity<Entities::KafBox>(Vector2(), i);
     }
 
     Debug("Spawned 11 KafBox");
@@ -45,7 +43,7 @@ void KindAndFair::handle(Client& client, Packet& packet) {
         return;
     }
 
-    auto* box = game->getEntityController().findIf<Entities::KafBox>([nid](Entities::KafBox& b) {
+    auto* box = state->getEntityController().findIf<Entities::KafBox>([nid](Entities::KafBox& b) {
         return b.getNid() == nid;
     });
 
@@ -57,5 +55,11 @@ void KindAndFair::handle(Client& client, Packet& packet) {
 }
 
 DisasterServer::MapProperties KindAndFair::getMapProperties() const {
-    return MapProperties(3 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(3 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

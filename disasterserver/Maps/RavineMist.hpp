@@ -6,18 +6,17 @@
 namespace DisasterServer::Maps
 {
     class RavineMist : public Map {
-        GameState* state = nullptr;
         Random random = {};
     public:
-        explicit RavineMist(Server &server);
+        explicit RavineMist(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
         void tick() override;
         void handle(Client &client, Packet &packet) override;
         void left(Client &client) override;
 
         MapProperties getMapProperties() const override;
-
+        void checkOpeningBigring() override;
     private:
 
         void spawnShards(Client &client);
