@@ -54,7 +54,7 @@ void GameState::enter() {
     this->bringState = BigRingState::NONE;
     this->bringLocation = server.getRandom().nextInt(0, 255);
     this->leftClients.clear();
-    this->ringSlots.assign(currentMap->getRingCount(), false);
+    this->ringSlots.assign(currentMap->getMapProperties().ringCount, false);
 
     this->startTimeout.start(15);
 
@@ -211,13 +211,7 @@ void GameState::tick() {
     tickPlayers();
     entityController.tick();
 
-    if (gameTime.remaining() <= TICKS_PER_SEC && bringState < BigRingState::DEACTIVATED) {
-        bigRing(BigRingState::DEACTIVATED);
-    }
-
-    if (gameTime.remaining() <= TICKS_PER_SEC - 10 && bringState < BigRingState::ACTIVATED) {
-        bigRing(BigRingState::ACTIVATED);
-    }
+    currentMap->checkOpeningBigring();
 
     currentMap->tick();
 }
@@ -445,11 +439,17 @@ bool GameState::checkStart() {
         gameTime.stop();
         endTime.stop();
 
-        auto [time, mul, mapRingCoff] = currentMap->getMapProperties();
+        const auto propertiesMap = currentMap->getMapProperties();
+
+        const double time = propertiesMap.time;
+        const float mul = propertiesMap.mul;
+        const int mapRingCoff = propertiesMap.ringCoff;
+
         this->ringCoff = mapRingCoff;
         this->gameTime.start((time + ((this->server.getInGameCount() - 1) * mul)));
 
-        currentMap->init(*this);
+        currentMap->setupContext();
+        currentMap->init();
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
         started = true;

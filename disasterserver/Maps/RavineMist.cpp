@@ -8,23 +8,22 @@
 
 using namespace DisasterServer::Maps;
 
-RavineMist::RavineMist(Server &server) : Map(server, "Ravine Mist", 1, 27) {
+RavineMist::RavineMist(MapContext context) : Map(context, "Ravine Mist") {
 }
 
-void RavineMist::init(GameState &game) {
-    this->state = &game;
+void RavineMist::init() {
 
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1901, 392));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2193, 392));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2468, 392));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1188, 860));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2577, 1952));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2564, 2264));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2782, 2264));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1441, 2264));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(884, 2264));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(988, 2004));
-    game.getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(915, 2004));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1901, 392));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2193, 392));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2468, 392));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1188, 860));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2577, 1952));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2564, 2264));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(2782, 2264));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(1441, 2264));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(884, 2264));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(988, 2004));
+    state->getEntityController().spawnEntity<Entities::SlugSpawner>(Vector2(915, 2004));
 
     std::vector positionsShard {
         Vector2(862, 248),
@@ -43,7 +42,7 @@ void RavineMist::init(GameState &game) {
 
     for (int i = 0; i < 7; i++) {
         const int id = random.nextInt(1, positionsShard.size() - 1);
-        game.getEntityController().spawnEntity<Entities::Shard>(positionsShard[id], 0);
+        state->getEntityController().spawnEntity<Entities::Shard>(positionsShard[id], 0);
     }
 }
 
@@ -137,7 +136,22 @@ void RavineMist::left(Client &client) {
 }
 
 DisasterServer::MapProperties RavineMist::getMapProperties() const {
-    return MapProperties();
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(27)
+        .build();
+}
+
+void RavineMist::checkOpeningBigring() {
+    if (state->getGameTime().remaining() <= TICKS_PER_SEC && state->getBigringState() < BigRingState::DEACTIVATED) {
+        state->bigRing(BigRingState::DEACTIVATED);
+    }
+
+    if (state->getGameTime().remaining() <= TICKS_PER_SEC - 10 && state->getBigringState() < BigRingState::ACTIVATED) {
+        if ((7 - static_cast<uint8_t>(state->getEntityController().findCount<Entities::Shard>())) >= 6) {
+            state->bigRing(BigRingState::ACTIVATED);
+        }
+    }
 }
 
 void RavineMist::spawnShards(Client &client) {

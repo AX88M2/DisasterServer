@@ -78,6 +78,7 @@ namespace DisasterServer
             }
         }
 
+        BigRingState getBigringState() const { return bringState; }
         void bigRing(BigRingState state);
 
         clientId getExe() const { return exeId; }

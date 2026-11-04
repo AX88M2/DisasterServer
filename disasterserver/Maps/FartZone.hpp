@@ -7,9 +7,9 @@ namespace DisasterServer::Maps
     class FartZone : public Map {
         GameState *gameCtx = nullptr;
     public:
-        explicit FartZone(Server &server);
+        explicit FartZone(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

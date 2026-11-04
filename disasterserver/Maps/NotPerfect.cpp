@@ -1,18 +1,18 @@
 #include "NotPerfect.hpp"
-#include "Server.hpp"
+
 #include "Entities/NotPerfect/NPController.hpp"
 #include "States/GameState.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-NotPerfect::NotPerfect(Server &server) : Map(server, "Not Perfect", 1, 59) {
+NotPerfect::NotPerfect(MapContext context) : Map(context, "Not Perfect") {
 }
 
 NotPerfect::~NotPerfect() noexcept = default;
 
-void NotPerfect::init(GameState &game) {
-    game.getEntityController().spawnEntity<NPController>();
+void NotPerfect::init() {
+    state->getEntityController().spawnEntity<NPController>();
 }
 
 void NotPerfect::tick() {
@@ -25,5 +25,11 @@ void NotPerfect::left(Client &client) {
 }
 
 MapProperties NotPerfect::getMapProperties() const {
-    return MapProperties(2.585 * TICKS_PER_SEC, 20, 3);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(59)
+        .timer(2.585 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

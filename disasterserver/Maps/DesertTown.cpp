@@ -5,9 +5,9 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-DesertTown::DesertTown(Server &server) : Map(server, "Desert Town", 1, 30) {}
+DesertTown::DesertTown(MapContext context) : Map(context, "Desert Town") {}
 
-void DesertTown::init(GameState& game)
+void DesertTown::init()
 {
 }
 
@@ -23,6 +23,9 @@ void DesertTown::left(Client&) {
 
 }
 
-DisasterServer::MapProperties DesertTown::getMapProperties() const {
-    return MapProperties();
+MapProperties DesertTown::getMapProperties() const {
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .build();
 }

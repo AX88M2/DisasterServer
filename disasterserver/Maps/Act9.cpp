@@ -6,13 +6,13 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-Act9::Act9(Server &server) : Map(server, "Act 9", 1, 38) {
+Act9::Act9(MapContext context) : Map(context, "Act 9") {
 }
 
-void Act9::init(GameState &game) {
-    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(0, 1025), 0);
-    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 1);
-    game.getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 2);
+void Act9::init() {
+    state->getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(0, 1025), 0);
+    state->getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 1);
+    state->getEntityController().spawnEntity<Entities::Act9Wall>(Vector2(1663, 0), 2);
 }
 
 void Act9::tick() {
@@ -25,5 +25,11 @@ void Act9::left(Client &client) {
 }
 
 MapProperties Act9::getMapProperties() const {
-    return MapProperties(2.17 * TICKS_PER_SEC, 10, 3);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(28)
+        .timer(2.17 * TICKS_PER_SEC)
+        .multiplier(10)
+        .ringCoff(3)
+        .build();
 }

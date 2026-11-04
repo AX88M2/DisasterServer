@@ -5,11 +5,10 @@
 namespace DisasterServer::Maps
 {
     class VolcanoValley : public Map {
-        GameState *game = nullptr;
     public:
-        explicit VolcanoValley(Server &server);
+        explicit VolcanoValley(MapContext context);
 
-        void init(GameState &state) override;
+        void init() override;
         void tick() override;
         void handle(Client &client, Packet &packet) override;
         void left(Client &client) override;

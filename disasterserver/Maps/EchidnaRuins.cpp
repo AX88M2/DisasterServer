@@ -8,13 +8,13 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-EchidnaRuins::EchidnaRuins(Server &server) : Map(server, "Echidna Ruins", 1, 28 + 1) {
+EchidnaRuins::EchidnaRuins(MapContext context) : Map(context, "Echidna Ruins") {
 }
 
-void EchidnaRuins::init(GameState &game) {
-    game.getEntityController().spawnEntity<Entities::MLava>(Vector2(), 1624, 512);
-    game.getEntityController().spawnEntity<Entities::MJCrystal>();
-    game.getEntityController().spawnEntity<Entities::MJew>();
+void EchidnaRuins::init() {
+    state->getEntityController().spawnEntity<Entities::MLava>(Vector2(), 1624, 512);
+    state->getEntityController().spawnEntity<Entities::MJCrystal>();
+    state->getEntityController().spawnEntity<Entities::MJew>();
 }
 
 void EchidnaRuins::tick() {
@@ -27,5 +27,11 @@ void EchidnaRuins::left(Client &client) {
 }
 
 MapProperties EchidnaRuins::getMapProperties() const {
-    return MapProperties(3.42 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(29)
+        .timer(3.42 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

@@ -9,19 +9,17 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Maps;
 
-VolcanoValley::VolcanoValley(Server &server) : Map(server, "Volcano Valley", 1, 27) {}
+VolcanoValley::VolcanoValley(MapContext context) : Map(context, "Volcano Valley") {}
 
-void VolcanoValley::init(GameState &state) {
-    this->game = &state;
-
+void VolcanoValley::init() {
     for (uint8_t i = 0; i < 14; i++) {
-        state.getEntityController().spawnEntity<Entities::Vase>(Vector2(), i);
+        state->getEntityController().spawnEntity<Entities::Vase>(Vector2(), i);
     }
 
-    state.getEntityController().spawnEntity<Entities::Lava>(Vector2(736, 130), 0);
-    state.getEntityController().spawnEntity<Entities::Lava>(Vector2(1388, 130), 1);
-    state.getEntityController().spawnEntity<Entities::Lava>(Vector2(1524, 130), 2);
-    state.getEntityController().spawnEntity<Entities::Lava>(Vector2(1084, 130), 3);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(736, 130), 0);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1388, 130), 1);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1524, 130), 2);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1084, 130), 3);
 }
 
 void VolcanoValley::tick() {
@@ -38,7 +36,7 @@ void VolcanoValley::handle(Client &client, Packet &packet) {
 
             const uint8_t vid = packet.read<uint8_t>();
 
-            auto* vase = game->getEntityController().findIf<Entities::Vase>([vid](Entities::Vase& b) {
+            auto* vase = state->getEntityController().findIf<Entities::Vase>([vid](Entities::Vase& b) {
                 return b.getVid() == vid;
             });
 
@@ -55,7 +53,7 @@ void VolcanoValley::handle(Client &client, Packet &packet) {
             pack.write<uint8_t>(player.getRings() > 0);
             pack.sendBroadcast(server, true);
 
-            game->getEntityController().despawnEntity(vase->getId());
+            state->getEntityController().despawnEntity(vase->getId());
 
             break;
         }
@@ -67,5 +65,8 @@ void VolcanoValley::left(Client &client) {
 }
 
 MapProperties VolcanoValley::getMapProperties() const {
-    return MapProperties();
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(27)
+        .build();
 }

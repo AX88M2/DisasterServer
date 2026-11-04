@@ -6,9 +6,9 @@ namespace DisasterServer::Maps
 {
     class EchidnaRuins : public Map {
     public:
-        explicit EchidnaRuins(Server &server);
+        explicit EchidnaRuins(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

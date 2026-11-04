@@ -10,12 +10,11 @@
 
 using namespace DisasterServer::Maps;
 
-YouCantRun::YouCantRun(Server &server) : Map(server, "You Can't Run", 1, 30) {}
+YouCantRun::YouCantRun(MapContext context) : Map(context, "You Can't Run") {}
 
-void YouCantRun::init(GameState& game) {
-    auto& ec = game.getEntityController();
-    ec.spawnEntity<Entities::SpikeController>();
-    ec.spawnEntity<Entities::YCRController>();
+void YouCantRun::init() {
+    state->getEntityController().spawnEntity<Entities::SpikeController>();
+    state->getEntityController().spawnEntity<Entities::YCRController>();
     Debug("Spawned SpikeController and YCRController");
 }
 
@@ -30,5 +29,11 @@ void YouCantRun::left(Client&) {
 }
 
 DisasterServer::MapProperties YouCantRun::getMapProperties() const {
-    return MapProperties(3 * TICKS_PER_SEC, 20, 5);
+    return MapPropertiesBuilder()
+        .redRings(1)
+        .ringCount(30)
+        .timer(3 * TICKS_PER_SEC)
+        .multiplier(20)
+        .ringCoff(5)
+        .build();
 }

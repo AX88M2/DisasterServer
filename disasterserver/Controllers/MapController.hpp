@@ -34,7 +34,7 @@ namespace DisasterServer
                 return;
             }
 
-            auto map = std::make_unique<T>(server);
+            auto map = std::make_unique<T>(MapContext(server));
 
             Debug("Registered Map \"{}\"", map->getName());
 

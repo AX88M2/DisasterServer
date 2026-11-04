@@ -6,9 +6,9 @@ namespace DisasterServer::Maps
 {
     class TortureCave : public Map {
     public:
-        explicit TortureCave(Server &server);
+        explicit TortureCave(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 

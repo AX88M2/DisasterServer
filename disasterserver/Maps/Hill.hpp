@@ -6,9 +6,9 @@ namespace DisasterServer::Maps
 {
     class Hill : public Map {
     public:
-        explicit Hill(Server &server);
+        explicit Hill(MapContext context);
 
-        void init(GameState &game) override;
+        void init() override;
 
         void tick() override;
 
