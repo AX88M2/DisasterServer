@@ -29,6 +29,7 @@
 #include "Maps/NotPerfect.hpp"
 #include "Maps/TortureCave.hpp"
 #include "Util/Random.hpp"
+#include "PaletteValidator.hpp"
 
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
@@ -472,6 +473,8 @@ bool GameState::handle(Client& client, Packet& packet) {
         }
 
         case PacketType::CLIENT_PLAYER_PALETTE: {
+            AssertOrDisconnect(client, client.isInGame());
+            AssertOrDisconnect(client, !server.getApp().getConfigManager().gamePlay().anticheat || validatePlayerPalette(client, packet));
             this->server.broadcastEx(packet, true, client.getId());
             break;
         }

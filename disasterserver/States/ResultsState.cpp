@@ -42,7 +42,6 @@ void ResultsState::exit() {
 
         client->setSurvCharacter(SurvCharacters::NONE);
         client->setExeCharacter(ExesCharacters::NONE);
-
         client->setCharacter<Characters::None>();
     }
 }
@@ -83,8 +82,11 @@ bool ResultsState::handle(Client &client, Packet &packet) {
             appendInGame(leftClients);
 
             std::ranges::sort(results, [](Client* aPtr, Client* bPtr) {
-                auto& a = *aPtr;
-                auto& b = *bPtr;
+                Client& a = *aPtr;
+                Client& b = *bPtr;
+
+                const auto& statsA = a.getPlayer().getStats();
+                const auto& statsB = b.getPlayer().getStats();
 
                 auto hasFlag = [](Client& c, auto flag) {
                     return c.getPlayer().isFlag(flag);
@@ -92,27 +94,30 @@ bool ResultsState::handle(Client &client, Packet &packet) {
 
                 const bool aKiller = hasFlag(a, Player::Flags::PLAYER_KILLER);
                 const bool bKiller = hasFlag(b, Player::Flags::PLAYER_KILLER);
-                if (aKiller != bKiller) return aKiller;
+                if (aKiller != bKiller)
+                    return aKiller;
 
                 const bool aLeft = hasFlag(a, Player::Flags::PLAYER_LEFT);
                 const bool bLeft = hasFlag(b, Player::Flags::PLAYER_LEFT);
-                if (aLeft != bLeft) return aLeft;
+                if (aLeft != bLeft)
+                    return aLeft;
 
                 const bool aDem = hasFlag(a, Player::Flags::PLAYER_DEMONIZED);
                 const bool bDem = hasFlag(b, Player::Flags::PLAYER_DEMONIZED);
-                if (aDem != bDem) return aDem;
+                if (aDem != bDem)
+                    return aDem;
 
                 const bool aDead = hasFlag(a, Player::Flags::PLAYER_DEAD);
                 const bool bDead = hasFlag(b, Player::Flags::PLAYER_DEAD);
-                if (aDead == bDead) {
-                    if (a.getPlayer().getStats().getDangerTime() != b.getPlayer().getDeathTimer()) {
-                        return a.getPlayer().getStats().getDangerTime() > b.getPlayer().getDeathTimer();
-                    }
-                } else {
+                if (aDead != bDead)
                     return aDead;
-                }
 
-                return false;
+                const double dangerA = statsA.getDangerTime();
+                const double dangerB = statsB.getDangerTime();
+                if (dangerA != dangerB)
+                    return dangerA > dangerB;
+
+                return a.getNickname() < b.getNickname();
             });
 
             for (const auto c : results) {
@@ -130,7 +135,8 @@ bool ResultsState::handle(Client &client, Packet &packet) {
 bool ResultsState::sendResult(Client &client, Client &data, bool hasQuit) {
     uint8_t type = PLRSTATE_ALIVE;
 
-    auto otherPlayer = data.getPlayer();
+    auto &otherPlayer = data.getPlayer();
+    const auto &status = otherPlayer.getStats();
 
     if (otherPlayer.isFlag(Player::Flags::PLAYER_ESCAPED)) {
         type = PLRSTATE_ESCAPED;
@@ -150,8 +156,6 @@ bool ResultsState::sendResult(Client &client, Client &data, bool hasQuit) {
     packet.write<uint16_t>(mapTimeSec);
     packet.write<uint8_t>(hasQuit);
     packet.write<uint8_t>(type);
-
-    const auto status = otherPlayer.getStats();
 
     packet.write<uint16_t>(status.getRings());
     packet.write<uint16_t>(status.getKills());
