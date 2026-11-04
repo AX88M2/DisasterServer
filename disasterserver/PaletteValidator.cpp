@@ -2,7 +2,6 @@
 
 #include "Client.hpp"
 #include "Packet.hpp"
-#include "Core/Defines.hpp"
 
 #include <array>
 #include <cstdint>
@@ -16,7 +15,7 @@ namespace
 constexpr uint32_t PALETTE_END = 0xDEADB00B;
 constexpr uint8_t  PALETTE_EPSILON = 10;
 
-static constexpr uint32_t palettesFrom[][20] = {
+constexpr uint32_t palettesFrom[][20] = {
     { 0xe0a000, 0xe08000, 0xa06040, 0xc0c0e0, 0xa0a0c0, 0x606080, 0x202020, PALETTE_END  },
     { 0xe0a000, 0xe08000, 0xa06040, 0xe0e0e0, 0xc0c0e0, 0xa0a0c0, 0x606080, 0x800000, PALETTE_END },
     { 0x2d273b, 0x181421, 0xb3b3b3, 0x828282, 0x424242, PALETTE_END },
@@ -51,7 +50,7 @@ static constexpr uint32_t palettesFrom[][20] = {
     { 0x177aff, 0x0f47c0, 0x102676, 0xf2a572, 0xb2622d, 0xc40000, PALETTE_END }
 };
 
-static constexpr uint32_t palettesTo[][20] = {
+constexpr uint32_t palettesTo[][20] = {
     { 0xe09600, 0xbf6900, 0x8f0e00, 0xa5a5a5, 0x848484, 0x424242, 0x000000, PALETTE_END },
     { 0xf89c00, 0xfa6000, 0xb80c00, 0xfcfcfc, 0xd8d8fc, 0xb4b4d8, 0x6c6c90, 0x800020, PALETTE_END },
     { 0x282848, 0x101430, 0xc0c0e0, 0xa0a0c0, 0x606080, PALETTE_END },
@@ -86,7 +85,7 @@ static constexpr uint32_t palettesTo[][20] = {
     { 0x353867, 0x292d50, 0x1c1f37, 0xc1bdb8, 0x898781, 0x800000, PALETTE_END }
 };
 
-static constexpr uint32_t palettesCustom[][5] = {
+constexpr uint32_t palettesCustom[][5] = {
     { 0x800000, 0xe00000, PALETTE_END },
     { 0x800000, 0xe00000, PALETTE_END },
     { 0x880000, 0xf80000, PALETTE_END },
@@ -152,7 +151,7 @@ bool paletteMatches(const std::array<std::array<uint8_t, 3>, 20>& final, uint8_t
 
 namespace DisasterServer
 {
-    bool validatePlayerPalette(Client& client, Packet& packet)
+    bool validatePlayerPalette(const Client& client, Packet& packet)
     {
         const uint8_t from = packet.read<uint8_t>();
         const clientId id  = packet.read<clientId>();

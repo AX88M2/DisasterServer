@@ -8,6 +8,6 @@ namespace DisasterServer
     class Client;
     class Packet;
 
-    bool validatePlayerPalette(Client& client, Packet& packet);
+    bool validatePlayerPalette(const Client& client, Packet& packet);
 
 } // namespace DisasterServer
