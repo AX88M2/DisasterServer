@@ -43,7 +43,6 @@ bool lobby_state_left		(PeerData* v);
 bool lobby_state_handle		(PeerData* v, Packet* packet);
 bool lobby_state_tick		(Server* server);
 
-
 bool mapvote_init			(Server* server);
 bool mapvote_state_join		(PeerData * v);
 bool mapvote_state_left		(PeerData * v);
@@ -62,6 +61,9 @@ bool	game_uninit				(Server* server, bool show_results);
 bool	game_spawn				(Server* server, Entity* entity, size_t size, Entity** out);
 bool	game_despawn			(Server* server, Entity** out, uint16_t id);
 int		game_find				(Server* server, Entity** out, char* tag, size_t count);
+bool	game_bigring			(Server* server, BigRingState state);
+bool	game_demonize			(Server* server, PeerData* data);
+bool	game_state_join			(PeerData* v);
 
 bool	game_bigring			(Server* server, BigRingState state);
 bool	game_state_join			(PeerData* v);
