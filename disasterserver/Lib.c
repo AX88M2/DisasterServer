@@ -321,10 +321,10 @@ SERVER_API void disaster_force_end(struct Server* server, int ending)
     game_end(server, (Ending)ending, true);
 }
 
-SERVER_API void disaster_set_timer(struct Server* server, uint16_t seconds)
+SERVER_API bool disaster_set_timer(struct Server* server, uint16_t seconds)
 {
     if (!server || server->state != ST_GAME)
-		return;
+		return false;
 
     server->game.time_sec = seconds;
     server->game.time = TICKSPERSEC; 
@@ -337,4 +337,6 @@ SERVER_API void disaster_set_timer(struct Server* server, uint16_t seconds)
     if (server->game.time_sec <= 0) {
         game_end(server, ED_TIMEOVER, true);
     }
+    
+    return true;
 }
