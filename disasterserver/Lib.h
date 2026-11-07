@@ -60,6 +60,6 @@ SERVER_API void 			disaster_force_start			(struct Server* server, uint16_t exe_i
 SERVER_API void 			disaster_force_bigring			(struct Server* server, int state);
 SERVER_API bool 			disaster_force_demonize			(struct Server* server, uint16_t id);
 SERVER_API void 			disaster_force_end				(struct Server* server, int ending);
-SERVER_API void 			disaster_set_timer				(struct Server* server, uint16_t seconds);
+SERVER_API bool 			disaster_set_timer				(struct Server* server, uint16_t seconds);
 
 #endif
