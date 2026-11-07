@@ -58,7 +58,6 @@ typedef struct
 
 typedef struct
 {
-	bool chatfix;
     char motd[256];
 } MessageConfig;
 

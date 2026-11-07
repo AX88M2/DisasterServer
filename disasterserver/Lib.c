@@ -7,6 +7,7 @@
 #include <States.h>
 #include <DyList.h>
 #include <Config.h>
+#include <entities/RMZSlug.h>
 
 ThreadVar		g_threadName;
 DyList			servers;
@@ -270,4 +271,70 @@ double disaster_game_time(Server* server)
 uint16_t disaster_game_time_sec(Server* server)
 {
 	return server->game.time_sec;
+}
+
+SERVER_API void disaster_broadcast(struct Server* server, const char* msg)
+{
+    if (!server)
+		return;
+
+    server_broadcast_msg(server, 0, msg);
+}
+
+SERVER_API void disaster_force_start(struct Server* server, uint16_t exe_id, int8_t map)
+{
+    if (!server)
+		return;
+
+    game_init(exe_id, map, server);
+}
+
+SERVER_API void disaster_force_bigring(struct Server* server, int state)
+{
+    if (!server)
+		return;
+
+    game_bigring(server, (BigRingState)state);
+}
+
+SERVER_API bool disaster_force_demonize(struct Server* server, uint16_t id)
+{
+    if (!server)
+		return false;
+
+    for (size_t i = 0; i < server->peers.capacity; i++)
+    {
+        PeerData* v = (PeerData*)server->peers.ptr[i];
+        if (v && v->id == id)
+        {
+            return game_demonize(server, v); 
+        }
+    }
+    return false;
+}
+
+SERVER_API void disaster_force_end(struct Server* server, int ending)
+{
+    if (!server)
+		return;
+
+    game_end(server, (Ending)ending, true);
+}
+
+SERVER_API void disaster_set_timer(struct Server* server, uint16_t seconds)
+{
+    if (!server || server->state != ST_GAME)
+		return;
+
+    server->game.time_sec = seconds;
+    server->game.time = TICKSPERSEC; 
+
+    Packet packet;
+    PacketCreate(&packet, SERVER_GAME_TIME_SYNC);
+    PacketWrite(&packet, packet_write16, (uint16_t)server->game.time_sec * TICKSPERSEC);
+    server_broadcast(server, &packet, true);
+
+    if (server->game.time_sec <= 0) {
+        game_end(server, ED_TIMEOVER, true);
+    }
 }

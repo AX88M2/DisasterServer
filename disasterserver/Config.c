@@ -56,10 +56,8 @@ SERVER_API Config g_config =
         },
     },
 
-    /* Message */
     .message =
     {
-        .chatfix = true,
         .motd = "",
     },
 };
@@ -219,7 +217,6 @@ bool config_init(void)
     if (message)
     {
         snprintf(g_config.message.motd, sizeof(g_config.message.motd), "%s", cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(message, "motd")));
-        g_config.message.chatfix = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(message, "chatfix"));
     }
 
     cJSON_Delete(json);
@@ -272,7 +269,6 @@ SERVER_API bool config_save(void)
     cJSON_AddItemToObject(json, "gameplay", gameplay);
 
     cJSON *message = cJSON_CreateObject();
-    cJSON_AddItemToObject(message, "chatfix", cJSON_CreateBool(g_config.message.chatfix));
     cJSON_AddItemToObject(message, "motd", cJSON_CreateString(g_config.message.motd));
     cJSON_AddItemToObject(json, "message", message);
 

@@ -55,5 +55,11 @@ SERVER_API int				disaster_server_peer_ingame		(struct Server*);
 SERVER_API int8_t			disaster_game_map				(struct Server*);
 SERVER_API double			disaster_game_time				(struct Server*);
 SERVER_API uint16_t			disaster_game_time_sec			(struct Server*);
+SERVER_API void 			disaster_broadcast				(struct Server* server, const char* msg);
+SERVER_API void 			disaster_force_start			(struct Server* server, uint16_t exe_id, int8_t map);
+SERVER_API void 			disaster_force_bigring			(struct Server* server, int state);
+SERVER_API bool 			disaster_force_demonize			(struct Server* server, uint16_t id);
+SERVER_API void 			disaster_force_end				(struct Server* server, int ending);
+SERVER_API void 			disaster_set_timer				(struct Server* server, uint16_t seconds);
 
 #endif
