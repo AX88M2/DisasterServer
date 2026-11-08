@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # ============================
 #  DisasterServer build script
 #  Usage: ./build.sh [options]
