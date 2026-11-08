@@ -18,6 +18,7 @@ err()   { echo -e "${RED}[-]${NC} $*" >&2; }
 BUILD_DIR="build"
 BUILD_TYPE="Release"
 WITH_UI="OFF"
+WITH_DYLIB="OFF"
 GENERATOR=""
 CLEAN=0
 JOBS="$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)"
@@ -34,6 +35,7 @@ Options:
   -g, --generator GEN  CMake generator, e.g. "MinGW Makefiles" or "Ninja"
   -j, --jobs N         Number of parallel jobs (default: auto)
   -c, --clean          Remove the build directory before building
+  -l, --dylib          Dynamic library build
   -h, --help           Show this help
 
 Examples:
@@ -41,6 +43,7 @@ Examples:
   $0 --ui                     # build with UI (Ninja if available)
   $0 -u -g "MinGW Makefiles"  # UI + MinGW
   $0 -c -u                    # clean build with UI
+  $0 -l                       # build as dynamic library (DLL/SO)
 EOF
 }
 
@@ -52,17 +55,24 @@ while [[ $# -gt 0 ]]; do
         -g|--generator)   GENERATOR="$2"; shift 2 ;;
         -j|--jobs)        JOBS="$2"; shift 2 ;;
         -c|--clean)       CLEAN=1; shift ;;
+        -l|--dylib)       WITH_DYLIB="ON"; shift ;;
         -h|--help)        usage; exit 0 ;;
         *) err "Unknown argument: $1"; usage; exit 1 ;;
     esac
 done
+
+# check for conflict UI and DYLIB
+if [[ "$WITH_UI" == "ON" && "$WITH_DYLIB" == "ON" ]]; then
+    warn "UI and DYLIB cannot be built together. Disabling UI."
+    WITH_UI="OFF"
+fi
 
 # environment checks
 command -v cmake >/dev/null 2>&1 || { err "cmake not found in PATH"; exit 1; }
 command -v git   >/dev/null 2>&1 || { err "git not found in PATH"; exit 1; }
 
 info "cmake: $(cmake --version | head -n1)"
-info "Mode: BUILD_TYPE=$BUILD_TYPE, BUILD_UI=$WITH_UI"
+info "Mode: BUILD_TYPE=$BUILD_TYPE, BUILD_UI=$WITH_UI, DYLIB=$WITH_DYLIB"
 [[ -n "$GENERATOR" ]] && info "Generator: $GENERATOR"
 
 # clean
@@ -77,6 +87,7 @@ CMAKE_ARGS=(
     -B "$BUILD_DIR"
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
     -DBUILD_UI="$WITH_UI"
+    -DDYLIB="$WITH_DYLIB"
 )
 
 if [[ -n "$GENERATOR" ]]; then

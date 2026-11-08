@@ -203,6 +203,22 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 				return true;
 			}
 
+			if(strstr(msg.value, ".notexe"))
+			{
+				if(v->op)
+				{
+					v->exe_chance = 0;
+
+					Packet pack;
+					PacketCreate(&pack, SERVER_LOBBY_EXE_CHANCE);
+					PacketWrite(&pack, packet_write8, v->exe_chance);
+					RAssert(packet_send(v->peer, &pack, true));
+					RAssert(server_send_msg(v->server, v->peer, CLRCODE_GRA "nah not today"));
+				}
+
+				return true;
+			}
+
 			bool ignore = true;
 			unsigned long hash = server_cmd_parse(&msg);
 
@@ -387,7 +403,7 @@ bool lobby_state_handle(PeerData* v, Packet* packet)
 			}
 
             Info("%s " LOG_RST "(id %d): %s", v->nickname.value, v->id, msg.value);
-            if (!ignore && g_config.message.chatfix)
+            if (!ignore)
                 server_broadcast_msg(v->server, v->id, msg.value);
 			
 			break;
