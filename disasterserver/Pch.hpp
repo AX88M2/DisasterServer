@@ -33,3 +33,19 @@ using commandHash = unsigned long;
 using Clock = std::chrono::steady_clock;
 using Duration = std::chrono::duration<double, std::milli>;
 using TimeStamp = std::chrono::time_point<Clock>;
+
+constexpr int TICKS_PER_SEC = 60;
+constexpr int MAX_PLAYERS = 8;
+constexpr int BUILD_VERSION = 1101;
+
+constexpr std::string_view CLRCODE_RED = "\\";
+constexpr std::string_view CLRCODE_GRN = "@";
+constexpr std::string_view CLRCODE_PUR = "&";
+constexpr std::string_view CLRCODE_BLU = "/";
+constexpr std::string_view CLRCODE_GRA = "|";
+constexpr std::string_view CLRCODE_YLW = "`";
+constexpr std::string_view CLRCODE_ORG = "\xE2\x84\x96";
+constexpr std::string_view CLRCODE_RST = "~";
+
+static std::array clr_list = { CLRCODE_RED, CLRCODE_GRN, CLRCODE_PUR, CLRCODE_BLU, CLRCODE_GRA, CLRCODE_YLW, CLRCODE_ORG, CLRCODE_RST };
+constexpr int CLRLIST_LEN = 8;

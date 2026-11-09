@@ -127,8 +127,7 @@ bool paletteMatches(const std::array<std::array<uint8_t, 3>, 20>& final, uint8_t
             const uint8_t g = (rgb >>  8) & 0xFF;
             const uint8_t b =  rgb & 0xFF;
 
-            if (paletteWithinEpsilon(final[length][0], r) && paletteWithinEpsilon(final[length][1], g) && paletteWithinEpsilon(final[length][2], b))
-            {
+            if (paletteWithinEpsilon(final[length][0], r) && paletteWithinEpsilon(final[length][1], g) && paletteWithinEpsilon(final[length][2], b)) {
                 ++match;
             }
 
@@ -161,8 +160,6 @@ namespace DisasterServer
         if (size == 0)
             return false;
 
-        const bool isCustom = name.rfind("custom", 0) == 0;
-
         if (client.getId() != id)
             return false;
 
@@ -186,26 +183,19 @@ namespace DisasterServer
             ++finalLen;
         }
 
+        const bool isCustom = name.rfind("custom", 0) == 0;
+
         if (from) {
             if (isCustom) {
-                return paletteMatches(
-                    final, finalLen,
-                    &palettesCustom[0][0], PALETTE_CUSTOM_SIZE, 5
-                );
+                return paletteMatches(final, finalLen, &palettesCustom[0][0], PALETTE_CUSTOM_SIZE, 5);
             }
 
-            return paletteMatches(
-                final, finalLen,
-                &palettesFrom[0][0], PALETTE_FROM_SIZE, 20
-            );
+            return paletteMatches(final, finalLen, &palettesFrom[0][0], PALETTE_FROM_SIZE, 20);
         }
 
         if (isCustom)
             return true;
 
-        return paletteMatches(
-            final, finalLen,
-            &palettesTo[0][0], PALETTE_TO_SIZE, 20
-        );
+        return paletteMatches(final, finalLen, &palettesTo[0][0], PALETTE_TO_SIZE, 20);
     }
-} // namespace DisasterServer
+}

@@ -22,7 +22,7 @@ bool LCEye::tick() {
         chargeTimer.start(1);
     }
 
-    if (chargeTimer.tick(delta) == Countdown::TickResult::Second) {
+    if (chargeTimer.tick(delta) == TickResult::Second) {
         if (used && charge > 0) {
             charge -= 20;
             if (charge < 20) {

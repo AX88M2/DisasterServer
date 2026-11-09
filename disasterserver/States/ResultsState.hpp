@@ -1,7 +1,6 @@
 #pragma once
 
 #include "State.hpp"
-#include "Core/Constansts.hpp"
 #include "Util/Countdown.hpp"
 
 namespace DisasterServer
@@ -9,7 +8,7 @@ namespace DisasterServer
     enum class Ending : uint8_t;
 
     class ResultsState : public State {
-        Countdown countdown { TICKS_PER_SEC };
+        Countdown countdown;
 
         mapId id;
         uint16_t mapTimeSec;

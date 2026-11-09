@@ -1,7 +1,5 @@
 #include "CharSelect.hpp"
 
-#include <string>
-
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Controllers/StateController.hpp"
@@ -20,7 +18,6 @@
 #include "Characters/Survivors/Knuckles.hpp"
 #include "Characters/Survivors/Sally.hpp"
 #include "Characters/Survivors/Tails.hpp"
-#include "Core/Constansts.hpp"
 #include "Util/Random.hpp"
 
 using namespace DisasterServer;
@@ -79,7 +76,7 @@ bool CharSelectState::playerLeaved(Client& client) {
 
 void CharSelectState::tick() {
     switch (countdown.tick(server.getDelta())) {
-        case Countdown::TickResult::Finished: {
+        case TickResult::Finished: {
             for (auto& client : server.getClients()) {
                 if (!client || !client->isInGame())
                     continue;
@@ -91,7 +88,7 @@ void CharSelectState::tick() {
             break;
         }
 
-        case Countdown::TickResult::Second: {
+        case TickResult::Second: {
             Packet timePack(PacketType::SERVER_CHAR_TIME_SYNC);
             timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
             timePack.sendBroadcast(server);

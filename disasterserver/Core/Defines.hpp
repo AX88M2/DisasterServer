@@ -1,19 +1,18 @@
 #pragma once
 
-#if !defined(___EXPORT___)
+#if !defined(EXPORT_)
 #if defined(_WIN32)
-#define ___EXPORT___ __declspec(dllexport)
+#define EXPORT_ __declspec(dllexport)
 #elif defined(__GNUC__)
-#define ___EXPORT___ __attribute__((visibility("default")))
+#define EXPORT_ __attribute__((visibility("default")))
 #else
-#define ___EXPORT___
+#define EXPORT_
 #endif
 #endif
 
-#define SERVER_API(type) extern "C" type ___EXPORT___
+#define SERVER_API(type) extern "C" type EXPORT_
 
-#define unusedArg(x) (void)x
-#define unused() (void)0
+#define SERVER_UNUSED(x) (void)x
 
 #if defined(_WIN32)
 #define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)

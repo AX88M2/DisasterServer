@@ -12,27 +12,30 @@ Vote::Vote(Server &server) : server(server) {
 
 Vote::~Vote() = default;
 
-bool Vote::init(VoteType type, clientId id) {
-    ongoing = false;
-    votes.clear();
-    auto &players = server.getClients();
-    this->type = type;
+bool Vote::init(const VoteType type_, const clientId id) {
+    this->ongoing = false;
+    this->type = type_;
 
-    for (auto &c: server.getClients()) {
-        c->setCanVote(c->getId() != id);
+    votes.clear();
+
+    auto &clients = server.getClients();
+
+    for (const auto &client: server.getClients()) {
+        client->setCanVote(client->getId() != id);
     }
-    this->votedTotal = std::ranges::count_if(players, [](const auto& peer) { return peer->isCanVote(); });
+
+    this->votedTotal = std::ranges::count_if(clients, [](const auto& client) { return client->isCanVote(); });
 
     if (votedTotal <= 1) {
         return false;
     }
 
     this->ongoing = true;
-    this->countdown = 20 * TICKS_PER_SEC;
+    this->countdown.start(20);
     return true;
 }
 
-VoteState Vote::add(Client & voter) {
+VoteState Vote::add(const Client & voter) {
     if (this->votes.contains(voter.getId())) {
         return VoteState::ALREADY_VOTED;
     }
@@ -51,9 +54,9 @@ bool Vote::tick() {
         return false;
     }
 
-    countdown -= server.getDelta();
+    const auto result = countdown.tick(server.getDelta());
 
-    if (countdown <= 0) {
+    if (result == TickResult::Finished) {
         return false;
     }
 
@@ -61,5 +64,5 @@ bool Vote::tick() {
 }
 
 bool Vote::check() {
-    return votes.size() * 4 > votedTotal;
+    return votes.size() * 2 > (votedTotal / 2.0);
 }

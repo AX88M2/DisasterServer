@@ -2,7 +2,6 @@
 
 #include "Packet.hpp"
 #include "States/State.hpp"
-#include "Core/Constansts.hpp"
 #include "Core/Assert.hpp"
 
 namespace DisasterServer

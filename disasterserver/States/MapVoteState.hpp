@@ -2,7 +2,6 @@
 
 #include "Client.hpp"
 #include "State.hpp"
-#include "Core/Constansts.hpp"
 #include "Util/Countdown.hpp"
 
 namespace DisasterServer
@@ -11,7 +10,7 @@ namespace DisasterServer
     class StateController;
 
     class MapVoteState : public State {
-        Countdown countdown { TICKS_PER_SEC };
+        Countdown countdown;
 
         std::array<mapId, 3> maps = {};
         std::array<uint8_t, 3> votes = {};

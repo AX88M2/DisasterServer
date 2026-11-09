@@ -1,7 +1,6 @@
 #include "KAFSpeedBox.hpp"
 
 #include "Server.hpp"
-#include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
 #include "Packet.hpp"
 

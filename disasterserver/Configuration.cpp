@@ -14,6 +14,7 @@ static std::string_view defaultConfig = R"(
     lobby-count = 1
     ping-limit = 250
     motd = "Hello from DisasterServerCXX"
+    extended-protention = ""
 
 [afk]
     enable = true
@@ -49,6 +50,7 @@ void Configuration::loadFields() {
     serverConfig.lobby_count = toml::find_or<int>(root, "server", "lobby-count", 1);
     serverConfig.ping_limit  = toml::find_or<int>(root, "server", "ping-limit", 250);
     serverConfig.motd        = toml::find_or<std::string>(root, "server", "motd", "Hello from DisasterServerCXX");
+    toml::find_or<std::string>(root, "server", "extended-protention", "");
 
     afkConfig.enable  = toml::find_or<bool>(root, "afk", "enable", true);
     afkConfig.timeout = toml::find_or<int>(root, "afk", "timeout", 30);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "State.hpp"
-#include "Core/Constansts.hpp"
 #include "Maps/Map.hpp"
 #include "Util/Countdown.hpp"
 
@@ -34,9 +33,9 @@ namespace DisasterServer
         bool started = false;
         bool suddenDeath = false;
 
-        Countdown gameTime { TICKS_PER_SEC };
-        Countdown startTimeout { TICKS_PER_SEC };
-        Countdown endTime { TICKS_PER_SEC };
+        Countdown gameTime;
+        Countdown startTimeout;
+        Countdown endTime;
 
         double elapsed = 0.0;
         int ringCoff = 0;

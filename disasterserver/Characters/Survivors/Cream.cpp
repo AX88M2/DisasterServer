@@ -13,7 +13,8 @@ Cream::Cream(Server &server, Client &client) : Character(server, client, "Cream"
 Cream::~Cream() = default;
 
 void Cream::tick() {
-    auto result = countdown.tick(server.getDelta());
+    const auto result = countdown.tick(server.getDelta());
+    SERVER_UNUSED(result);
 }
 
 bool Cream::handle(GameState &state, Packet &packet) {

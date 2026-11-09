@@ -2,20 +2,16 @@
 
 namespace DisasterServer
 {
+    enum class TickResult : uint8_t
+    {
+        None,
+        Second,
+        Finished
+    };
+
     class Countdown final
     {
     public:
-        enum class TickResult : uint8_t
-        {
-            None,
-            Second,
-            Finished
-        };
-
-        explicit Countdown(double ticksPerSecond) noexcept
-            : ticksPerSecond_{ticksPerSecond}
-        {}
-
         /**
          * Starts countdown from the specified amount of seconds.
          **/
@@ -173,7 +169,7 @@ namespace DisasterServer
         }
 
     private:
-        double ticksPerSecond_ = 0;
+        double ticksPerSecond_ = TICKS_PER_SEC;
         double ticks_ = 0.0;
         int seconds_ = 0;
         bool active_ = false;

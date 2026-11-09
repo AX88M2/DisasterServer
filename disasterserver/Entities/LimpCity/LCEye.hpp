@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Entities/Entity.hpp"
-#include "Core/Constansts.hpp"
 #include "Core/Vector2.hpp"
 #include "Util/Countdown.hpp"
 
@@ -19,8 +18,8 @@ namespace DisasterServer::Entities
         uint8_t charge = 100;
         uint16_t target = 0;
 
-        Countdown cooldownTimer { TICKS_PER_SEC };
-        Countdown chargeTimer { TICKS_PER_SEC };
+        Countdown cooldownTimer;
+        Countdown chargeTimer;
     public:
         LCEye(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t eyeId);
 

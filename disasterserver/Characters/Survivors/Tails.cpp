@@ -16,9 +16,9 @@ Tails::~Tails() = default;
 
 void Tails::tick() {
 
-    auto result = countdown.tick(server.getDelta());
+    const auto result = countdown.tick(server.getDelta());
 
-    if (result == Countdown::TickResult::Finished) {
+    if (result == TickResult::Finished) {
         Debug("Laser is charged!");
     }
 }

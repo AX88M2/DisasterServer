@@ -2,7 +2,6 @@
 
 #include "Client.hpp"
 #include "State.hpp"
-#include "Core/Constansts.hpp"
 #include "Maps/Map.hpp"
 #include "Util/Countdown.hpp"
 #include "Packet.hpp"
@@ -12,7 +11,7 @@ namespace DisasterServer
     class StateController;
 
     class CharSelectState : public State {
-        Countdown countdown { TICKS_PER_SEC };
+        Countdown countdown;
 
         Map *map = nullptr;
         mapId mapid = 0;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/Constansts.hpp"
 #include "Entities/Entity.hpp"
 
 namespace DisasterServer {

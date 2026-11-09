@@ -6,7 +6,6 @@
 #include "LobbyState.hpp"
 #include "ResultsState.hpp"
 #include "Core/Defines.hpp"
-#include "Core/Constansts.hpp"
 #include "Entities/BlackRing.hpp"
 #include "Entities/MapRing.hpp"
 #include "Entities/Ring.hpp"
@@ -118,7 +117,7 @@ void GameState::uninit(bool show_results) {
 }
 
 bool GameState::playerJoined(Client& client) {
-    unusedArg(client);
+    SERVER_UNUSED(client);
     return true;
 }
 
@@ -165,7 +164,7 @@ bool GameState::playerLeaved(Client& client) {
 void GameState::tick() {
     if (!started) {
         auto result = this->startTimeout.tick(server.getDelta());
-        if (result == Countdown::TickResult::Finished) {
+        if (result == TickResult::Finished) {
             Warn("Waiting for players took too long, kicking out inactive players!");
             for (auto &client : server.getClients()) {
                 if (!client->isInGame()) continue;
@@ -181,7 +180,7 @@ void GameState::tick() {
     }
 
     auto resultEnd = endTime.tick(server.getDelta());
-    if (resultEnd == Countdown::TickResult::Finished) {
+    if (resultEnd == TickResult::Finished) {
         uninit(true);
         return;
     }
@@ -190,7 +189,7 @@ void GameState::tick() {
 
     const auto result = gameTime.tick(delta);
 
-    if (result == Countdown::TickResult::Second) {
+    if (result == TickResult::Second) {
         if (ringCoff > 0 && gameTime.remaining() > 0 && (gameTime.remaining() % ringCoff) == 0) {
             spawnRing();
         }
@@ -200,7 +199,7 @@ void GameState::tick() {
         pack.sendBroadcast(server, true);
     }
 
-    if (result == Countdown::TickResult::Finished) {
+    if (result == TickResult::Finished) {
         Packet pack(PacketType::SERVER_GAME_TIME_SYNC);
         pack.write<uint16_t>(static_cast<uint16_t>(gameTime.remaining() * TICKS_PER_SEC));
         pack.sendBroadcast(server, true);

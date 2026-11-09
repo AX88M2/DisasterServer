@@ -7,7 +7,6 @@
 #include "Server.hpp"
 #include "Configuration.hpp"
 #include "Controllers/StateController.hpp"
-#include "Core/Constansts.hpp"
 
 using namespace DisasterServer;
 
@@ -15,6 +14,8 @@ LobbyState::LobbyState(Server &server, ContextControllers ctx) : State(server, c
 }
 
 LobbyState::~LobbyState() = default;
+
+constexpr int PRACTICE_MAP = 20;
 
 void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
@@ -46,7 +47,6 @@ void LobbyState::enter() {
     }
 
     countdown.start(0);
-    pracCountdown = 0;
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
     pack.sendBroadcast(server);
@@ -93,14 +93,14 @@ void LobbyState::checkVote() {
     if (vote.check()) {
         switch (vote.getCurrentVoteType()) {
             case VoteType::KICK: {
-                this->server.sendBroadcastMessage(0, "vote kick @succeeded~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote kick @succeeded~ (@{} ~from \\{}~)", vote.getVoteCount(), vote.getVoteTotal());
                 this->server.disconnectById(kickTarget, DisconnectReason::KICKEDBYHOST);
                 break;
             }
 
             case VoteType::PRACTICE: {
-                this->server.sendBroadcastMessage(0, "vote practice succeeded~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
-                pracCountdown = 2 * TICKS_PER_SEC;
+                this->server.sendBroadcastMessage(0, "vote practice succeeded~ (@{} ~from \\{}~)", vote.getVoteCount(), vote.getVoteTotal());
+                pracCountdown.start(2);
                 break;
             }
 
@@ -109,12 +109,12 @@ void LobbyState::checkVote() {
     } else {
         switch (vote.getCurrentVoteType()) {
             case VoteType::KICK: {
-                this->server.sendBroadcastMessage(0, "vote kick \\failed~ (@{} ~from \\{})", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote kick \\failed~ (@{} ~from \\{}~)", vote.getVoteCount(), vote.getVoteTotal());
                 break;
             }
 
             case VoteType::PRACTICE: {
-                this->server.sendBroadcastMessage(0, "vote practice \\failed~ (@{} ~from \\{}", vote.getVoteCount(), vote.getVoteTotal());
+                this->server.sendBroadcastMessage(0, "vote practice \\failed~ (@{} ~from \\{}~)", vote.getVoteCount(), vote.getVoteTotal());
                 break;
             }
 
@@ -149,8 +149,8 @@ void LobbyState::tick() {
         if (!client->isReady()) {
             if (server.getApp().getConfigManager().afk().enable) {
                 client->setTimeout(client->getTimeout() + server.getDelta());
-                if (std::fmod(client->getTimeout(), 60) == 0) {
-                    Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / 60.0f);
+                if (std::fmod(client->getTimeout(), TICKS_PER_SEC) == 0) {
+                    Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / TICKS_PER_SEC);
                 }
 
                 if (client->getTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
@@ -162,19 +162,18 @@ void LobbyState::tick() {
         }
     }
 
-    if (pracCountdown > 0) {
-        pracCountdown -= server.getDelta();
-        if (pracCountdown <= 0) {
-            auto map = mapController.getMap(21);
+    const auto pracResult = pracCountdown.tick(server.getDelta());
 
-            if (!map.has_value()) {
-                Error("Map with ID 21 was not found!");
-                return;
-            }
+    if (pracResult == TickResult::Finished) {
+        const auto map = mapController.getMap(PRACTICE_MAP);
 
-            stateController.changeTo<CharSelectState>(*map, 21); //Fart Zone
+        if (!map.has_value()) {
+            Error("Map with ID {} was not found!", PRACTICE_MAP);
             return;
         }
+
+        stateController.changeTo<CharSelectState>(*map, PRACTICE_MAP);
+        return;
     }
 
     if (vote.isOnGoing() && !vote.tick()) {
@@ -182,11 +181,11 @@ void LobbyState::tick() {
     }
 
     switch (countdown.tick(server.getDelta())) {
-        case Countdown::TickResult::Finished: {
+        case TickResult::Finished: {
             stateController.changeTo<MapVoteState>();
             break;
         }
-        case Countdown::TickResult::Second: {
+        case TickResult::Second: {
             sendCountdown();
             break;
         }

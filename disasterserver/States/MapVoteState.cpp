@@ -107,8 +107,7 @@ bool MapVoteState::playerLeaved(Client &client) {
 
 void MapVoteState::tick() {
     switch (countdown.tick(server.getDelta())) {
-        case Countdown::TickResult::Finished: {
-
+        case TickResult::Finished: {
             //choose the map
             int8_t indeces[3] = { -1, -1, -1 };
             int count = 0;
@@ -177,7 +176,7 @@ void MapVoteState::tick() {
 
             break;
         }
-        case Countdown::TickResult::Second: {
+        case TickResult::Second: {
             Packet pack(PacketType::SERVER_VOTE_TIME_SYNC);
             pack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
             pack.sendBroadcast(server);

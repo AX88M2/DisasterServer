@@ -5,8 +5,6 @@
 #include <sstream>
 #include <syncstream>
 
-#include "Constansts.hpp"
-
 using namespace DisasterServer;
 
 void Logger::write(LogLevel level, std::string message, std::source_location location) {

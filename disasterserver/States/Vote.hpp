@@ -1,8 +1,7 @@
 #pragma once
 
-
-
 #include "Client.hpp"
+#include "Util/Countdown.hpp"
 
 namespace DisasterServer
 {
@@ -31,13 +30,14 @@ namespace DisasterServer
 
         std::unordered_set<clientId> votes;
         size_t votedTotal = 0;
-        double countdown = 0;
+        Countdown countdown;
+
     public:
         Vote(Server &server);
         ~Vote();
 
-        bool init(VoteType type, clientId id);
-        VoteState add(Client &voter);
+        bool init(VoteType type_, clientId id);
+        VoteState add(const Client &voter);
         bool tick();
         bool check();
 

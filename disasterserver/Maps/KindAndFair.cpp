@@ -3,7 +3,6 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Packet.hpp"
-#include "Core/Constansts.hpp"
 #include "States/GameState.hpp"
 #include "Entities/KindAndFair/KAFSpeedBox.hpp"
 

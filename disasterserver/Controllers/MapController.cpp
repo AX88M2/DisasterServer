@@ -54,9 +54,10 @@ void MapController::initialize() {
 }
 
 std::optional<Map*> MapController::getMap(int id) {
-    const auto &map = this->maps.at(id);
-
-    if (map == nullptr) return std::nullopt;
-
-    return map.get();
+    try {
+        const auto &map = this->maps.at(id);
+        return map.get();
+    } catch (const std::out_of_range& ex) {
+        return std::nullopt;
+    }
 }

@@ -2,7 +2,6 @@
 
 #include "State.hpp"
 #include "Vote.hpp"
-#include "Core/Constansts.hpp"
 #include "Util/Countdown.hpp"
 
 namespace DisasterServer
@@ -10,9 +9,9 @@ namespace DisasterServer
     class StateController;
 
     class LobbyState : public State {
-        Countdown countdown { TICKS_PER_SEC };
+        Countdown countdown;
 
-        double pracCountdown = 0;
+        Countdown pracCountdown;
 
         Vote vote;
         clientId kickTarget = 0;
