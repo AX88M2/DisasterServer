@@ -56,12 +56,13 @@ if(ANDROID)
     target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
     target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} log m Threads::Threads)
+    target_precompile_headers(DisasterServerCXX PRIVATE Pch.hpp)
 else()
     if(DYLIB) # Build .dll or .so
         add_library(DisasterServerCXX SHARED ${SOURCES})
 
         if (WIN32)
-            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp)
+            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp WIL::WIL)
         else() # UNIX
             set(THREADS_PREFER_PTHREAD_FLAG ON)
             find_package(Threads REQUIRED)
@@ -70,79 +71,28 @@ else()
 
         target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+        target_precompile_headers(DisasterServerCXX PRIVATE Pch.hpp)
 
     else() # Build executable
-        if(BUILD_UI)
-           # set(UI_SOURCES
-           #         "ui/Resources.c"
-           #         "ui/Main.c"
-           #         "ui/Image.c"
-           #         "ui/Label.c"
-           #         "ui/Button.c"
-           #         "ui/TButton.c"
-           #         "ui/MapList.c"
-           #         "ui/Presets.c"
-           #         "ui/MapListPreset.c"
-           #         "ui/PingPreset.c"
-           #         "ui/PlayerList.c"
-           # )
+        add_executable(DisasterServerCXX
+                ${SOURCES}
+                Main.cpp
+        )
 
-           # if (WIN32)
-           #     add_executable(DisasterServer
-           #             ${SOURCES}
-           #             ${UI_SOURCES}
-           #     )
-
-           #     target_link_libraries(DisasterServer PRIVATE
-           #             ws2_32
-           #             enet
-           #             winmm
-           #             dbghelp
-           #             SDL3-static
-           #             SDL3_image::SDL3_image
-           #     )
-
-           #     target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-           #     target_sources(DisasterServer PRIVATE "${CMAKE_SOURCE_DIR}/resources/icon.rc")
-
-           # else() # UNIX
-           #     add_executable(DisasterServer
-           #             ${SOURCES}
-           #             ${UI_SOURCES}
-           #     )
-
-           #     set(THREADS_PREFER_PTHREAD_FLAG ON)
-           #     find_package(Threads REQUIRED)
-           #     target_link_libraries(DisasterServer PRIVATE enet m Threads::Threads
-           #             SDL3::SDL3-static
-           #             SDL3_image::SDL3_image
-           #     )
-           # endif()
-
-           # target_include_directories(DisasterServer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-        else()
-            add_executable(DisasterServerCXX
-                    ${SOURCES}
-                    Main.cpp
-            )
-
-            if (WIN32)
-                target_sources(DisasterServerCXX PRIVATE "${CMAKE_SOURCE_DIR}/resources/icon.rc")
-                target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp)
-            else() # UNIX
-                set(THREADS_PREFER_PTHREAD_FLAG ON)
-                find_package(Threads REQUIRED)
-                add_compile_options(-static)
-                target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
-            endif()
-
-            target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
-            target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-            target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
-
+        if (WIN32)
+            target_sources(DisasterServerCXX PRIVATE "${CMAKE_SOURCE_DIR}/resources/icon.rc")
+            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} ws2_32 winmm dbghelp WIL::WIL)
+        else() # UNIX
+            set(THREADS_PREFER_PTHREAD_FLAG ON)
+            find_package(Threads REQUIRED)
+            add_compile_options(-static)
+            target_link_libraries(DisasterServerCXX PRIVATE ${LIBS} m Threads::Threads)
         endif()
+
+        target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
+        target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+        target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
+        target_precompile_headers(DisasterServerCXX PRIVATE Pch.hpp)
     endif()
 endif()
 
