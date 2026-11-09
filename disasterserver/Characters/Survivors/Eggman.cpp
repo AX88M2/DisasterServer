@@ -13,6 +13,7 @@ Eggman::Eggman(Server &server, Client &client) : Character(server, client, "Eggm
 Eggman::~Eggman() = default;
 
 void Eggman::tick() {
+    auto result = countdown.tick(server.getDelta());
 }
 
 bool Eggman::handle(GameState &state, Packet &packet) {
