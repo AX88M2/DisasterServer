@@ -1,10 +1,5 @@
 #include "GameState.hpp"
 
-#include <algorithm>
-#include <array>
-#include <ctime>
-#include <cstdio>
-
 #include "Server.hpp"
 #include "Controllers/StateController.hpp"
 #include "Client.hpp"
@@ -248,6 +243,8 @@ void GameState::tickPlayers() {
             exeCamp = true;
         }
 
+        client->getCharacter()->tick();
+
         if (client->getId() != exeId && !player.isFlag(Player::Flags::PLAYER_DEAD) && !player.isFlag(Player::Flags::PLAYER_DEMONIZED)) {
             // calc danger time
             if (!player.isFlag(Player::Flags::PLAYER_ESCAPED)) {
@@ -363,8 +360,6 @@ void GameState::tickPlayers() {
                 demonize(*client);
                 continue;
             }
-
-            client->getCharacter()->tick();
 
             if (player.getDeathTimer() >= TICKS_PER_SEC) {
                 if (!exeNear) {
@@ -773,7 +768,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                             }
 
                             if (hp > 100) {
-                                client.disconnect(DisconnectReason::OTHER, "disconnect code: 200");
+                                client.disconnect(DisconnectReason::OTHER, "hp > 100");
                                 return true;
                             }
                         }
