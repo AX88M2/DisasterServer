@@ -3,7 +3,6 @@
 #include "Server.hpp"
 #include "Core/Constansts.hpp"
 #include "Core/Log.hpp"
-#include "Util/Linker.hpp"
 
 namespace DisasterServer
 {
