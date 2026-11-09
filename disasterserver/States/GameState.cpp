@@ -228,19 +228,21 @@ void GameState::tickPlayers() {
         //TODO: add check zone
 
         // Ping Check
-        if (server.getDelta() < 2.5) {
-            player.addPingTimer(server.getDelta());
-            player.addPingTotal(player.getPingLast() * server.getDelta());
+        if (server.getApp().getConfigManager().server().ping_limit != -1) {
+            if (server.getDelta() < 2.5) {
+                player.addPingTimer(server.getDelta());
+                player.addPingTotal(player.getPingLast() * server.getDelta());
 
-            if (player.getPingTimer() >= 20 * TICKS_PER_SEC) {
-                double avgPing = player.getPingTotal() / player.getPingTimer();
-                if (avgPing >= server.getApp().getConfigManager().server().ping_limit) {
-                    client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avgPing);
-                    continue;
+                if (player.getPingTimer() >= 20 * TICKS_PER_SEC) {
+                    double avgPing = player.getPingTotal() / player.getPingTimer();
+                    if (avgPing >= server.getApp().getConfigManager().server().ping_limit) {
+                        client->disconnect(DisconnectReason::OTHER, "Bad connection, try picking closest region for better experience!\nYour average ping for last 20s: {}ms", avgPing);
+                        continue;
+                    }
+
+                    player.setPingTotal(0);
+                    player.setPingTimer(0);
                 }
-
-                player.setPingTotal(0);
-                player.setPingTimer(0);
             }
         }
 
