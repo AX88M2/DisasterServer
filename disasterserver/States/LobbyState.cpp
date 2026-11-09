@@ -152,9 +152,10 @@ void LobbyState::tick() {
                 if (std::fmod(client->getTimeout(), 60) == 0) {
                     Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / 60.0f);
                 }
-            }
-            if (client->getTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
-                client->disconnect(DisconnectReason::AFKTIMEOUT);
+
+                if (client->getTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
+                    client->disconnect(DisconnectReason::AFKTIMEOUT);
+                }
             }
         } else {
             client->setTimeout(0);
