@@ -1,14 +1,9 @@
 #pragma once
 
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 #include <boost/lexical_cast.hpp>
 
 #include "Core/Exceptions.hpp"
 #include "Core/Log.hpp"
-#include "Core/Types.hpp"
 
 #define CMD_GET_ARG(name, type, id, defaultValue) \
     const auto _internal_##name##id = args.get<type>(id, defaultValue); \

@@ -1,7 +1,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "Core/Log.hpp"
-#include "Core/Time.hpp"
 #include "Server.hpp"
 #include "Configuration.hpp"
 #include "Packet.hpp"

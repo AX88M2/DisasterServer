@@ -3,12 +3,15 @@
 #include "Server.hpp"
 #include "Core/Constansts.hpp"
 #include "Core/Log.hpp"
+#include "Util/Linker.hpp"
 
 namespace DisasterServer
 {
     Application::Application() : config(Configuration()), storage(Storage()) {}
 
     Application::~Application() = default;
+
+    typedef void (*InitializeProtectionHandle)(void *);
 
     void Application::initialize() {
 

@@ -5,7 +5,6 @@
 #include "Packet.hpp"
 #include "Characters/Character.hpp"
 #include "Characters/None.hpp"
-#include "Core/Types.hpp"
 
 namespace DisasterServer
 {

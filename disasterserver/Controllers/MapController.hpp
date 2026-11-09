@@ -1,13 +1,5 @@
 ﻿#pragma once
 
-#include <memory>
-#include <typeindex>
-#include <unordered_set>
-#include <vector>
-#include <array>
-#include <optional>
-#include <unordered_map>
-
 #include "Core/Log.hpp"
 #include "Maps/Map.hpp"
 

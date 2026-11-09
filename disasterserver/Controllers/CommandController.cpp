@@ -1,7 +1,5 @@
 #include "CommandController.hpp"
 
-#include <vector>
-#include <regex>
 #include <boost/algorithm/string.hpp>
 
 #include "Commands/Ban.hpp"

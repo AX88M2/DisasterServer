@@ -1,9 +1,5 @@
 #pragma once
 
-#include <array>
-
-#include "Core/Time.hpp"
-#include "Core/Types.hpp"
 #include "Core/Vector2.hpp"
 
 namespace DisasterServer
@@ -221,7 +217,7 @@ namespace DisasterServer
         Vector2 getStartPosition() const { return this->startPos; }
         void setStartPosition(Vector2 vec2) { this->startPos = vec2;  }
 
-        Vector2 getPosition() const { return this->position; }
+        Vector2 getPosition() { return this->position; }
         void setPosition(Vector2 vec2) { position = vec2; }
 
         PlayerStats &getStats() { return this->stats; }

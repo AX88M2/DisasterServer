@@ -1,8 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdint>
-
 namespace DisasterServer
 {
     class Countdown final

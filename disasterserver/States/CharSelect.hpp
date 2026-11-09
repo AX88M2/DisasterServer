@@ -7,8 +7,6 @@
 #include "Util/Countdown.hpp"
 #include "Packet.hpp"
 
-#include "Core/Types.hpp"
-
 namespace DisasterServer
 {
     class StateController;

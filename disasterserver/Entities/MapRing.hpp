@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BaseRing.hpp"
-#include "Core/Types.hpp"
 
 namespace DisasterServer {
     class Server;

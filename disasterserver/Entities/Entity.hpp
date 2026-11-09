@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-#include "Core/Types.hpp"
 #include "Core/Vector2.hpp"
 
 namespace DisasterServer
