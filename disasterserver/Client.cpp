@@ -164,6 +164,17 @@ bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t ti
         if (!motd.empty()) {
             this->server->sendMessage(*this, motd);
         }
+
+        if (this->isOperator()) {
+            this->server->sendMessage(*this, "{}you're an operator on this server{}", CLRCODE_GRN, CLRCODE_RST);
+        }
+
+        if (stateController.isState<GameState>()) {
+            const auto state = stateController.getState<GameState>();
+            if (state != nullptr) {
+                this->server->sendMessage(*this, "map: {}{}{}", CLRCODE_GRN, state->getCurrentMap()->getName(), CLRCODE_RST);
+            }
+        }
     }
 
     return true;
