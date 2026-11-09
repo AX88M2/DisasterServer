@@ -33,7 +33,7 @@ void *Linker::getSymbol(const std::string &symbol) {
 #if WIN32
     func = reinterpret_cast<void *>(GetProcAddress(handle, symbol.c_str()));
 #else
-    func = reinterpret_cast<void *>(dlsym(handle, symbol.c_str()))
+    func = reinterpret_cast<void *>(dlsym(handle, symbol.c_str()));
 #endif
 
     if (func != nullptr) {
