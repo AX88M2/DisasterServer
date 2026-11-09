@@ -2,6 +2,8 @@
 
 #if _WIN32
 #include <windows.h>
+#else
+#include <dlfcn.h>
 #endif
 #if WIN32
 using Handle = HMODULE;
