@@ -142,6 +142,11 @@ bool GameState::playerLeaved(Client& client) {
         return true;
     }
 
+    if (client.getId() == exeId) {
+        this->stateController.changeTo<LobbyState>();
+        return true;
+    }
+
     auto &player = client.getPlayer();
     player.setFlag(Player::Flags::PLAYER_LEFT);
 
