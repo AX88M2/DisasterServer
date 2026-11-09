@@ -54,17 +54,17 @@ void Server::worker() {
                     const clientId id = ev.peer->incomingPeerID + 1;
 
                     auto client = std::make_unique<Client>(this, stateController, ev.peer, id, buf);
-                    Client *rawClient = client.get();
-                    ev.peer->data = rawClient;
+                    Client *raw = client.get();
+                    ev.peer->data = raw;
                     clients.push_back(std::move(client));
 
-                    Debug("Connection peer id {}", rawClient->getId());
+                    Debug("Connection peer id {}", raw->getId());
 
                     Packet pack(PacketType::SERVER_PREIDENTITY);
 
-                    auto &auth = rawClient->getAuthPeer();
-                    auth.one = (uint8_t) Random::randInt() % 128;
-                    auth.two = (uint8_t) Random::randInt() % 255;
+                    auto &ticketAuth = raw->getTicketAuth();
+                    ticketAuth.one = (uint8_t) Random::randInt() % 128;
+                    ticketAuth.two = (uint8_t) Random::randInt() % 255;
 
                     uint32_t type = 0;
 
@@ -96,13 +96,13 @@ void Server::worker() {
                             type |= 1u << bit;
                     }
 
-                    auth.type = type;
+                    ticketAuth.type = type;
 
                     pack.write<uint16_t>(0);
                     pack.write<uint16_t>(1);
-                    pack.write<uint8_t>(auth.one);
+                    pack.write<uint8_t>(ticketAuth.one);
                     pack.write<uint8_t>(static_cast<uint8_t>(Random::randInt()) % 2);
-                    pack.write<uint8_t>(auth.two);
+                    pack.write<uint8_t>(ticketAuth.two);
 
                     const uint8_t key[6] = { 0x00, 0x00, 0xFF, 0x1F, 0x80, 0x14 };
 
@@ -110,8 +110,8 @@ void Server::worker() {
                         pack.write<uint8_t>(key[Random::randInt() % sizeof(key)]);
                     }
 
-                    pack.write<uint32_t>(auth.type);
-                    pack.send(*rawClient, true);
+                    pack.write<uint32_t>(ticketAuth.type);
+                    pack.send(*raw, true);
 
                     break;
                 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/env bash
 # DisasterServer — Windows build (Ninja + MSVC, as in CMakePresets.json)
 # Run from: "x64 Native Tools Command Prompt for VS" or Git Bash/MSYS2
 # where cl.exe is already in PATH. For WSL use build_linux.sh.

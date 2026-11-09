@@ -73,6 +73,11 @@ namespace DisasterServer
         }
     }
 
+    struct TicketAuth {
+        int32_t type = 0;
+        uint8_t	 one = 0;
+        uint8_t	 two = 0;
+    };
 
     class Client {
         friend class Server;
@@ -97,11 +102,7 @@ namespace DisasterServer
         bool voted = false;
         bool disconnecting = false;
 
-        struct AuthPeer {
-            uint32_t type = 0;
-            uint8_t	 one = 0;
-            uint8_t	 two = 0;
-        } auth = {};
+        TicketAuth ticketAuth = {};
 
         /* Character */
         SurvCharacters survChar = SurvCharacters::NONE;
@@ -134,7 +135,7 @@ namespace DisasterServer
         std::string getUdid() { return udid; }
         uint8_t getLobbyIcon() const { return lobbyIcon; }
         int8_t getPet() const { return pet; }
-        AuthPeer &getAuthPeer() { return auth; }
+        TicketAuth &getTicketAuth() { return ticketAuth; }
         void setExeChance(const uint8_t chance) { exeChance = chance; }
         uint8_t getExeChance() const { return exeChance; }
 

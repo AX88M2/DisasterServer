@@ -10,6 +10,7 @@ set(COMPILER_OPTIONS
             /wd4101 # 'var': unreferenced local variable
             /wd4388 # 'token' : signed/unsigned mismatch
             /wd4018 # '>': signed/unsigned mismatch
+            /Gy
         >
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:
             -Wall
@@ -19,9 +20,12 @@ set(COMPILER_OPTIONS
             -fexec-charset=UTF-8
             -Wcomment
             -Wunused-parameter
+            -ffunction-sections
+            -fdata-sections
             $<$<CONFIG:Release>:
                 -O2
                 -ffast-math
+                -s
             >
         >
         $<$<CXX_COMPILER_ID:GNU>:

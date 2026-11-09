@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/env bash
 # DisasterServer — GNU/Linux build (Ninja + Clang, as in CMakePresets.json)
 set -euo pipefail
 

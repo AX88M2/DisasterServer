@@ -6,7 +6,7 @@ Linker::Linker(const std::string &name) {
 #if WIN32
     handle = LoadLibrary(name.c_str());
 #else
-    handle = (Handle)dlopen(path.c_str(), RTLD_LOCAL | RTLD_LAZY);
+    handle = (Handle)dlopen(name.c_str(), RTLD_LOCAL | RTLD_LAZY);
 #endif
 }
 
@@ -21,7 +21,7 @@ Linker::~Linker() {
 }
 
 std::string Linker::getError() {
-#if RETRO_PLATFORM == RETRO_WIN
+#if WIN32
     return getLastErrorAsString();
 #else
     return std::string(dlerror());

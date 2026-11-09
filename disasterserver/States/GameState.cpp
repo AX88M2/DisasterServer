@@ -28,7 +28,12 @@
 using namespace DisasterServer;
 using namespace DisasterServer::Entities;
 
-GameState::GameState(Server &server, const ContextControllers ctx, clientId exe, mapId mapid, Map* map) : State(server, ctx), currentMapId(mapid), currentMap(map), exeId(exe), entityController(server, *this) {}
+GameState::GameState(Server &server, const ContextControllers ctx, clientId exe, mapId mapId, Map* map) : State(server, ctx),
+    currentMapId(mapId),
+    currentMap(map),
+    exeId(exe),
+    entityController(server, *this) {}
+
 GameState::~GameState() = default;
 
 void GameState::enter() {
