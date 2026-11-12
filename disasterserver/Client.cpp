@@ -136,7 +136,7 @@ bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t ti
             Packet pack(PacketType::SERVER_WAITING_PLAYER_INFO);
             pack.write<uint8_t>(stateController.isState<GameState>() && client->in_game);
             pack.write<clientId>(client->getId());
-            pack.writeString(nickname);
+            pack.writeString(client->getNickname());
 
             if (stateController.isState<GameState>() && client->in_game) {
                 auto state = stateController.getState<GameState>();
