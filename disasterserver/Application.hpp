@@ -16,12 +16,15 @@ namespace DisasterServer
 
         std::mutex server_mutex;
         std::vector<std::shared_ptr<Server>> servers;
-        std::vector<std::jthread> workers;
+        std::vector<std::thread> workers;
+
+        std::atomic<bool> isRunning;
     protected:
         Application();
         ~Application();
     public:
         void initialize();
+        void stop();
 
         Configuration& getConfigManager() { return config; }
         Storage& getStorage() { return storage; }

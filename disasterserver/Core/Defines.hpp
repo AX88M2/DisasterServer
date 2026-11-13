@@ -25,3 +25,4 @@
 
 /** == Configuration == **/
 #define NETWORK_LOGGER 0
+#define NETWORK_TRACE 0

@@ -15,7 +15,7 @@ namespace DisasterServer
 
     class Server {
         int port = 0;
-        bool running = false;
+        std::atomic<bool> isRunning = true;
         double delta = 0;
         ENetHost *host = nullptr;
 

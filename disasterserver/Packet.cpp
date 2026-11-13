@@ -3,6 +3,7 @@
 #include "Core/Log.hpp"
 #include "Core/Exceptions.hpp"
 #include "Client.hpp"
+#include "PacketTracer.hpp"
 #include "Server.hpp"
 
 using namespace DisasterServer;
@@ -29,6 +30,9 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	[[maybe_unused]]
 	const uint8_t isPasstrough = read<uint8_t>();
 	type = read<PacketType>();
+#if NETWORK_TRACE
+	PacketTracer::getInstance().addRecord(true, buffer);
+#endif
 #if NETWORK_LOGGER
 	Debug("Packet received {} (length {})", getPacketTypeName(type), len);
 #endif
@@ -136,6 +140,9 @@ bool Packet::send(Client &client, bool reliable) {
 	}
 #if NETWORK_LOGGER
 	Debug("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
+#endif
+#if NETWORK_TRACE
+	PacketTracer::getInstance().addRecord(false, buffer);
 #endif
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 

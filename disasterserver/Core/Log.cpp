@@ -12,16 +12,7 @@ void Logger::write(LogLevel level, std::string message, std::source_location loc
 
 	std::stringstream ss;
 
-	const time_t now = std::time(nullptr);
-
-	std::tm local{};
-#ifdef _WIN32
-	localtime_s(&local, &now);
-#else
-	localtime_r(&now, &local);
-#endif
-
-	ss << std::put_time(&local, "%d.%m.%Y %T");
+	ss << getCurrentTime();
 	ss << " " << TerminalColors::light_gray << "[" << std::this_thread::get_id() << "]" << TerminalColors::reset << " ";
 
 	switch (level) {

@@ -30,7 +30,11 @@ Server::Server(const int port) :
 }
 
 Server::~Server() {
-    enet_host_destroy(host);
+    this->quit();
+    if (host != nullptr) {
+        enet_host_destroy(host);
+        host = nullptr;
+    }
 }
 
 void Server::worker() {
@@ -43,7 +47,7 @@ void Server::worker() {
 
     double heartbeat = 0.0;
 
-    while (!running) {
+    while (isRunning) {
         ENetEvent ev;
         if (enet_host_service(host, &ev, 5) > 0) {
             switch (ev.type) {
@@ -201,7 +205,7 @@ void Server::quit() {
         client->disconnect(DisconnectReason::SHUTDOWN);
     }
 
-    running = false;
+    isRunning = false;
 }
 
 void Server::disconnectById(const clientId id, DisconnectReason reason, const std::string &message) const {

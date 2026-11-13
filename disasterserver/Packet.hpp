@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "Core/Log.hpp"
 #include "enet/enet.h"
 
@@ -322,8 +320,6 @@ inline std::string getPacketTypeName(PacketType type) {
 #define BYTESWAP_32(x) _byteswap_ulong((x))
 #define BYTESWAP_64(x) _byteswap_uint64((x))
 #endif
-
-static constexpr int PACKET_MAXSIZE = 256;
 
 #undef min
 #undef max

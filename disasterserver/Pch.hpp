@@ -23,6 +23,23 @@
 #include <ranges>
 #include <utility>
 #include <string_view>
+#include <fstream>
+
+namespace DisasterServer {
+    static std::string getCurrentTime(const std::string& format = "%d.%m.%Y %T") {
+        std::stringstream ss;
+        const time_t now = std::time(nullptr);
+
+        std::tm local{};
+#ifdef _WIN32
+        localtime_s(&local, &now);
+#else
+        localtime_r(&now, &local);
+#endif
+        ss << std::put_time(&local, format.c_str());
+        return ss.str();
+    }
+}
 
 using clientId = uint16_t;
 using mapId = uint16_t;
@@ -37,6 +54,7 @@ using TimeStamp = std::chrono::time_point<Clock>;
 constexpr int TICKS_PER_SEC = 60;
 constexpr int MAX_PLAYERS = 8;
 constexpr int BUILD_VERSION = 1101;
+static constexpr int PACKET_MAXSIZE = 256;
 
 constexpr std::string_view CLRCODE_RED = "\\";
 constexpr std::string_view CLRCODE_GRN = "@";
