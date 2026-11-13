@@ -15,13 +15,13 @@ void Lobby::execute(Client &client, CommandArguments &args) {
 
     auto config = this->server.getApp().getConfigManager().server();
 
-    if (ind < 1 || ind > config.lobby_count) {
+    if (ind < 1 || ind > config.port) {
         this->server.sendMessage(client, "{}lobby should be between 1 and {}", CLRCODE_RED, config.lobby_count);
         return;
     }
 
     Packet pack(PacketType::SERVER_LOBBY_CHANGELOBBY);
-    uint32_t port = config.lobby_count + (ind - 1);
+    uint32_t port = config.port + (ind - 1);
     pack.write<uint32_t>(port);
 
     if (!pack.send(client, true)) {
