@@ -12,10 +12,18 @@ StateController::StateController(Server &server, MapController &mapController): 
 
 StateController::~StateController() = default;
 
+void StateController::setLatestExe(clientId id) {
+    this->latestExe = id;
+}
+
+clientId StateController::getLatestExe() {
+    return this->latestExe;
+}
+
 bool StateController::playerJoined(Client &client) {
-    Packet packet(PacketType::SERVER_LOBBY_EXE_CHANCE);
-    packet.write<uint8_t>(client.getExeChance());
-    packet.send(client, true);
+    Packet exeChange(PacketType::SERVER_LOBBY_EXE_CHANCE);
+    exeChange.write<uint8_t>(client.getExeChance());
+    exeChange.send(client, true);
 
     Packet playerJoined(PacketType::SERVER_PLAYER_JOINED);
     playerJoined.write<clientId>(client.getId());

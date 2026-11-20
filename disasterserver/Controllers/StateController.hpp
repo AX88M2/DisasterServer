@@ -23,12 +23,16 @@ namespace DisasterServer
 
         Server &server;
         MapController &mapController;
+        clientId latestExe = 0;
 
         std::vector<std::unique_ptr<State>> pendingState = {};
         std::unique_ptr<State> current;
     public:
         explicit StateController(Server &server, MapController &mapController);
         ~StateController();
+
+        void setLatestExe(clientId id);
+        clientId getLatestExe();
 
         /**
          * @tparam T Класс наследований от @interface State <States\State.hpp>
