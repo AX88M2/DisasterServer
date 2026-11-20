@@ -56,7 +56,7 @@ bool ResultsState::playerLeaved(Client &client) {
 }
 
 void ResultsState::tick() {
-    auto result = countdown.tick(server.getDelta());
+    const auto result = countdown.tick(server.getDelta());
     switch (result) {
         case TickResult::Finished: {
             stateController.changeTo<LobbyState>();
