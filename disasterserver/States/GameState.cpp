@@ -57,6 +57,8 @@ void GameState::enter() {
 
     this->startTimeout.start(15);
 
+    stateController.setLatestExe(exeId);
+
     for (auto &client : server.getClients()) {
         if (!client->isInGame()) continue;
 
