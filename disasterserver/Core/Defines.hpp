@@ -14,14 +14,6 @@
 
 #define SERVER_UNUSED(x) (void)x
 
-#if defined(_WIN32)
-#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
-#elif defined(__GNUC__)
-#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
-#else
-#define scanf(buf, format, ...) sscanf(buf, format __VA_OPT__(,) __VA_ARGS__)
-#endif
-
 
 /** == Configuration == **/
 #define NETWORK_LOGGER 0
