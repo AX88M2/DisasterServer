@@ -35,10 +35,9 @@ void LobbyState::enter() {
                 client->disconnect(DisconnectReason::SERVERTIMEOUT);
             }
         } else {
-            /*
-            if (v->id != server.game.exe)
-                v->exe_chance += 2 + rand() % 5;
-            */
+            if (client->getId() != stateController.getLatestExe()) {
+                client->setExeChance(client->getExeChance() + (2 + server.getRandom().nextInt(0, 5)));
+            }
 
             Packet pack(PacketType::SERVER_LOBBY_EXE_CHANCE);
             pack.write<uint8_t>(client->getExeChance());
