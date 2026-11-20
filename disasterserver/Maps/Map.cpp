@@ -15,14 +15,14 @@ void Map::checkOpeningBigring() {
     }
 }
 
-void Map::setupContext() {
-    const auto currentState = server.getStateController().getState<GameState>();
+void Map::setupContext(StateController &controller) {
+    const auto currentState = controller.getState<GameState>();
 
-    if (server.getStateController().isState<GameState>()) {
+    if (controller.isState<GameState>()) {
         state = currentState;
         return;
     }
 
-    Info("currentState is not GameState");
-    server.getStateController().changeTo<LobbyState>();
+    Warn("currentState is not GameState");
+    controller.changeTo<LobbyState>();
 }

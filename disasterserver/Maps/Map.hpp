@@ -6,6 +6,7 @@ namespace DisasterServer
     class Client;
     class Packet;
     class GameState;
+    class StateController;
 
     struct MapProperties {
         int spawnRedRings = 0;
@@ -98,6 +99,6 @@ namespace DisasterServer
         virtual MapProperties getMapProperties() const = 0;
         const std::string& getName() const { return name; }
     private:
-        void setupContext();
+        void setupContext(StateController &controller);
     };
 }
