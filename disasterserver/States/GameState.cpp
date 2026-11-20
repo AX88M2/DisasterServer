@@ -715,7 +715,7 @@ bool GameState::handle(Client& client, Packet& packet) {
                 player.delFlag(Player::Flags::PLAYER_DEAD);
             }
 
-            RAssert(checkState());
+            checkState();
             break;
         }
 
