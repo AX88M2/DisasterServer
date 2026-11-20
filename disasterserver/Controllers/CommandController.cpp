@@ -2,6 +2,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "Core/Log.hpp"
+
 #include "Commands/Ban.hpp"
 #include "Commands/Kick.hpp"
 #include "Commands/Op.hpp"
@@ -11,7 +13,7 @@
 #include "Commands/SelfOp.hpp"
 #include "Commands/Map.hpp"
 #include "Commands/Debug.hpp"
-#include "Core/Log.hpp"
+#include "Commands/ExeChance.hpp"
 
 using namespace DisasterServer;
 
@@ -27,6 +29,7 @@ CommandController::CommandController(Server &server, StateController &stateContr
     this->registerCommand<Commands::SelfOp>();
     this->registerCommand<Commands::Map>();
     this->registerCommand<Commands::Debuging>();
+    this->registerCommand<Commands::ExeChance>();
 }
 
 bool CommandController::process(Client &client, std::string &message) {
