@@ -454,7 +454,7 @@ bool GameState::checkStart() {
         this->ringCoff = mapRingCoff;
         this->gameTime.start((time + ((this->server.getInGameCount() - 1) * mul)));
 
-        currentMap->setupContext();
+        currentMap->setupContext(stateController);
         currentMap->init();
 
         Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
