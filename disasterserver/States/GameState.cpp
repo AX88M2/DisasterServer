@@ -745,7 +745,7 @@ bool GameState::handle(Client& client, Packet& packet) {
             pack2.write<clientId>(client.getId());
             pack2.sendBroadcast(server);
 
-            RAssert(checkState());
+            checkState();
             break;
         }
 
