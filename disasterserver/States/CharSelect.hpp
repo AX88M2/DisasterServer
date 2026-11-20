@@ -31,7 +31,7 @@ namespace DisasterServer
         bool checkState();
         bool chooseExe();
 
-        void selectSurvival(Client& client, SurvCharacters survChar);
-        void selectExe(Client &client, ExesCharacters charExe);
+        static void selectSurvival(Client& client, SurvCharacters survChar);
+        static void selectExe(Client &client, ExesCharacters charExe);
     };
 }

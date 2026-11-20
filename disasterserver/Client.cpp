@@ -33,26 +33,22 @@ bool Client::identity(Packet &packet) {
         return false;
     }
 
-    const uint16_t buildVersion = packet.read<uint16_t>();
-    const int32_t serverIndex = packet.read<int32_t>();
-    const std::string nickname = packet.readString();
-    const std::string udid = packet.readString();
-    const uint8_t lobbyIcon = packet.read<uint8_t>();
-    const int8_t pet = packet.read<int8_t>();
-
     shouldTimeout = true;
     isModifiedClient = false;
-    this->nickname = std::format("{}~", nickname);
-    this->udid = udid;
-    this->lobbyIcon = lobbyIcon;
-    this->pet = pet;
+
+    const uint16_t buildVersion = packet.read<uint16_t>();
+    const int32_t serverIndex = packet.read<int32_t>();
+    this->nickname = std::format("{}~", packet.readString());
+    this->udid = packet.readString();
+    this->lobbyIcon = packet.read<uint8_t>();
+    this->pet = packet.read<int8_t>();
     this->op = server->getApp().getStorage().isOperator(*this);
 
-    uint64_t rawKeyA = packet.read<uint64_t>();
-    uint64_t rawKeyB = packet.read<uint64_t>();
+    [[maybe_unused]] uint64_t rawKeyA = packet.read<uint64_t>();
+    [[maybe_unused]] uint64_t rawKeyB = packet.read<uint64_t>();
 
     this->in_game = stateController.isState<LobbyState>();
-    this->exeChance = 1 + server->getRandom().nextInt(0, 4);
+    this->exeChance = 1 + static_cast<uint8_t>(server->getRandom().nextInt(0, 4));
 
     if (this->server->getClients().size() >= MAX_PLAYERS) {
         this->disconnect(DisconnectReason::LOBBYFULL);

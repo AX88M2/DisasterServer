@@ -22,7 +22,7 @@ namespace DisasterServer
         Random random;
 
         Application &application = Application::getInstance();
-
+        
         std::vector<std::unique_ptr<Client>> clients;
         MapController mapController;
         StateController stateController;
