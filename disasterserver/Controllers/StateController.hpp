@@ -15,7 +15,6 @@ namespace DisasterServer
         Y = 1547,
         NO = 47727,
         N = 1536,
-        EXE = 1471268,
     };
 
     class StateController {
