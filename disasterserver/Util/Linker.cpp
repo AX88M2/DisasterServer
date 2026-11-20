@@ -3,7 +3,7 @@
 using namespace DisasterServer;
 
 Linker::Linker(const std::string &name) {
-#if WIN32
+#if _WIN32
     handle = LoadLibrary(name.c_str());
 #else
     handle = (Handle)dlopen(name.c_str(), RTLD_LOCAL | RTLD_LAZY);
@@ -12,7 +12,7 @@ Linker::Linker(const std::string &name) {
 
 Linker::~Linker() {
     if (handle != nullptr) {
-#if WIN32
+#if _WIN32
         FreeLibrary(handle);
 #else
         dlclose(handle);
@@ -21,7 +21,7 @@ Linker::~Linker() {
 }
 
 std::string Linker::getError() {
-#if WIN32
+#if _WIN32
     return getLastErrorAsString();
 #else
     return std::string(dlerror());
@@ -30,7 +30,7 @@ std::string Linker::getError() {
 
 void *Linker::getSymbol(const std::string &symbol) {
     void* func = nullptr;
-#if WIN32
+#if _WIN32
     func = reinterpret_cast<void *>(GetProcAddress(handle, symbol.c_str()));
 #else
     func = reinterpret_cast<void *>(dlsym(handle, symbol.c_str()));
@@ -43,7 +43,7 @@ void *Linker::getSymbol(const std::string &symbol) {
     return nullptr;
 }
 
-#if WIN32
+#if _WIN32
 std::string Linker::getLastErrorAsString() {
     // Get the error message ID, if any.
     DWORD errorMessageID = GetLastError();

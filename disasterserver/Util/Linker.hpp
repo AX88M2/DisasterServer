@@ -5,7 +5,7 @@
 #else
 #include <dlfcn.h>
 #endif
-#if WIN32
+#if _WIN32
 using Handle = HMODULE;
 #else
 using Handle = void*;
@@ -27,7 +27,7 @@ namespace DisasterServer
         }
     private:
         void *getSymbol(const std::string &symbol);
-#if WIN32
+#if _WIN32
         static std::string getLastErrorAsString();
 #endif
     };

@@ -60,7 +60,7 @@ namespace DisasterServer
             case DisconnectReason::BANNEDBYHOST: return "BANNED BY HOST";
             case DisconnectReason::VERMISMATCH: return "VER MISMATCH";
             case DisconnectReason::SERVERTIMEOUT: return "SERVER TIMEOUT";
-            case DisconnectReason::PACKETSNOTRECV: return "PACKET SNOT RECV";
+            case DisconnectReason::PACKETSNOTRECV: return "PACKETS NOT RECV";
             case DisconnectReason::GAMESTARTED: return "GAME STARTED";
             case DisconnectReason::AFKTIMEOUT: return "AFK TIMEOUT";
             case DisconnectReason::LOBBYFULL: return "LOBBY FULL";
