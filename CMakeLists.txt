@@ -76,4 +76,3 @@ find_package(Boost REQUIRED COMPONENTS bind algorithm lexical_cast)
 find_package(SqliteOrm CONFIG REQUIRED)
 
 add_subdirectory(disasterserver)
-add_subdirectory(disasterserver_c/)
