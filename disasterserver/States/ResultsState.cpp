@@ -152,7 +152,11 @@ bool ResultsState::sendResult(Client &client, Client &data, bool hasQuit) {
     Packet packet(PacketType::SERVER_RESULTS_DATA);
 
     packet.writeString(std::format("{}", data.getNickname()));
-    packet.write<uint8_t>(data.getExeCharacter() != ExesCharacters::NONE ? static_cast<uint8_t>(data.getExeCharacter()) : static_cast<uint8_t>(data.getSurvCharacter()));
+    if (data.getExeCharacter() != ExesCharacters::NONE) {
+        packet.write<uint8_t>(static_cast<uint8_t>(data.getExeCharacter()));
+    } else {
+        packet.write<uint8_t>(static_cast<uint8_t>(data.getSurvCharacter()));
+    }
     packet.write<Ending>(ending);
     packet.write<uint16_t>(mapTimeSec);
     packet.write<uint8_t>(hasQuit);
