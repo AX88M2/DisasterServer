@@ -1,5 +1,6 @@
 import type.magic;
 import type.types.c;
+import type.time;
 import std.string;
 
 enum PacketType : uint8_t
@@ -223,6 +224,17 @@ struct Packet {
             ;
 
         uint8_t buffer[256 - fixedSize] [[hidden]];
+    } else if(type == PacketType::CLIENT_CHAT_MESSAGE) {
+        uint16_t clientID;
+        char message[];
+
+        size_t fixedSize =
+            sizeof(uint8_t)  +
+            sizeof(PacketType) +
+            sizeof(uint16_t)
+            ;
+
+        uint8_t buffer[256 - (fixedSize + (std::string::length(message) + 1))] [[hidden]];
     } else {
         size_t fixedSize =
             sizeof(uint8_t)  +
@@ -234,7 +246,7 @@ struct Packet {
 
 struct EntryTrace {
     bool received;
-    uint64_t timestamp;
+    type::time64_t timestamp;
     Packet packet;
 };
 

@@ -15,7 +15,7 @@ namespace DisasterServer
 
         struct EntryTrace {
             bool received;
-            uint64_t timestamp;
+            int64_t timestamp;
             uint8_t buffer[PACKET_MAXSIZE];
         };
 #pragma pack(pop)
@@ -28,5 +28,7 @@ namespace DisasterServer
         void initialize();
         void addRecord(bool received, const std::array<uint8_t, PACKET_MAXSIZE> &buffer);
         void save();
+    private:
+        static int64_t timestamp();
     };
 }
