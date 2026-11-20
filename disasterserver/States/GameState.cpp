@@ -66,8 +66,9 @@ void GameState::enter() {
 
         auto &player = client->getPlayer();
 
-        if (client->getId() == exeId)
+        if (client->getId() == exeId) {
             player.setFlag(Player::Flags::PLAYER_KILLER);
+        }
 
         player.setReady(false);
     }
