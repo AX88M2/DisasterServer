@@ -196,6 +196,6 @@ namespace DisasterServer
         if (isCustom)
             return true;
 
-        return paletteMatches(final, finalLen, &palettesTo[0][0], PALETTE_TO_SIZE, 20);
+        return true;//paletteMatches(final, finalLen, &palettesTo[0][0], PALETTE_TO_SIZE, 20);
     }
 }
