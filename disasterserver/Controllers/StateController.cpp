@@ -115,7 +115,7 @@ bool StateController::handle(Client &client, Packet &packet) {
                 if (c->getId() == pid) {
                     server.getApp().getStorage().addOperator(*c);
                     c->setOperator(true);
-                    server.sendMessage(client, "{}you're an operator now", CLRCODE_GRN);
+                    server.sendMessage(*c, "{}you're an operator now", CLRCODE_GRN);
                 }
             }
 
