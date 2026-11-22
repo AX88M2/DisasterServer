@@ -154,7 +154,7 @@ void MapVoteState::tick() {
             mapController.setMapWeight(*wonMap, weight);
 
             Debug("Pickrates:");
-            for (int8_t i = 0; i < mapController.getMapCount(); i++) {
+            for (int i = 0; i < mapController.getMapCount(); i++) {
                 auto map = mapController.getMap(i);
 
                 if (!map.has_value()) {
