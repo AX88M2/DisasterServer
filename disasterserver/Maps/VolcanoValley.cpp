@@ -16,10 +16,10 @@ void VolcanoValley::init() {
         state->getEntityController().spawnEntity<Entities::Vase>(Vector2(), i);
     }
 
-    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(736, 130), 0);
-    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1388, 130), 1);
-    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1524, 130), 2);
-    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(1084, 130), 3);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(130, 736), 0);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(130, 1388), 1);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(130, 1524), 2);
+    state->getEntityController().spawnEntity<Entities::Lava>(Vector2(130, 1084), 3);
 }
 
 void VolcanoValley::tick() {

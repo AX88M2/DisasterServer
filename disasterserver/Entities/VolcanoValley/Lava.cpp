@@ -9,6 +9,8 @@ using namespace DisasterServer::Entities;
 Lava::Lava(entityId id, Server &server, GameState &state, const Vector2 &position, uint8_t lid) :
     Entity(id, server, state, "lava", position),
     lid(lid),
+    start(position.y),
+    dist(position.x),
     timer(20 + server.getRandom().nextInt(0, 5) * TICKS_PER_SEC) {}
 
 Lava::~Lava() = default;
