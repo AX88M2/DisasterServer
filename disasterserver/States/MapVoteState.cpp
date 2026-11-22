@@ -32,7 +32,11 @@ void MapVoteState::enter() {
         int attempts = 0;
 
         while (count < 3 && attempts++ < 1000) {
-            int8_t mapid = server.getRandom().nextInt(0, static_cast<int>(mapController.getMapCount()));
+            int mapid = server.getRandom().nextInt(0, static_cast<int>(mapController.getMapCount()));
+
+            if (mapid == mapController.getMapCount()) {
+                continue;
+            }
 
             auto map = mapController.getMap(mapid);
 
