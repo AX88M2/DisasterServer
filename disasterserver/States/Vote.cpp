@@ -64,5 +64,5 @@ bool Vote::tick() {
 }
 
 bool Vote::check() {
-    return votes.size() * 2 > (votedTotal / 2.0);
+    return votes.size() > (votedTotal / static_cast<size_t>(2));
 }
