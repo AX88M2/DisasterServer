@@ -25,9 +25,9 @@ namespace DisasterServer::Entities
         TailsDoll(entityId id, Server &server, GameState &ctx, const Vector2 &position);
         ~TailsDoll() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
     private:
         void findSpot();

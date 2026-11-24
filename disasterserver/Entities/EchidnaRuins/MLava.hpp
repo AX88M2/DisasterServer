@@ -26,8 +26,8 @@ namespace DisasterServer::Entities
         MLava(entityId id, Server &server, GameState &state, const Vector2 &position, float start, float dist);
         ~MLava() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
     };
 }

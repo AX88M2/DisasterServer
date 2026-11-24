@@ -10,13 +10,13 @@ using namespace DisasterServer::Entities;
 KafBox::KafBox(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t nid) :
     Entity(id, server, state, "kafbox", pos), nid(nid) {}
 
-bool KafBox::init() {
+bool KafBox::create() {
     Packet pack(PacketType::SERVER_KAFMONITOR_STATE);
     pack.write<uint8_t>(0);
     pack.write<uint8_t>(nid);
     pack.sendBroadcast(server, true);
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool KafBox::tick() {

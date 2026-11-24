@@ -13,7 +13,7 @@ namespace DisasterServer::Entities
         Ring(entityId id, Server &server, GameState &state, const Vector2 &position, bool red = false);
         ~Ring() override;
 
-        bool init() override;
-        bool uninit() override;
+        bool create() override;
+        bool destroy() override;
     };
 }

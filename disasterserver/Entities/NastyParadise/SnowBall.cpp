@@ -14,13 +14,13 @@ SnowBall::SnowBall(entityId id, Server &server, GameState &state, const Vector2 
 
 SnowBall::~SnowBall() = default;
 
-bool SnowBall::init() {
+bool SnowBall::create() {
     for (int i = 0; i < 20; i++) {
         this->pMove[i] = 0.05f;
         this->pAnim[i] = 0.35f;
     }
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool SnowBall::tick() {
@@ -76,8 +76,8 @@ bool SnowBall::tick() {
     return Entity::tick();
 }
 
-bool SnowBall::uninit() {
-    return Entity::uninit();
+bool SnowBall::destroy() {
+    return Entity::destroy();
 }
 
 void SnowBall::activate() {

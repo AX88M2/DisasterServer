@@ -11,8 +11,8 @@ Ice::Ice(entityId id, Server &server, GameState &state, const Vector2 &position,
 
 Ice::~Ice() = default;
 
-bool Ice::init() {
-    return Entity::init();
+bool Ice::create() {
+    return Entity::create();
 }
 
 bool Ice::tick() {
@@ -35,8 +35,8 @@ bool Ice::tick() {
     return Entity::tick();
 }
 
-bool Ice::uninit() {
-    return Entity::uninit();
+bool Ice::destroy() {
+    return Entity::destroy();
 }
 
 bool Ice::activate() {

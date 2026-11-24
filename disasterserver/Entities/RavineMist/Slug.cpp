@@ -15,7 +15,7 @@ Slug::Slug(entityId id, Server &server, GameState &state, const Vector2 &positio
 Slug::~Slug() {
 }
 
-bool Slug::init() {
+bool Slug::create() {
     int num = server.getRandom().nextInt(0, 100);
 
     if (num < 50) {
@@ -37,7 +37,7 @@ bool Slug::init() {
     packet.write<State>(state);
     packet.sendBroadcast(server);
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool Slug::tick() {
@@ -73,7 +73,7 @@ bool Slug::tick() {
     return Entity::tick();
 }
 
-bool Slug::uninit() {
+bool Slug::destroy() {
     Packet packet(PacketType::SERVER_RMZSLIME_STATE);
     packet.write<uint8_t>(2);
     packet.write<entityId>(id);

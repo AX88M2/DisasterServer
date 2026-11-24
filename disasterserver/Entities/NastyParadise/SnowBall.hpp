@@ -28,9 +28,9 @@ namespace DisasterServer::Entities
                 int8_t dir, const std::array<float, 20> &pMove, const std::array<float, 20> &pAnim);
         ~SnowBall() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
         void activate();
     };

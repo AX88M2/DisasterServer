@@ -10,7 +10,7 @@ ExellerClone::ExellerClone(entityId id, Server &server, GameState &state, const 
 
 ExellerClone::~ExellerClone() = default;
 
-bool ExellerClone::init() {
+bool ExellerClone::create() {
     Packet pack(PacketType::SERVER_EXELLERCLONE_STATE);
     pack.write<uint8_t>(0);
     pack.write<entityId>(id);
@@ -19,9 +19,9 @@ bool ExellerClone::init() {
     pack.write<int8_t>(dir);
     pack.sendBroadcast(server);
 
-    return Entity::init();
+    return Entity::create();
 }
 
-bool ExellerClone::uninit() {
-    return Entity::uninit();
+bool ExellerClone::destroy() {
+    return Entity::destroy();
 }

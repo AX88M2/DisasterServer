@@ -16,8 +16,8 @@ namespace DisasterServer::Entities
         Acid(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~Acid() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
     };
 }

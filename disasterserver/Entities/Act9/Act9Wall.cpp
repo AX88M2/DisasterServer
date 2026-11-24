@@ -12,10 +12,10 @@ Act9Wall::Act9Wall(entityId id, Server &server, GameState &state, const Vector2 
 
 Act9Wall::~Act9Wall() = default;
 
-bool Act9Wall::init() {
+bool Act9Wall::create() {
     startTime = game.getGameTime().remaining() * TICKS_PER_SEC + game.getGameTime().remainingTicks();
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool Act9Wall::tick() {

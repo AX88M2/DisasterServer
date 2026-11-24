@@ -23,7 +23,7 @@ void EntityController::tick() {
 
     for (auto& entity : entities) {
         if (pendingRemoval.contains(entity->getId())) {
-            entity->uninit();
+            entity->destroy();
         }
     }
 

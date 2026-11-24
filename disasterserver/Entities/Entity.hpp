@@ -21,9 +21,9 @@ namespace DisasterServer
 
         virtual ~Entity() = default;
 
-        virtual bool init() { return true; }
+        virtual bool create() { return true; }
         virtual bool tick() { return true; }
-        virtual bool uninit() { return true; }
+        virtual bool destroy() { return true; }
 
         template<std::derived_from<Entity> T>
         bool is() const {

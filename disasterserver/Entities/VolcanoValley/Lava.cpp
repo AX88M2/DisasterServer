@@ -15,8 +15,8 @@ Lava::Lava(entityId id, Server &server, GameState &state, const Vector2 &positio
 
 Lava::~Lava() = default;
 
-bool Lava::init() {
-    return Entity::init();
+bool Lava::create() {
+    return Entity::create();
 }
 
 bool Lava::tick() {
@@ -99,6 +99,6 @@ bool Lava::tick() {
     return Entity::tick();
 }
 
-bool Lava::uninit() {
-    return Entity::uninit();
+bool Lava::destroy() {
+    return Entity::destroy();
 }

@@ -9,10 +9,10 @@ using namespace DisasterServer::Entities;
 
 PFLift::PFLift(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t lid, float start, float end) : Entity(id, server, state, "pflift", pos), lid(lid), start(start), end(end) {}
 
-bool PFLift::init() {
+bool PFLift::create() {
     position.y = start;
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool PFLift::tick() {

@@ -10,14 +10,14 @@ BlackRing::BlackRing(entityId id, Server &server, GameState &state, const Vector
 
 BlackRing::~BlackRing() = default;
 
-bool BlackRing::init() {
+bool BlackRing::create() {
     if (position == Vector2(mapBring, mapBring)) {
         Packet pack(PacketType::SERVER_BRING_STATE);
         pack.write<uint8_t>(0);
         pack.write<entityId>(id);
         pack.sendBroadcast(server);
 
-        return Entity::init();
+        return Entity::create();
     }
 
     Packet pack(PacketType::SERVER_ERECTOR_BRING_SPAWN);
@@ -25,14 +25,14 @@ bool BlackRing::init() {
     pack.writeVector2(position);
     pack.sendBroadcast(server);
 
-    return Entity::init();
+    return Entity::create();
 }
 
-bool BlackRing::uninit() {
+bool BlackRing::destroy() {
     Packet pack(PacketType::SERVER_BRING_STATE);
     pack.write<uint8_t>(1);
     pack.write<entityId>(id);
     pack.sendBroadcast(server);
 
-    return Entity::uninit();
+    return Entity::destroy();
 }

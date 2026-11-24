@@ -10,8 +10,8 @@ DTBall::DTBall(entityId id, Server &server, GameState &state, const Vector2 &pos
 
 DTBall::~DTBall() = default;
 
-bool DTBall::init() {
-    return Entity::init();
+bool DTBall::create() {
+    return Entity::create();
 }
 
 bool DTBall::tick() {
@@ -37,6 +37,6 @@ bool DTBall::tick() {
     return Entity::tick();
 }
 
-bool DTBall::uninit() {
-    return Entity::uninit();
+bool DTBall::destroy() {
+    return Entity::destroy();
 }

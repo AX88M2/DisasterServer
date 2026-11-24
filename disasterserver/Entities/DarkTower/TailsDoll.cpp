@@ -25,7 +25,7 @@ TailsDoll::TailsDoll(entityId id, Server &server, GameState &ctx, const Vector2 
 
 TailsDoll::~TailsDoll() = default;
 
-bool TailsDoll::init() {
+bool TailsDoll::create() {
     findSpot();
 
     Packet pack(PacketType::SERVER_DTTAILSDOLL_STATE);
@@ -34,7 +34,7 @@ bool TailsDoll::init() {
     pack.write<States>(state);
     pack.sendBroadcast(server, true);
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool TailsDoll::tick() {
@@ -122,8 +122,8 @@ bool TailsDoll::tick() {
     return Entity::tick();
 }
 
-bool TailsDoll::uninit() {
-    return Entity::uninit();
+bool TailsDoll::destroy() {
+    return Entity::destroy();
 }
 
 void TailsDoll::findSpot() {

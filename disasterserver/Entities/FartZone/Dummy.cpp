@@ -11,8 +11,8 @@ Dummy::Dummy(entityId id, Server &server, GameState &state, const Vector2 &posit
 
 Dummy::~Dummy() = default;
 
-bool Dummy::init() {
-    return Entity::init();
+bool Dummy::create() {
+    return Entity::create();
 }
 
 bool Dummy::tick() {
@@ -27,8 +27,8 @@ bool Dummy::tick() {
     return Entity::tick();
 }
 
-bool Dummy::uninit() {
-    return Entity::uninit();
+bool Dummy::destroy() {
+    return Entity::destroy();
 }
 
 void Dummy::activate(int8_t dir) {

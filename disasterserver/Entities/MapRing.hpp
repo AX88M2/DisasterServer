@@ -18,8 +18,8 @@ namespace DisasterServer::Entities
         MapRing(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~MapRing() override;
 
-        bool init() override;
-        bool uninit() override;
+        bool create() override;
+        bool destroy() override;
     };
 
 }

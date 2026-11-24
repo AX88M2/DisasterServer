@@ -36,9 +36,9 @@ namespace DisasterServer::Entities
         Slug(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~Slug() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
         Drop getDrop() const { return drop; }
 

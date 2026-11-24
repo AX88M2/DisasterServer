@@ -14,7 +14,7 @@ Stalactits::Stalactits(entityId id, Server &server, GameState &state, const Vect
 
 Stalactits::~Stalactits() = default;
 
-bool Stalactits::init() {
+bool Stalactits::create() {
 
     Packet pack(PacketType::SERVER_DTASS_STATE);
     pack.write<uint8_t>(0);
@@ -22,7 +22,7 @@ bool Stalactits::init() {
     pack.writeVector2(position);
     pack.sendBroadcast(server, true);
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool Stalactits::tick() {
@@ -87,8 +87,8 @@ bool Stalactits::tick() {
     return Entity::tick();
 }
 
-bool Stalactits::uninit() {
-    return Entity::uninit();
+bool Stalactits::destroy() {
+    return Entity::destroy();
 }
 
 bool Stalactits::activate() {

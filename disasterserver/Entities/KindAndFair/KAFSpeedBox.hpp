@@ -11,7 +11,7 @@ namespace DisasterServer::Entities
     public:
         KafBox(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t nid);
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
         bool activate(clientId pid, uint8_t isProj);
 

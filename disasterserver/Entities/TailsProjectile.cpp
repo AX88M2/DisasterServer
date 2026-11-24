@@ -10,7 +10,7 @@ using namespace DisasterServer::Entities;
 TProjectile::TProjectile(entityId id, Server &server, GameState &state, const Vector2 &pos, uint16_t owner, int8_t dir, uint8_t exe, uint8_t charge, uint8_t damage) :
     Entity(id, server, state, "tproj", pos), owner(owner), dir(dir), isExe(exe), charge(charge), damage(damage) {}
 
-bool TProjectile::init() {
+bool TProjectile::create() {
 
     Packet pack(PacketType::SERVER_TPROJECTILE_STATE);
     pack.write<uint8_t>(0);
@@ -22,7 +22,7 @@ bool TProjectile::init() {
     pack.write<uint8_t>(charge);
     pack.sendBroadcast(server, true);
 
-    return Entity::init();
+    return Entity::create();
 }
 
 bool TProjectile::tick() {
@@ -50,10 +50,10 @@ bool TProjectile::tick() {
     return Entity::tick();
 }
 
-bool TProjectile::uninit() {
+bool TProjectile::destroy() {
     Packet pack(PacketType::SERVER_TPROJECTILE_STATE);
     pack.write<uint8_t>(2);
     pack.sendBroadcast(server, true);
 
-    return Entity::uninit();
+    return Entity::destroy();
 }

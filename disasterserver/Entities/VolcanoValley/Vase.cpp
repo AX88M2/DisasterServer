@@ -10,14 +10,14 @@ Vase::Vase(entityId id, Server &server, GameState &state, const Vector2 &positio
 
 Vase::~Vase() = default;
 
-bool Vase::init() {
-    return Entity::init();
+bool Vase::create() {
+    return Entity::create();
 }
 
 bool Vase::tick() {
     return Entity::tick();
 }
 
-bool Vase::uninit() {
-    return Entity::uninit();
+bool Vase::destroy() {
+    return Entity::destroy();
 }

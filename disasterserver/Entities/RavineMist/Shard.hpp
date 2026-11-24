@@ -14,6 +14,6 @@ namespace DisasterServer::Entities
         Shard(entityId id, Server &server, GameState &state, const Vector2 &position, uint8_t spawned);
         ~Shard() override;
 
-        bool init() override;
+        bool create() override;
     };
 }

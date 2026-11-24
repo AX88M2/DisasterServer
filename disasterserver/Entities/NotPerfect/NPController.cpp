@@ -11,12 +11,12 @@ using namespace DisasterServer::Maps;
 NPController::NPController(entityId id, Server& server, GameState& state, const Vector2& pos, const std::string& tag) : Entity(id, server, state, tag, pos) {
 }
 
-bool NPController::init() {
-    return Entity::init();
+bool NPController::create() {
+    return Entity::create();
 }
 
-bool NPController::uninit() {
-    return Entity::uninit();
+bool NPController::destroy() {
+    return Entity::destroy();
 }
 
 bool NPController::tick()

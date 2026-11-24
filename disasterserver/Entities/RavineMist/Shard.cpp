@@ -10,7 +10,7 @@ Shard::Shard(entityId id, Server &server, GameState &state, const Vector2 &posit
 
 Shard::~Shard() = default;
 
-bool Shard::init() {
+bool Shard::create() {
     Packet pack(PacketType::SERVER_RMZSHARD_STATE);
     pack.write<uint8_t>(spawned);
     pack.write<entityId>(id);

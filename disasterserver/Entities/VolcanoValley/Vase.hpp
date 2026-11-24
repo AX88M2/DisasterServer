@@ -15,9 +15,9 @@ namespace DisasterServer::Entities
         Vase(entityId id, Server &server, GameState &state, const Vector2 &position, uint8_t vid);
         ~Vase() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
         uint8_t getVid() { return vid; }
         uint8_t getRings() { return rings; }

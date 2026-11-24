@@ -14,9 +14,9 @@ namespace DisasterServer::Entities
         Dummy(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~Dummy() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
         void activate(int8_t dir);
     };

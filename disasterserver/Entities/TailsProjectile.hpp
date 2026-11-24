@@ -21,8 +21,8 @@ namespace DisasterServer::Entities
     public:
         TProjectile(entityId id, Server &server, GameState &state, const Vector2 &pos, clientId owner, int8_t dir, uint8_t exe, uint8_t charge, uint8_t damage);
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
     };
 }

@@ -19,9 +19,9 @@ namespace DisasterServer::Entities
         Stalactits(entityId id, Server &server, GameState &state, const Vector2 &position, uint8_t sid);
         ~Stalactits() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
 
         bool activate();
 

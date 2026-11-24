@@ -16,7 +16,7 @@ namespace DisasterServer::Entities
     public:
         PFLift(entityId id, Server &server, GameState &state, const Vector2 &pos, uint8_t lid, float start, float end);
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
         bool activate(clientId pid);
 

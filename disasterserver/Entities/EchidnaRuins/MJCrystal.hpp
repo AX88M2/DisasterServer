@@ -16,8 +16,8 @@ namespace DisasterServer::Entities
         MJCrystal(entityId id, Server &server, GameState &state, const Vector2 &position);
         ~MJCrystal() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
     };
 }

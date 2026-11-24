@@ -18,8 +18,8 @@ namespace DisasterServer::Maps
     public:
         NPController(entityId id, Server& server, GameState& state, const Vector2& pos, const std::string& tag = "npctrl");
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
-        bool uninit() override;
+        bool destroy() override;
     };
 }

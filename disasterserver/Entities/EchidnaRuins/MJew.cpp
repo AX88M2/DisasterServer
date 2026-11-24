@@ -11,8 +11,8 @@ MJew::MJew(entityId id, Server &server, GameState &state, const Vector2 &positio
 
 MJew::~MJew() = default;
 
-bool MJew::init() {
-    return Entity::init();
+bool MJew::create() {
+    return Entity::create();
 }
 
 bool MJew::tick() {
@@ -51,6 +51,6 @@ bool MJew::tick() {
     return Entity::tick();
 }
 
-bool MJew::uninit() {
-    return Entity::uninit();
+bool MJew::destroy() {
+    return Entity::destroy();
 }

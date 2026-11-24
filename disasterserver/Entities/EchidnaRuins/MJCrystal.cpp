@@ -11,8 +11,8 @@ MJCrystal::MJCrystal(entityId id, Server &server, GameState &state, const Vector
 
 MJCrystal::~MJCrystal() = default;
 
-bool MJCrystal::init() {
-    return Entity::init();
+bool MJCrystal::create() {
+    return Entity::create();
 }
 
 bool MJCrystal::tick() {
@@ -33,6 +33,6 @@ bool MJCrystal::tick() {
     return Entity::tick();
 }
 
-bool MJCrystal::uninit() {
-    return Entity::uninit();
+bool MJCrystal::destroy() {
+    return Entity::destroy();
 }

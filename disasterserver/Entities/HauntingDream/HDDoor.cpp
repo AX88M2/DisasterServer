@@ -11,8 +11,8 @@ HDDoor::HDDoor(entityId id, Server &server, GameState &state, const Vector2 &pos
 HDDoor::~HDDoor() {
 }
 
-bool HDDoor::init() {
-    return Entity::init();
+bool HDDoor::create() {
+    return Entity::create();
 }
 
 bool HDDoor::tick() {
@@ -29,8 +29,8 @@ bool HDDoor::tick() {
     return Entity::tick();
 }
 
-bool HDDoor::uninit() {
-    return Entity::uninit();
+bool HDDoor::destroy() {
+    return Entity::destroy();
 }
 
 void HDDoor::toggle() {

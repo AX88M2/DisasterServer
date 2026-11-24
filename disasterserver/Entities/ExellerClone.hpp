@@ -15,8 +15,8 @@ namespace DisasterServer::Entities
         ExellerClone(entityId id, Server &server, GameState &state, const Vector2 &position, int8_t dir, clientId owner);
         ~ExellerClone() override;
 
-        bool init() override;
-        bool uninit() override;
+        bool create() override;
+        bool destroy() override;
 
         clientId getOwner() const { return owner; }
         int8_t getDir() const { return dir; }

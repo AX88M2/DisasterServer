@@ -10,8 +10,8 @@ Acid::Acid(entityId id, Server &server, GameState &state, const Vector2 &positio
 
 Acid::~Acid() = default;
 
-bool Acid::init() {
-    return Entity::init();
+bool Acid::create() {
+    return Entity::create();
 }
 
 bool Acid::tick() {
@@ -32,6 +32,6 @@ bool Acid::tick() {
     return Entity::tick();
 }
 
-bool Acid::uninit() {
+bool Acid::destroy() {
     return true;
 }

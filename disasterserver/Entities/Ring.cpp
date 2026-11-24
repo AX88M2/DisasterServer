@@ -10,7 +10,7 @@ Ring::Ring(entityId id, Server &server, GameState &state, const Vector2 &positio
 
 Ring::~Ring() = default;
 
-bool Ring::init() {
+bool Ring::create() {
     Packet pack(PacketType::SERVER_RING_STATE);
     pack.write<uint8_t>(2);
     pack.writeVector2(position);
@@ -19,15 +19,15 @@ bool Ring::init() {
     pack.write<uint8_t>(red);
     pack.sendBroadcast(server);
 
-    return Entity::init();
+    return Entity::create();
 }
 
-bool Ring::uninit() {
+bool Ring::destroy() {
     Packet pack(PacketType::SERVER_RING_STATE);
     pack.write<uint8_t>(1);
     pack.write<uint8_t>(rid);
     pack.write<entityId>(id);
     pack.sendBroadcast(server);
 
-    return Entity::uninit();
+    return Entity::destroy();
 }

@@ -11,8 +11,8 @@ MLava::MLava(entityId id, Server &server, GameState &state, const Vector2 &posit
 
 MLava::~MLava() = default;
 
-bool MLava::init() {
-    return Entity::init();
+bool MLava::create() {
+    return Entity::create();
 }
 
 bool MLava::tick() {
@@ -94,6 +94,6 @@ bool MLava::tick() {
     return Entity::tick();
 }
 
-bool MLava::uninit() {
-    return Entity::uninit();
+bool MLava::destroy() {
+    return Entity::destroy();
 }

@@ -10,8 +10,8 @@ Thunder::Thunder(entityId id, Server &server, GameState &state, const Vector2 &p
 
 Thunder::~Thunder() = default;
 
-bool Thunder::init() {
-    return Entity::init();
+bool Thunder::create() {
+    return Entity::create();
 }
 
 bool Thunder::tick() {
@@ -34,6 +34,6 @@ bool Thunder::tick() {
     return Entity::tick();
 }
 
-bool Thunder::uninit() {
-    return Entity::uninit();
+bool Thunder::destroy() {
+    return Entity::destroy();
 }

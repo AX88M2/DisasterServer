@@ -28,7 +28,7 @@ namespace DisasterServer
             ++entityIdCounter;
             auto ent = std::make_unique<T>(entityIdCounter, server, state, pos, std::forward<Args>(args)...);
 
-            if (!ent->init())
+            if (!ent->create())
                 return nullptr;
 
             T* raw = ent.get();

@@ -15,7 +15,7 @@ namespace DisasterServer::Entities
         Act9Wall(entityId id, Server &server, GameState &state, const Vector2 &position, uint8_t wid);
         ~Act9Wall() override;
 
-        bool init() override;
+        bool create() override;
         bool tick() override;
     };
 }
