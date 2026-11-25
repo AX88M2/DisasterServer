@@ -74,7 +74,7 @@ namespace DisasterServer
     }
 
     struct TicketAuth {
-        int32_t type = 0;
+        uint32_t type = 0;
         uint8_t	 one = 0;
         uint8_t	 two = 0;
     };
