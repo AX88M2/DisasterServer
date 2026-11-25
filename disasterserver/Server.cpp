@@ -255,7 +255,7 @@ void Server::sendMessage(Client &client, std::string message) {
     packet.send(client, true);
 }
 
-void Server::sendBroadcastMessage(clientId sender, std::string message) {
+void Server::sendBroadcastMessage(clientId sender, const std::string& message) {
     Packet packet(PacketType::CLIENT_CHAT_MESSAGE);
     packet.write<clientId>(sender);
     packet.writeString(message);

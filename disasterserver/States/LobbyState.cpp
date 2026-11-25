@@ -15,8 +15,6 @@ LobbyState::LobbyState(Server &server, ContextControllers ctx) : State(server, c
 
 LobbyState::~LobbyState() = default;
 
-constexpr int PRACTICE_MAP = 20;
-
 void LobbyState::enter() {
     Debug("Attepting to enter DisasterServer::LobbyState...");
 
@@ -285,41 +283,41 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 }
 
                 break;
+            }
+
+            bool found = false;
+            for (auto &c : this->server.getClients()) {
+                if (c->getId() == pid) {
+                    if (!c->isOperator()) {
+                        this->server.sendMessage(client, "you're permissionless");
+                        return true;
+                    }
+
+                    kickTarget = c->getId();
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                if (client.getVoteCooldown() > 0) {
+                    this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKS_PER_SEC));
+                    break;
+                }
+
+                if (!vote.init(VoteType::KICK, kickTarget)) {
+                    this->server.sendMessage(client, "{}not enough participants.", CLRCODE_RED);
+                    break;
+                }
+
+                this->server.sendBroadcastMessage(0, "{}~ `started kick vote.~", client.getNickname());
+                this->server.sendBroadcastMessage(0, "type @.yes~ or ignore");
+                this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
+
+                vote.add(client);
+                client.setVoteCooldown(20 * TICKS_PER_SEC);
             } else {
-                bool found = false;
-                for (auto &c : this->server.getClients()) {
-                    if (c->getId() == pid) {
-                        if (!c->isOperator()) {
-                            this->server.sendMessage(client, "you're permissionless");
-                            return true;
-                        }
-
-                        kickTarget = c->getId();
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    if (client.getVoteCooldown() > 0) {
-                        this->server.sendMessage(client, "you cannot start another vote for {}", static_cast<int>(client.getVoteCooldown() / TICKS_PER_SEC));
-                        break;
-                    }
-
-                    if (!vote.init(VoteType::KICK, kickTarget)) {
-                        this->server.sendMessage(client, "{}not enough participants.", CLRCODE_RED);
-                        break;
-                    }
-
-                    this->server.sendBroadcastMessage(0, "{}~ `started kick vote.~", client.getNickname());
-                    this->server.sendBroadcastMessage(0, "type @.yes~ or ignore");
-                    this->server.sendBroadcastMessage(0, "results will be summarized in @20~ sec");
-
-                    vote.add(client);
-                    client.setVoteCooldown(30 * TICKS_PER_SEC);
-                } else {
-                    this->server.sendBroadcastMessage(0, "{}specified player not found.", CLRCODE_RED);
-                }
+                this->server.sendBroadcastMessage(0, "{}specified player not found.", CLRCODE_RED);
             }
 
             break;

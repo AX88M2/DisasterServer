@@ -54,7 +54,7 @@ namespace DisasterServer
             return static_cast<T*>(current.get());
         }
 
-        CommandsHash cmdParse(std::string string);
+        static CommandsHash cmdParse(const std::string& string);
 
         void handleChat(Client &client, std::string& message, std::function<bool(CommandsHash, std::string &)> cmdProcessor);
         bool cmdHandle(Client& client, CommandsHash hash, const std::string& msg);

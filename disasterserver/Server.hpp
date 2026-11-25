@@ -37,7 +37,7 @@ namespace DisasterServer
         void disconnectById(clientId id, DisconnectReason reason, const std::string& message = "") const;
 
         void sendMessage(Client &client, std::string message);
-        void sendBroadcastMessage(clientId sender, std::string message);
+        void sendBroadcastMessage(clientId sender, const std::string& message);
 
         template <typename... Args>
         void sendMessage(Client &client, std::format_string<Args...> fmt, Args&&... args) {

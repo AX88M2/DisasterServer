@@ -145,7 +145,7 @@ bool StateController::handle(Client &client, Packet &packet) {
     return true;
 }
 
-CommandsHash StateController::cmdParse(std::string string) {
+CommandsHash StateController::cmdParse(const std::string& string) {
     std::string current;
     bool started = false;
 
