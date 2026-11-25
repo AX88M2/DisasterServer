@@ -37,6 +37,15 @@ set(COMPILER_OPTIONS
         >
 )
 
+set(LINKER_OPTIONS
+        $<$<CXX_COMPILER_ID:MSVC>:
+            /OPT:REF                        # Remove unreferenced functions and data during linking
+        >
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:
+            -Wl,--gc-sections               # Remove unused sections during linking
+        >
+)
+
 set(DEFINES
         $<$<CONFIG:Debug>:SERVER_DEBUG>
 )
@@ -96,6 +105,7 @@ else()
         target_compile_definitions(DisasterServerCXX PRIVATE ${DEFINES})
         target_include_directories(DisasterServerCXX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
         target_compile_options(DisasterServerCXX PRIVATE ${COMPILER_OPTIONS})
+        target_link_options(DisasterServerCXX PRIVATE ${LINKER_OPTIONS})
         target_precompile_headers(DisasterServerCXX PRIVATE Pch.hpp)
     endif()
 endif()
