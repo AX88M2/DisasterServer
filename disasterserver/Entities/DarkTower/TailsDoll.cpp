@@ -154,12 +154,12 @@ void TailsDoll::findSpot() {
         Vector2 spot = newSpots[randSpot];
 
         position = Vector2(spot);
-        Debug("Tails doll found spot {} at {} {}", randSpot, position.x, position.y);
+        LOG_DEBUG("Tails doll found spot {} at {} {}", randSpot, position.x, position.y);
     } else {
         Vector2 spot = spots[server.getRandom().nextInt(0, static_cast<int>(spots.size()) - 1)];
         position = Vector2(spot);
 
-        Debug("Tails doll didn't find a spot, using {} {}", position.x, position.y);
+        LOG_DEBUG("Tails doll didn't find a spot, using {} {}", position.x, position.y);
     }
 }
 

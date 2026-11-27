@@ -16,7 +16,7 @@ void LimpCity::init() {
     state->getEntityController().spawnEntity<Entities::LCEye>(Vector2(), 0);
     state->getEntityController().spawnEntity<Entities::LCEye>(Vector2(), 1);
     state->getEntityController().spawnEntity<Entities::LCChain>();
-    Debug("LimpCity: spawned 2 LCEye and 1 LCChain");
+    LOG_DEBUG("LimpCity: spawned 2 LCEye and 1 LCChain");
 }
 
 void LimpCity::tick() {

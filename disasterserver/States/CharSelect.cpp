@@ -29,10 +29,10 @@ CharSelectState::CharSelectState(Server &server, ContextControllers ctx, Map* ma
 CharSelectState::~CharSelectState() = default;
 
 void CharSelectState::enter() {
-    Debug("Attempting to enter DisasterServer::CharSelectState...");
+    LOG_DEBUG("Attempting to enter DisasterServer::CharSelectState...");
 
     if (!chooseExe()) {
-        Error("Failed to pick exe for some reason!");
+        LOG_ERROR("Failed to pick exe for some reason!");
 
         stateController.changeTo<LobbyState>();
         return;
@@ -49,7 +49,7 @@ void CharSelectState::enter() {
     timePack.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
     timePack.sendBroadcast(server);
 
-    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Character Select", CLRCODE_RST);
+    LOG_INFO("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Character Select", CLRCODE_RST);
 }
 
 void CharSelectState::exit() {
@@ -112,27 +112,27 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             uint8_t charExe = packet.read<uint8_t>();
             charExe--;
 
-            if (charExe > static_cast<uint8_t>(ExesCharacters::COUNT)) {
+            if (charExe > static_cast<uint8_t>(ExeCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid exe character");
                 return false;
             }
 
-            client.setExeCharacter(static_cast<ExesCharacters>(charExe));
-            selectExe(client, static_cast<ExesCharacters>(charExe));
+            client.setExeCharacter(static_cast<ExeCharacters>(charExe));
+            selectExe(client, static_cast<ExeCharacters>(charExe));
 
             Packet pack(PacketType::SERVER_LOBBY_EXECHARACTER_RESPONSE);
-            pack.write<ExesCharacters>(static_cast<ExesCharacters>(charExe));
+            pack.write<ExeCharacters>(static_cast<ExeCharacters>(charExe));
             if (!pack.send(client, true)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
+                LOG_WARN("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
 
             Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
             change.write<clientId>(client.getId());
-            change.write<ExesCharacters>(static_cast<ExesCharacters>(charExe));
+            change.write<ExeCharacters>(static_cast<ExeCharacters>(charExe));
             change.sendBroadcast(server, true);
 
-            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, client.getCharacter()->getName(), CLRCODE_RST);
+            LOG_INFO("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_RED, client.getCharacter()->getName(), CLRCODE_RST);
             return checkState();
         }
 
@@ -153,12 +153,12 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
             uint8_t charSurv = packet.read<uint8_t>();
             charSurv--;
 
-            if (charSurv > static_cast<uint8_t>(SurvCharacters::COUNT)) {
+            if (charSurv > static_cast<uint8_t>(SurvivalCharacters::COUNT)) {
                 client.disconnect(DisconnectReason::OTHER, "Invalid survivor character");
                 return false;
             }
 
-            SurvCharacters character = static_cast<SurvCharacters>(charSurv);
+            SurvivalCharacters character = static_cast<SurvivalCharacters>(charSurv);
 
             const bool available = !avail[character];
 
@@ -174,7 +174,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 return false;
 
             if (available) {
-                client.setSurvCharacter(static_cast<SurvCharacters>(charSurv));
+                client.setSurvCharacter(static_cast<SurvivalCharacters>(charSurv));
                 selectSurvival(client, character);
 
                 Packet change(PacketType::SERVER_LOBBY_CHARACTER_CHANGE);
@@ -183,7 +183,7 @@ bool CharSelectState::handle(Client& client, Packet& packet) {
                 change.sendBroadcast(server, true);
             }
 
-            Info("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, client.getCharacter()->getName(), CLRCODE_RST);
+            LOG_INFO("{} (id {}) choses [{}{}{}]!", client.getNickname(), client.getId(), CLRCODE_GRN, client.getCharacter()->getName(), CLRCODE_RST);
             return checkState();
         }
 
@@ -221,8 +221,8 @@ bool CharSelectState::chooseExe() {
         if (!client || !client->isInGame())
             continue;
 
-        client->setExeCharacter(ExesCharacters::NONE);
-        client->setSurvCharacter(SurvCharacters::NONE);
+        client->setExeCharacter(ExeCharacters::NONE);
+        client->setSurvCharacter(SurvivalCharacters::NONE);
 
         client->setCharacter<Characters::None>();
 
@@ -234,7 +234,7 @@ bool CharSelectState::chooseExe() {
 
     uint32_t rnd = static_cast<uint32_t>(server.getRandom().nextInt(0, static_cast<int32_t>(weight)));
 
-    for (auto& client : server.getClients()) {
+    for (const auto& client : server.getClients()) {
         if (!client || !client->isInGame())
             continue;
 
@@ -244,7 +244,7 @@ bool CharSelectState::chooseExe() {
         }
 
         if (rnd < client->getExeChance() && !client->isModified()) {
-            Info("{} (id {}, c {}) is exe!", client->getNickname(), client->getId(), client->getExeChance());
+            LOG_INFO("{} (id {}, c {}) is exe!", client->getNickname(), client->getId(), client->getExeChance());
 
             client->setExeChance(1 + server.getRandom().nextInt(0, 1));
 
@@ -259,27 +259,27 @@ bool CharSelectState::chooseExe() {
     return false;
 }
 
-void CharSelectState::selectSurvival(Client &client, SurvCharacters survChar) {
+void CharSelectState::selectSurvival(Client &client, SurvivalCharacters survChar) {
     switch (survChar) {
-        case SurvCharacters::NONE: client.setCharacter<Characters::None>(); break;
-        case SurvCharacters::TAILS: client.setCharacter<Characters::Tails>(); break;
-        case SurvCharacters::KNUX: client.setCharacter<Characters::Knuckles>(); break;
-        case SurvCharacters::EGGMAN: client.setCharacter<Characters::Eggman>(); break;
-        case SurvCharacters::AMY: client.setCharacter<Characters::AmyRose>(); break;
-        case SurvCharacters::CREAM: client.setCharacter<Characters::Cream>(); break;
-        case SurvCharacters::SALLY: client.setCharacter<Characters::Sally>(); break;
+        case SurvivalCharacters::NONE: client.setCharacter<Characters::None>(); break;
+        case SurvivalCharacters::TAILS: client.setCharacter<Characters::Tails>(); break;
+        case SurvivalCharacters::KNUCKLES: client.setCharacter<Characters::Knuckles>(); break;
+        case SurvivalCharacters::EGGMAN: client.setCharacter<Characters::Eggman>(); break;
+        case SurvivalCharacters::AMY: client.setCharacter<Characters::AmyRose>(); break;
+        case SurvivalCharacters::CREAM: client.setCharacter<Characters::Cream>(); break;
+        case SurvivalCharacters::SALLY: client.setCharacter<Characters::Sally>(); break;
 
 
         default: client.setCharacter<Characters::UndefinedSurvival>(); break;
     }
 }
 
-void CharSelectState::selectExe(Client &client, const ExesCharacters charExe) {
+void CharSelectState::selectExe(Client &client, const ExeCharacters charExe) {
     switch (charExe) {
-        case ExesCharacters::ORIGINAL: client.setCharacter<Characters::Original>(); break;
-        case ExesCharacters::CHAOS: client.setCharacter<Characters::Chaos>(); break;
-        case ExesCharacters::EXETIOR: client.setCharacter<Characters::Exetior>(); break;
-        case ExesCharacters::EXELLER: client.setCharacter<Characters::Exeller>(); break;
+        case ExeCharacters::ORIGINAL: client.setCharacter<Characters::Original>(); break;
+        case ExeCharacters::CHAOS: client.setCharacter<Characters::Chaos>(); break;
+        case ExeCharacters::EXETIOR: client.setCharacter<Characters::Exetior>(); break;
+        case ExeCharacters::EXELLER: client.setCharacter<Characters::Exeller>(); break;
 
 
         default: client.setCharacter<Characters::UndefinedExe>(); break;

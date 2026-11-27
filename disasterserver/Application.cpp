@@ -35,14 +35,14 @@ namespace DisasterServer
             });
         }
 
-        Info("Application initialized successfully. Main loop started.");
+        LOG_INFO("Application initialized successfully. Main loop started.");
 
 
         while (isRunning) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        Info("Stopping application...");
+        LOG_INFO("Stopping application...");
 
         {
             std::lock_guard lock(server_mutex);
@@ -69,7 +69,7 @@ namespace DisasterServer
         PacketTracer::getInstance().save();
 #endif
 
-        Info("Application stopped completely.");
+        LOG_INFO("Application stopped completely.");
     }
 
     void Application::stop() {

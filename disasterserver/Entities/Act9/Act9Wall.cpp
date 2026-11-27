@@ -56,7 +56,7 @@ bool Act9Wall::tick() {
             break;
         }
         default: {
-            Error("Invalid wall id!");
+            LOG_ERROR("Invalid wall id!");
             return false;
         }
     }

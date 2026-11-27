@@ -25,6 +25,6 @@ void Lobby::execute(Client &client, CommandArguments &args) {
     pack.write<uint32_t>(port);
 
     if (!pack.send(client, true)) {
-        Warn("Failed to send lobby change packet to {} (id {})", client.getNickname(), client.getId());
+        LOG_WARN("Failed to send lobby change packet to {} (id {})", client.getNickname(), client.getId());
     }
 }

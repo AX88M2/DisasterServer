@@ -19,7 +19,7 @@ void Tails::tick() {
     const auto result = countdown.tick(server.getDelta());
 
     if (result == TickResult::Finished) {
-        Debug("Laser is charged!");
+        LOG_DEBUG("Laser is charged!");
     }
 }
 

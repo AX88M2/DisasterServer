@@ -24,7 +24,7 @@ ResultsState::ResultsState(Server &server, ContextControllers ctx,
 ResultsState::~ResultsState() = default;
 
 void ResultsState::enter() {
-    Debug("Attepting to enter DisasterServer::ResultsState...");
+    LOG_DEBUG("Attepting to enter DisasterServer::ResultsState...");
 
     countdown.start(15);
 
@@ -32,7 +32,7 @@ void ResultsState::enter() {
     packet.write(id);
     packet.sendBroadcast(server);
 
-    Info("Server is now in {}Results", CLRCODE_PUR);
+    LOG_INFO("Server is now in {}Results", CLRCODE_PUR);
 }
 
 void ResultsState::exit() {
@@ -41,8 +41,8 @@ void ResultsState::exit() {
             continue;
         }
 
-        client->setSurvCharacter(SurvCharacters::NONE);
-        client->setExeCharacter(ExesCharacters::NONE);
+        client->setSurvCharacter(SurvivalCharacters::NONE);
+        client->setExeCharacter(ExeCharacters::NONE);
         client->setCharacter<Characters::None>();
     }
 }
@@ -152,7 +152,7 @@ bool ResultsState::sendResult(Client &client, Client &data, bool hasQuit) {
     Packet packet(PacketType::SERVER_RESULTS_DATA);
 
     packet.writeString(std::format("{}", data.getNickname()));
-    if (data.getExeCharacter() != ExesCharacters::NONE) {
+    if (data.getExeCharacter() != ExeCharacters::NONE) {
         packet.write<uint8_t>(static_cast<uint8_t>(data.getExeCharacter()));
     } else {
         packet.write<uint8_t>(static_cast<uint8_t>(data.getSurvCharacter()));

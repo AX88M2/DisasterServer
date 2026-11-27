@@ -64,11 +64,11 @@ namespace DisasterServer
         template <std::derived_from<Entity> T>
         size_t findCount() {
             const auto count = std::ranges::count_if(entities, [](const auto &entity) {
-                Debug("Search {} (id {}) vs {}", entity->getTag(), entity->getId(), typeid(T).name());
+                LOG_DEBUG("Search {} (id {}) vs {}", entity->getTag(), entity->getId(), typeid(T).name());
                 return entity->template is<T>();
             });
 
-            Debug("Search for \"{}\" found {} entities", typeid(T).name(), count);
+            LOG_DEBUG("Search for \"{}\" found {} entities", typeid(T).name(), count);
             return count;
         }
 

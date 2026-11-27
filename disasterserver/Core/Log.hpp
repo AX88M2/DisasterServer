@@ -114,11 +114,11 @@ namespace DisasterServer
     };
 }
 
-#define Info(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
-#define Warn(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
-#define Error(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define LOG_INFO(fmt, ...) ::DisasterServer::Logger::info(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define LOG_WARN(fmt, ...) ::DisasterServer::Logger::warning(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define LOG_ERROR(fmt, ...) ::DisasterServer::Logger::error(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
 #if defined(SERVER_DEBUG)
-#define Debug(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
+#define LOG_DEBUG(fmt, ...) ::DisasterServer::Logger::debug(std::source_location::current(), fmt __VA_OPT__(,) __VA_ARGS__)
 #else
-#define Debug(fmt, ...) (void)0
+#define LOG_DEBUG(fmt, ...) (void)0
 #endif

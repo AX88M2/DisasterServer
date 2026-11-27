@@ -35,10 +35,10 @@ namespace DisasterServer
                 try {
                    return boost::lexical_cast<T>(arguments[id]);
                 } catch (boost::bad_lexical_cast &e) {
-                    Error("Failed get argument: {}", e.what());
+                    LOG_ERROR("Failed get argument: {}", e.what());
                     return defaultValue;
                 } catch (std::exception &e) {
-                    Error("{}", e.what());
+                    LOG_ERROR("{}", e.what());
                     return defaultValue;
                 }
 

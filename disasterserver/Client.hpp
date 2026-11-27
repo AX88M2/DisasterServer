@@ -10,11 +10,11 @@ namespace DisasterServer
 {
     class PacketHandler;
 
-    enum class SurvCharacters {
+    enum class SurvivalCharacters {
         NONE = -1,
 
         TAILS,
-        KNUX,
+        KNUCKLES,
         EGGMAN,
         AMY,
         CREAM,
@@ -23,7 +23,7 @@ namespace DisasterServer
         COUNT
     };
 
-    enum class ExesCharacters {
+    enum class ExeCharacters {
         NONE = -1,
 
         ORIGINAL,
@@ -53,7 +53,7 @@ namespace DisasterServer
         OTHER = 255
     };
 
-    inline std::string getDisconnectReasonName(DisconnectReason reason) {
+    inline std::string toStringDisconnectReason(DisconnectReason reason) {
         switch (reason) {
             case DisconnectReason::FAILEDTOCONNECT: return "FAILED TO CONNECT";
             case DisconnectReason::KICKEDBYHOST: return "KICKED BY HOST";
@@ -105,15 +105,15 @@ namespace DisasterServer
         TicketAuth ticketAuth = {};
 
         /* Character */
-        SurvCharacters survChar = SurvCharacters::NONE;
-        ExesCharacters exeChar = ExesCharacters::NONE;
+        SurvivalCharacters survChar = SurvivalCharacters::NONE;
+        ExeCharacters exeChar = ExeCharacters::NONE;
         std::shared_ptr<Character> character;
 
         bool shouldTimeout = false;
 
         /* State info */
         uint8_t exeChance = 0;
-        double timeout = 0;
+        double afkTimeout = 0;
         double voteCooldown = 0;
 
         Server *server = nullptr;
@@ -139,10 +139,10 @@ namespace DisasterServer
         void setExeChance(const uint8_t chance) { exeChance = chance; }
         uint8_t getExeChance() const { return exeChance; }
 
-        SurvCharacters getSurvCharacter() const { return survChar; }
-        void setSurvCharacter(const SurvCharacters ch) { survChar = ch; }
-        ExesCharacters getExeCharacter() const { return exeChar; }
-        void setExeCharacter(const ExesCharacters ch) { exeChar = ch; }
+        SurvivalCharacters getSurvCharacter() const { return survChar; }
+        void setSurvCharacter(const SurvivalCharacters ch) { survChar = ch; }
+        ExeCharacters getExeCharacter() const { return exeChar; }
+        void setExeCharacter(const ExeCharacters ch) { exeChar = ch; }
 
         std::shared_ptr<Character> getCharacter() const { return character; }
         template <std::derived_from<Character> T>
@@ -154,8 +154,8 @@ namespace DisasterServer
             return dynamic_cast<T *>(character.get()) != nullptr;
         }
 
-        void setTimeout(const double value) { timeout = value; }
-        double getTimeout() const { return timeout; }
+        void setAfkTimeout(const double value) { afkTimeout = value; }
+        double getAfkTimeout() const { return afkTimeout; }
         bool isShouldTimeout() const { return shouldTimeout; }
         bool isDisconnecting() const { return disconnecting; }
         void setVoteCooldown(const double value) { voteCooldown = value; }
@@ -183,7 +183,7 @@ namespace DisasterServer
 
     private:
         bool identity(Packet &packet);
-        bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout);
+        bool identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool doTimeout);
         bool received(Packet &packet);
     };
 }

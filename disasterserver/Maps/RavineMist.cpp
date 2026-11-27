@@ -92,12 +92,12 @@ void RavineMist::handle(Client &client, Packet &packet) {
             auto &player = client.getPlayer();
 
             if (!state->getEntityController().despawnEntity(eid)) {
-                Debug("ignoring entity {}", eid);
+                LOG_DEBUG("ignoring entity {}", eid);
                 break;
             }
 
             player.getUserdata().shards++;
-            Debug("Add shards {}", player.getUserdata().shards);
+            LOG_DEBUG("Add shards {}", player.getUserdata().shards);
 
             Packet pack(PacketType::SERVER_RMZSHARD_STATE);
             pack.write<uint8_t>(2);
@@ -158,7 +158,7 @@ void RavineMist::spawnShards(Client &client) {
     auto &player = client.getPlayer();
     for (int i = 0; i < player.getUserdata().shards; i++) {
         auto pos = player.getPosition();
-        Debug("shard spawned at {} {}", pos.x, pos.y);
+        LOG_DEBUG("shard spawned at {} {}", pos.x, pos.y);
         state->getEntityController().spawnEntity<Entities::Shard>(Vector2(pos.x + (-8 + static_cast<float>(server.getRandom().nextDouble(0, 17))), pos.y), 1);
     }
 
@@ -166,7 +166,7 @@ void RavineMist::spawnShards(Client &client) {
 }
 
 void RavineMist::checkState() {
-    Debug("check state");
+    LOG_DEBUG("check state");
     size_t total = 7 - static_cast<uint8_t>(state->getEntityController().findCount<Entities::Shard>());
 
     Packet packet(PacketType::SERVER_RMZSHARD_STATE);

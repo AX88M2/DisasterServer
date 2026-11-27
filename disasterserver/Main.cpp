@@ -47,18 +47,18 @@ int main(int argc, char** argv) {
     std::signal(SIGTERM, signalHandler);
 
     if (enet_initialize() != 0) {
-        Error("Failed to initialize ENet");
+        LOG_ERROR("Failed to initialize ENet");
         return 1;
     }
 
-    Info("- DisasterServerCXX for game v{}", BUILD_VERSION);
-    Info("- Build from {} {}", __DATE__, __TIME__);
+    LOG_INFO("- DisasterServerCXX for game v{}", BUILD_VERSION);
+    LOG_INFO("- Build from {} {}", __DATE__, __TIME__);
 
     try {
         auto &app = DisasterServer::Application::getInstance();
         app.initialize();
     } catch (const std::exception& e) {
-        Error("Exception: {}", e.what());
+        LOG_ERROR("Exception: {}", e.what());
     }
 
     enet_deinitialize();

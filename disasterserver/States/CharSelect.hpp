@@ -16,7 +16,7 @@ namespace DisasterServer
         Map *map = nullptr;
         mapId mapid = 0;
         clientId exe = 0;
-        std::unordered_map<SurvCharacters, bool> avail;
+        std::unordered_map<SurvivalCharacters, bool> avail;
     public:
         CharSelectState(Server &server, ContextControllers ctx, Map* map, mapId id);
         ~CharSelectState() override;
@@ -31,7 +31,7 @@ namespace DisasterServer
         bool checkState();
         bool chooseExe();
 
-        static void selectSurvival(Client& client, SurvCharacters survChar);
-        static void selectExe(Client &client, ExesCharacters charExe);
+        static void selectSurvival(Client& client, SurvivalCharacters survChar);
+        static void selectExe(Client &client, ExeCharacters charExe);
     };
 }

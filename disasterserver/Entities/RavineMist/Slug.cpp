@@ -83,7 +83,7 @@ bool Slug::destroy() {
         return e.getSlug() == this;
     });
 
-    Debug("removed slug from {}", spawner->getId());
+    LOG_DEBUG("removed slug from {}", spawner->getId());
     spawner->setSlug(nullptr);
 
     return true;

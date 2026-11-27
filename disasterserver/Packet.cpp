@@ -34,7 +34,7 @@ Packet::Packet(ENetPacket *packet) : buffer({}) {
 	PacketTracer::getInstance().addRecord(true, buffer);
 #endif
 #if NETWORK_LOGGER
-	Debug("Packet received {} (length {})", getPacketTypeName(type), len);
+	LOG_DEBUG("Packet received {} (length {})", getPacketTypeName(type), len);
 #endif
 }
 
@@ -43,7 +43,7 @@ Packet::Packet(PacketType type, const bool passtrough) : buffer({}), type(type) 
 	write<PacketType>(type);
 #if NETWORK_LOGGER
 	if (type != PacketType::SERVER_HEARTBEAT) {
-		Debug("Packet created {}", getPacketTypeName(type));
+		LOG_DEBUG("Packet created {}", getPacketTypeName(type));
 	}
 #endif
 }
@@ -58,7 +58,7 @@ void Packet::seek(const size_t offset) {
 	const size_t amount = this->len - offset;
 
 	if (amount > buffer.size() - position) {
-		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+		LOG_ERROR("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
 		throw PacketError::format("Packet overflow");
 	}
 
@@ -73,7 +73,7 @@ void Packet::append(const Packet &other, size_t offset) {
 	const size_t amount = other.len - offset;
 
 	if (amount > buffer.size() - position) {
-		Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+		LOG_ERROR("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
 		throw PacketError::format("Packet overflow");
 	}
 
@@ -139,7 +139,7 @@ bool Packet::send(Client &client, bool reliable) {
 		return true;
 	}
 #if NETWORK_LOGGER
-	Debug("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
+	LOG_DEBUG("{} sending to {} (id {})", getPacketTypeName(type), client.getNickname(), client.getId());
 #endif
 #if NETWORK_TRACE
 	PacketTracer::getInstance().addRecord(false, buffer);
@@ -147,7 +147,7 @@ bool Packet::send(Client &client, bool reliable) {
 	ENetPacket* pack = enet_packet_create(buffer.data(), len, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 
 	if (!pack) {
-		Error("Failed to create ENet packet");
+		LOG_ERROR("Failed to create ENet packet");
 		return false;
 	}
 
@@ -158,7 +158,7 @@ void Packet::sendBroadcast(Server &server, bool reliable, std::function<bool(con
 	for (auto &client : server.getClients()) {
 		if (predicate(*client)) {
 			if (!send(*client, reliable)) {
-				Warn("Failed to send {} to client {}", getPacketTypeName(type), client->getId());
+				LOG_WARN("Failed to send {} to client {}", getPacketTypeName(type), client->getId());
 			}
 		}
 	}

@@ -382,7 +382,7 @@ namespace DisasterServer
 			static_assert(std::is_trivially_copyable_v<T>, "Packet::write requires trivially copyable type");
 
 			if (position > buffer.size() || sizeof(T) > buffer.size() - position) {
-				Error("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
+				LOG_ERROR("Exceeding the Packet Size Limit. Max Size {}", PACKET_MAXSIZE);
 				throw std::runtime_error("Packet overflow");
 			}
 

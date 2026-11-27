@@ -24,6 +24,7 @@ namespace DisasterServer
         Application &application = Application::getInstance();
         
         std::vector<std::unique_ptr<Client>> clients;
+        std::unordered_map<std::string, uint64_t> clientsTimeout;
         MapController mapController;
         StateController stateController;
         CommandController commandController;
@@ -51,7 +52,11 @@ namespace DisasterServer
 
         void broadcastEx(Packet &packet, bool reliable, clientId ignore);
 
-        size_t getClientCount();
+        void setTimeout(Client &client, uint64_t timestamp);
+        uint64_t checkTimeout(Client &client);
+        void revokeTimeout(Client &client);
+
+        size_t getClientCount() const;
         size_t getInGameCount();
 
         /**

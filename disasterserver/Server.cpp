@@ -22,11 +22,11 @@ Server::Server(const int port) :
     host = enet_host_create(&addr, 50, 2, 0, 0);
 
     if (host == nullptr) {
-        Error("Failed to create ENet host on port {}", port);
+        LOG_ERROR("Failed to create ENet host on port {}", port);
         throw ServerException("Failed to create ENet host");
     }
 
-    Info("Listening on port {}", port);
+    LOG_INFO("Listening on port {}", port);
 }
 
 Server::~Server() {
@@ -42,7 +42,7 @@ void Server::worker() {
 
     const auto start = Clock::now();
 
-    auto next_tick = start;
+    TimeStamp next_tick = start;
     constexpr auto TICK_INTERVAL = std::chrono::milliseconds(1000 / 60);
 
     double heartbeat = 0.0;
@@ -62,7 +62,7 @@ void Server::worker() {
                     ev.peer->data = raw;
                     clients.push_back(std::move(client));
 
-                    Debug("Connection peer id {}", raw->getId());
+                    LOG_DEBUG("Connection peer id {}", raw->getId());
 
                     Packet pack(PacketType::SERVER_PREIDENTITY);
 
@@ -126,10 +126,12 @@ void Server::worker() {
                         break;
                     }
 
-                    Info("{} (id {}) left.", client->getNickname(), client->getId());
+                    LOG_INFO("{} (id {}) left.", client->getNickname(), client->getId());
 
-                    if (client->isOperator() && client->isShouldTimeout()) {
-
+                    if (!client->isOperator() && client->isShouldTimeout()) {
+                        if (this->checkTimeout(*client) != 0) {
+                            this->setTimeout(*client, 5);
+                        }
                     }
 
                     if (client->isVerified()) {
@@ -165,7 +167,7 @@ void Server::worker() {
 
                     if (packet.getType() == PacketType::IDENTITY) {
                         if (!client->identity(packet)) {
-                            Debug("Identity failed for id {}", client->getId());
+                            LOG_DEBUG("Identity failed for id {}", client->getId());
                         }
                     } else {
                         client->received(packet);
@@ -186,10 +188,10 @@ void Server::worker() {
             // Heartbeat
             if (!clients.empty()) {
                 Packet pack(PacketType::SERVER_HEARTBEAT);
-                if (heartbeat >= (TICKS_PER_SEC * 2))
+                if (heartbeat >= TICKS_PER_SEC * 2)
                 {
                     pack.sendBroadcast(*this, true);
-                    Debug("Heartbeat done.");
+                    LOG_DEBUG("Heartbeat done.");
                     heartbeat = 0;
                 }
                 heartbeat += delta;
@@ -201,10 +203,11 @@ void Server::worker() {
 }
 
 void Server::quit() {
-    for (auto &client : clients) {
+    for (const auto &client : clients) {
         client->disconnect(DisconnectReason::SHUTDOWN);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     isRunning = false;
 }
 
@@ -218,12 +221,34 @@ void Server::disconnectById(const clientId id, DisconnectReason reason, const st
 
 void Server::broadcastEx(Packet &packet, bool reliable, clientId ignore) {
 #if NETWORK_LOGGER
-    Debug("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getType()), ignore);
+    LOG_DEBUG("{} sending broadcast, ignoring client {}", getPacketTypeName(packet.getType()), ignore);
 #endif
     packet.sendBroadcast(*this, reliable, [ignore](const Client& v) { return v.getId() != ignore; });
 }
 
-size_t Server::getClientCount() {
+void Server::setTimeout(Client &client, const uint64_t timestamp) {
+    clientsTimeout[client.getUdid()] = time(nullptr) + timestamp;
+}
+
+uint64_t Server::checkTimeout(Client &client) {
+    uint64_t timeout = 0;
+
+    const auto it = clientsTimeout.find(client.getUdid());
+    if (it != clientsTimeout.end()) {
+        timeout = it->second;
+    }
+
+    return timeout;
+}
+
+void Server::revokeTimeout(Client &client) {
+    const auto it = clientsTimeout.find(client.getUdid());
+    if (it != clientsTimeout.end()) {
+        clientsTimeout.erase(it);
+    }
+}
+
+size_t Server::getClientCount() const {
     return clients.size();
 }
 

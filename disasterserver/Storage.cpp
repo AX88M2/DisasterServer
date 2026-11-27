@@ -36,7 +36,7 @@ struct Storage::Impl {
 };
 
 Storage::Storage() : impl(std::make_unique<Impl>()) {
-    Info("Storage initialized...");
+    LOG_INFO("Storage initialized...");
 }
 
 Storage::~Storage() = default;
@@ -59,7 +59,7 @@ bool Storage::isBanned(Client &client) {
 
         return !rows.empty();
     } catch (std::exception &ex) {
-        Error("Failed to read for some reason: {}", ex.what());
+        LOG_ERROR("Failed to read for some reason: {}", ex.what());
         return true;
     }
 }
@@ -71,7 +71,7 @@ std::vector<ClientBan> Storage::getBans() {
         auto objects = impl->storage.get_all<ClientBan>();
         return objects;
     } catch (std::exception &ex) {
-        Error("Failed to read for some reason: {}", ex.what());
+        LOG_ERROR("Failed to read for some reason: {}", ex.what());
         return {};
     }
 }
@@ -94,7 +94,7 @@ bool Storage::isOperator(Client &client) {
 
         return !rows.empty();
     } catch (std::exception &ex) {
-        Error("Failed to read for some reason: {}", ex.what());
+        LOG_ERROR("Failed to read for some reason: {}", ex.what());
         return true;
     }
 }
@@ -106,7 +106,7 @@ std::vector<ClientOperator> Storage::getOperators() {
         auto objects = impl->storage.get_all<ClientOperator>();
         return objects;
     } catch (std::exception &ex) {
-        Error("Failed to read for some reason: {}", ex.what());
+        LOG_ERROR("Failed to read for some reason: {}", ex.what());
         return {};
     }
 }
@@ -121,7 +121,7 @@ void Storage::write(Args &&... args) {
         impl->storage.commit();
     } catch (std::exception &ex) {
         try { impl->storage.rollback(); } catch (...) {}
-        Error("Failed to save for some reason: {}", ex.what());
+        LOG_ERROR("Failed to save for some reason: {}", ex.what());
     }
 }
 
@@ -135,7 +135,7 @@ void Storage::remove(Args &&... args) {
         impl->storage.commit();
     } catch (std::exception &ex) {
         try { impl->storage.rollback(); } catch (...) {}
-        Error("Failed to save for some reason: {}", ex.what());
+        LOG_ERROR("Failed to save for some reason: {}", ex.what());
     }
 }
 

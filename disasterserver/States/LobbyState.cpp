@@ -16,12 +16,12 @@ LobbyState::LobbyState(Server &server, ContextControllers ctx) : State(server, c
 LobbyState::~LobbyState() = default;
 
 void LobbyState::enter() {
-    Debug("Attepting to enter DisasterServer::LobbyState...");
+    LOG_DEBUG("Attepting to enter DisasterServer::LobbyState...");
 
     for (auto &client : server.getClients()) {
         client->setReady(false);
         client->setVoted(false);
-        client->setTimeout(0);
+        client->setAfkTimeout(0);
 
         if (!client->isInGame()) {
             client->setInGame(true);
@@ -47,7 +47,7 @@ void LobbyState::enter() {
 
     Packet pack(PacketType::SERVER_GAME_BACK_TO_LOBBY);
     pack.sendBroadcast(server);
-    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Lobby", CLRCODE_RST);
+    LOG_INFO("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Lobby", CLRCODE_RST);
 }
 
 void LobbyState::exit() {
@@ -91,7 +91,15 @@ void LobbyState::checkVote() {
         switch (vote.getCurrentVoteType()) {
             case VoteType::KICK: {
                 this->server.sendBroadcastMessage(0, "vote kick @succeeded~ (@{} ~from \\{}~)", vote.getVoteCount(), vote.getVoteTotal());
-                this->server.disconnectById(kickTarget, DisconnectReason::KICKEDBYHOST);
+
+                const auto target = this->server.findClient(kickTarget);
+
+                if (target.has_value()) {
+                    this->server.setTimeout(**target, 60);
+                    this->server.disconnectById(kickTarget, DisconnectReason::KICKEDBYHOST);
+                } else {
+                    this->server.sendBroadcastMessage(0, "{}the player you want to kick was not found!", CLRCODE_RED);
+                }
                 break;
             }
 
@@ -145,17 +153,17 @@ void LobbyState::tick() {
 
         if (!client->isReady()) {
             if (server.getApp().getConfigManager().afk().enable) {
-                client->setTimeout(client->getTimeout() + server.getDelta());
-                if (std::fmod(client->getTimeout(), TICKS_PER_SEC) == 0) {
-                    Debug("tick for {}: {}", client->getNickname(), client->getTimeout() / TICKS_PER_SEC);
+                client->setAfkTimeout(client->getAfkTimeout() + server.getDelta());
+                if (std::fmod(client->getAfkTimeout(), TICKS_PER_SEC) == 0) {
+                    LOG_DEBUG("tick for {}: {}", client->getNickname(), client->getAfkTimeout() / TICKS_PER_SEC);
                 }
 
-                if (client->getTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
+                if (client->getAfkTimeout() >= server.getApp().getConfigManager().afk().timeout * TICKS_PER_SEC) {
                     client->disconnect(DisconnectReason::AFKTIMEOUT);
                 }
             }
         } else {
-            client->setTimeout(0);
+            client->setAfkTimeout(0);
         }
     }
 
@@ -165,7 +173,7 @@ void LobbyState::tick() {
         const auto map = mapController.getMap(PRACTICE_MAP);
 
         if (!map.has_value()) {
-            Error("Map with ID {} was not found!", PRACTICE_MAP);
+            LOG_ERROR("Map with ID {} was not found!", PRACTICE_MAP);
             return;
         }
 
@@ -204,15 +212,16 @@ bool LobbyState::handle(Client &client, Packet &packet) {
                 pack.writeString(c->getNickname());
                 pack.write<uint8_t>(c->getLobbyIcon());
                 pack.write<uint8_t>(c->getPet());
+
                 if (!pack.send(client, true)) {
-                    Error("Failed to send SERVER_LOBBY_PLAYER to {}", client.getId());
+                    LOG_WARN("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                     return false;
                 }
             }
 
             Packet pack(PacketType::SERVER_LOBBY_CORRECT);
             if (!pack.send(client, true)) {
-                Error("Failed to send SERVER_LOBBY_CORRECT to {}", client.getId());
+                LOG_WARN("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
                 return false;
             }
 
@@ -431,9 +440,9 @@ bool LobbyState::cmdHandle(Client &client, clientId pid, CommandsHash hash, std:
                 break;
             }
 
-            size_t ingame = this->server.getInGameCount();
+            size_t inGameCount = this->server.getInGameCount();
 
-            if (ingame > 2) {
+            if (inGameCount > 2) {
                 Packet pack(PacketType::SERVER_LOBBY_CHOOSEVOTEKICK);
                 pack.send(client, true);
             } else {

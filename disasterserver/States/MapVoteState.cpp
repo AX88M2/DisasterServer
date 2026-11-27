@@ -16,7 +16,7 @@ MapVoteState::MapVoteState(Server &server, ContextControllers ctx) : State(serve
 MapVoteState::~MapVoteState() = default;
 
 void MapVoteState::enter() {
-    Debug("Attepting to enter DisasterServer::MapVoteState...");
+    LOG_DEBUG("Attepting to enter DisasterServer::MapVoteState...");
 
     countdown.start(30);
 
@@ -41,7 +41,7 @@ void MapVoteState::enter() {
             auto map = mapController.getMap(mapid);
 
             if (!map.has_value()) {
-                Error("Map with id {} was not found!", mapid);
+                LOG_ERROR("Map with id {} was not found!", mapid);
                 stateController.changeTo<LobbyState>();
                 return;
             }
@@ -54,7 +54,7 @@ void MapVoteState::enter() {
             const int num = server.getRandom().nextInt(0, 255);
 
             if (num >= weight) {
-                Debug("{} vs {} lost", num, weight);
+                LOG_DEBUG("{} vs {} lost", num, weight);
                 continue;
             }
 
@@ -84,13 +84,13 @@ void MapVoteState::enter() {
     sync.write<uint8_t>(static_cast<uint8_t>(countdown.remaining()));
     sync.sendBroadcast(server);
 
-    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Map Vote", CLRCODE_RST);
+    LOG_INFO("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Map Vote", CLRCODE_RST);
 
     const auto map1 = *mapController.getMap(maps[0]);
     const auto map2 = *mapController.getMap(maps[1]);
     const auto map3 = *mapController.getMap(maps[2]);
 
-    Info("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, map1->getName(), CLRCODE_RST, CLRCODE_BLU, map2->getName(), CLRCODE_RST, CLRCODE_YLW, map3->getName(), CLRCODE_RST);
+    LOG_INFO("Maps: {}[{}]{} {}[{}]{} {}[{}]{}", CLRCODE_RED, map1->getName(), CLRCODE_RST, CLRCODE_BLU, map2->getName(), CLRCODE_RST, CLRCODE_YLW, map3->getName(), CLRCODE_RST);
 }
 
 void MapVoteState::exit() {
@@ -138,7 +138,7 @@ void MapVoteState::tick() {
             auto wonMap = mapController.getMap(wonId);
 
             if (!wonMap.has_value()) {
-                Error("Map with id {} was not found!", wonId);
+                LOG_ERROR("Map with id {} was not found!", wonId);
                 stateController.changeTo<LobbyState>();
                 return;
             }
@@ -153,17 +153,17 @@ void MapVoteState::tick() {
 
             mapController.setMapWeight(*wonMap, weight);
 
-            Debug("Pickrates:");
+            LOG_DEBUG("Pickrates:");
             for (int i = 0; i < mapController.getMapCount(); i++) {
                 auto map = mapController.getMap(i);
 
                 if (!map.has_value()) {
-                    Error("Map with id {} was not found!", i);
+                    LOG_ERROR("Map with id {} was not found!", i);
                     stateController.changeTo<LobbyState>();
                     return;
                 }
 
-                Debug("{}: {}", i, mapController.getMapWeight(*map));
+                LOG_DEBUG("{}: {}", i, mapController.getMapWeight(*map));
                 if (i == wonId) {
                     continue;
                 }
@@ -210,7 +210,7 @@ bool MapVoteState::handle(Client &client, Packet &packet) {
             for (int i = 0; i < 3; i++) {
                 pack.write<uint8_t>(votes[i]);
             }
-            Info("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), mapController.getMaps().at(maps[map])->getName());
+            LOG_INFO("{} (id {}) voted for [{}]!", client.getNickname(), client.getId(), mapController.getMaps().at(maps[map])->getName());
             pack.sendBroadcast(server);
             checkState();
             break;

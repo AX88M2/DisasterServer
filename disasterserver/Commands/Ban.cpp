@@ -23,6 +23,6 @@ void Ban::execute(Client &client, CommandArguments &args) {
 
     Packet pack(PacketType::SERVER_LOBBY_CHOOSEBAN);
     if (!pack.send(client, true)) {
-        Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
+        LOG_WARN("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client.getNickname(), client.getId());
     }
 }

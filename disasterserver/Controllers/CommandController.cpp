@@ -70,7 +70,7 @@ std::pair<std::string, CommandArguments> CommandController::parseCommand(const s
             boost::split(arguments, cmdArgs, boost::is_any_of(" "));
         }
     } catch (std::exception const &e) {
-        Error("Failed to parse arguments command {}: {}", cmd, e.what());
+        LOG_ERROR("Failed to parse arguments command {}: {}", cmd, e.what());
     }
 
     return { cmd, CommandArguments(std::move(arguments)) };

@@ -96,7 +96,7 @@ bool StateController::handle(Client &client, Packet &packet) {
 
             for (auto &c : server.getClients()) {
                 if (c->getId() == pid) {
-                    //TODO: add timeout logic
+                    this->server.setTimeout(*c, 5);
                     c->disconnect(DisconnectReason::KICKEDBYHOST);
                 }
             }
@@ -183,7 +183,7 @@ CommandsHash StateController::cmdParse(const std::string& string) {
 }
 
 void StateController::handleChat(Client &client, std::string &message, std::function<bool(CommandsHash, std::string &)> cmdProcessor) {
-    client.setTimeout(0);
+    client.setAfkTimeout(0);
 
     if (message.length() > 90) {
         this->server.sendMessage(client, "{}message too long", CLRCODE_RED);
@@ -193,7 +193,7 @@ void StateController::handleChat(Client &client, std::string &message, std::func
     CommandsHash cmd = cmdParse(message);
     bool isCommand = cmdProcessor(cmd, message);
 
-    Info("{} (id {}): {}", client.getNickname(), client.getId(), message);
+    LOG_INFO("{} (id {}): {}", client.getNickname(), client.getId(), message);
 
     if (!isCommand) {
         server.sendBroadcastMessage(client.getId(), message);

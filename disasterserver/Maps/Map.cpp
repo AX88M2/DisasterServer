@@ -23,6 +23,6 @@ void Map::setupContext(StateController &controller) {
         return;
     }
 
-    Warn("currentState is not GameState");
+    LOG_WARN("currentState is not GameState");
     controller.changeTo<LobbyState>();
 }

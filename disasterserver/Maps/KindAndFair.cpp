@@ -16,7 +16,7 @@ void KindAndFair::init() {
         state->getEntityController().spawnEntity<Entities::KafBox>(Vector2(), i);
     }
 
-    Debug("Spawned 11 KafBox");
+    LOG_DEBUG("Spawned 11 KafBox");
 }
 
 void KindAndFair::tick() {

@@ -6,5 +6,5 @@
     }
 
 
-#define RAssert(x) if (!(x)) { Error("RAssert({}) failed!", #x); return false; }
-#define RAssertEx(x) if (!(x)) { Error("RAssert({}) failed!", #x); }
+#define RAssert(x) if (!(x)) { LOG_ERROR("RAssert({}) failed!", #x); return false; }
+#define RAssertEx(x) if (!(x)) { LOG_ERROR("RAssert({}) failed!", #x); }

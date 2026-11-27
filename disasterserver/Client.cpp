@@ -29,7 +29,7 @@ bool Client::identity(Packet &packet) {
     assert(id > 0);
 
     if (packet.getType() != PacketType::IDENTITY) {
-        this->disconnect(DisconnectReason::OTHER, "type != IDENTITY?");
+        this->disconnect(DisconnectReason::OTHER, "type != PacketType::IDENTITY");
         return false;
     }
 
@@ -43,6 +43,8 @@ bool Client::identity(Packet &packet) {
     this->lobbyIcon = packet.read<uint8_t>();
     this->pet = packet.read<int8_t>();
     this->op = server->getApp().getStorage().isOperator(*this);
+
+    const uint64_t timeout = server->checkTimeout(*this);
 
     [[maybe_unused]] uint64_t rawKeyA = packet.read<uint64_t>();
     [[maybe_unused]] uint64_t rawKeyB = packet.read<uint64_t>();
@@ -66,30 +68,30 @@ bool Client::identity(Packet &packet) {
     }
 
     if (udid.empty()) {
-        this->disconnect(DisconnectReason::OTHER, "whoops you have to put the CD in you conputer");
+        this->disconnect(DisconnectReason::OTHER, "You must have a UDID!");
         return false;
     }
 
-    bool isBanned = server->getApp().getStorage().isBanned(*this);
+    const bool isBanned = server->getApp().getStorage().isBanned(*this);
 
-    if (!identityProcess(ip, isBanned, 0, serverIndex == -1)) {
+    if (!identityProcess(ip, isBanned, timeout, serverIndex == -1)) {
         return false;
     }
 
-    Info("{} (id {}) joined.", this->nickname, id);
-    Info("	IP: {}", ip);
-    Info("	UID: {}", this->udid);
-    Info("	BuildVersion: {}", buildVersion);
-    Info("	Modified: {}", isModifiedClient);
+    LOG_INFO("{} (id {}) joined.", this->nickname, id);
+    LOG_INFO("	IP: {}", ip);
+    LOG_INFO("	UID: {}", this->udid);
+    LOG_INFO("	BuildVersion: {}", buildVersion);
+    LOG_INFO("	Modified: {}", isModifiedClient);
 
     this->verified = true;
 
     return true;
 }
 
-bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t timeout, bool do_timeout) {
+bool Client::identityProcess(const std::string &addr, bool isBanned, const uint64_t timeout, bool doTimeout) {
     if (isBanned) {
-        Info("{} banned by host (id {}, ip {})", nickname, id, addr);
+        LOG_INFO("{} banned by host (id {}, ip {})", nickname, id, addr);
         this->disconnect(DisconnectReason::BANNEDBYHOST);
         return false;
     }
@@ -99,19 +101,21 @@ bool Client::identityProcess(const std::string &addr, bool isBanned, uint64_t ti
         return false;
     }
 
-    if (do_timeout && timeout != 0) {
-        time_t tm = time(nullptr);
-        time_t val = timeout - tm;
+    if (doTimeout && timeout != 0) {
+        const time_t now = time(nullptr);
+        const time_t val = timeout - now;
         if (val > 0) {
-            Info("{} is rate-limited (id {}, ip {})", nickname, id, addr);
+            LOG_INFO("{} is rate-limited (id {}, ip {})", nickname, id, addr);
             this->disconnect(DisconnectReason::RATELIMITED);
             return false;
         }
+
+        server->revokeTimeout(*this);
     }
 
     if (!this->stateController.playerJoined(*this)) {
         shouldTimeout = false;
-        this->disconnect(DisconnectReason::OTHER, "Report this to dev: 415 baza otvette, mi tonem");
+        this->disconnect(DisconnectReason::OTHER, "Report this to dev: stateController.playerJoined() != true");
         return false;
     }
 
@@ -200,9 +204,9 @@ void Client::disconnect(DisconnectReason reason, const std::string &message) {
     }
 
     if (message.empty()) {
-        Info("Disconnected id {} {}: No text.", id, getDisconnectReasonName(reason));
+        LOG_INFO("Disconnected id {} {}: No text.", id, toStringDisconnectReason(reason));
     } else {
-        Info("Disconnected id {} {}: {}.", id, getDisconnectReasonName(reason), message);
+        LOG_INFO("Disconnected id {} {}: {}.", id, toStringDisconnectReason(reason), message);
     }
 
     disconnecting = true;

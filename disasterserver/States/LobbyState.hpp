@@ -10,7 +10,6 @@ namespace DisasterServer
 
     class LobbyState : public State {
         Countdown countdown;
-
         Countdown pracCountdown;
 
         Vote vote;

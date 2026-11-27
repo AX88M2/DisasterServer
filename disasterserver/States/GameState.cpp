@@ -37,10 +37,10 @@ GameState::GameState(Server &server, const ContextControllers ctx, clientId exe,
 GameState::~GameState() = default;
 
 void GameState::enter() {
-    Debug("Attempting to enter DisasterServer::GameState...");
+    LOG_DEBUG("Attempting to enter DisasterServer::GameState...");
 
     if (!currentMap) {
-        Error("GameState::init: map {} is null", currentMapId);
+        LOG_ERROR("GameState::enter: map {} is null", currentMapId);
         stateController.changeTo<LobbyState>();
         return;
     }
@@ -95,20 +95,20 @@ void GameState::enter() {
             }
 
             if (!pack.send(*client)) {
-                Warn("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client->getNickname(), client->getId());
+                LOG_WARN("Failed send packet {} to {} (id {})", getPacketTypeName(pack.getType()), client->getNickname(), client->getId());
             }
         }
     }
 
-    auto exe = this->server.findClient(exeId);
+    const auto exe = this->server.findClient(exeId);
     if (exe.has_value()) {
         exeClient = *exe;
     } else {
-        Error("Failed find client exe");
+        LOG_ERROR("Failed find client exe");
         stateController.changeTo<LobbyState>();
     }
 
-    Info("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Game", CLRCODE_RST);
+    LOG_INFO("{}Server is now in {}{}{}", CLRCODE_YLW, CLRCODE_PUR, "Game", CLRCODE_RST);
 }
 
 void GameState::exit() {
@@ -173,7 +173,7 @@ void GameState::tick() {
     if (!started) {
         auto result = this->startTimeout.tick(server.getDelta());
         if (result == TickResult::Finished) {
-            Warn("Waiting for players took too long, kicking out inactive players!");
+            LOG_WARN("Waiting for players took too long, kicking out inactive players!");
             for (auto &client : server.getClients()) {
                 if (!client->isInGame()) continue;
 
@@ -332,9 +332,9 @@ void GameState::tickPlayers() {
             return a->getPlayer().getDeathTimerSec() > b->getPlayer().getDeathTimerSec();
         });
 
-        Debug("Demonization order:");
+        LOG_DEBUG("Demonization order:");
         for (auto *c : dead) {
-            Debug("{}: {}", c->getId(), c->getPlayer().getDeathTimerSec() + (c->getPlayer().getDeathTimer() / 60));
+            LOG_DEBUG("{}: {}", c->getId(), c->getPlayer().getDeathTimerSec() + (c->getPlayer().getDeathTimer() / 60));
             demonize(*c);
         }
     }
@@ -460,7 +460,7 @@ bool GameState::checkStart() {
         currentMap->setupContext(stateController);
         currentMap->init();
 
-        Info("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
+        LOG_INFO("{}Game started!{} (Time {})", CLRCODE_YLW, CLRCODE_RST, gameTime.remaining());
         started = true;
     }
 
@@ -497,12 +497,12 @@ bool GameState::handle(Client& client, Packet& packet) {
             player.setHealRings(player.getRings());
 
             if (rings < 10) {
-                client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
+                client.disconnect(DisconnectReason::OTHER, "rings < 10");
                 return true;
             }
 
             if (rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()) {
-                client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+                client.disconnect(DisconnectReason::OTHER, "rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()");
                 return true;
             }
 
@@ -518,12 +518,12 @@ bool GameState::handle(Client& client, Packet& packet) {
             auto &player = client.getPlayer();
 
             if (rings < 10) {
-                client.disconnect(DisconnectReason::OTHER, "эй чел ты какой хуйнёй занимаешься");
+                client.disconnect(DisconnectReason::OTHER, "rings < 10");
                 return true;
             }
 
             if (rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()) {
-                client.disconnect(DisconnectReason::OTHER, "ты зачем кредит взял?");
+                client.disconnect(DisconnectReason::OTHER, "rings >= 140 && currentMap->is<Maps::HideAndSeekAct2>()");
                 return true;
             }
 
@@ -777,7 +777,7 @@ bool GameState::handle(Client& client, Packet& packet) {
 
                         if (revival < 2) {
                             if (rings < 0 || (currentMap->is<Maps::FartZone>() && rings >= 120)) {
-                                client.disconnect(DisconnectReason::OTHER, "disconnect code: 100");
+                                client.disconnect(DisconnectReason::OTHER, "rings < 0 || (currentMap->is<Maps::FartZone>() && rings >= 120)");
                                 return true;
                             }
 
@@ -970,7 +970,7 @@ bool GameState::spawnRing() {
     if (!currentMap) return false;
 
     if (!entityController.spawnEntity<MapRing>()) {
-        Debug("Not enough space for rings");
+        LOG_DEBUG("Not enough space for rings");
         return false;
     }
     return true;
@@ -984,21 +984,21 @@ bool GameState::endingRound(const Ending endtype, bool achiv) {
             Packet pack(PacketType::SERVER_GAME_EXE_WINS);
             pack.write<uint8_t>(achiv);
             pack.sendBroadcast(server);
-            Info("Ending is Ending::EXEWIN");
+            LOG_INFO("Ending is Ending::EXEWIN");
             break;
         }
         case Ending::SURVWIN: {
             Packet pack(PacketType::SERVER_GAME_SURVIVOR_WIN);
             pack.write<uint8_t>(achiv);
             pack.sendBroadcast(server);
-            Info("Ending is Ending::SURVWIN");
+            LOG_INFO("Ending is Ending::SURVWIN");
             break;
         }
         case Ending::TIMEOVER: {
             Packet pack(PacketType::SERVER_GAME_TIME_OVER);
             pack.write<uint8_t>(achiv);
             pack.sendBroadcast(server);
-            Info("Ending is Ending::TIMEOVER");
+            LOG_INFO("Ending is Ending::TIMEOVER");
             break;
         }
     }
@@ -1034,11 +1034,11 @@ void GameState::demonize(Client &client) {
 
         client.getCharacter()->demonize();
 
-        Info("{} (id {}) was {}demonized!", client.getNickname(), client.getId(), CLRCODE_RED);
+        LOG_INFO("{} (id {}) was {}demonized!", client.getNickname(), client.getId(), CLRCODE_RED);
         pack.write<uint8_t>(1);
     } else {
         player.setFlag(Player::Flags::PLAYER_CANTREVIVE);
-        Info("{} (id {}) {}died!", client.getNickname(), client.getId(), CLRCODE_RED);
+        LOG_INFO("{} (id {}) {}died!", client.getNickname(), client.getId(), CLRCODE_RED);
         pack.write<uint8_t>(0);
     }
 
@@ -1050,7 +1050,7 @@ void GameState::bigRing(BigRingState state) {
 
     switch (state) {
         case BigRingState::DEACTIVATED: {
-            Info("Big ring is deactivated!");
+            LOG_INFO("Big ring is deactivated!");
 
             Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
             pack.write<uint8_t>(0);
@@ -1059,7 +1059,7 @@ void GameState::bigRing(BigRingState state) {
             break;
         }
         case BigRingState::ACTIVATED: {
-            Info("Big ring is activated!");
+            LOG_INFO("Big ring is activated!");
 
             Packet pack(PacketType::SERVER_GAME_SPAWN_RING);
             pack.write<uint8_t>(1);

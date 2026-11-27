@@ -22,13 +22,13 @@ namespace DisasterServer
         template <std::derived_from<Map> T>
         void registerMap() {
             if (auto [_, inserted] = registeredTypes.emplace(typeid(T)); !inserted) {
-                Warn("Map {} type already registered", typeid(T).name());
+                LOG_WARN("Map {} type already registered", typeid(T).name());
                 return;
             }
 
             auto map = std::make_unique<T>(MapContext(server));
 
-            Debug("Registered Map \"{}\"", map->getName());
+            LOG_DEBUG("Registered Map \"{}\"", map->getName());
 
             map_weights.try_emplace(map.get(), 255);
             maps.push_back(std::move(map));

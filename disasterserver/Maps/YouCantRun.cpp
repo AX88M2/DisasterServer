@@ -14,7 +14,7 @@ YouCantRun::YouCantRun(MapContext context) : Map(context, "You Can't Run") {}
 void YouCantRun::init() {
     state->getEntityController().spawnEntity<Entities::SpikeController>();
     state->getEntityController().spawnEntity<Entities::YCRController>();
-    Debug("Spawned SpikeController and YCRController");
+    LOG_DEBUG("Spawned SpikeController and YCRController");
 }
 
 void YouCantRun::tick() {
